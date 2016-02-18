@@ -1,17 +1,11 @@
-<use name="root"/>
-<use name="roofit"/>
-<use name="rootcore"/>
-<use name="roostats"/>
-<use name="boost"/>
-<use name="boost_header"/>
-<use name="rootrflx"/>
-<use name="rootrio"/>
-<use name="roottmva"/>
 <bin name="LimitTreeMaker" file="LimitTreeMaker.C">
-	<use name="boost"/>
+	<use name="boost_program_options"/>
 	<use name="root"/>
 </bin>
 <bin name="bbgg2DFit" file="bbgg2DFit.C">
-	<use name="boost"/>
+	<use name="boost_program_options"/>
 	<use name="root"/>
+	<use name="roofit"/>
+	<use name="rootcore"/>
+	<use name="roostats"/>
 </bin>

@@ -13,7 +13,6 @@
 #include <sstream>
 #include <string>
 #include <cmath>
-#include <boost/program_options.hpp>
 // ROOT headers
 #include "TROOT.h"
 #include "TSystem.h"
@@ -55,10 +54,9 @@
 #include <utility>
 
 // namespaces
-using namespace std;
+//using namespace std;
 using namespace RooFit;
 using namespace RooStats;
-namespace po = boost::program_options;
 
 class bbgg2DFitter {
 public :

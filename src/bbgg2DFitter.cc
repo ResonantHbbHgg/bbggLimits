@@ -32,7 +32,7 @@
 #include <RooGenericPdf.h>
 #include <RooPlot.h>
 #include <RooAbsPdf.h>
-#include <RooAbsMoment.h>
+#include <RooMoment.h>
 #include <RooBernstein.h>
 #include <RooExtendPdf.h>
 #include <RooMinimizer.h>
@@ -45,7 +45,7 @@
 using namespace std;
 using namespace RooFit;
 using namespace RooStats;
-namespace po = boost::program_options;
+//namespace po = boost::program_options;
 
 std::string bbgg2DFitter::MakeModelCard( std::string file )
 {
