@@ -23,7 +23,7 @@
 // root> T->Process("bbggLTMaker.C+")
 //
 
-#include "flashgg/bbggTools/interface/bbggLTMaker.h"
+#include "HiggsAnalysis/bbggLimits/interface/bbggLTMaker.h"
 #include <TH2.h>
 #include <TStyle.h>
 #include <TSelector.h>

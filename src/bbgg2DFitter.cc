@@ -1,5 +1,5 @@
 #define bbgg2DFitter_cxx
-#include "flashgg/bbggTools/interface/bbgg2DFitter.h"
+#include "HiggsAnalysis/bbggLimits/interface/bbgg2DFitter.h"
 
 // C++ headers
 #include <iostream>

@@ -1,4 +1,4 @@
-#include "flashgg/bbggTools/interface/bbggLTMaker.h"
+#include "HiggsAnalysis/bbggLimits/interface/bbggLTMaker.h"
 #include <fstream>
 #include <string>
 #include <sstream>
@@ -26,7 +26,7 @@ int Process(string file, string outFile, string mtotMin, string mtotMax,string s
     option.append(";");
     option.append(doMX);
     cout << "[LimitTreeMaker:Process] Option parsing: " << option << endl;
-    iTree->Process("flashgg/bbggTools/src/bbggLTMaker.cc+", TString(option)); 
+    iTree->Process("HiggsAnalysis/bbggLimits/src/bbggLTMaker.cc+", TString(option)); 
     delete iFile;
     return 1;
 }
