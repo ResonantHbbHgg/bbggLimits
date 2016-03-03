@@ -43,9 +43,26 @@
 #include <RooPolynomial.h>
 // namespaces
 
-using namespace std;
+//using namespace std;
 using namespace RooFit;
 using namespace RooStats;
+
+void bbgg2DFitter::PrintWorkspace() {_w->Print("v");}
+
+void bbgg2DFitter::Initialize(RooWorkspace* workspace, Int_t SigMass, float Lumi,std::string folder_name,std::string energy, Bool_t doBlinding = false, Int_t nCat = 0, bool AddHiggs = true)
+{
+    _doblinding = doBlinding;
+    _NCAT = nCat;
+    _sigMass = SigMass;
+    _addHiggs = AddHiggs;
+    _w = new RooWorkspace(*workspace);
+    _lumi = Lumi;
+    _cut = "1";
+    _folder_name=folder_name;
+    _energy=energy;
+
+}
+
 RooArgSet* bbgg2DFitter::defineVariables()
 {
   RooRealVar* mgg = new RooRealVar("mgg","M(#gamma#gamma)",100,180,"GeV");
@@ -808,7 +825,7 @@ void bbgg2DFitter::MakeSigWS(std::string fileBaseName)
 					       															 );
   TString filename(wsDir+TString(fileBaseName)+".inputsig.root");
   wAll->writeToFile(filename);
-  cout << "Write signal workspace in: " << filename << " file" << endl;
+  std::cout << "Write signal workspace in: " << filename << " file" << std::endl;
   return;
 } // close make signal WP
 
@@ -903,7 +920,7 @@ void bbgg2DFitter::MakeHigWS(std::string fileHiggsName,int higgschannel)
   }
   TString filename(wsDir+fileHiggsName+".inputhig.root");
   wAll->writeToFile(filename);
-  cout << "Write signal workspace in: " << filename << " file" << endl;
+  std::cout << "Write signal workspace in: " << filename << " file" << std::endl;
   return;
 } // close make higgs WP
 
@@ -1012,35 +1029,35 @@ void bbgg2DFitter::MakeDataCard(std::string fileBaseName, std::string fileBkgNam
   std::cout << "====================================================" <<std::endl;
   TString filename(cardDir+fileBaseName+".txt");
   ofstream outFile(filename);
-  // outFile << "#CMS-HGG DataCard for Unbinned Limit Setting, " << lumi->getVal() << " pb-1 " << endl;
-  outFile << "#Run with: combine -d hgg.mH350.0.shapes-Unbinned.txt -U -m 130 -H ProfileLikelihood -M MarkovChainMC --rMin=0 --rMax=20.0 -b 3500 -i 50000 --optimizeSim=1 --tries 30" << endl;
-  outFile << "# Lumi = " << _lumi << " pb-1" << endl;
-  outFile << "imax "<<_NCAT << endl;
-  outFile << "jmax "<<Higgstrue.size()+1<< endl; // number of BKG
-  outFile << "kmax *" << endl;
-  outFile << "---------------" << endl;
-  outFile << "shapes data_obs cat0 " << wsDir+fileBkgName+".root" << " w_all:data_obs_cat0" << endl;
-  outFile << "shapes data_obs cat1 "<< wsDir+fileBkgName+".root" << " w_all:data_obs_cat1" << endl;
+  // outFile << "#CMS-HGG DataCard for Unbinned Limit Setting, " << lumi->getVal() << " pb-1 " << std::endl;
+  outFile << "#Run with: combine -d hgg.mH350.0.shapes-Unbinned.txt -U -m 130 -H ProfileLikelihood -M MarkovChainMC --rMin=0 --rMax=20.0 -b 3500 -i 50000 --optimizeSim=1 --tries 30" << std::endl;
+  outFile << "# Lumi = " << _lumi << " pb-1" << std::endl;
+  outFile << "imax "<<_NCAT << std::endl;
+  outFile << "jmax "<<Higgstrue.size()+1<< std::endl; // number of BKG
+  outFile << "kmax *" << std::endl;
+  outFile << "---------------" << std::endl;
+  outFile << "shapes data_obs cat0 " << wsDir+fileBkgName+".root" << " w_all:data_obs_cat0" << std::endl;
+  outFile << "shapes data_obs cat1 "<< wsDir+fileBkgName+".root" << " w_all:data_obs_cat1" << std::endl;
   if ( _NCAT > 2 )
 	{
-  outFile << "shapes data_obs cat2 " << wsDir+fileBkgName+".root" << " w_all:data_obs_cat2" << endl;
-  outFile << "shapes data_obs cat3 "<< wsDir+fileBkgName+".root" << " w_all:data_obs_cat3" << endl;
+  outFile << "shapes data_obs cat2 " << wsDir+fileBkgName+".root" << " w_all:data_obs_cat2" << std::endl;
+  outFile << "shapes data_obs cat3 "<< wsDir+fileBkgName+".root" << " w_all:data_obs_cat3" << std::endl;
   }
-  outFile << "############## shape with reparametrization" << endl;
-  outFile << "shapes Bkg cat0 " << wsDir+fileBkgName+".root" << " w_all:CMS_bkg_8TeV_cat0" << endl;
-  outFile << "shapes Bkg cat1 "<< wsDir+fileBkgName+".root" << " w_all:CMS_bkg_8TeV_cat1" << endl;
+  outFile << "############## shape with reparametrization" << std::endl;
+  outFile << "shapes Bkg cat0 " << wsDir+fileBkgName+".root" << " w_all:CMS_bkg_8TeV_cat0" << std::endl;
+  outFile << "shapes Bkg cat1 "<< wsDir+fileBkgName+".root" << " w_all:CMS_bkg_8TeV_cat1" << std::endl;
   if ( _NCAT > 2 )
 	{
-  	outFile << "shapes Bkg cat2 " << wsDir+fileBkgName+".root" << " w_all:CMS_bkg_8TeV_cat2" << endl;
-  	outFile << "shapes Bkg cat3 "<< wsDir+fileBkgName+".root" << " w_all:CMS_bkg_8TeV_cat3" << endl;
+  	outFile << "shapes Bkg cat2 " << wsDir+fileBkgName+".root" << " w_all:CMS_bkg_8TeV_cat2" << std::endl;
+  	outFile << "shapes Bkg cat3 "<< wsDir+fileBkgName+".root" << " w_all:CMS_bkg_8TeV_cat3" << std::endl;
   }
-  outFile << "# signal" << endl;
-  outFile << "shapes Sig cat0 " << wsDir+fileBaseName+".inputsig.root" << " w_all:CMS_sig_cat0" << endl;
-  outFile << "shapes Sig cat1 " << wsDir+fileBaseName+".inputsig.root" << " w_all:CMS_sig_cat1" << endl;
+  outFile << "# signal" << std::endl;
+  outFile << "shapes Sig cat0 " << wsDir+fileBaseName+".inputsig.root" << " w_all:CMS_sig_cat0" << std::endl;
+  outFile << "shapes Sig cat1 " << wsDir+fileBaseName+".inputsig.root" << " w_all:CMS_sig_cat1" << std::endl;
   if ( _NCAT > 2 )
 	{
-  	outFile << "shapes Sig cat2 " << wsDir+fileBaseName+".inputsig.root" << " w_all:CMS_sig_cat2" << endl;
-  	outFile << "shapes Sig cat3 " << wsDir+fileBaseName+".inputsig.root" << " w_all:CMS_sig_cat3" << endl;
+  	outFile << "shapes Sig cat2 " << wsDir+fileBaseName+".inputsig.root" << " w_all:CMS_sig_cat2" << std::endl;
+  	outFile << "shapes Sig cat3 " << wsDir+fileBaseName+".inputsig.root" << " w_all:CMS_sig_cat3" << std::endl;
   }
   for(std::map<std::string,std::vector<RooDataSet*>>::iterator it=higToFits.begin();it!=higToFits.end();++it)
   {
@@ -1049,11 +1066,11 @@ void bbgg2DFitter::MakeDataCard(std::string fileBaseName, std::string fileBkgNam
 		{"bbh_m125_8TeV","Higbbh"}};
         std::vector<std::string>::iterator itt=find(Higgstrue.begin(),Higgstrue.end(),it->first);
         if(itt!=Higgstrue.end())
-  	{outFile << name[it->first] << endl;
+  	{outFile << name[it->first] << std::endl;
         for(int hh=0;hh<_NCAT;++hh)
 	{
-	std::string catn="cat"+to_string(hh);
-  	outFile << "shapes "<<name2[it->first]<<" "<<catn<<" "<< wsDir+higgsfilename[it->first]<<".inputhig.root"<<" w_all:CMS_hig_"<<higgsNumber[it->first]<<"_"<<catn << endl;
+	std::string catn="cat"+std::to_string(hh);
+  	outFile << "shapes "<<name2[it->first]<<" "<<catn<<" "<< wsDir+higgsfilename[it->first]<<".inputhig.root"<<" w_all:CMS_hig_"<<higgsNumber[it->first]<<"_"<<catn << std::endl;
 	}
 	}
   }
@@ -1073,13 +1090,13 @@ void bbgg2DFitter::MakeDataCard(std::string fileBaseName, std::string fileBkgNam
       outFile << "\nobservation -1 -1 ";
       if ( _NCAT > 2 ) outFile << "-1 -1 ";
     }
-    outFile << "\n------------------------------" << endl;
+    outFile << "\n------------------------------" << std::endl;
     std::map<std::string,std::string>Name{{"ggh_m125_powheg_8TeV","Higggh"},{"tth_m125_8TeV","Higtth"},{"vbf_m125_8TeV","Higvbf"},{"wzh_m125_8TeV_zh","Higvh"},
 		{"bbh_m125_8TeV","Higbbh"}};
     outFile << "bin ";
     for(int f=0;f<_NCAT;++f)
 		{
-			std::string catn="cat"+to_string(f)+" ";
+			std::string catn="cat"+std::to_string(f)+" ";
     	
 			for(unsigned int l=0;l!=Higgstrue.size()+2;++l) outFile<<catn;
 		}
@@ -1093,7 +1110,7 @@ void bbgg2DFitter::MakeDataCard(std::string fileBaseName, std::string fileBkgNam
     for(int f=0;f<_NCAT;++f)
 		{
       outFile<< "0 1 ";
-			for(unsigned int l=0;l!=Higgstrue.size();++l) outFile<<to_string(l+2)+" ";
+			for(unsigned int l=0;l!=Higgstrue.size();++l) outFile<<std::to_string(l+2)+" ";
 		}
     outFile << "\nrate ";
     for(int f=0;f<_NCAT;++f)
@@ -1120,7 +1137,7 @@ void bbgg2DFitter::MakeDataCard(std::string fileBaseName, std::string fileBkgNam
     std::vector<std::string>QCD_scale{"-","-","0.922/1.072","0.907/1.038","0.998/1.002","0.980/1.020","0.980/1.020"};
     std::vector<std::string>gg_migration{"-","-","1.25","1.25","1.08","1.08","1.08"};
     std::vector<std::string>gluonSplitting{"-","-","1.40","1.40","1.40","1.40","1.40"};
-    vector<pair<string,vector<vector<string>>>>MAP
+    std::vector<std::pair<std::string,std::vector<std::vector<std::string>>>>MAP
     {
 	{"lumi_"+_energy,{lumi}},
 	{"DiphoTrigger",{DiphoTrigger}},
@@ -1144,9 +1161,9 @@ void bbgg2DFitter::MakeDataCard(std::string fileBaseName, std::string fileBkgNam
     };
 	
 	
-    for(vector<pair<string,vector<vector<std::string>>>>::iterator it=MAP.begin();it!=MAP.end();++it)
+    for(std::vector<std::pair<std::string,std::vector<std::vector<std::string>>>>::iterator it=MAP.begin();it!=MAP.end();++it)
     {
-	if(Comments.find(it->first)!=Comments.end())outFile<<Comments[it->first]<<endl;
+	if(Comments.find(it->first)!=Comments.end())outFile<<Comments[it->first]<<std::endl;
 	outFile<<it->first<<" lnN ";
         bool manycase=false;
         if((it->second).size()==2)manycase=true;    
@@ -1162,7 +1179,7 @@ void bbgg2DFitter::MakeDataCard(std::string fileBaseName, std::string fileBkgNam
 			else outFile<<(it->second)[f%2][higgsNumber[Higgstrue[l]]+2]<<"  ";
 		}
 	}
-	outFile<<endl;
+	outFile<<std::endl;
     }
     /*outFile << "lumi_8TeV lnN "<< "1.026 - 1.026 1.026 1.026 1.026 1.026 "<< "1.026 - 1.026 1.026 1.026 1.026 1.026 ";
     if ( _NCAT > 2 )outFile << "1.026 - 1.026 1.026 1.026 1.026 1.026 "<< "1.026 - 1.026 1.026 1.026 1.026 1.026 ";
@@ -1178,69 +1195,69 @@ void bbgg2DFitter::MakeDataCard(std::string fileBaseName, std::string fileBkgNam
     outFile << "############## Jet selection and phase space cuts normalisation uncertainties " <<std::endl;
     outFile << "pTj_cut_acceptance lnN "<< "1.010 - 1.010 1.010 1.010 1.010 1.010 "<< "1.010 - 1.010 1.010 1.010 1.010 1.010 ";
     if ( _NCAT > 2 )outFile << "1.010 - 1.010 1.010 1.010 1.010 1.010 "<< "1.010 - 1.010 1.010 1.010 1.010 1.010 ";
-    outFile <<"# JER and JES " << endl;
+    outFile <<"# JER and JES " << std::endl;
     if ( _NCAT == 2)outFile << "btag_eff lnN "<< "1.050 - 1.0508 1.050 1.050 1.050 1.050 "<< "0.979 - 0.979 0.979 0.979 0.979 0.979 ";
     else if ( _NCAT > 2 )outFile << "btag_eff lnN "<< "1.050 - 1.050 1.050 1.050 1.050 1.050 "<< "0.979 - 0.979 0.979 0.979 0.979 0.979 "<< "1.050 - 1.050 1.050 1.050 1.050 1.050 "<< "0.979 - 0.979 0.979 0.979 0.979 0.979 ";
-    outFile <<"# b tag efficiency uncertainty" << endl;
+    outFile <<"# b tag efficiency uncertainty" << std::endl;
     if (_NCAT == 2)outFile << "maajj_cut_acceptance lnN "<< "1.015 - 1.015 1.015 1.015 1.015 1.015 "<< "1.015 - 1.015 1.015 1.015 1.015 1.015 ";
     else if (_NCAT > 2)outFile << "maajj_cut_acceptance lnN "<< "0.995 - 0.995 0.995 0.995 0.995 0.995 "<< "0.995 - 0.995 0.995 0.995 0.995 0.995 "<< "1.015 - 1.015 1.015 1.015 1.015 1.015 "<< "1.015 - 1.015 1.015 1.015 1.015 1.015 ";
     outFile << "# uncertainty on mggjj cut acceptance" <<std::endl;
     outFile << " " <<std::endl <<std::endl;
-    outFile << "############## Theory uncertainties on SM Higgs production " << endl;
+    outFile << "############## Theory uncertainties on SM Higgs production " << std::endl;
     outFile << "PDF lnN "<< " - - 0.931/1.075 0.919/1.081 0.972/1.026 0.976/1.024 0.976/1.024 "<< " - - 0.931/1.075 0.919/1.081 0.972/1.026 0.976/1.024 0.976/1.024 ";
     if ( _NCAT > 2 )outFile << " - - 0.931/1.075 0.919/1.081 0.972/1.026 0.976/1.024 0.976/1.024 "<< " - - 0.931/1.075 0.919/1.081 0.972/1.026 0.976/1.024 0.976/1.024 ";
     outFile << "\nQCD_scale lnN "<< " - - 0.922/1.072 0.907/1.038 0.998/1.002 0.980/1.020 0.980/1.020 "<< " - - 0.922/1.072 0.907/1.038 0.998/1.002 0.980/1.020 0.980/1.020 ";
     if ( _NCAT > 2 )outFile << " - - 0.922/1.072 0.907/1.038 0.998/1.002 0.980/1.020 0.980/1.020 "<< " - - 0.922/1.072 0.907/1.038 0.998/1.002 0.980/1.020 0.980/1.020 ";
     outFile << "\ngg_migration lnN "<< " - - 1.25 1.25 1.08 1.08 1.08 "<< " - - 1.25 1.25 1.08 1.08 1.08 ";
     if ( _NCAT > 2 )outFile << " - - 1.25 1.25 1.08 1.08 1.08 "<< " - - 1.25 1.25 1.08 1.08 1.08 ";
-    outFile << "# UEPS" << endl;
+    outFile << "# UEPS" << std::endl;
     outFile << "gluonSplitting lnN "<< " - - 1.40 1.40 1.40 1.40 1.40 "<< " - - 1.40 1.40 1.40 1.40 1.40 ";
     if ( _NCAT > 2 )outFile << " - - 1.40 1.40 1.40 1.40 1.40 "<< " - - 1.40 1.40 1.40 1.40 1.40 ";
-    outFile << " " << endl<<endl;*/
+    outFile << " " << std::endl<<endl;*/
     if(useSigTheoryUnc)
 		{
-      outFile << "############## Theory uncertainty on SM diHiggs production " << endl;
+      outFile << "############## Theory uncertainty on SM diHiggs production " << std::endl;
       outFile << "SM_diHiggs_Theory lnN "<< " 0.857/1.136 - - - - - - "<< " 0.857/1.136 - - - - - - ";
       if ( _NCAT > 2 )outFile << " 0.857/1.136 - - - - - - "<< " 0.857/1.136 - - - - - - ";
-      outFile << " # from 9.96 + 1.35 - 1.42 fb " << endl << endl;
+      outFile << " # from 9.96 + 1.35 - 1.42 fb " << std::endl << std::endl;
     }
-    outFile << "############## Signal parametric shape uncertainties " << endl;
-    if ( _sigMass > 0)outFile << "CMS_hgg_sig_m0_absShift param 1 0.0045 # displacement of the dipho mean error = sqrt(0.4^ 2 + 0.2^ 2) " << endl;
-    else outFile << "CMS_hgg_sig_m0_absShift param 1 0.0054 # displacement of the dipho mean error = sqrt(0.5^ 2 + 0.2^ 2) " << endl;
-    outFile << "CMS_hgg_sig_sigmaScale param 1 0.05 # optimistic estimate of resolution uncertainty " << endl;
+    outFile << "############## Signal parametric shape uncertainties " << std::endl;
+    if ( _sigMass > 0)outFile << "CMS_hgg_sig_m0_absShift param 1 0.0045 # displacement of the dipho mean error = sqrt(0.4^ 2 + 0.2^ 2) " << std::endl;
+    else outFile << "CMS_hgg_sig_m0_absShift param 1 0.0054 # displacement of the dipho mean error = sqrt(0.5^ 2 + 0.2^ 2) " << std::endl;
+    outFile << "CMS_hgg_sig_sigmaScale param 1 0.05 # optimistic estimate of resolution uncertainty " << std::endl;
     //
-    outFile << "CMS_hbb_sig_m0_absShift param 1 0.026 # displacement of the dijet mean error " << endl;
-    outFile << "CMS_hbb_sig_sigmaScale param 1 0.10 # optimistic estimate of resolution uncertainty " << endl;
+    outFile << "CMS_hbb_sig_m0_absShift param 1 0.026 # displacement of the dijet mean error " << std::endl;
+    outFile << "CMS_hbb_sig_sigmaScale param 1 0.10 # optimistic estimate of resolution uncertainty " << std::endl;
     //
-    outFile << "############## for mggxmjj fit - slopes" << endl;
-    outFile << "CMS_bkg_8TeV_cat0_norm flatParam # Normalization uncertainty on background slope" << endl;
-    outFile << "CMS_bkg_8TeV_cat1_norm flatParam # Normalization uncertainty on background slope" << endl;
+    outFile << "############## for mggxmjj fit - slopes" << std::endl;
+    outFile << "CMS_bkg_8TeV_cat0_norm flatParam # Normalization uncertainty on background slope" << std::endl;
+    outFile << "CMS_bkg_8TeV_cat1_norm flatParam # Normalization uncertainty on background slope" << std::endl;
     if ( _NCAT > 2 )
 		{
-    	outFile << "CMS_bkg_8TeV_cat2_norm flatParam # Normalization uncertainty on background slope" << endl;
-    	outFile << "CMS_bkg_8TeV_cat3_norm flatParam # Normalization uncertainty on background slope" << endl;
-    	outFile << "CMS_hgg_bkg_8TeV_slope1_cat0 flatParam # Mean and absolute uncertainty on background slope" << endl;
-    	outFile << "CMS_hgg_bkg_8TeV_slope1_cat1 flatParam # Mean and absolute uncertainty on background slope" << endl;
-    	outFile << "CMS_hgg_bkg_8TeV_slope1_cat2 flatParam # Mean and absolute uncertainty on background slope" << endl;
-    	outFile << "CMS_hgg_bkg_8TeV_slope1_cat3 flatParam # Mean and absolute uncertainty on background slope" << endl;
-			outFile << "CMS_hbb_bkg_8TeV_slope1_cat0 flatParam # Mean and absolute uncertainty on background slope" << endl;
-    	outFile << "CMS_hbb_bkg_8TeV_slope1_cat1 flatParam # Mean and absolute uncertainty on background slope" << endl;
-    	outFile << "CMS_hbb_bkg_8TeV_slope1_cat2 flatParam # Mean and absolute uncertainty on background slope" << endl;
-    	outFile << "CMS_hbb_bkg_8TeV_slope1_cat3 flatParam # Mean and absolute uncertainty on background slope" << endl;
+    	outFile << "CMS_bkg_8TeV_cat2_norm flatParam # Normalization uncertainty on background slope" << std::endl;
+    	outFile << "CMS_bkg_8TeV_cat3_norm flatParam # Normalization uncertainty on background slope" << std::endl;
+    	outFile << "CMS_hgg_bkg_8TeV_slope1_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
+    	outFile << "CMS_hgg_bkg_8TeV_slope1_cat1 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
+    	outFile << "CMS_hgg_bkg_8TeV_slope1_cat2 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
+    	outFile << "CMS_hgg_bkg_8TeV_slope1_cat3 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
+			outFile << "CMS_hbb_bkg_8TeV_slope1_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
+    	outFile << "CMS_hbb_bkg_8TeV_slope1_cat1 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
+    	outFile << "CMS_hbb_bkg_8TeV_slope1_cat2 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
+    	outFile << "CMS_hbb_bkg_8TeV_slope1_cat3 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
     }
     else
 		{
-    	outFile << "CMS_hgg_bkg_8TeV_slope2_cat0 flatParam # Mean and absolute uncertainty on background slope" << endl;
-    	outFile << "CMS_hgg_bkg_8TeV_slope3_cat0 flatParam # Mean and absolute uncertainty on background slope" << endl;
-    	outFile << "CMS_hgg_bkg_8TeV_slope1_cat1 flatParam # Mean and absolute uncertainty on background slope" << endl;
-			outFile << "CMS_hbb_bkg_8TeV_slope2_cat0 flatParam # Mean and absolute uncertainty on background slope" << endl;
-    	outFile << "CMS_hbb_bkg_8TeV_slope3_cat0 flatParam # Mean and absolute uncertainty on background slope" << endl;
-    	outFile << "CMS_hbb_bkg_8TeV_slope1_cat1 flatParam # Mean and absolute uncertainty on background slope" << endl;
+    	outFile << "CMS_hgg_bkg_8TeV_slope2_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
+    	outFile << "CMS_hgg_bkg_8TeV_slope3_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
+    	outFile << "CMS_hgg_bkg_8TeV_slope1_cat1 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
+			outFile << "CMS_hbb_bkg_8TeV_slope2_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
+    	outFile << "CMS_hbb_bkg_8TeV_slope3_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
+    	outFile << "CMS_hbb_bkg_8TeV_slope1_cat1 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
     }
   } // if ncat == 2 or 4
   /////////////////////////////////////
   outFile.close();
-  cout << "Write data card in: " << filename << " file" << endl;
+  std::cout << "Write data card in: " << filename << " file" << std::endl;
 } // close write full datacard
 
 void bbgg2DFitter::MakeDataCardonecatnohiggs(std::string fileBaseName, std::string fileBkgName, Bool_t useSigTheoryUnc)
@@ -1263,8 +1280,8 @@ void bbgg2DFitter::MakeDataCardonecatnohiggs(std::string fileBaseName, std::stri
   else std::cout << "#Events data: -1 " <<std::endl;
   if(!_doblinding)for (int c = 0; c < _NCAT; ++c) std::cout << TString::Format("#Events data cat%d: ",c) << data[c]->sumEntries() <<std::endl;
   else for (int c = 0; c < _NCAT; ++c) std::cout << TString::Format("#Events data cat%d: ",c) << -1 <<std::endl;
-  // cout << ".........Expected Signal for L = " << lumi->getVal() << " pb-1 ............................" << endl;
-  cout << ".........Expected Signal for L = " << _lumi << " pb-1 ............................" << endl;
+  // cout << ".........Expected Signal for L = " << lumi->getVal() << " pb-1 ............................" << std::endl;
+  std::cout << ".........Expected Signal for L = " << _lumi << " pb-1 ............................" << std::endl;
   if(!_doblinding) std::cout << "#Events Signal: " << _w->data("Data")->sumEntries() << std::endl;
   else std::cout << "#Events Signal: -1 " <<std::endl;
   std::vector<Float_t> siglikeErr(_NCAT,0);
@@ -1276,9 +1293,9 @@ void bbgg2DFitter::MakeDataCardonecatnohiggs(std::string fileBaseName, std::stri
   std::cout << "====================================================" <<std::endl;
   TString filename(cardDir+fileBaseName+"onecatnohiggs.txt");
   ofstream outFile(filename);
-  //outFile << "#CMS-HGG DataCard for Unbinned Limit Setting, " << lumi->getVal() << " pb-1 " << endl;
+  //outFile << "#CMS-HGG DataCard for Unbinned Limit Setting, " << lumi->getVal() << " pb-1 " << std::endl;
   outFile << "#Run with: combine -d hgg.mH350.0.shapes-Unbinned.txt -U -m 130 -H ProfileLikelihood -M MarkovChainMC --rMin=0 --rMax=20.0 -b 3500 -i 50000 --optimizeSim=1 --tries 30" <<std::endl;
-  // outFile << "# Lumi = " << lumi->getVal() << " pb-1" << endl;
+  // outFile << "# Lumi = " << lumi->getVal() << " pb-1" << std::endl;
   outFile << "# Lumi = " << _lumi << " pb-1" <<std::endl;
   outFile << "imax 1" <<std::endl;
   outFile << "jmax 1" <<std::endl; // number of BKG
@@ -1293,52 +1310,52 @@ void bbgg2DFitter::MakeDataCardonecatnohiggs(std::string fileBaseName, std::stri
   /////////////////////////////////////
   if(_addHiggs) 
 	{ //
-    outFile << "bin cat0 " << endl;
-    if(!_doblinding)outFile << "observation "<< data[0]->sumEntries() << " " << endl; 
-    else outFile << "observation -1 " << endl;   
-    outFile << "------------------------------" << endl;
-    outFile << "bin cat0 cat0 " << endl;
-    outFile << "process Sig Bkg " << endl;
-    outFile << "process 0 1 " << endl;
-    outFile << "rate "<< " " << sigToFit[0]->sumEntries() << " " << 1<< " " << endl;
-    outFile << "--------------------------------" << endl;
-    outFile << "lumi_8TeV lnN "<< "1.026 - " << endl;
-    outFile << "############## jet" << endl;
-    outFile << "pTj_acceptance lnN "<< "1.010 - "<<"# JER and JES " << endl;
+    outFile << "bin cat0 " << std::endl;
+    if(!_doblinding)outFile << "observation "<< data[0]->sumEntries() << " " << std::endl; 
+    else outFile << "observation -1 " << std::endl;   
+    outFile << "------------------------------" << std::endl;
+    outFile << "bin cat0 cat0 " << std::endl;
+    outFile << "process Sig Bkg " << std::endl;
+    outFile << "process 0 1 " << std::endl;
+    outFile << "rate "<< " " << sigToFit[0]->sumEntries() << " " << 1<< " " << std::endl;
+    outFile << "--------------------------------" << std::endl;
+    outFile << "lumi_8TeV lnN "<< "1.026 - " << std::endl;
+    outFile << "############## jet" << std::endl;
+    outFile << "pTj_acceptance lnN "<< "1.010 - "<<"# JER and JES " << std::endl;
     outFile << "btag_eff lnN ";
     if (_sigMass==0) outFile << "1.050 - ";
     else outFile << "1.050 - ";
-    outFile <<"# b tag efficiency uncertainty" << endl;
+    outFile <<"# b tag efficiency uncertainty" << std::endl;
     outFile << "mggjj_acceptance lnN ";
-    if (_sigMass==0) outFile << "0.995 - " << endl;
-    else outFile << "1.015 - " << endl;
-    outFile << "############## photon " << endl;
-    outFile << "CMS_hgg_eff_g lnN "<< "1.010 - "<< "# photon selection accep." << endl;
-    outFile << "DiphoTrigger lnN "<< "1.01 - "<< "# Trigger efficiency" << endl;
-    if(useSigTheoryUnc)outFile << "SM_diHiggs_Theory lnN 0.857/1.136 - " << endl;
-    outFile << "# Parametric shape uncertainties, entered by hand. they act on signal " << endl;
-    outFile << "CMS_hgg_sig_m0_absShift param 1 0.0054 # displacement of the dipho mean" << endl;
-    outFile << "CMS_hgg_sig_sigmaScale param 1 0.05 # optimistic estimate of resolution uncertainty " << endl;
-    outFile << "CMS_hbb_sig_m0_absShift param 1 0.026 # displacement of the dijet mean" << endl;
-    outFile << "CMS_hbb_sig_sigmaScale param 1 0.10 # optimistic estimate of resolution uncertainty " << endl;
-    outFile << "############## for mggxmjj fit - slopes" << endl;
-    outFile << "CMS_bkg_8TeV_cat0_norm flatParam # Normalization uncertainty on background slope" << endl;
-    if ( _NCAT > 2 )outFile << "CMS_hgg_bkg_8TeV_slope1_cat0 flatParam # Mean and absolute uncertainty on background slope" << endl;
+    if (_sigMass==0) outFile << "0.995 - " << std::endl;
+    else outFile << "1.015 - " << std::endl;
+    outFile << "############## photon " << std::endl;
+    outFile << "CMS_hgg_eff_g lnN "<< "1.010 - "<< "# photon selection accep." << std::endl;
+    outFile << "DiphoTrigger lnN "<< "1.01 - "<< "# Trigger efficiency" << std::endl;
+    if(useSigTheoryUnc)outFile << "SM_diHiggs_Theory lnN 0.857/1.136 - " << std::endl;
+    outFile << "# Parametric shape uncertainties, entered by hand. they act on signal " << std::endl;
+    outFile << "CMS_hgg_sig_m0_absShift param 1 0.0054 # displacement of the dipho mean" << std::endl;
+    outFile << "CMS_hgg_sig_sigmaScale param 1 0.05 # optimistic estimate of resolution uncertainty " << std::endl;
+    outFile << "CMS_hbb_sig_m0_absShift param 1 0.026 # displacement of the dijet mean" << std::endl;
+    outFile << "CMS_hbb_sig_sigmaScale param 1 0.10 # optimistic estimate of resolution uncertainty " << std::endl;
+    outFile << "############## for mggxmjj fit - slopes" << std::endl;
+    outFile << "CMS_bkg_8TeV_cat0_norm flatParam # Normalization uncertainty on background slope" << std::endl;
+    if ( _NCAT > 2 )outFile << "CMS_hgg_bkg_8TeV_slope1_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
     else
 		{
-	    outFile << "CMS_hgg_bkg_8TeV_slope2_cat0 flatParam # Mean and absolute uncertainty on background slope" << endl;
-	    outFile << "CMS_hgg_bkg_8TeV_slope3_cat0 flatParam # Mean and absolute uncertainty on background slope" << endl;
+	    outFile << "CMS_hgg_bkg_8TeV_slope2_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
+	    outFile << "CMS_hgg_bkg_8TeV_slope3_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
     }
-    if ( _NCAT > 2 )	outFile << "CMS_hbb_bkg_8TeV_slope1_cat0 flatParam # Mean and absolute uncertainty on background slope" << endl;
+    if ( _NCAT > 2 )	outFile << "CMS_hbb_bkg_8TeV_slope1_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
     else
 		{
-    	outFile << "CMS_hbb_bkg_8TeV_slope2_cat0 flatParam # Mean and absolute uncertainty on background slope" << endl;
-    	outFile << "CMS_hbb_bkg_8TeV_slope3_cat0 flatParam # Mean and absolute uncertainty on background slope" << endl;
+    	outFile << "CMS_hbb_bkg_8TeV_slope2_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
+    	outFile << "CMS_hbb_bkg_8TeV_slope3_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
     }
   } // if ncat ==2
   /////////////////////////////////////
   outFile.close();
-  cout << "Write data card in: " << filename << " file" << endl;
+  std::cout << "Write data card in: " << filename << " file" << std::endl;
   return;
 } // close write datacard one cat
 

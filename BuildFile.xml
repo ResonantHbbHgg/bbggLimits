@@ -5,8 +5,12 @@
 <use name="histfactory"/>
 <use name="libxml2"/>
 <use name="vdt"/>
-<use   name="boost_program_options"/>
-<use   name="boost_filesystem"/>
+<use name="rootrflx"/>
+<use name="boost_program_options"/>
+<use name="boost_filesystem"/>
+<use name="boost"/>
+<use name="boost_header"/>
+<use name="boost_regex"/>
 <export>
    <lib name="1"/>
 </export>

@@ -227,7 +227,8 @@ std::map<std::string,int>higgsNumber
     HLFactory hlf(HLFactoryname.c_str(), card_name, false);
     RooWorkspace* w = hlf.GetWs();
     //Object
-  	bbgg2DFitter TheFitter = bbgg2DFitter( w, sigMas, lumi,folder_name,energy,doblinding, NCAT, addHiggs);
+  	bbgg2DFitter TheFitter;
+	TheFitter.Initialize( w, sigMas, lumi,folder_name,energy,doblinding, NCAT, addHiggs);
   	TheFitter.style();
     
   	int opened=TheFitter.AddSigData( mass,signalDir2);

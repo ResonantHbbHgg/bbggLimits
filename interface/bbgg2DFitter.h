@@ -9,10 +9,10 @@
 #define bbgg2DFitter_h
 
 // C++ headers
-#include <iostream>
-#include <sstream>
+//#include <iostream>
+//#include <sstream>
 #include <string>
-#include <cmath>
+//#include <cmath>
 // ROOT headers
 #include <TROOT.h>
 //#include <TSystem.h>
@@ -26,37 +26,41 @@
 #include <TStyle.h>
 #include <TLegend.h>
 // RooFit headers
-#include <RooWorkspace.h>
-#include <RooFitResult.h>
-#include <RooRealVar.h>
-#include <RooCategory.h>
-#include <RooArgSet.h>
-#include <RooStats/HLFactory.h>
-#include <RooDataSet.h>
-#include <RooFormulaVar.h>
-#include <RooGenericPdf.h>
-#include <RooPlot.h>
-#include <RooAbsPdf.h>
-#include <RooBernstein.h>
-#include <RooExtendPdf.h>
-#include <RooMinimizer.h>
-#include <RooStats/RooStatsUtils.h>
-#include <RooProdPdf.h>
-#include <RooExponential.h>
-#include <RooPolynomial.h>
+//#include <RooWorkspace.h>
+//#include <RooFitResult.h>
+//#include <RooRealVar.h>
+//#include <RooCategory.h>
+//#include <RooArgSet.h>
+//#include <RooStats/HLFactory.h>
+//#include <RooDataSet.h>
+//#include <RooFormulaVar.h>
+//#include <RooGenericPdf.h>
+//#include <RooPlot.h>
+//#include <RooAbsPdf.h>
+//#include <RooBernstein.h>
+//#include <RooExtendPdf.h>
+//#include <RooMinimizer.h>
+//#include <RooStats/RooStatsUtils.h>
+//#include <RooProdPdf.h>
+//#include <RooExponential.h>
+//#include <RooPolynomial.h>
 
 // Header file for the classes stored in the TTree if any.
 #include <vector>
-#include <cmath>
-#include <Math/LorentzVector.h>
-#include <algorithm>
+//#include <cmath>
+//#include <Math/LorentzVector.h>
+//#include <algorithm>
 #include <string>
-#include <utility>
+//#include <utility>
 
 // namespaces
-using namespace std;
-using namespace RooFit;
-using namespace RooStats;
+//using namespace std;
+//using namespace RooFit;
+//using namespace RooStats;
+
+class RooWorkspace;
+struct RooFitResult;
+struct RooArgSet;
 
 class bbgg2DFitter {
 public :
@@ -72,7 +76,8 @@ public :
    //Workspace
    RooWorkspace* _w;
    std::string _folder_name;
-   bbgg2DFitter(RooWorkspace* workspace, Int_t SigMass, float Lumi,std::string folder_name,std::string energy, Bool_t doBlinding, Int_t nCat, bool AddHiggs);// { doblinding = false; NCAT = 0; addHiggs = true; cardName = cardname; Init();}
+   bbgg2DFitter() {}
+   void Initialize(RooWorkspace* workspace, Int_t SigMass, float Lumi,std::string folder_name,std::string energy, Bool_t doBlinding, Int_t nCat, bool AddHiggs);// { doblinding = false; NCAT = 0; addHiggs = true; cardName = cardname; Init();}
    virtual ~bbgg2DFitter() { }
    void SetCut(TString cut) {_cut = cut;}
    RooArgSet* defineVariables(); //DONE
@@ -91,7 +96,7 @@ public :
    void MakeDataCard(std::string filename, std::string filename1,std::map<std::string,std::string>higgsfilename, Bool_t,std::vector<std::string>,std::map<std::string,int>higgsNumber); //DONE
    void MakeDataCardonecatnohiggs(std::string filename1, std::string filename2, Bool_t useSigTheoryUnc); //DONE
    void SetConstantParams(const RooArgSet* params); //DONE
-   void PrintWorkspace() {_w->Print("v");}
+   void PrintWorkspace();// {_w->Print("v");}
    TStyle * style(); //DONE
    
    ClassDef(bbgg2DFitter,0);
@@ -99,6 +104,7 @@ public :
 
 #endif
 
+/*
 #ifdef bbgg2DFitter_cxx
 bbgg2DFitter::bbgg2DFitter(RooWorkspace* workspace, Int_t SigMass, float Lumi,std::string folder_name,std::string energy, Bool_t doBlinding = false, Int_t nCat = 0, bool AddHiggs = true)
 {
@@ -115,3 +121,4 @@ bbgg2DFitter::bbgg2DFitter(RooWorkspace* workspace, Int_t SigMass, float Lumi,st
 }
 
 #endif // #ifdef bbgg2DFitter_cxx
+*/
