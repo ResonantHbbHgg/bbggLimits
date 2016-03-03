@@ -3,7 +3,7 @@
 
 namespace {
 	struct dictionary {
-       bbggLTMaker dummy_ltree;
-       bbgg2DFitter dummy_fit;
-	};
-}
+	       bbggLTMaker dummy_ltree;
+	       bbgg2DFitter dummy_fit;
+	              	};
+	  }

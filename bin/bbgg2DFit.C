@@ -1,15 +1,20 @@
 // C++ headers
+#include "HiggsAnalysis/bbggLimits/src/BrazilianFlag.cc"
 #include "HiggsAnalysis/bbggLimits/interface/bbgg2DFitter.h"
-
+#include "HiggsAnalysis/bbggLimits/interface/Colors.h"
+#include "HiggsAnalysis/bbggLimits/interface/RunCombine.h"
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <cmath>
-#include <boost/program_options.hpp>
+#include <map>
+#include <vector>
+#include <boost/filesystem.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/foreach.hpp>
+#include <cstdlib>
 // ROOT headers
 #include "TROOT.h"
 #include "TSystem.h"
@@ -46,202 +51,247 @@
 using namespace std;
 using namespace RooFit;
 using namespace RooStats;
-namespace po = boost::program_options;
- 
+
 int main(int argc, const char* argv[])
 {
-  if(argc < 2) {
-	cout << "Please, parse xml configuration file!" << endl;
-	return 0;
+	RooMsgService::instance().setGlobalKillBelow(RooFit::FATAL) ;
+	RooMsgService::instance().setSilentMode(true);
+	std::vector<std::string>higgstrue;
+  //Parameters to set
+	Float_t mass = 1;
+	Float_t lumi = 1;
+	Bool_t doBands = 1;
+  bool docombine=false;
+	bool doBrazilianFlag=false;
+	int version = 44;
+	string analysisType = "a";
+	string nonresFile = "b";
+	Bool_t useSigTheoryUnc = 1;
+	std::vector<std::pair<int,std::string>> sigMass;
+	Bool_t doblinding = 1;
+	Int_t NCAT = 1;
+	bool addHiggs =1;
+	string signalType = "";
+	string signalDir = "";
+	string energy = "13TeV";
+	string cardName = "";
+	string datadir="";
+	string dataname="";
+	std::string dirhiggs="";
+	std::string path_dir="./bbggToolsResults";
+  std::vector<string>folder_to_create;
+	//name files
+	std::string fileBkgName = "hgg.inputbkg_8TeV";
+	std::string part="LT_GluGluTo";
+	std::string part2="ToHHTo2B2G_M-";
+	std::string end="_narrow_13TeV-madgraph.root";
+  if(argc < 2) 
+	{
+		cout <<red<< "Please, parse json configuration file!"<<normal << endl;
+		return 0;
   }
-
-//Parameters to set
-  Float_t mass = 1;
-  Float_t lumi = 1;
-  Float_t minMgg = 100.;
-  Float_t maxMgg = 180.;
-  Float_t minMjj = 60.;
-  Float_t maxMjj = 180;
-  Float_t minMggHig = 115.;
-  Float_t maxMggHig = 135.;
-  Float_t minMjjHig = 60.;
-  Float_t maxMjjHig = 180.;
-  Bool_t doBands = 1;
-  int version = 44;
-  string analysisType = "a";
-  string nonresFile = "b";
-  Bool_t useSigTheoryUnc = 1;
-  int sigMass = 1;
-  Bool_t doblinding = 1;
-  Int_t NCAT = 1;
-  bool addHiggs =1;
-  string signalType = "a";
-  string signalDir = "a";
-  string energy = "13";
-  string cardName = "";
-  string sigFile = "";
-  string dataFile = "";
-
+  if(argc < 3) 
+	{
+		cout <<yellow<< "Please, specify the folder which will hold the files!"<<normal << endl;
+		cout <<yellow<<"Default folder : "<<path_dir<<" !"<<normal<<std::endl;
+	}
   //Read config file
-//  using boost::property_tree::ptree;
- // ptree configs;
   boost::property_tree::ptree pt;
   boost::property_tree::read_json( argv[1], pt );
-
   cout << "Reading input configuration file..." << endl;
   BOOST_FOREACH( boost::property_tree::ptree::value_type const& rowPair, pt.get_child( "" ) )
   {
+  	cout << "Reading " << rowPair.first << " options..." << endl;
+    if (rowPair.first == "signal") 
+    {
+      signalType = rowPair.second.get<std::string>("type");
+      signalDir = rowPair.second.get<std::string>("dir");
+      cardName = rowPair.second.get<std::string>("signalModelCard");
+      BOOST_FOREACH (boost::property_tree::ptree::value_type const& v, rowPair.second.get_child("mass"))
+      {  
+								static int color=1;
+                folder_to_create.push_back("/"+signalType+"_M"+v.second.data());
+                std::string filename=signalDir+part+signalType+part2+v.second.data()+end;
+                std::pair<int,std::string>a(stoi(v.second.data()),filename);
+   							sigMass.push_back(a);
+								if(color%2==0)cout<<grey;
+								cout << "\t Signal type: " << signalType << endl;
+     	 					cout << "\t Signal samples location: " << signalDir << endl;
+								cout << "\t Signal model card: " << cardName << endl;
+      					cout << "\t Signal mass: " << v.second.data() << endl;
+								cout<<normal;
+                color++;
+      }
+      if (mass == 0 ) 
+			{
+      	cout << "Mass == 0 means non-resonant analysis, therefore:" << endl;
+        nonresFile = rowPair.second.get<std::string>("nonresFile");
+        cout << "\t Non resonant file: " << nonresFile <<endl;
+      }
+     
+    }
+    if (rowPair.first == "other") 
+		{
+      lumi = rowPair.second.get<float>("integratedLumi");
+      energy = rowPair.second.get<std::string>("energy");
+      mass = rowPair.second.get<float>("higgsMass");
+      addHiggs = rowPair.second.get<bool>("addHiggs");
+      doblinding = rowPair.second.get<bool>("doBlinding");
+      doBands = rowPair.second.get<bool>("doBands");
+      NCAT = rowPair.second.get<int>("ncat");
+			doBrazilianFlag=rowPair.second.get<bool>("doBrazilianFlag");
+      if(NCAT>3)
+      {
+				std::cout<<red<<"Error NCAT>3 !!!"<<normal<<std::endl;
+				std::exit(0);
+      }
+      version=rowPair.second.get<int>("version");
+			docombine=rowPair.second.get<bool>("runCombine");
+      useSigTheoryUnc = rowPair.second.get<bool>("useSigTheoryUnc");
+      analysisType = rowPair.second.get<string>("analysisType");
+      cout << "Running options: " << endl;
+      cout << "\t Integrated luminosity: " << lumi << endl;
+      cout << "\t Center of mass energy: " << energy << endl;
+      cout << "\t Higgs mass: " << mass << endl;
+      cout << "\t Add Higgs: " << addHiggs <<endl;
+      cout << "\t Do blinded analysis: " << doblinding << endl;
+      cout << "\t Calculate and show 1 and 2 sigma bands on background fit: " << doBands << endl;
+      cout << "\t Number of categories to fit: " << NCAT << endl;
+      cout << "\t Analysis type: " << analysisType << endl;
+   		cout << "\t Add an uncertainty to the datacard for the SM diHiggs theory uncertainty: " << useSigTheoryUnc << endl;
+    }
+   	if (rowPair.first == "data") 
+	 	{
+    	datadir = rowPair.second.get<string>("dir");
+			cout << "\t Data location: " << datadir<< endl;
+      dataname = rowPair.second.get<string>("name");
+			cout << "\t Data type: " << dataname << endl;
+    }
+    if (rowPair.first == "higgs") 
+		{
+			dirhiggs=rowPair.second.get<string>("dir");
+			
+			std::string type=rowPair.second.get<string>("type");
+      BOOST_FOREACH (boost::property_tree::ptree::value_type const& v, rowPair.second.get_child("type"))
+      { 
+						static int  color=1;
+      			higgstrue.push_back(v.second.data());
+						if(color%2==0)cout<<grey;
+            cout << "\t Higgs signal location: " << dirhiggs << endl;
+						cout << "\t Higgs signal type: " << v.second.data() << endl;
+						cout<<normal;
+						color++;
+			}
 
-        cout << "Reading " << rowPair.first << " options..." << endl;
-        if (rowPair.first == "signal") {
-                signalType = rowPair.second.get<std::string>("type");
-                signalDir = rowPair.second.get<std::string>("dir");
-                sigMass = rowPair.second.get<int>("mass");
-		cardName = rowPair.second.get<std::string>("signalModelCard");
-		sigFile = rowPair.second.get<std::string>("signalFile");
-                cout << "\t Signal type: " << signalType << endl;
-                cout << "\t Signal samples location: " << signalDir << endl;
-		cout << "\t Signal model card: " << cardName << endl;
-                cout << "\t Signal mass: " << mass << endl;
-                if (mass == 0 ) {
-                        cout << "Mass == 0 means non-resonant analysis, therefore:" << endl;
-                        nonresFile = rowPair.second.get<std::string>("nonresFile");
-                        cout << "\t Non resonant file: " << nonresFile << endl;
-                }
-        }
-        if (rowPair.first == "other") {
-		dataFile = rowPair.second.get<std::string>("dataFile");
-                lumi = rowPair.second.get<float>("integratedLumi");
-                energy = rowPair.second.get<std::string>("energy");
-                mass = rowPair.second.get<float>("higgsMass");
-                addHiggs = rowPair.second.get<bool>("addHiggs");
-                doblinding = rowPair.second.get<bool>("doBlinding");
-                doBands = rowPair.second.get<bool>("doBands");
-                NCAT = rowPair.second.get<int>("ncat");
-                useSigTheoryUnc = rowPair.second.get<bool>("useSigTheoryUnc");
-                analysisType = rowPair.second.get<string>("analysisType");
-		minMgg = rowPair.second.get<float>("minMgg");
-		maxMgg = rowPair.second.get<float>("maxMgg");
-		minMjj = rowPair.second.get<float>("minMjj");
-		maxMjj = rowPair.second.get<float>("maxMjj");
-		minMggHig = rowPair.second.get<float>("minMggHig");
-		maxMggHig = rowPair.second.get<float>("maxMggHig");
-		minMjjHig = rowPair.second.get<float>("minMjjHig");
-		maxMjjHig = rowPair.second.get<float>("maxMjjHig");
-                cout << "Running options: " << endl;
-                cout << "\t Integrated luminosity: " << lumi << endl;
-                cout << "\t Center of mass energy: " << energy << endl;
-                cout << "\t Higgs mass: " << mass << endl;
-                cout << "\t Add Higgs: " << addHiggs << endl;
-                cout << "\t Do blinded analysis: " << doblinding << endl;
-                cout << "\t Calculate and show 1 and 2 sigma bands on background fit: " << doBands << endl;
-                cout << "\t Number of categories to fit: " << NCAT << endl;
-                cout << "\t Analysis type: " << analysisType << endl;
-                cout << "\t Add an uncertainty to the datacard for the SM diHiggs theory uncertainty: " << useSigTheoryUnc << endl;
-        }
+    }
+	}
+if(argc==3)
+{
+	path_dir=argv[2];
+	path_dir+="_v"+to_string(version);
 }
+else path_dir+="v_"+to_string(version);
 
-
-  TString fileBaseName = TString::Format("hgg.mH%.1f_8TeV", mass);
-  TString fileHiggsNameggh = TString::Format("hgg.hig.mH%.1f_8TeV.ggh", mass);
-  TString fileHiggsNametth = TString::Format("hgg.hig.mH%.1f_8TeV.tth", mass);
-  TString fileHiggsNamevbf = TString::Format("hgg.hig.mH%.1f_8TeV.vbf", mass);
-  TString fileHiggsNamevh = TString::Format("hgg.hig.mH%.1f_8TeV.vh", mass);
-  TString fileHiggsNamebbh = TString::Format("hgg.hig.mH%.1f_8TeV.bbh", mass);
-  TString fileBkgName = "hgg.inputbkg_8TeV";
-
-  TString card_name(cardName); // put the model parameters here!
-  bbgg2DFitter TheFitter = bbgg2DFitter( sigMass, lumi, doblinding, NCAT, addHiggs );
-  TheFitter.SetMinMaxMggMjj(minMgg, maxMgg, minMjj, maxMjj);
-  TheFitter.SetMinMaxMggMjjHig(minMggHig, maxMggHig, minMjjHig, maxMjjHig);
-  std::string CardName = TheFitter.MakeModelCard(card_name.Data());
-  
-  if(CardName == "")
-	return 0;
-
-  HLFactory hlf("HLFactory", CardName.c_str(), false);
-  RooWorkspace* w = hlf.GetWs();
-  
-  //Object
-  TheFitter.SetWorkspace(w);
-  TheFitter.style();
-
-  RooFitResult* fitresults;
-
-  // the limit trees to be addeed
-  //
-  TString dir = TString::Format("/afs/cern.ch/work/o/obondu/public/forRadion/limitTrees/v%d/v%d_%s",version,version,analysisType.c_str());
-
-  TString hhiggsggh = TString::Format("%s/ggh_m125_powheg_8TeV_m%d.root",dir.Data(),sigMass);
-  TString hhiggstth = TString::Format("%s/tth_m125_8TeV_m%d.root",dir.Data(),sigMass);;
-  TString hhiggsvbf = TString::Format("%s/vbf_m125_8TeV_m%d.root",dir.Data(),sigMass);;
-  TString hhiggsvh =  TString::Format("%s/wzh_m125_8TeV_zh_m%d.root",dir.Data(),sigMass);;
-  TString hhiggsbbh = TString::Format("%s/bbh_m125_8TeV_m%d.root",dir.Data(),sigMass);;
-  //
-  TString ddata = TString::Format("%s/Data_m%d.root",dir.Data(),sigMass);
-  TString ssignal;
-  if (sigMass == 260) ssignal = TString::Format("%s/MSSM_m260_8TeV_m260.root",dir.Data());
-  else if (sigMass >= 270) ssignal = TString::Format("%s/Radion_m%d_8TeV_m%d.root",dir.Data(),sigMass,sigMass);
-  else ssignal = TString::Format("%s/ggHH_%s_8TeV_m0.root",dir.Data(),nonresFile.c_str());
-
-  cout<<"Signal: "<<ssignal<<endl;
-  cout<<"Data: "<<ddata<<endl;
-
-  ssignal = sigFile;
-  TheFitter.AddSigData( mass,ssignal);
-  cout<<"SIGNAL ADDED"<<endl;
+std::string fileBaseName = "hgg.mH"+to_string(mass)+"_8TeV";
+boost::filesystem::path dire(path_dir);
+boost::filesystem::create_directory(dire);
+std::map<std::string,std::string>higgsfilename
+{
+		{"ggh_m125_powheg_8TeV","hgg.hig.mH"+to_string(mass)+"_8TeV.ggh"},
+		{"tth_m125_8TeV","hgg.hig.mH"+to_string(mass)+"_8TeV.tth"},
+		{"vbf_m125_8TeV","hgg.hig.mH"+to_string(mass)+"_8TeV.vbf"},
+		{"wzh_m125_8TeV_zh","hgg.hig.mH"+to_string(mass)+"_8TeV.vh"},
+		{"bbh_m125_8TeV","hgg.hig.mH"+to_string(mass)+"_8TeV.bbh"}
+};
+std::map<std::string,int>higgsNumber
+{
+		{"ggh_m125_powheg_8TeV",0},
+		{"tth_m125_8TeV",1},
+		{"vbf_m125_8TeV",2},
+		{"wzh_m125_8TeV_zh",3},
+		{"bbh_m125_8TeV",4}
+};
+  for(unsigned int i=0;i!=sigMass.size();++i)
+  {
+    int sigMas=sigMass[i].first;
+    std::string signalDir2="";
+    if(energy=="13TeV") signalDir2 = sigMass[i].second;
+    else signalDir2=signalDir+"/v"+to_string(version)+"/v"+to_string(version)+"_"+analysisType+"/"+signalType+"_m"+to_string(sigMas)+"_8TeV_m"+to_string(sigMas)+".root";
+    std::string folder_name=path_dir+"/"+signalType+"_M"+to_string(sigMas);
+    std::string HLFactoryname=signalType+"_M"+to_string(sigMas);
+		std::string ddata;
+    if(energy=="13TeV")ddata=datadir+"LT_"+dataname+".root";
+		else ddata=datadir+"/v"+to_string(version)+"/v"+to_string(version)+"_"+analysisType+"/"+dataname+"_m"+to_string(sigMas)+".root";
+    cout<<"Data: "<<ddata<<endl;
+    TString card_name(cardName); // put the model parameters here!
+    HLFactory hlf(HLFactoryname.c_str(), card_name, false);
+    RooWorkspace* w = hlf.GetWs();
+    //Object
+  	bbgg2DFitter TheFitter = bbgg2DFitter( w, sigMas, lumi,folder_name,energy,doblinding, NCAT, addHiggs);
+  	TheFitter.style();
+    
+  	int opened=TheFitter.AddSigData( mass,signalDir2);
+	if(opened==-1)
+	{
+		std::cout<<yellow<<" File "<<signalDir2<<" not found or not openeable !!"<<normal<<std::endl;
+		std::cout<<yellow<<" File skipped !!"<<normal<<std::endl;
+		continue;
+	}
+        boost::filesystem::path diree(path_dir+folder_to_create[i]);
+ 	if(boost::filesystem::create_directory(diree)) 
+ 	{
+  	boost::filesystem::path dirwork(path_dir+folder_to_create[i]+"/workspaces");
+		boost::filesystem::create_directory(dirwork);
+		boost::filesystem::path dirdata(path_dir+folder_to_create[i]+"/datacards");
+		boost::filesystem::create_directory(dirdata);
+  	}
+ 	cout<<green<<"SIGNAL ADDED"<<normal<<endl;
   TheFitter.SigModelFit( mass); // constructing signal pdf
-  TheFitter.MakeSigWS( fileBaseName);
-  TheFitter.MakePlots( mass);
-  cout<<" did signal WS's"<<endl;
-
-  //
-  cout<<"Higgs: "<<hhiggsggh<<endl;
-  TheFitter.AddHigData( mass,hhiggsggh,0);
-  TheFitter.HigModelFit( mass,0); // constructing higgs pdf
-  TheFitter.MakeHigWS( fileHiggsNameggh,0);
-  //
-  cout<<"Higgs: "<<hhiggstth<<endl;
-  TheFitter.AddHigData( mass,hhiggstth,1);
-  TheFitter.HigModelFit( mass,1); // constructing higgs pdf
-  TheFitter.MakeHigWS( fileHiggsNametth,1);
-  //
-  cout<<"Higgs: "<<hhiggsvbf<<endl;
-  TheFitter.AddHigData( mass,hhiggsvbf,2);
-  TheFitter.HigModelFit( mass,2); // constructing higgs pdf
-  TheFitter.MakeHigWS( fileHiggsNamevbf,2);
-  //
-  cout<<"=============================== Higgs: ============================= "<<hhiggsvh<<endl;
-  TheFitter.AddHigData( mass,hhiggsvh,3);
-  TheFitter.HigModelFit( mass,3); // constructing higgs pdf
-  TheFitter.MakeHigWS( fileHiggsNamevh,3);
-  cout<<"HIGGS ADDED"<<endl;
-  //
-  cout<<"=============================== Higgs: ============================= "<<hhiggsbbh<<endl;
-  TheFitter.AddHigData( mass,hhiggsbbh,4);
-  TheFitter.HigModelFit( mass,4); // constructing higgs pdf
-  TheFitter.MakeHigWS( fileHiggsNamebbh,4);
-  cout<<"HIGGS ADDED"<<endl;
-  TheFitter.MakePlotsHiggs( mass);
-  //
-
-
-//  ddata = "/tmp/rateixei/eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/S15V7_v0/LimitTrees/600_900/LT_data.root";
-  ddata = dataFile;
-  TheFitter.AddBkgData(ddata);
-  //w->Print("v");
-  TheFitter.PrintWorkspace();
-  cout<<"BKG ADDED"<<endl;
-  bool dobands=true;
-  fitresults = TheFitter.BkgModelFit( dobands); // this is berestein 3
-  TheFitter.MakeBkgWS( fileBkgName);
-  // construct the models to fit
-  //
-  TheFitter.MakeDataCardonecatnohiggs( fileBaseName, fileBkgName, useSigTheoryUnc);
-  TheFitter.MakeDataCard( fileBaseName, fileBkgName, fileHiggsNameggh, fileHiggsNametth, fileHiggsNamevbf, fileHiggsNamevh, fileHiggsNamebbh, useSigTheoryUnc);
-
-  cout<< "here"<<endl;
-  fitresults->Print();
-
-  return 0;
+	cout<<green<<"SIGNAL FITTED"<<normal<<endl;
+  	TheFitter.MakeSigWS( fileBaseName);
+        cout<<green<<"SIGNAL'S WORKSPACE DONE"<<normal<<endl;
+  	TheFitter.MakePlots( mass);
+	cout<<green<<"SIGNAL'S PLOT DONE"<<normal<<endl;
+	//
+        for(unsigned int J=0;J!=higgstrue.size();++J)
+	{
+      std::string direc=dirhiggs+"/v"+to_string(version)+"/v"+to_string(version)+"_"+analysisType+"/"+higgstrue[J]+"_m"+to_string(sigMas)+".root";
+  		TheFitter.AddHigData( mass,direc,higgsNumber[higgstrue[J]]);
+		cout<<green<<"HIGGS "<<higgstrue[J]<<" ADDED"<<normal<<endl;
+  		TheFitter.HigModelFit( mass,higgsNumber[higgstrue[J]]); // constructing higgs pdf
+		cout<<green<<"HIGGS "<<higgstrue[J]<<" FITTED"<<normal<<endl;
+  		TheFitter.MakeHigWS( higgsfilename[higgstrue[J]],higgsNumber[higgstrue[J]]);
+		cout<<green<<"HIGGS' "<<higgstrue[J]<<"WORKSPACE DONE"<<normal<<endl;
+	}		
+        TheFitter.MakePlotsHiggs(mass,higgstrue,higgsNumber);
+	cout<<green<<"HIGGS' PLOTS FITTED"<<normal<<endl;
+	TheFitter.AddBkgData(ddata);
+    	cout<<green<<"BKG ADDED"<<normal<<endl;
+  	//TheFitter.PrintWorkspace();
+        RooFitResult* fitresults = TheFitter.BkgModelFit( doBands,addHiggs,higgstrue,higgsNumber); // this is berestein 3
+	cout<<green<<"BKG FITTED"<<normal<<endl;
+        if(fitresults==nullptr)
+	{
+		std::cout<<"Problem with fitresults !!"<<std::endl;
+		std::exit(3);
+	}
+  	TheFitter.MakeBkgWS( fileBkgName);
+	cout<<green<<"BKG'S WORKSPACE DONE"<<normal<<endl;
+  	// construct the models to fit
+  	//
+  	TheFitter.MakeDataCardonecatnohiggs( fileBaseName, fileBkgName, useSigTheoryUnc);
+	cout<<green<<"DATACARD_ONE_CAT DONE"<<normal<<endl;
+  	TheFitter.MakeDataCard( fileBaseName, fileBkgName,higgsfilename,useSigTheoryUnc,higgstrue,higgsNumber);
+	cout<<green<<"DATACARD DONE"<<normal<<endl;
+  	fitresults->Print();
+  }
+  if(docombine==true)
+  {
+	RunCombine(path_dir,doblinding);
+  }
+  if(doBrazilianFlag==true)
+  {
+	BrazilianFlag(path_dir);
+  }
+  return 0;		
 } // close runfits

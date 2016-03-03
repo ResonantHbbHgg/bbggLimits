@@ -22,4 +22,3 @@ cd ${CMSSW_BASE}/src/HiggsAnalysis/
 git clone git@github.com:ResonantHbbHgg/bbggLimits.git
 ./Compile.sh
 ```
-
