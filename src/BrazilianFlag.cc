@@ -92,7 +92,13 @@ void BrazilianFlag(std::string path_dir,bool HH=false,bool base=true,bool low=fa
 {
 	std::cout<<green<<"CREATING BRAZILIAN FLAG"<<normal<<std::endl;
 	std::vector<double>radMASS;
-  std::vector<std::string>dirs;
+  	std::vector<std::string>dirs;
+  	boost::filesystem::path dir(path_dir);
+  	if(boost::filesystem::is_directory(path_dir)==false)
+  	{
+  		std::cout<<red<<"Directory "<<path_dir<<" doesn't exist"<<normal<<std::endl;
+  		std::exit(1);
+  	}
 	for (boost::filesystem::directory_iterator itr(path_dir); itr!=boost::filesystem::directory_iterator(); ++itr)
 	{
 		if (boost::filesystem::is_directory(itr->status()))

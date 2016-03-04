@@ -7,6 +7,12 @@
 
 void RunCombine(std::string path_dir,bool doblinding)
 {
+	boost::filesystem::path dir(path_dir);
+  	if(boost::filesystem::is_directory(path_dir)==false)
+  	{
+  		std::cout<<red<<"Directory "<<path_dir<<" doesn't exist"<<normal<<std::endl;
+  		std::exit(1);
+  	}
 	for (boost::filesystem::directory_iterator itr(path_dir); itr!=boost::filesystem::directory_iterator(); ++itr)
 	{
 		if (boost::filesystem::is_directory(itr->status()))
