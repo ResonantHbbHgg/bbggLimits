@@ -16,7 +16,9 @@
                 "ncat" : 2,
                 "analysisType" : "fitTo2D_resSearch_withRegKinFit",
                 "useSigTheoryUnc" : 0,
-		"version" : 44
+		"version" : 44,
+		"doBrazilianFlag" : true,
+		"runCombine" : true
         },
         "data" : {
                 "dir" : "/afs/cern.ch/user/f/flagarde/public/S15V7_v0/LimitTrees/250_350/",
