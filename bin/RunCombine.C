@@ -8,7 +8,7 @@ int main(int argc, const char* argv[])
 	std::string path_dir="";
 	if(argc < 3) 
 	{
-		std::cout <<red<< "Please provide the folder name as first argument and the blinding flag"<<normal << std::endl
+		std::cout <<red<< "Please provide the folder name as first argument and the blinding flag"<<normal << std::endl;
 	}
 	else
 	{

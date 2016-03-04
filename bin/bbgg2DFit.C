@@ -1,5 +1,5 @@
 // C++ headers
-#include "HiggsAnalysis/bbggLimits/src/BrazilianFlag.cc"
+#include "HiggsAnalysis/bbggLimits/interface/BrazilianFlag.h"
 #include "HiggsAnalysis/bbggLimits/interface/bbgg2DFitter.h"
 #include "HiggsAnalysis/bbggLimits/interface/Colors.h"
 #include "HiggsAnalysis/bbggLimits/interface/RunCombine.h"

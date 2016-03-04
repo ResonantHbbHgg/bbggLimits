@@ -13,3 +13,23 @@
 	<use name="roostats"/>
 	<use name="HiggsAnalysis/bbggLimits"/>
 </bin>
+<bin name="runCombine" file="RunCombine.C">
+        <use name="boost_program_options"/>
+        <use name="boost"/>
+       	<use name="boost_system"/>
+        <use name="root"/>
+        <use name="roofit"/>
+        <use name="rootcore"/>
+        <use name="roostats"/>
+        <use name="HiggsAnalysis/bbggLimits"/>
+</bin>
+<bin name="BrazilianFlag" file="BrazilianFlag.C">
+        <use name="boost_program_options"/>
+        <use name="boost"/>
+        <use name="boost_system"/>
+        <use name="root"/>
+        <use name="roofit"/>
+        <use name="rootcore"/>
+        <use name="roostats"/>
+        <use name="HiggsAnalysis/bbggLimits"/>
+</bin>
