@@ -29,7 +29,7 @@ void RunCombine(std::string path_dir,bool doblinding)
     }
 			std::string blinded="";
 			if(doblinding==1)blinded="--run blind ";
-			std::string txtname="hgg.mH125.000000_8TeV";
+			std::string txtname="hgg.mH125_8TeV";
 		 	std::string location=path_dir+"/"+folder_name+"/datacards/";
 		 	std::string logs=path_dir+"/"+folder_name+"/logs";
 			std::string cresult=path_dir+"/"+folder_name+"/combine"; 
@@ -37,17 +37,17 @@ void RunCombine(std::string path_dir,bool doblinding)
 			boost::filesystem::create_directory(logs);
 			boost::filesystem::create_directory(cresult);
 		  std::string command1="combine -M Asymptotic "+blinded+location+txtname+".txt >>"+logs+"/higgsCombineTest.Asymptotic.mH125.0._m"+number[0]+"_higgs.txt";
-			std::string command2="combine -M Asymptotic "+blinded+location+txtname+"onecatnohiggs.txt >>"+logs+"/higgsCombineTest.Asymptotic.mH125.0._m"+number[0]+"_onecatnohiggs.txt";
-			std::string command3="combine -M Asymptotic "+blinded+location+txtname+".txt -S 0 >>"+logs+"/higgsCombineTest.Asymptotic.mH125.0._m"+number[0]+"_nosyst_higgs.txt";
+			//std::string command2="combine -M Asymptotic "+blinded+location+txtname+"onecatnohiggs.txt >>"+logs+"/higgsCombineTest.Asymptotic.mH125.0._m"+number[0]+"_onecatnohiggs.txt";
+			//std::string command3="combine -M Asymptotic "+blinded+location+txtname+".txt -S 0 >>"+logs+"/higgsCombineTest.Asymptotic.mH125.0._m"+number[0]+"_nosyst_higgs.txt";
 			std::cout<<green<<"RUNNING COMBINE FOR "<<folder_name<<" : "<<normal<<std::endl;
       			std::cout<<command1<<std::endl;
 			std::system(command1.c_str());
 			std::string mvvv=mvv+"_higgs.root";
 			std::system(mvvv.c_str());
-      std::cout<<command2<<std::endl;                                    			                        		        			
-			std::system(command2.c_str());
-			mvvv=mvv+"_onecatnohiggs.root";
-			std::system(mvvv.c_str());
+      			//std::cout<<command2<<std::endl;                                    			                        		        			
+			//std::system(command2.c_str());
+			//mvvv=mvv+"_onecatnohiggs.root";
+			//std::system(mvvv.c_str());
 			//std::cout<<command3<<std::endl;						              			                        		        						
 			//std::system(command3.c_str());
 			//std::system("mv higgsCombineTest.Asymptotic.mH120.root"+cresult+"/higgsCombineTest.Asymptotic.mH125_nosyst_higgs.root")

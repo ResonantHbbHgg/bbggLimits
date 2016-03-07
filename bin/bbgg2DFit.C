@@ -13,6 +13,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
+#include <boost/optional/optional.hpp>
 #include <boost/foreach.hpp>
 #include <cstdlib>
 // ROOT headers
@@ -68,6 +69,7 @@ int main(int argc, const char* argv[])
 	string nonresFile = "b";
 	Bool_t useSigTheoryUnc = 1;
 	std::vector<std::pair<int,std::string>> sigMass;
+        std::map<int,std::vector<float>> ParamsForFits;
 	Bool_t doblinding = 1;
 	Int_t NCAT = 1;
 	bool addHiggs =1;
@@ -85,6 +87,23 @@ int main(int argc, const char* argv[])
 	std::string part="LT_GluGluTo";
 	std::string part2="ToHHTo2B2G_M-";
 	std::string end="_narrow_13TeV-madgraph.root";
+	float minMggMassFit=100;
+	float maxMggMassFit=180;
+	float minMjjMassFit=60;
+	float maxMjjMassFit=180;
+        float minSigFitMgg=115;
+	float maxSigFitMgg=135;
+  	float minSigFitMjj=60;
+	float maxSigFitMjj=180;
+        float minHigMggFit=115;
+	float maxHigMggFit=135;
+  	float minHigMjjFit=60;
+	float maxHigMjjFit=180;
+	bool HH=false;
+	bool base=true;
+	bool low=false;
+	bool obs=false;
+	bool twotag=false;
   if(argc < 2) 
 	{
 		cout <<red<< "Please, parse json configuration file!"<<normal << endl;
@@ -109,17 +128,35 @@ int main(int argc, const char* argv[])
       cardName = rowPair.second.get<std::string>("signalModelCard");
       BOOST_FOREACH (boost::property_tree::ptree::value_type const& v, rowPair.second.get_child("mass"))
       {  
-								static int color=1;
+		static int color=1;
+		if(color%2==0)cout<<grey;
+      		cout << "\t Signal type: " << signalType << endl;
+     	 	cout << "\t Signal samples location: " << signalDir << endl;
+      		cout << "\t Signal model card: " << cardName << endl;
+                cout << "\t Signal mass: " << v.second.data() << endl;
                 folder_to_create.push_back("/"+signalType+"_M"+v.second.data());
                 std::string filename=signalDir+part+signalType+part2+v.second.data()+end;
                 std::pair<int,std::string>a(stoi(v.second.data()),filename);
-   							sigMass.push_back(a);
-								if(color%2==0)cout<<grey;
-								cout << "\t Signal type: " << signalType << endl;
-     	 					cout << "\t Signal samples location: " << signalDir << endl;
-								cout << "\t Signal model card: " << cardName << endl;
-      					cout << "\t Signal mass: " << v.second.data() << endl;
-								cout<<normal;
+   		sigMass.push_back(a);
+                std::string nameparam="param_"+v.second.data();
+                boost::optional< const boost::property_tree::ptree& > child = rowPair.second.get_child_optional( nameparam.c_str() );
+		if( child )
+		{
+			std::vector<float>Params;
+  			BOOST_FOREACH (boost::property_tree::ptree::value_type const& v2, rowPair.second.get_child( nameparam.c_str() ))
+      			{
+				Params.push_back(stof(v2.second.data()));
+			}
+			if(Params.size()!=12)
+			{
+				std::cout<<yellow<<"\t Some parameters are missing for M"+v.second.data()+", I will use the default ones "<<normal<<std::endl;
+			}
+			else ParamsForFits[stoi(v.second.data())]=Params;
+		}
+
+
+		
+		cout<<normal;
                 color++;
       }
       if (mass == 0 ) 
@@ -146,9 +183,26 @@ int main(int argc, const char* argv[])
 				std::exit(0);
       }
       version=rowPair.second.get<int>("version");
-			docombine=rowPair.second.get<bool>("runCombine");
+      docombine=rowPair.second.get<bool>("runCombine");
+      minMggMassFit=rowPair.second.get<float>("minMggMassFit");
+      maxMggMassFit=rowPair.second.get<float>("maxMggMassFit");
+      minMjjMassFit=rowPair.second.get<float>("minMjjMassFit");
+      maxMjjMassFit=rowPair.second.get<float>("maxMjjMassFit");
+      minSigFitMgg=rowPair.second.get<float>("minSigFitMgg");
+      maxSigFitMgg=rowPair.second.get<float>("maxSigFitMgg");
+      minSigFitMjj=rowPair.second.get<float>("minSigFitMjj");
+      maxSigFitMjj=rowPair.second.get<float>("maxSigFitMjj");
+      minHigMggFit=rowPair.second.get<float>("minHigMggFit");
+      maxHigMggFit=rowPair.second.get<float>("maxHigMggFit");
+      minHigMjjFit=rowPair.second.get<float>("minHigMjjFit");
+      maxHigMjjFit=rowPair.second.get<float>("maxHigMjjFit");
       useSigTheoryUnc = rowPair.second.get<bool>("useSigTheoryUnc");
       analysisType = rowPair.second.get<string>("analysisType");
+      HH=rowPair.second.get<bool>("HH");
+      base=rowPair.second.get<bool>("base");
+      low=rowPair.second.get<bool>("low");
+      obs=rowPair.second.get<bool>("obs");
+      twotag=rowPair.second.get<bool>("twotag");
       cout << "Running options: " << endl;
       cout << "\t Integrated luminosity: " << lumi << endl;
       cout << "\t Center of mass energy: " << energy << endl;
@@ -158,7 +212,8 @@ int main(int argc, const char* argv[])
       cout << "\t Calculate and show 1 and 2 sigma bands on background fit: " << doBands << endl;
       cout << "\t Number of categories to fit: " << NCAT << endl;
       cout << "\t Analysis type: " << analysisType << endl;
-   		cout << "\t Add an uncertainty to the datacard for the SM diHiggs theory uncertainty: " << useSigTheoryUnc << endl;
+      cout << "\t Add an uncertainty to the datacard for the SM diHiggs theory uncertainty: " << useSigTheoryUnc << endl;
+      
     }
    	if (rowPair.first == "data") 
 	 	{
@@ -191,17 +246,25 @@ if(argc==3)
 	path_dir+="_v"+to_string(version);
 }
 else path_dir+="v_"+to_string(version);
-
-std::string fileBaseName = "hgg.mH"+to_string(mass)+"_8TeV";
+if(boost::filesystem::is_directory(path_dir)==true)
+{
+	std::cout<<red<<"Folder already exists. Please change the folder name or delete it "<<normal<<std::endl;
+	std::exit(1);
+}
+std::string masswthout0 = std::to_string (mass);
+masswthout0.erase ( masswthout0.find_last_not_of('0') + 1, std::string::npos );
+if ((masswthout0.size () > 0)& (masswthout0.back()=='.'))  masswthout0.resize (masswthout0.size () - 1);
+std::string fileBaseName = "hgg.mH"+masswthout0+"_8TeV";
 boost::filesystem::path dire(path_dir);
 boost::filesystem::create_directory(dire);
+std::system(("cp "+std::string(argv[1])+" "+path_dir).c_str());
 std::map<std::string,std::string>higgsfilename
 {
-		{"ggh_m125_powheg_8TeV","hgg.hig.mH"+to_string(mass)+"_8TeV.ggh"},
-		{"tth_m125_8TeV","hgg.hig.mH"+to_string(mass)+"_8TeV.tth"},
-		{"vbf_m125_8TeV","hgg.hig.mH"+to_string(mass)+"_8TeV.vbf"},
-		{"wzh_m125_8TeV_zh","hgg.hig.mH"+to_string(mass)+"_8TeV.vh"},
-		{"bbh_m125_8TeV","hgg.hig.mH"+to_string(mass)+"_8TeV.bbh"}
+		{"ggh_m125_powheg_8TeV","hgg.hig.mH"+masswthout0+"_8TeV.ggh"},
+		{"tth_m125_8TeV","hgg.hig.mH"+masswthout0+"_8TeV.tth"},
+		{"vbf_m125_8TeV","hgg.hig.mH"+masswthout0+"_8TeV.vbf"},
+		{"wzh_m125_8TeV_zh","hgg.hig.mH"+masswthout0+"_8TeV.vh"},
+		{"bbh_m125_8TeV","hgg.hig.mH"+masswthout0+"_8TeV.bbh"}
 };
 std::map<std::string,int>higgsNumber
 {
@@ -221,15 +284,19 @@ std::map<std::string,int>higgsNumber
     std::string HLFactoryname=signalType+"_M"+to_string(sigMas);
 		std::string ddata;
     if(energy=="13TeV")ddata=datadir+"LT_"+dataname+".root";
-		else ddata=datadir+"/v"+to_string(version)+"/v"+to_string(version)+"_"+analysisType+"/"+dataname+"_m"+to_string(sigMas)+".root";
+    else ddata=datadir+"/v"+to_string(version)+"/v"+to_string(version)+"_"+analysisType+"/"+dataname+"_m"+to_string(sigMas)+".root";
     cout<<"Data: "<<ddata<<endl;
     TString card_name(cardName); // put the model parameters here!
     HLFactory hlf(HLFactoryname.c_str(), card_name, false);
     RooWorkspace* w = hlf.GetWs();
     //Object
-  	bbgg2DFitter TheFitter;
-	TheFitter.Initialize( w, sigMas, lumi,folder_name,energy,doblinding, NCAT, addHiggs);
-  	TheFitter.style();
+    bbgg2DFitter TheFitter;
+    if(ParamsForFits.find(sigMas)!=ParamsForFits.end())
+    {
+	TheFitter.Initialize( w, sigMas, lumi,folder_name,energy,doblinding, NCAT, addHiggs,ParamsForFits[sigMas][0],ParamsForFits[sigMas][1],ParamsForFits[sigMas][2],ParamsForFits[sigMas][3],ParamsForFits[sigMas][4],ParamsForFits[sigMas][5],ParamsForFits[sigMas][6],ParamsForFits[sigMas][7],ParamsForFits[sigMas][8],ParamsForFits[sigMas][9],ParamsForFits[sigMas][10],ParamsForFits[sigMas][11]);
+    }
+    else TheFitter.Initialize( w, sigMas, lumi,folder_name,energy,doblinding, NCAT, addHiggs,minMggMassFit,maxMggMassFit,minMjjMassFit,maxMjjMassFit,minSigFitMgg,maxSigFitMgg,minSigFitMjj,maxSigFitMjj,minHigMggFit,maxHigMggFit,minHigMjjFit,maxHigMjjFit);
+    TheFitter.style();
     
   	int opened=TheFitter.AddSigData( mass,signalDir2);
 	if(opened==-1)
@@ -247,7 +314,7 @@ std::map<std::string,int>higgsNumber
 		boost::filesystem::create_directory(dirdata);
   	}
  	cout<<green<<"SIGNAL ADDED"<<normal<<endl;
-  TheFitter.SigModelFit( mass); // constructing signal pdf
+  	TheFitter.SigModelFit( mass); // constructing signal pdf
 	cout<<green<<"SIGNAL FITTED"<<normal<<endl;
   	TheFitter.MakeSigWS( fileBaseName);
         cout<<green<<"SIGNAL'S WORKSPACE DONE"<<normal<<endl;
@@ -280,8 +347,6 @@ std::map<std::string,int>higgsNumber
 	cout<<green<<"BKG'S WORKSPACE DONE"<<normal<<endl;
   	// construct the models to fit
   	//
-  	TheFitter.MakeDataCardonecatnohiggs( fileBaseName, fileBkgName, useSigTheoryUnc);
-	cout<<green<<"DATACARD_ONE_CAT DONE"<<normal<<endl;
   	TheFitter.MakeDataCard( fileBaseName, fileBkgName,higgsfilename,useSigTheoryUnc,higgstrue,higgsNumber);
 	cout<<green<<"DATACARD DONE"<<normal<<endl;
   	fitresults->Print();
@@ -292,7 +357,7 @@ std::map<std::string,int>higgsNumber
   }
   if(doBrazilianFlag==true)
   {
-	BrazilianFlag(path_dir);
+	BrazilianFlag(path_dir,HH,base,low,obs,twotag,energy,lumi);
   }
   return 0;		
 } // close runfits

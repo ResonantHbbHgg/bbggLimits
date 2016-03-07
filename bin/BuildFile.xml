@@ -10,6 +10,7 @@
 	<use name="root"/>
 	<use name="roofit"/>
 	<use name="rootcore"/>
+	<use name="roofitcore"/>
 	<use name="roostats"/>
 	<use name="HiggsAnalysis/bbggLimits"/>
 </bin>

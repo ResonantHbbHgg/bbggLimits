@@ -72,12 +72,23 @@ public :
    float _lumi;
    TString _cut;
    std::string _energy;
-   
+   float _minMggMassFit;
+   float _maxMggMassFit;
+   float _minMjjMassFit;
+   float _maxMjjMassFit;
+   float _minSigFitMgg;
+   float _maxSigFitMgg;
+  	float _minSigFitMjj;
+	float _maxSigFitMjj;
+ float _minHigMggFit;
+	float _maxHigMggFit;
+  float _minHigMjjFit;
+	float _maxHigMjjFit;
    //Workspace
    RooWorkspace* _w;
    std::string _folder_name;
    bbgg2DFitter() {}
-   void Initialize(RooWorkspace* workspace, Int_t SigMass, float Lumi,std::string folder_name,std::string energy, Bool_t doBlinding, Int_t nCat, bool AddHiggs);// { doblinding = false; NCAT = 0; addHiggs = true; cardName = cardname; Init();}
+   void Initialize(RooWorkspace* workspace, Int_t SigMass, float Lumi,std::string folder_name,std::string energy, Bool_t doBlinding, Int_t nCat, bool AddHiggs,float minMggMassFit,float maxMggMassFit,float minMjjMassFit,float maxMjjMassFit,float minSigFitMgg,float maxSigFitMgg,float minSigFitMjj,float maxSigFitMjj,float minHigMggFit,float maxHigMggFit,float minHigMjjFit,float maxHigMjjFit);
    virtual ~bbgg2DFitter() { }
    void SetCut(TString cut) {_cut = cut;}
    RooArgSet* defineVariables(); //DONE
@@ -94,7 +105,6 @@ public :
    void MakeBkgWS(std::string filename); //DONE
    // const char* filenameh0, const char* filenameh1, const char* filenameh2, const char* filenameh4);
    void MakeDataCard(std::string filename, std::string filename1,std::map<std::string,std::string>higgsfilename, Bool_t,std::vector<std::string>,std::map<std::string,int>higgsNumber); //DONE
-   void MakeDataCardonecatnohiggs(std::string filename1, std::string filename2, Bool_t useSigTheoryUnc); //DONE
    void SetConstantParams(const RooArgSet* params); //DONE
    void PrintWorkspace();// {_w->Print("v");}
    TStyle * style(); //DONE

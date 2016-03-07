@@ -49,7 +49,7 @@ using namespace RooStats;
 
 void bbgg2DFitter::PrintWorkspace() {_w->Print("v");}
 
-void bbgg2DFitter::Initialize(RooWorkspace* workspace, Int_t SigMass, float Lumi,std::string folder_name,std::string energy, Bool_t doBlinding = false, Int_t nCat = 0, bool AddHiggs = true)
+void bbgg2DFitter::Initialize(RooWorkspace* workspace, Int_t SigMass, float Lumi,std::string folder_name,std::string energy, Bool_t doBlinding, Int_t nCat, bool AddHiggs,float minMggMassFit,float maxMggMassFit,float minMjjMassFit,float maxMjjMassFit,float minSigFitMgg,float maxSigFitMgg,float minSigFitMjj,float maxSigFitMjj,float minHigMggFit,float maxHigMggFit,float minHigMjjFit,float maxHigMjjFit)
 {
     _doblinding = doBlinding;
     _NCAT = nCat;
@@ -60,14 +60,25 @@ void bbgg2DFitter::Initialize(RooWorkspace* workspace, Int_t SigMass, float Lumi
     _cut = "1";
     _folder_name=folder_name;
     _energy=energy;
-
+    _minMggMassFit=minMggMassFit;
+    _maxMggMassFit=maxMggMassFit;
+    _minMjjMassFit=minMjjMassFit;
+    _maxMjjMassFit=maxMjjMassFit;
+    _minSigFitMgg=minSigFitMgg;
+    _maxSigFitMgg=maxSigFitMgg;
+    _minSigFitMjj=minSigFitMjj;
+    _maxSigFitMjj=maxSigFitMjj;
+    _minHigMggFit=minHigMggFit;
+    _maxHigMggFit=maxHigMggFit;
+    _minHigMjjFit=minHigMjjFit;
+    _maxHigMjjFit=maxHigMjjFit;
 }
 
 RooArgSet* bbgg2DFitter::defineVariables()
 {
-  RooRealVar* mgg = new RooRealVar("mgg","M(#gamma#gamma)",100,180,"GeV");
+  RooRealVar* mgg = new RooRealVar("mgg","M(#gamma#gamma)",_minMggMassFit,_maxMggMassFit,"GeV");
   RooRealVar* mtot = new RooRealVar("mtot","M(#gamma#gammajj)",200,1600,"GeV");
-  RooRealVar* mjj = new RooRealVar("mjj","M(jj)",60,180,"GeV");
+  RooRealVar* mjj = new RooRealVar("mjj","M(jj)",_minMjjMassFit,_maxMjjMassFit,"GeV");
   RooRealVar* evWeight = new RooRealVar("evWeight","HqT x PUwei",0,100,"");
   RooCategory* cut_based_ct = new RooCategory("cut_based_ct","event category 4") ;
   //
@@ -211,12 +222,12 @@ void bbgg2DFitter::SigModelFit(float mass)
   RooAbsPdf* mjjSig[_NCAT];
   RooProdPdf* SigPdf[_NCAT];
   // fit range
-  Float_t minSigFitMgg(115),maxSigFitMgg(135); //This should be an option
-  Float_t minSigFitMjj(60),maxSigFitMjj(180); //This should be an option
+  //Float_t minSigFitMgg(115),maxSigFitMgg(135); //This should be an option
+  //Float_t minSigFitMjj(60),maxSigFitMjj(180); //This should be an option
   RooRealVar* mgg = _w->var("mgg");
   RooRealVar* mjj = _w->var("mjj");
-  mgg->setRange("SigFitRange",minSigFitMgg,maxSigFitMgg);
-  mjj->setRange("SigFitRange",minSigFitMjj,maxSigFitMjj);
+  mgg->setRange("SigFitRange",_minSigFitMgg,_maxSigFitMgg);
+  mjj->setRange("SigFitRange",_minSigFitMjj,_maxSigFitMjj);
   for (int c = 0; c < _NCAT; ++c) 
 	{
 		// import sig and data from workspace
@@ -263,12 +274,12 @@ void bbgg2DFitter::HigModelFit(float mass, int higgschannel)
   RooAbsPdf* mjjHig[_NCAT];
   RooProdPdf* HigPdf[_NCAT];
   // fit range
-  Float_t minHigMggFit(115),maxHigMggFit(135);//This should be an option
-  Float_t minHigMjjFit(60),maxHigMjjFit(180);//This should be an option
+  //Float_t minHigMggFit(115),maxHigMggFit(135);//This should be an option
+  //Float_t minHigMjjFit(60),maxHigMjjFit(180);//This should be an option
   RooRealVar* mgg = _w->var("mgg");
   RooRealVar* mjj = _w->var("mjj");
-  mgg->setRange("HigFitRange",minHigMggFit,maxHigMggFit);
-  mjj->setRange("HigFitRange",minHigMjjFit,maxHigMjjFit);
+  mgg->setRange("HigFitRange",_minHigMggFit,_maxHigMggFit);
+  mjj->setRange("HigFitRange",_minHigMjjFit,_maxHigMjjFit);
 	for (int c = 0; c < _NCAT; ++c) 
 	{
     // import sig and data from workspace
@@ -1215,7 +1226,7 @@ void bbgg2DFitter::MakeDataCard(std::string fileBaseName, std::string fileBkgNam
     if ( _NCAT > 2 )outFile << " - - 1.40 1.40 1.40 1.40 1.40 "<< " - - 1.40 1.40 1.40 1.40 1.40 ";
     outFile << " " << std::endl<<endl;*/
     if(useSigTheoryUnc)
-		{
+   {
       outFile << "############## Theory uncertainty on SM diHiggs production " << std::endl;
       outFile << "SM_diHiggs_Theory lnN "<< " 0.857/1.136 - - - - - - "<< " 0.857/1.136 - - - - - - ";
       if ( _NCAT > 2 )outFile << " 0.857/1.136 - - - - - - "<< " 0.857/1.136 - - - - - - ";
@@ -1240,7 +1251,7 @@ void bbgg2DFitter::MakeDataCard(std::string fileBaseName, std::string fileBkgNam
     	outFile << "CMS_hgg_bkg_8TeV_slope1_cat1 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
     	outFile << "CMS_hgg_bkg_8TeV_slope1_cat2 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
     	outFile << "CMS_hgg_bkg_8TeV_slope1_cat3 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
-			outFile << "CMS_hbb_bkg_8TeV_slope1_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
+	outFile << "CMS_hbb_bkg_8TeV_slope1_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
     	outFile << "CMS_hbb_bkg_8TeV_slope1_cat1 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
     	outFile << "CMS_hbb_bkg_8TeV_slope1_cat2 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
     	outFile << "CMS_hbb_bkg_8TeV_slope1_cat3 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
@@ -1250,7 +1261,7 @@ void bbgg2DFitter::MakeDataCard(std::string fileBaseName, std::string fileBkgNam
     	outFile << "CMS_hgg_bkg_8TeV_slope2_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
     	outFile << "CMS_hgg_bkg_8TeV_slope3_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
     	outFile << "CMS_hgg_bkg_8TeV_slope1_cat1 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
-			outFile << "CMS_hbb_bkg_8TeV_slope2_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
+	outFile << "CMS_hbb_bkg_8TeV_slope2_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
     	outFile << "CMS_hbb_bkg_8TeV_slope3_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
     	outFile << "CMS_hbb_bkg_8TeV_slope1_cat1 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
     }
@@ -1259,105 +1270,6 @@ void bbgg2DFitter::MakeDataCard(std::string fileBaseName, std::string fileBkgNam
   outFile.close();
   std::cout << "Write data card in: " << filename << " file" << std::endl;
 } // close write full datacard
-
-void bbgg2DFitter::MakeDataCardonecatnohiggs(std::string fileBaseName, std::string fileBkgName, Bool_t useSigTheoryUnc)
-{
-  TString cardDir =  TString::Format("%s/datacards/",_folder_name.data());
-  TString wsDir = TString::Format("%s/workspaces/",_folder_name.data());
-  std::vector<RooDataSet*> data(_NCAT,nullptr);
-  std::vector<RooDataSet*> sigToFit(_NCAT,nullptr);
-  std::vector<RooDataSet*> higToFit(_NCAT,nullptr);
-  for (int c = 0; c < _NCAT; ++c) 
-	{
-    data[c] = (RooDataSet*) _w->data(TString::Format("Data_cat%d",c));
-    sigToFit[c] = (RooDataSet*) _w->data(TString::Format("Sig_cat%d",c));
-    higToFit[c] = (RooDataSet*) _w->data(TString::Format("Hig_cat%d",c));
-  }
-  //RooRealVar* lumi = w->var("lumi");
-  std::cout << "======== Expected Events Number =====================" <<std::endl;
-  std::cout << ".........Measured Data for L = " << _lumi << " pb-1 ............................" <<std::endl;
-  if(!_doblinding)std::cout << "#Events data: " << _w->data("Data")->sumEntries() <<std::endl;
-  else std::cout << "#Events data: -1 " <<std::endl;
-  if(!_doblinding)for (int c = 0; c < _NCAT; ++c) std::cout << TString::Format("#Events data cat%d: ",c) << data[c]->sumEntries() <<std::endl;
-  else for (int c = 0; c < _NCAT; ++c) std::cout << TString::Format("#Events data cat%d: ",c) << -1 <<std::endl;
-  // cout << ".........Expected Signal for L = " << lumi->getVal() << " pb-1 ............................" << std::endl;
-  std::cout << ".........Expected Signal for L = " << _lumi << " pb-1 ............................" << std::endl;
-  if(!_doblinding) std::cout << "#Events Signal: " << _w->data("Data")->sumEntries() << std::endl;
-  else std::cout << "#Events Signal: -1 " <<std::endl;
-  std::vector<Float_t> siglikeErr(_NCAT,0);
-  for (int c = 0; c < _NCAT; ++c) 
-	{
-    std::cout << TString::Format("#Events Signal cat%d: ",c) << sigToFit[c]->sumEntries() <<std::endl;
-    siglikeErr[c]=0.6*sigToFit[c]->sumEntries();
-  }
-  std::cout << "====================================================" <<std::endl;
-  TString filename(cardDir+fileBaseName+"onecatnohiggs.txt");
-  ofstream outFile(filename);
-  //outFile << "#CMS-HGG DataCard for Unbinned Limit Setting, " << lumi->getVal() << " pb-1 " << std::endl;
-  outFile << "#Run with: combine -d hgg.mH350.0.shapes-Unbinned.txt -U -m 130 -H ProfileLikelihood -M MarkovChainMC --rMin=0 --rMax=20.0 -b 3500 -i 50000 --optimizeSim=1 --tries 30" <<std::endl;
-  // outFile << "# Lumi = " << lumi->getVal() << " pb-1" << std::endl;
-  outFile << "# Lumi = " << _lumi << " pb-1" <<std::endl;
-  outFile << "imax 1" <<std::endl;
-  outFile << "jmax 1" <<std::endl; // number of BKG
-  outFile << "kmax *" <<std::endl;
-  outFile << "---------------" <<std::endl;
-  outFile << "shapes data_obs cat0 " << wsDir+fileBkgName+".root" << " w_all:data_obs_cat0" <<std::endl;
-  outFile << "############## shape with reparametrization" <<std::endl;
-  outFile << "shapes Bkg cat0 " << wsDir+fileBkgName+".root" << " w_all:CMS_bkg_8TeV_cat0" <<std::endl;
-  outFile << "# signal" <<std::endl;
-  outFile << "shapes Sig cat0 " <<wsDir+fileBaseName+".inputsig.root" << " w_all:CMS_sig_cat0" <<std::endl;
-  outFile << "---------------" <<std::endl;
-  /////////////////////////////////////
-  if(_addHiggs) 
-	{ //
-    outFile << "bin cat0 " << std::endl;
-    if(!_doblinding)outFile << "observation "<< data[0]->sumEntries() << " " << std::endl; 
-    else outFile << "observation -1 " << std::endl;   
-    outFile << "------------------------------" << std::endl;
-    outFile << "bin cat0 cat0 " << std::endl;
-    outFile << "process Sig Bkg " << std::endl;
-    outFile << "process 0 1 " << std::endl;
-    outFile << "rate "<< " " << sigToFit[0]->sumEntries() << " " << 1<< " " << std::endl;
-    outFile << "--------------------------------" << std::endl;
-    outFile << "lumi_8TeV lnN "<< "1.026 - " << std::endl;
-    outFile << "############## jet" << std::endl;
-    outFile << "pTj_acceptance lnN "<< "1.010 - "<<"# JER and JES " << std::endl;
-    outFile << "btag_eff lnN ";
-    if (_sigMass==0) outFile << "1.050 - ";
-    else outFile << "1.050 - ";
-    outFile <<"# b tag efficiency uncertainty" << std::endl;
-    outFile << "mggjj_acceptance lnN ";
-    if (_sigMass==0) outFile << "0.995 - " << std::endl;
-    else outFile << "1.015 - " << std::endl;
-    outFile << "############## photon " << std::endl;
-    outFile << "CMS_hgg_eff_g lnN "<< "1.010 - "<< "# photon selection accep." << std::endl;
-    outFile << "DiphoTrigger lnN "<< "1.01 - "<< "# Trigger efficiency" << std::endl;
-    if(useSigTheoryUnc)outFile << "SM_diHiggs_Theory lnN 0.857/1.136 - " << std::endl;
-    outFile << "# Parametric shape uncertainties, entered by hand. they act on signal " << std::endl;
-    outFile << "CMS_hgg_sig_m0_absShift param 1 0.0054 # displacement of the dipho mean" << std::endl;
-    outFile << "CMS_hgg_sig_sigmaScale param 1 0.05 # optimistic estimate of resolution uncertainty " << std::endl;
-    outFile << "CMS_hbb_sig_m0_absShift param 1 0.026 # displacement of the dijet mean" << std::endl;
-    outFile << "CMS_hbb_sig_sigmaScale param 1 0.10 # optimistic estimate of resolution uncertainty " << std::endl;
-    outFile << "############## for mggxmjj fit - slopes" << std::endl;
-    outFile << "CMS_bkg_8TeV_cat0_norm flatParam # Normalization uncertainty on background slope" << std::endl;
-    if ( _NCAT > 2 )outFile << "CMS_hgg_bkg_8TeV_slope1_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
-    else
-		{
-	    outFile << "CMS_hgg_bkg_8TeV_slope2_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
-	    outFile << "CMS_hgg_bkg_8TeV_slope3_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
-    }
-    if ( _NCAT > 2 )	outFile << "CMS_hbb_bkg_8TeV_slope1_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
-    else
-		{
-    	outFile << "CMS_hbb_bkg_8TeV_slope2_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
-    	outFile << "CMS_hbb_bkg_8TeV_slope3_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
-    }
-  } // if ncat ==2
-  /////////////////////////////////////
-  outFile.close();
-  std::cout << "Write data card in: " << filename << " file" << std::endl;
-  return;
-} // close write datacard one cat
 
 void bbgg2DFitter::SetConstantParams(const RooArgSet* params)
 {
@@ -1434,7 +1346,7 @@ TStyle * bbgg2DFitter::style()
   return defaultStyle;
 }
 
-RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs,std::vector<std::string>higgstrue,std::map<std::string,int>higgsNumber)
+RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs,std::vector<std::string>higgstrue,std::map<std::string,int>higgsNumber )
 {
   const Int_t ncat = _NCAT;
   std::vector<TString> catdesc;
@@ -1465,18 +1377,18 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs,std::vecto
   RooExponential* mggBkgTmpExp1 = nullptr;
   RooBernstein* mjjBkgTmpBer1 = nullptr;
   RooBernstein* mggBkgTmpBer1 = nullptr;
-  Float_t minMggMassFit(100),maxMggMassFit(180);
-  Float_t minMjjMassFit(60),maxMjjMassFit(180);
-  if(_sigMass == 260) maxMggMassFit = 145;
-  if(_sigMass == 270) maxMggMassFit = 155;
+  //Float_t minMggMassFit(100),maxMggMassFit(180);
+  //Float_t minMjjMassFit(60),maxMjjMassFit(180);
+  if(_sigMass == 260) _maxMggMassFit = 145;
+  if(_sigMass == 270) _maxMggMassFit = 155;
   // Fit data with background pdf for data limit
   RooRealVar* mgg = _w->var("mgg");
   RooRealVar* mjj = _w->var("mjj");
   //RooRealVar* mtot = _w->var("mtot");
   mgg->setUnit("GeV");
   mjj->setUnit("GeV");
-  mgg->setRange("BkgFitRange",minMggMassFit,maxMggMassFit);
-  mjj->setRange("BkgFitRange",minMjjMassFit,maxMjjMassFit);
+  mgg->setRange("BkgFitRange",_minMggMassFit,_maxMggMassFit);
+  mjj->setRange("BkgFitRange",_minMjjMassFit,_maxMjjMassFit);
   RooFitResult* fitresults = new RooFitResult();
   //
   TLatex *text = new TLatex();
@@ -1583,7 +1495,10 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs,std::vecto
     pt->SetBorderSize(0);
     pt->SetFillColor(0);
     pt->SetTextSize(0.035);
-    pt->AddText("            CMS Preliminary                     L = 19.7 fb^{-1}    #sqrt{s} = 8 TeV   ");
+    std::string lum = std::to_string (_lumi);
+    lum.erase ( lum.find_last_not_of('0') + 1, std::string::npos );
+    if ((lum.size () > 0)& (lum.back()=='.'))  lum.resize (lum.size () - 1);
+    pt->AddText(("            CMS Preliminary                     L = "+lum+" fb^{-1}    #sqrt{s} = "+_energy+" TeV   ").c_str());
     pt->Draw();
     TGraphAsymmErrors *onesigma = new TGraphAsymmErrors();
     TGraphAsymmErrors *twosigma = new TGraphAsymmErrors();
@@ -1629,7 +1544,7 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs,std::vecto
         delete nll;
         delete epdf;
       } // close for bin
-      mgg->setRange("errRange",minMggMassFit,maxMggMassFit);
+      mgg->setRange("errRange",_minMggMassFit,_maxMggMassFit);
       twosigma->SetLineColor(kYellow);
       twosigma->SetFillColor(kYellow);
       twosigma->SetMarkerColor(kYellow);
@@ -1686,7 +1601,7 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs,std::vecto
     legmcH->SetFillStyle(0);
     legmc->Draw();
     legmcH->Draw();
-    TLatex *lat2 = new TLatex(minMggMassFit+1.5,0.85*plotmggBkg[c]->GetMaximum(),catdesc.at(c));
+    TLatex *lat2 = new TLatex(_minMggMassFit+1.5,0.85*plotmggBkg[c]->GetMaximum(),catdesc.at(c));
     lat2->Draw();
     //
     ctmp->SaveAs(TString::Format("%s/databkgoversigMgg_cat%d.pdf",_folder_name.data(),c),"QUIET");
@@ -1736,7 +1651,7 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs,std::vecto
     pt->SetBorderSize(0);
     pt->SetFillColor(0);
     pt->SetTextSize(0.035);
-    pt->AddText("            CMS Preliminary                     L = 19.7 fb^{-1}    #sqrt{s} = 8 TeV   ");
+    pt->AddText(("            CMS Preliminary                     L = "+lum+" fb^{-1}    #sqrt{s} = "+_energy+" TeV   ").c_str());
     pt->Draw();
     if (dobands) 
 		{
@@ -1781,7 +1696,7 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs,std::vecto
         delete nll;
         delete epdf;
       } // close for bin
-      mjj->setRange("errRange",minMjjMassFit,maxMjjMassFit);
+      mjj->setRange("errRange",_minMjjMassFit,_maxMjjMassFit);
       twosigma->SetLineColor(kYellow);
       twosigma->SetFillColor(kYellow);
       twosigma->SetMarkerColor(kYellow);
@@ -1838,7 +1753,7 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs,std::vecto
     legmcH->SetFillStyle(0);
     legmc->Draw();
     legmcH->Draw();
-    lat2 = new TLatex(minMjjMassFit+1.5,0.85*plotmjjBkg[c]->GetMaximum(),catdesc.at(c));
+    lat2 = new TLatex(_minMjjMassFit+1.5,0.85*plotmjjBkg[c]->GetMaximum(),catdesc.at(c));
     lat2->Draw();
     //
     ctmp->SaveAs(TString::Format("%s/databkgoversigMjj_cat%d.pdf",_folder_name.data(),c),"QUIET");

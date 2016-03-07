@@ -1,14 +1,14 @@
 {
         "signal" : {
                 "type" : "Radion",
-                "dir" : "/afs/cern.ch/user/f/flagarde/public/S15V7_v0/LimitTrees/250_350/",
-                "mass" : [300,350,400],
+                "dir" : "/afs/cern.ch/user/f/flagarde/CMSSW_7_1_5/src/HiggsAnalysis/bbggLimits/forFrancois/",
+                "mass" : [300,400,500],
                 "nonresFile" : "Lam_1d0_Yt_1d0_c2_0d0",
-		"signalModelCard" : "/afs/cern.ch/user/f/flagarde/CMSSW_7_4_12/src/flashgg/bbggTools/LimitSetting/Models/models_2D.rs"
+		"signalModelCard" : "/afs/cern.ch/user/f/flagarde/CMSSW_7_1_5/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D.rs"
         },
         "other" : {
-                "integratedLumi" : 19.8,
-                "energy" : "8TeV",
+                "integratedLumi" : 29.80,
+                "energy" : "13TeV",
                 "higgsMass" : 125.0,
                 "addHiggs" : 1,
                 "doBlinding" : 1,
@@ -18,14 +18,32 @@
                 "useSigTheoryUnc" : 0,
 		"version" : 44,
 		"doBrazilianFlag" : true,
-		"runCombine" : true
+		"runCombine" : true,
+		"minMggMassFit" : 100,
+		"maxMggMassFit" : 180,
+		"minMjjMassFit"	: 60,
+		"maxMjjMassFit"	: 180,
+		"minSigFitMgg" :115,
+		"maxSigFitMgg" :135,
+		"minSigFitMjj" :60,
+		"maxSigFitMjj" :180,
+		"minHigMggFit" :115,
+		"maxHigMggFit" :135,
+		"minHigMjjFit":60,
+		"maxHigMjjFit":180,
+		"HH":false,
+		"base":false,
+		"low":false,
+		"obs":false,
+		"twotag":false
+		
         },
         "data" : {
-                "dir" : "/afs/cern.ch/user/f/flagarde/public/S15V7_v0/LimitTrees/250_350/",
+                "dir" : "/afs/cern.ch/user/f/flagarde/CMSSW_7_1_5/src/HiggsAnalysis/bbggLimits/forFrancois/",
                 "name" :"DoubleEG"
         },
         "higgs" : {
-                "dir" : "/afs/cern.ch/work/o/obondu/public/forRadion/limitTrees/",
+                "dir" : "/afs/cern.ch/work/o/obondu/public/forRadion/limitTrees",
 		"type" : ["ggh_m125_powheg_8TeV","tth_m125_8TeV"]
         }
 }

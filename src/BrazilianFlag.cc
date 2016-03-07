@@ -88,7 +88,7 @@ TStyle* CreateStyle(std::string name1,std::string name2)
         return defaultStyle;
 }
 
-void BrazilianFlag(std::string path_dir,bool HH=false,bool base=true,bool low=false,bool obs=false,bool twobtag=false) 
+void BrazilianFlag(std::string path_dir,bool HH,bool base,bool low,bool obs,bool twobtag,std::string energy, float lumi) 
 {
 	std::cout<<green<<"CREATING BRAZILIAN FLAG"<<normal<<std::endl;
 	std::vector<double>radMASS;
@@ -105,17 +105,20 @@ void BrazilianFlag(std::string path_dir,bool HH=false,bool base=true,bool low=fa
 		{
 			std::string folder_name=itr->path().filename().string();
 			
-      const char * pattern = "\\d+";
-      boost::regex re(pattern);
-      boost::sregex_iterator it(folder_name.begin(), folder_name.end(), re);
-      boost::sregex_iterator end;
-      std::vector<std::string>number;
-      for( ; it != end; ++it)
-    	{
-         number.push_back(it->str()); 
-    	}
-			radMASS.push_back(std::stod(number[0]));
-			dirs.push_back(path_dir+"/"+folder_name+"/combine/higgsCombineTest.Asymptotic.mH125_m"+number[0]);
+      			const char * pattern = "\\d+";
+      			boost::regex re(pattern);
+      			boost::sregex_iterator it(folder_name.begin(), folder_name.end(), re);
+      			boost::sregex_iterator end;
+      			std::vector<std::string>number;
+			for( ; it != end; ++it)
+    			{
+         			number.push_back(it->str()); 
+    			}
+                        if(number.size()!=0)
+			{
+				radMASS.push_back(std::stod(number[0]));
+				dirs.push_back(path_dir+"/"+folder_name+"/combine/higgsCombineTest.Asymptotic.mH125_m"+number[0]);
+			}
 		}
 		
 	}
@@ -155,7 +158,7 @@ void BrazilianFlag(std::string path_dir,bool HH=false,bool base=true,bool low=fa
         std::vector<double>radCX(int(radMASS.size()),1.0);
         //std::vector<double>radCX2(int(radMASS2.size()),1.0);
         //std::vector<double>radCX3(int(radMASS3.size()),1.0);
-		if(!HH) br=1;//1./(0.577*0.00228); 
+    if(!HH) br=1;//1./(0.577*0.00228); 
     if(HH) br=1./(2*0.577*0.00228); // HH
     //////////////////////////////////////////
     // draw the radion line // MR      rad_CX(fb)       grav_CX(fb)
@@ -235,7 +238,7 @@ void BrazilianFlag(std::string path_dir,bool HH=false,bool base=true,bool low=fa
     Double_t limit=0;
     //Double_t limit2=0;
     //Double_t limit3=0;
-    std::vector<std::vector<float>>rad(6,std::vector<float>(int(radMASS.size())));
+    std::vector<std::vector<float>>rad(6,std::vector<float>(int(radMASS.size()),0));
     //std::vector<std::vector<float>>rad2(6,std::vector<float>(int(Mass2.size())));
     //std::vector<std::vector<float>>rad3(6,std::vector<float>(int(Mass3.size())));
     TFile *file=nullptr;
@@ -244,8 +247,8 @@ void BrazilianFlag(std::string path_dir,bool HH=false,bool base=true,bool low=fa
         std::string name=dirs[i];//path+radMASS[i]+path2+radMASS[i];
         //if(i<20) 
         //{
-          if (twobtag==false) name+="_onecatnohiggs.root";
-          else name+="_higgs.root";
+          //if (twobtag==false) name+="_onecatnohiggs.root";
+          /*else*/ name+="_higgs.root";
         //}
         //std::cout<<i<<std::endl;
         //if (twobtag) name+="_onecat";
@@ -326,8 +329,11 @@ void BrazilianFlag(std::string path_dir,bool HH=false,bool base=true,bool low=fa
     pt->SetBorderSize(0);
     pt->SetFillColor(0);
     //   pt->SetShadowColor(kWhite);
-    if (!HH) pt->AddText("CMS                                    L = 19.7 fb^{-1}          #sqrt{s} = 8 TeV");
-    else pt->AddText("CMS (Unpublished)                                L = 19.7 fb^{-1}          #sqrt{s} = 8 TeV");
+    std::string lum = std::to_string (lumi);
+    lum.erase ( lum.find_last_not_of('0') + 1, std::string::npos );
+    //if(lum.end()-1=='.')lum.erase ( lum.end()-1, std::string::npos );
+    if (!HH) pt->AddText(("CMS                                    L = "+lum+" fb^{-1}          #sqrt{s} = "+energy+" TeV").c_str());
+    else pt->AddText(("CMS (Unpublished)                                L = "+lum+" fb^{-1}          #sqrt{s} = "+energy+" TeV").c_str());
     pt->SetTextSize(0.04);
     TPaveText *Purity = new TPaveText(0.78,0.53,0.88,0.58, "brNDC");
     //   pt->SetName("title");
@@ -391,7 +397,11 @@ void BrazilianFlag(std::string path_dir,bool HH=false,bool base=true,bool low=fa
     int nmax=0;
     //int nmax2=0;
     //int nmax3=0;
-    if(low) nmax= 5;//nmass;//nmass
+    if(low)
+    {
+	if(radMASS.size()<5) nmax= radMASS.size();//nmass;//nmass
+	else nmax=5;
+    }
     if(!low) 
     {
 			nmax= radMASS.size();//nmass
@@ -399,6 +409,15 @@ void BrazilianFlag(std::string path_dir,bool HH=false,bool base=true,bool low=fa
         // nmax3= Mass3.size();
     }
     Double_t yobs[nmax], y2up[nmax], y1up[nmax], y1down[nmax], y2down[nmax], ymean[nmax];
+    for(int i=0;i!=nmax;++i)
+    {
+	yobs[i]=0;
+	y2up[i]=0; 
+	y1up[i]=0;
+	y1down[i]=0;
+	y2down[i]=0;
+	ymean[i]=0;
+    }
     //Double_t yobs2[nmax2], y2up2[nmax2], y1up2[nmax2], y1down2[nmax2], y2down2[nmax2], ymean2[nmax2];
     //Double_t yobs3[nmax3], y2up3[nmax3], y1up3[nmax3], y1down3[nmax3], y2down3[nmax3], ymean3[nmax3];
     //
@@ -873,6 +892,7 @@ void BrazilianFlag(std::string path_dir,bool HH=false,bool base=true,bool low=fa
   if(twobtag)name+="_onecat";
   boost::filesystem::create_directory(folderr);
 	folderr+=name;
+ 
   c1->SaveAs((folderr+".png").c_str());
 	c1->SaveAs((folderr+".pdf").c_str());
 	c1->SaveAs((folderr+".root").c_str());
@@ -905,7 +925,7 @@ void BrazilianFlag(std::string path_dir,bool HH=false,bool base=true,bool low=fa
   //return c1;
 
   delete defaultStyle;
-  delete leg;
+  /*delete leg;
   delete leg1;
   delete ntuple;
   delete ntupleg;
@@ -928,7 +948,7 @@ void BrazilianFlag(std::string path_dir,bool HH=false,bool base=true,bool low=fa
   delete gcheck4;
   delete gcheck7;
   delete gcheck3;
-  delete gcheck5;
+  delete gcheck5;*/
   //for(unsigned int i=0;i!=TTrees.size();++i) delete TTrees[i];
   //for(unsigned int i=0;i!=TFileVec.size();++i)delete TFileVec[i];
 }
