@@ -3,9 +3,14 @@
 #include"HiggsAnalysis/bbggLimits/interface/Colors.h"
 #include"HiggsAnalysis/bbggLimits/interface/BrazilianFlag.h"
 #include<cstring>
+#include <boost/property_tree/xml_parser.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/optional/optional.hpp>
+#include <boost/foreach.hpp>
 bool ConvertToBool(const char* a)
 {
-	if(std::strcmp(a, "true") == 0||std::strcmp(a, "1") == 0||std::strcmp(a, "true") == 0) return true;
+	if(std::strcmp(a, "true") == 0||std::strcmp(a, "1") == 0||std::strcmp(a, "True") == 0) return true;
 	else return false;
 	return false;
 }
