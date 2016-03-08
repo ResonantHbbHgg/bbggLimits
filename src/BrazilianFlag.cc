@@ -332,8 +332,8 @@ void BrazilianFlag(std::string path_dir,bool HH,bool base,bool low,bool obs,bool
     std::string lum = std::to_string (lumi);
     lum.erase ( lum.find_last_not_of('0') + 1, std::string::npos );
     //if(lum.end()-1=='.')lum.erase ( lum.end()-1, std::string::npos );
-    if (!HH) pt->AddText(("CMS                                    L = "+lum+" fb^{-1}          #sqrt{s} = "+energy+" TeV").c_str());
-    else pt->AddText(("CMS (Unpublished)                                L = "+lum+" fb^{-1}          #sqrt{s} = "+energy+" TeV").c_str());
+    if (!HH) pt->AddText(("CMS                                    L = "+lum+" fb^{-1}          #sqrt{s} = "+energy).c_str());
+    else pt->AddText(("CMS (Unpublished)                                L = "+lum+" fb^{-1}          #sqrt{s} = "+energy).c_str());
     pt->SetTextSize(0.04);
     TPaveText *Purity = new TPaveText(0.78,0.53,0.88,0.58, "brNDC");
     //   pt->SetName("title");
