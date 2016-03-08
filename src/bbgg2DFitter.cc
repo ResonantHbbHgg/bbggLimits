@@ -1495,10 +1495,7 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs,std::vecto
     pt->SetBorderSize(0);
     pt->SetFillColor(0);
     pt->SetTextSize(0.035);
-    std::string lum = std::to_string (_lumi);
-    lum.erase ( lum.find_last_not_of('0') + 1, std::string::npos );
-    if ((lum.size () > 0)& (lum.back()=='.'))  lum.resize (lum.size () - 1);
-    pt->AddText(("            CMS Preliminary                     L = "+lum+" fb^{-1}    #sqrt{s} = "+_energy).c_str());
+    pt->AddText(TString::Format("            CMS Preliminary                     L = %.2f fb^{-1}    #sqrt{s} = %s",_lumi,_energy.c_str()));
     pt->Draw();
     TGraphAsymmErrors *onesigma = new TGraphAsymmErrors();
     TGraphAsymmErrors *twosigma = new TGraphAsymmErrors();
@@ -1651,7 +1648,7 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs,std::vecto
     pt->SetBorderSize(0);
     pt->SetFillColor(0);
     pt->SetTextSize(0.035);
-    pt->AddText(("            CMS Preliminary                     L = "+lum+" fb^{-1}    #sqrt{s} = "+_energy).c_str());
+    pt->AddText(TString::Format("            CMS Preliminary                     L = %.2f fb^{-1}    #sqrt{s} = %s",_lumi,_energy.c_str()));
     pt->Draw();
     if (dobands) 
 		{
