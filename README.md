@@ -27,8 +27,7 @@ How to run it :
 ```
 		
 1) Edit your .json ( example in LimitSetting/jest.json )
-if you want to change the value of "minMggMassFit" "maxMggMassFit" ... etc for one Mass in particular (Mx=300 for example ), just add the line 
-:	
+if you want to change the value of "minMggMassFit" "maxMggMassFit" ... etc for one Mass in particular (Mx=300 for example ), just add the line :	
 "param_300" :[minMggMassFit,maxMggMassFit,minMjjMassFit,maxMjjMassFit,minSigFitMgg,maxSigFitMgg,minSigFitMjj,maxSigFitMjj,minHigMggFit,maxHigMggFit,minHigMjjFit,maxHigMjj],
 	in "signal"
 if you want to run runCombine and BrazilianFlag at the same time than bbgg2DFit, just put runCombine and doBrazilianFlag accordingly.
@@ -40,5 +39,4 @@ if you want to run runCombine and BrazilianFlag at the same time than bbgg2DFit,
 3) If you want to run RunCombine and/or BrazilianFlag alone run :
 	runCombine MyJsonFile MyFolder
 	BrazilianFlag MyJsonFile MyFolder
-
 ```         
