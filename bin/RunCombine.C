@@ -8,23 +8,11 @@
 #include <boost/optional/optional.hpp>
 #include <boost/foreach.hpp>
 #include <boost/filesystem.hpp>
-bool ConvertToBool(const char* a)
-{
-	if(std::strcmp(a, "true") == 0||std::strcmp(a, "1") == 0||std::strcmp(a, "True") == 0) return true;
-	else return false;
-	return false;
-}
-
 int main(int argc, const char* argv[])
 {	
 	bool doblinding=true;
 	std::string path_dir="";
-	if(argc < 2) 
-	{
-		std::cout <<red<< "Please provide the json file and the directory you want to use"<<normal << std::endl;
-		std::exit(2);
-	}
-	else if(argc==3)
+	if(argc==3)
 	{
 		if ( !boost::filesystem::exists( argv[1] ) || !boost::filesystem::exists( argv[1] ) )
 		{
@@ -41,6 +29,11 @@ int main(int argc, const char* argv[])
       				doblinding = rowPair.second.get<bool>("doBlinding");
       			}
 		}
+	}
+	else
+	{
+		std::cout <<red<< "Please provide the json file and the directory you want to use"<<normal << std::endl;
+		std::exit(2);
 	}
         path_dir=argv[2];
 	RunCombine(path_dir,doblinding);

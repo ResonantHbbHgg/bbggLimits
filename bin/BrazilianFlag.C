@@ -8,12 +8,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/optional/optional.hpp>
 #include <boost/foreach.hpp>
-bool ConvertToBool(const char* a)
-{
-	if(std::strcmp(a, "true") == 0||std::strcmp(a, "1") == 0||std::strcmp(a, "True") == 0) return true;
-	else return false;
-	return false;
-}
+#include <boost/filesystem.hpp>
 int main(int argc, const char* argv[])
 {
 	bool HH=true;
@@ -24,30 +19,37 @@ int main(int argc, const char* argv[])
         std::string energy="";
 	float lumi=0.0;
 	std::string path_dir="";
-	if(argc < 9)
+	if(argc==3)
 	{
-		std::cout <<red<< "Please provide :"<<normal << std::endl;
-		std::cout <<red<< "* The path of the folder"<<normal << std::endl;
-		std::cout <<red<< "* HH (true,false)"<<normal << std::endl;
-		std::cout <<red<< "* base (true,false)"<<normal << std::endl;
-		std::cout <<red<< "* low (true,false)"<<normal << std::endl;
-		std::cout <<red<< "* obs (true,false)"<<normal << std::endl;
-		std::cout <<red<< "* twotag (true,false)"<<normal << std::endl;
-		std::cout <<red<< "* energy"<<normal << std::endl;
-		std::cout <<red<< "* lumi"<<normal << std::endl;
-		std::exit(1);
+		if ( !boost::filesystem::exists( argv[1] ) || !boost::filesystem::exists( argv[1] ) )
+		{
+			std::cout<<red<<"File "<<argv[1]<<" or/and "<<argv[2]<<" doesn't exist "<<normal<<std::endl;
+			std::exit(2);
+		}
+		boost::property_tree::ptree pt;
+  		boost::property_tree::read_json( argv[1], pt );
+  		std::cout <<green<< "Reading input configuration file..."<<normal << std::endl;
+  		BOOST_FOREACH( boost::property_tree::ptree::value_type const& rowPair, pt.get_child( "" ) )
+  		{
+    			if (rowPair.first == "other") 
+    			{
+      				HH = rowPair.second.get<bool>("HH");
+				base = rowPair.second.get<bool>("base");
+				low = rowPair.second.get<bool>("low");
+				obs = rowPair.second.get<bool>("obs");
+				twotag = rowPair.second.get<bool>("twotag");
+				lumi = rowPair.second.get<float>("integratedLumi");
+      				energy = rowPair.second.get<std::string>("energy");
+      			}
+		}
 	}
 	else
 	{
-		path_dir=argv[1];
-		HH=ConvertToBool(argv[2]);
-		base=ConvertToBool(argv[3]);
-		low=ConvertToBool(argv[4]);
-		obs=ConvertToBool(argv[5]);
-		twotag=ConvertToBool(argv[6]);
-                energy=argv[7];
-		lumi=std::atof(argv[8]);
-		BrazilianFlag(path_dir,HH,base,low,obs,twotag,energy,lumi); 
+		std::cout <<red<< "Please provide the json file and the directory you want to use"<<normal << std::endl;
+		std::exit(2);
 	}
+	std::cout<<"Running BrazilianFlag with path_dir:"<<path_dir<<" HH:"<<HH<<" base:"<<base<<" low:"<<low<<" obs:"<<obs<<" twotag:"<<twotag<<" energy:"<<energy<<" lumi:"<<lumi<<normal<<std::endl;
+	path_dir=argv[2];
+	BrazilianFlag(path_dir,HH,base,low,obs,twotag,energy,lumi); 
 	return 0;
 }
