@@ -23,20 +23,17 @@ git clone git@github.com:ResonantHbbHgg/bbggLimits.git
 ./Compile.sh
 ```
 
-How to run it :
+##How to run it :
 ```
-		
-1) Edit your .json ( example in LimitSetting/jest.json )
-if you want to change the value of "minMggMassFit" "maxMggMassFit" ... etc for one Mass in particular (Mx=300 for example ),
-just add the line :	
-"param_300" :[minMggMassFit,maxMggMassFit,minMjjMassFit,maxMjjMassFit,minSigFitMgg,maxSigFitMgg,minSigFitMjj,maxSigFitMjj,minHigMggFit,maxHigMggFit,minHigMjjFit,maxHigMjj],
-	in "signal"
-if you want to run runCombine and BrazilianFlag at the same time than bbgg2DFit, just put runCombine and doBrazilianFlag accordingly.
+1) Edit your .json ( example in LimitSetting/jest.json ) :
+	If you want to change the value of "minMggMassFit" "maxMggMassFit" ... etc for one Mass in particular just add the line in "signal":	
+"param_Mass" :[minMggMassFit,maxMggMassFit,minMjjMassFit,maxMjjMassFit,minSigFitMgg,maxSigFitMgg,minSigFitMjj,maxSigFitMjj,minHigMggFit,maxHigMggFit,minHigMjjFit,maxHigMjj],
+If you want to run runCombine and BrazilianFlag at the same time than bbgg2DFit, just put runCombine and doBrazilianFlag accordingly.
 
 2) Run bbgg2DFit MyJsonFile MyFolder
-	with MyJsonFile is the Json file you have created and MyFolder is the name of the folder in witch bbgg2DFit
-	runCombine and BrazilianFlag will put all their output. The name of the directory will be MyFolder_v{version} 
-	with {version} the number provided in MyJsonFile
+	MyJsonFile is the Json file you have created 
+	MyFolder is the name of the folder in witch bbgg2DFit runCombine and BrazilianFlag will put all their outputs. 
+	The name of the directory will be MyFolder_v{version} with {version} the number provided in MyJsonFile
 	If you don't provide MyFolder argument bbgg2DFit will create bbggToolsResults_v{version} by default.
 
 3) If you want to run RunCombine and/or BrazilianFlag alone run :
