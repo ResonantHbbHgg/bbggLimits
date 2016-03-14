@@ -20,7 +20,8 @@ Get bbggLimits:
 ```
 cd ${CMSSW_BASE}/src/HiggsAnalysis/
 git clone git@github.com:ResonantHbbHgg/bbggLimits.git
-./Compile.sh
+cd bbggLimits
+scramv1 b -j 10
 ```
 
 ##How to run it :
