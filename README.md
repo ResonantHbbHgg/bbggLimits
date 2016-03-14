@@ -1,7 +1,7 @@
 # bbggLimits
 Package for computing limits for the Run II analyses
 
-## Instalation
+### Instalation
 First, setup the environment with the Higgs Combine tools: https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideHiggsAnalysisCombinedLimit#For_end_users_that_don_t_need_to   
 Currently recommended CMSSW version: 71X
 ```
@@ -23,8 +23,17 @@ git clone git@github.com:ResonantHbbHgg/bbggLimits.git
 cd bbggLimits
 scramv1 b -j 10
 ```
+   
+### Make Limits Trees
+```
+LimitTreeMaker -i <input list of files> -o <output location> [optional: -min <min mtot> -max <max mtot> -scale <scale factor> -photonCR (do photon control region) -KF (use Mtot_KF to cut on mass window) -MX (use MX to cut on mass window) (choose either -MX or -KF!)
+```   
+*-min and max*: use it to cut on the 4-body invariant mass;   
+*-scale*: set this to the scale factor to be multiplied to normalize your input file, for example xsec*lumi/(sum of weights);   
+*-photonCR*: use this flag to use data from photon control region (one photon fails the ID requirements);   
+*-KF or -MX*: cut on kinematic fitted 4body mass (KF) or on the MX variable (MX)   
 
-##How to run it :
+### How to run it :
 ```
 1) Edit your .json ( example in LimitSetting/jest.json ) :
 	If you want to change the value of "minMggMassFit" "maxMggMassFit" ... etc for one Mass in particular just add the line in "signal":	
