@@ -1,4 +1,5 @@
 <lcgdict>
     <class name="bbggLTMaker"/>
     <class name="bbgg2DFitter"/>
+<!--    <class name="bbggHighMassFitter"/>-->
 </lcgdict>

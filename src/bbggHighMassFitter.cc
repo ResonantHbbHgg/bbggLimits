@@ -42,55 +42,6 @@
 #include <RooPolynomial.h>
 #include <RooHistPdf.h>
 #include <RooCurve.h>
-/** \macro H2GGFitter.cc
- *
- * $Id: R2JJFitter.cc,v 1.14 2013/06/27 10:18:27 hinzmann Exp $
- *
- * Software developed for the CMS Detector at LHC
- *
- *
- *  \author Serguei Ganjour - CEA/IRFU/SPP, Saclay
- *  \modified by Maxime Gouzevitch for the Dijet Bump Search - IPNL, Lyon 
- *
- * Macro is implementing the unbinned maximum-likelihood model for 
- * the Higgs to gamma gamma analysis. PDF model and RooDataSets 
- * are stored in the workspace which is feeded to  HiggsAnalysis/CombinedLimit tools:
- * 
- * http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/CMSSW/HiggsAnalysis/CombinedLimit
- * http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/CMSSW/HiggsAnalysis/CombinedLimit/data/lhc-hcg/cms-jj-1fb/
- * 
- * The analysis root trees produced in a simple format 
- *
- *     TFile file(filename,"RECREATE", "X->jj input tree for unbinned maximum-likelihood fit");
- *     TTree* outTree  = new TTree("XTojj","X->jj input tree for unbinned maximum-likelihood fit");
- *     Float_t mass;
- *     Int_t CAT3;
- *     Float_t weight;
- *
- *     outTree->Branch("mass",&mass,"mass/F");
- *     outTree->Branch("weight",&weight,"weight/F");
- *     outTree->Branch("CAT4",&CAT4,"CAT4/I");
- *     {
- *       .............
- *       outTree->Fill();
- *     }
- *
- *     file.Write();
- *     file.Close();
- *     delete outTree;
- *
- * are used as input files. They have to be produced for 
- * data and Monte Carlo signal and background data sets 
- * after all analysis selections to be applied. It is recommended to put   
- * loose kinematical cuts on pt1 and pt2 (20 GeV) since further selections 
- * are possible based on RooDataSets. 
- * It is recommended to use Root 5.28/00 (CMSSW_4_1_3).
- *
- *
- */
-// Loading:  .L H2GGFitter.cc
-// Running:  runfits("jj120-shapes-combined-Unbinned.root")  
-//                
 
 using namespace RooFit;
 using namespace RooStats ;
@@ -132,7 +83,7 @@ RooArgSet* bbggHighMassFitter::defineVariables()
 }
 
 
-void bbggHighMassFitter::AddSigData(RooWorkspace* w, Float_t mass, int signalsample, std::vector<std::string> cat_names) 
+void bbggHighMassFitter::AddSigData(Float_t mass, int signalsample, std::vector<std::string> cat_names) 
 {
 	Int_t ncat = _NCAT;
   TString inDir   = "./MiniTrees/Signal_HH_13TeV/";
@@ -168,8 +119,8 @@ void bbggHighMassFitter::AddSigData(RooWorkspace* w, Float_t mass, int signalsam
     TString cut(TString::Format("categories==%d",c));
     TString name = TString::Format("Sig_%s",cat_names.at(c).c_str());
 
-    sigToFit[c] =  (RooDataSet*) sigScaled.reduce(*w->var("mgg"),_mainCut+TString::Format(" && categories==%d",c));
-    w->import(*sigToFit[c],Rename(TString::Format("Sig_%s",cat_names.at(c).c_str())));
+    sigToFit[c] =  (RooDataSet*) sigScaled.reduce(*_w->var("mgg"),_mainCut+TString::Format(" && categories==%d",c));
+    _w->import(*sigToFit[c],Rename(TString::Format("Sig_%s",cat_names.at(c).c_str())));
     std::cout << "Sum Entries = " << sigToFit[c]->sumEntries() << " isWeighted ? = " << sigToFit[c]->isWeighted() << std::endl;
     
   }
@@ -177,7 +128,7 @@ void bbggHighMassFitter::AddSigData(RooWorkspace* w, Float_t mass, int signalsam
 }
 
 
-void bbggHighMassFitter::AddBkgData(RooWorkspace* w, std::vector<std::string> cat_names) 
+void bbggHighMassFitter::AddBkgData(std::vector<std::string> cat_names) 
 {
   Int_t ncat = _NCAT;
   TString inDir   = "./MiniTrees/Background_HH_13TeV/";
@@ -205,19 +156,19 @@ void bbggHighMassFitter::AddBkgData(RooWorkspace* w, std::vector<std::string> ca
   RooDataSet* dataToFit[_NCAT];
   for (int c = 0; c < ncat; ++c) {
 
-    dataToFit[c] = (RooDataSet*) Data.reduce(*w->var("mgg"),_mainCut+TString::Format(" && categories==%d",c));
-    w->import(*dataToFit[c],Rename(TString::Format("Data_%s",cat_names.at(c).c_str())));
+    dataToFit[c] = (RooDataSet*) Data.reduce(*_w->var("mgg"),_mainCut+TString::Format(" && categories==%d",c));
+    _w->import(*dataToFit[c],Rename(TString::Format("Data_%s",cat_names.at(c).c_str())));
 
     std::cout << "Sum Entries data = " << dataToFit[c]->sumEntries() << " isWeighted ? = " << dataToFit[c]->isWeighted() << std::endl;
   }
 
 // Create full data set without categorization
-  RooDataSet* data    = (RooDataSet*) Data.reduce(*w->var("mgg"),_mainCut);
-  w->import(*data, Rename("Data"));
+  RooDataSet* data    = (RooDataSet*) Data.reduce(*_w->var("mgg"),_mainCut);
+  _w->import(*data, Rename("Data"));
   data->Print("v");
 }
 
-void bbggHighMassFitter::SigModelFit(RooWorkspace* w, Float_t mass, TString signalname, std::vector<std::string> cat_names) 
+void bbggHighMassFitter::SigModelFit(Float_t mass, TString signalname, std::vector<std::string> cat_names) 
 {
   Int_t ncat = _NCAT;
   Float_t MASS(mass);
@@ -234,11 +185,11 @@ void bbggHighMassFitter::SigModelFit(RooWorkspace* w, Float_t mass, TString sign
 // Fit Signal 
   for (int c = 0; c < ncat; ++c) {
     std::cout << "---------- category = " << c << std::endl;
-    sigToFit[c]   = (RooDataSet*) w->data(TString::Format("Sig_%s",cat_names.at(c).c_str()));
-    jjSig[c]     = (RooAbsPdf*)  w->pdf(signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str()));
+    sigToFit[c]   = (RooDataSet*) _w->data(TString::Format("Sig_%s",cat_names.at(c).c_str()));
+    jjSig[c]     = (RooAbsPdf*)  _w->pdf(signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str()));
 
     std::cerr << ("jj_"+signalname+TString::Format("_sig_m0_%s",cat_names.at(c).c_str())) << std::endl;
-    ((RooRealVar*) w->var("jj_"+signalname+TString::Format("_sig_m0_%s",cat_names.at(c).c_str())))->setVal(MASS);
+    ((RooRealVar*) _w->var("jj_"+signalname+TString::Format("_sig_m0_%s",cat_names.at(c).c_str())))->setVal(MASS);
   
     std::cout << " Mass = " << MASS << std::endl;
       
@@ -247,21 +198,21 @@ void bbggHighMassFitter::SigModelFit(RooWorkspace* w, Float_t mass, TString sign
     std::cout << " fitted " << std::endl;
 
 // IMPORTANT: fix all pdf parameters to constant
-    w->defineSet(TString::Format("SigPdfParam_%s",cat_names.at(c).c_str()), RooArgSet(*w->var("jj_"+signalname+TString::Format("_sig_m0_%s",cat_names.at(c).c_str())),
-								   *w->var("jj_"+signalname+TString::Format("_sig_sigma_%s",cat_names.at(c).c_str())),
-								   *w->var("jj_"+signalname+TString::Format("_sig_alpha_%s",cat_names.at(c).c_str())),
-								   *w->var("jj_"+signalname+TString::Format("_sig_n_%s",cat_names.at(c).c_str())) 
+    _w->defineSet(TString::Format("SigPdfParam_%s",cat_names.at(c).c_str()), RooArgSet(*_w->var("jj_"+signalname+TString::Format("_sig_m0_%s",cat_names.at(c).c_str())),
+								   *_w->var("jj_"+signalname+TString::Format("_sig_sigma_%s",cat_names.at(c).c_str())),
+								   *_w->var("jj_"+signalname+TString::Format("_sig_alpha_%s",cat_names.at(c).c_str())),
+								   *_w->var("jj_"+signalname+TString::Format("_sig_n_%s",cat_names.at(c).c_str())) 
 										      //								   *w->var("jj_"+signalname+TString::Format("_sig_gsigma_%s",cat_names.at(c).c_str())),
 										      //								   *w->var("jj_"+signalname+TString::Format("_sig_frac_%s",cat_names.at(c).c_str()))) 
 										      ));
 
     std::cout << " defined " << std::endl;
 
-    SetConstantParams(w->set(TString::Format("SigPdfParam_%s",cat_names.at(c).c_str())));
+    SetConstantParams(_w->set(TString::Format("SigPdfParam_%s",cat_names.at(c).c_str())));
   }
 }
 
-void bbggHighMassFitter::BkgModelFit(RooWorkspace* w, Bool_t dobands, std::vector<std::string> cat_names, RooFitResult** fitresult) 
+void bbggHighMassFitter::BkgModelFit(Bool_t dobands, std::vector<std::string> cat_names, RooFitResult** fitresult) 
 {
   Int_t ncat = _NCAT;
 //******************************************//
@@ -283,7 +234,7 @@ void bbggHighMassFitter::BkgModelFit(RooWorkspace* w, Bool_t dobands, std::vecto
   RooAbsPdf*  jjSig[_NCAT];
   Float_t minMassFit(_MMIN),maxMassFit(_MMAX); 
 // Fit data with background pdf for data limit
-  RooRealVar* mgg     = w->var("mgg");  
+  RooRealVar* mgg     = _w->var("mgg");  
   mgg->setUnit("GeV");
   
   TLatex *text = new TLatex();
@@ -291,13 +242,13 @@ void bbggHighMassFitter::BkgModelFit(RooWorkspace* w, Bool_t dobands, std::vecto
   text->SetTextSize(0.04);
   for (int c = 0; c < ncat; ++c) 
 	{
-    data[c]   = (RooDataSet*) w->data(TString::Format("Data_%s",cat_names.at(c).c_str()));
+    data[c]   = (RooDataSet*) _w->data(TString::Format("Data_%s",cat_names.at(c).c_str()));
                     
-    RooFormulaVar *p1mod = new RooFormulaVar(TString::Format("p1mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("bkg_fit_slope1_%s",cat_names.at(c).c_str())));
-    RooFormulaVar *p1mod_clone = new RooFormulaVar(TString::Format("p1mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("bkg_fit_slope1_clone_%s",cat_names.at(c).c_str())));
-    RooFormulaVar *p2mod = new RooFormulaVar(TString::Format("p2mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(c).c_str())));
+    RooFormulaVar *p1mod = new RooFormulaVar(TString::Format("p1mod_%s",cat_names.at(c).c_str()),"","@0",*_w->var(TString::Format("bkg_fit_slope1_%s",cat_names.at(c).c_str())));
+    RooFormulaVar *p1mod_clone = new RooFormulaVar(TString::Format("p1mod_%s",cat_names.at(c).c_str()),"","@0",*_w->var(TString::Format("bkg_fit_slope1_clone_%s",cat_names.at(c).c_str())));
+    RooFormulaVar *p2mod = new RooFormulaVar(TString::Format("p2mod_%s",cat_names.at(c).c_str()),"","@0",*_w->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(c).c_str())));
      
-    RooFormulaVar *sqrtS = new RooFormulaVar(TString::Format("sqrtS_%s",cat_names.at(c).c_str()),"","@0",*w->var("sqrtS"));
+    RooFormulaVar *sqrtS = new RooFormulaVar(TString::Format("sqrtS_%s",cat_names.at(c).c_str()),"","@0",*_w->var("sqrtS"));
     RooFormulaVar *x = new RooFormulaVar(TString::Format("x_%s",cat_names.at(c).c_str()),"","@0/@1",RooArgList(*mgg, *sqrtS));
 
     // EXO-12-053 1-parameter function
@@ -309,8 +260,8 @@ void bbggHighMassFitter::BkgModelFit(RooWorkspace* w, Bool_t dobands, std::vecto
     bkg_fitTmp->fitTo(*data[c], Strategy(1),Minos(kFALSE), Range(minMassFit,maxMassFit),SumW2Error(kTRUE), Save(kTRUE),RooFit::PrintEvalErrors(-1));
  
     RooAbsReal* bkg_fitTmp2  = new RooRealVar(TString::Format("bkg_fit_%s_norm",cat_names.at(c).c_str()),"",4000.0,0.0,10000000);
-    w->import(*bkg_fitTmp);
-    w->import(*bkg_fitTmp2);
+    _w->import(*bkg_fitTmp);
+    _w->import(*bkg_fitTmp2);
 
 //************************************************//
 // Plot jj background fit results per categories 
@@ -512,7 +463,7 @@ void bbggHighMassFitter::SetConstantParams(const RooArgSet* params) {
 
 }
 
-void bbggHighMassFitter::MakePlots(RooWorkspace* w, Float_t mass, RooFitResult** fitresults, TString signalname, std::vector<std::string> cat_names) {
+void bbggHighMassFitter::MakePlots(Float_t mass, RooFitResult** fitresults, TString signalname, std::vector<std::string> cat_names) {
 
   std::cout << "Start plotting" << std::endl; 
 
@@ -531,18 +482,18 @@ void bbggHighMassFitter::MakePlots(RooWorkspace* w, Float_t mass, RooFitResult**
 //  RooAbsPdf*  bkg_fit2[9];  
 
   for (int c = 0; c < ncat; ++c) {
-    data[c]         = (RooDataSet*) w->data(TString::Format("Data_%s",cat_names.at(c).c_str()));
+    data[c]         = (RooDataSet*) _w->data(TString::Format("Data_%s",cat_names.at(c).c_str()));
 //    signal[c]       = (RooDataSet*) w->data(TString::Format("Sig_%s",cat_names.at(c).c_str()));
-    signal[c]       = (RooDataSet*) w->data(TString::Format("Sig_%s",cat_names.at(c).c_str()));
+    signal[c]       = (RooDataSet*) _w->data(TString::Format("Sig_%s",cat_names.at(c).c_str()));
     //    jjGaussSig[c]  = (RooAbsPdf*)  w->pdf(TString::Format("jjGaussSig_%s",cat_names.at(c).c_str()));
     //    jjCBSig[c]     = (RooAbsPdf*)  w->pdf(TString::Format("jjCBSig_%s",cat_names.at(c).c_str()));
-    jjSig[c]       = (RooAbsPdf*)  w->pdf(signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str()));
-    bkg_fit[c]       = (RooAbsPdf*)  w->pdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()));
+    jjSig[c]       = (RooAbsPdf*)  _w->pdf(signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str()));
+    bkg_fit[c]       = (RooAbsPdf*)  _w->pdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()));
 //    bkg_fit2[c]      = (RooAbsPdf*)  w->pdf(TString::Format("bkg_fit2_%s",cat_names.at(c).c_str()));
   }
 
 // retrieve mass observable from the workspace
-  RooRealVar* mgg     = w->var("mgg");  
+  RooRealVar* mgg     = _w->var("mgg");  
   mgg->setUnit("GeV");
 
 // retrieve pdfs after the fits
@@ -707,7 +658,7 @@ void bbggHighMassFitter::MakePlots(RooWorkspace* w, Float_t mass, RooFitResult**
 }
 
 
-void bbggHighMassFitter::MakeSigWS(RooWorkspace* w, const char* fileBaseName, TString signalname, std::vector<std::string> cat_names) {
+void bbggHighMassFitter::MakeSigWS(const char* fileBaseName, TString signalname, std::vector<std::string> cat_names) {
 
   TString wsDir   = "workspaces/"+_filePOSTfix;
   Int_t ncat = _NCAT;
@@ -726,8 +677,8 @@ void bbggHighMassFitter::MakeSigWS(RooWorkspace* w, const char* fileBaseName, TS
 
 
   for (int c = 0; c < ncat; ++c) {
-    jjSigPdf[c] = (RooAbsPdf*)  w->pdf(signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str()));
-    wAll->import(*w->pdf(signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str())));
+    jjSigPdf[c] = (RooAbsPdf*)  _w->pdf(signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str()));
+    wAll->import(*_w->pdf(signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str())));
   }
 
 // (2) Systematics on energy scale and resolution
@@ -773,7 +724,7 @@ void bbggHighMassFitter::MakeSigWS(RooWorkspace* w, const char* fileBaseName, TS
 }
 
 
-void bbggHighMassFitter::MakeBkgWS(RooWorkspace* w, const char* fileBaseName, std::vector<std::string> cat_names) {
+void bbggHighMassFitter::MakeBkgWS(const char* fileBaseName, std::vector<std::string> cat_names) {
 
   TString wsDir   = "workspaces/"+_filePOSTfix;
   Int_t ncat = _NCAT;  
@@ -796,14 +747,14 @@ void bbggHighMassFitter::MakeBkgWS(RooWorkspace* w, const char* fileBaseName, st
   for (int c = 0; c < ncat; ++c) {
  
     std::cout << "For category " << c << std::endl;
-    data[c]      = (RooDataSet*) w->data(TString::Format("Data_%s",cat_names.at(c).c_str()));
+    data[c]      = (RooDataSet*) _w->data(TString::Format("Data_%s",cat_names.at(c).c_str()));
     ((RooRealVar*) data[c]->get()->find("mgg"))->setBins(_MMAX-_MMIN) ;
     //RooDataHist* dataBinned = data[c]->binnedClone();
-    bkg_fitPdf[c] = (RooExtendPdf*)  w->pdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()));
+    bkg_fitPdf[c] = (RooExtendPdf*)  _w->pdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()));
        wAll->import(*data[c], Rename(TString::Format("data_obs_%s",cat_names.at(c).c_str())));
     //wAll->import(*dataBinned, Rename(TString::Format("data_obs_%s",cat_names.at(c).c_str())));
-   wAll->import(*w->pdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str())));
-   wAll->import(*w->function(TString::Format("bkg_fit_%s_norm",cat_names.at(c).c_str())));
+   wAll->import(*_w->pdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str())));
+   wAll->import(*_w->function(TString::Format("bkg_fit_%s_norm",cat_names.at(c).c_str())));
 
    double mean = (wAll->var(TString::Format("bkg_fit_%s_norm",cat_names.at(c).c_str())))->getVal();
    double min = (wAll->var(TString::Format("bkg_fit_%s_norm",cat_names.at(c).c_str())))->getMin();
@@ -867,7 +818,7 @@ void bbggHighMassFitter::MakeBkgWS(RooWorkspace* w, const char* fileBaseName, st
 }
 
 
-Double_t effSigma(TH1 *hist) {
+/*Double_t effSigma(TH1 *hist) {
 
   TAxis *xaxis = hist->GetXaxis();
   Int_t nb = xaxis->GetNbins();
@@ -940,11 +891,15 @@ Double_t effSigma(TH1 *hist) {
   if(ierr != 0) std::cout << "effsigma: Error of type " << ierr << std::endl;
 
   return widmin;
+}*/
+bbggHighMassFitter::~bbggHighMassFitter()
+{
+
 }
 
 
-
-void bbggHighMassFitter::MakeDataCard_1Channel(RooWorkspace* w, const char* fileBaseName, const char* fileBkgName, int iChan, TString signalname, int signalsample, std::vector<std::string> cat_names, double mass) {
+void bbggHighMassFitter::MakeDataCard_1Channel(const char* fileBaseName, const char* fileBkgName, int iChan, TString signalname, int signalsample, std::vector<std::string> cat_names, double mass) 
+{
 
   TString cardDir = "datacards/"+_filePOSTfix;
   Int_t ncat = _NCAT;
@@ -959,8 +914,8 @@ void bbggHighMassFitter::MakeDataCard_1Channel(RooWorkspace* w, const char* file
   RooDataSet* data[_NCAT];
  RooDataSet* signal[_NCAT];
   for (int c = 0; c < _NCAT; ++c) {
-    data[c]        = (RooDataSet*) w->data(TString::Format("Data_%s",cat_names.at(c).c_str()));
-    signal[c]      = (RooDataSet*) w->data(TString::Format("Sig_%s",cat_names.at(c).c_str()));
+    data[c]        = (RooDataSet*) _w->data(TString::Format("Data_%s",cat_names.at(c).c_str()));
+    signal[c]      = (RooDataSet*) _w->data(TString::Format("Sig_%s",cat_names.at(c).c_str()));
   }
 
 //*****************************//
@@ -968,7 +923,7 @@ void bbggHighMassFitter::MakeDataCard_1Channel(RooWorkspace* w, const char* file
 //*****************************//
 
   std::cout << "======== Expected Events Number =====================" << std::endl;  
-  std::cout << "#Events data:        " <<  w->data("Data")->sumEntries()  << std::endl;
+  std::cout << "#Events data:        " <<  _w->data("Data")->sumEntries()  << std::endl;
   for (int c = 0; c < ncat; ++c) {
     std::cout << TString::Format("#Events data %s:   ",cat_names.at(c).c_str()) << data[c]->sumEntries()  << std::endl;
   }
@@ -1129,3 +1084,4 @@ TStyle * bbggHighMassFitter::style()
     defaultStyle->cd();
   	return defaultStyle;
 }
+

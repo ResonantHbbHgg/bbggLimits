@@ -45,20 +45,21 @@ public :
    std::string _folder_name;
    void Initialize(RooWorkspace* w,Double_t MMIN,Double_t MMAX,std::string filePOSTfix,double analysisLumi,double nEventsInSignalMC,int iGraviton,TString mainCut,double signalScaler,double scaleFactorHP, double scaleFactorLP,std::string folder_name,Int_t NCAT);
    bbggHighMassFitter() {}
-   virtual ~bbggHighMassFitter() { }
+   virtual ~bbggHighMassFitter();
    RooArgSet* defineVariables();
-  // void AddSigData(RooWorkspace*, Float_t, int, std::vector<std::string>);
-   //void AddBkgData(RooWorkspace*, std::vector<std::string>);
-   //void SigModelFit(RooWorkspace*, Float_t, TString signalname, std::vector<std::string>);
-   //void BkgModelFit(RooWorkspace*, Bool_t, std::vector<std::string>, RooFitResult** fitresults);
-   //void MakePlots(RooWorkspace*, Float_t, RooFitResult** , TString signalname, std::vector<std::string>);
-   //void MakeSigWS(RooWorkspace* w, const char* filename, TString signalname, std::vector<std::string>);
-   //void MakeBkgWS(RooWorkspace* w, const char* filename, std::vector<std::string>);
-   //void SetConstantParams(const RooArgSet* params);
-   //void MakeDataCard_1Channel(RooWorkspace* w, const char* fileBaseName, const char* fileBkgName, int iChan, TString signalname, int signalsample, std::vector<std::string> cat_names, double mass);
-   Double_t effSigma(TH1 *hist);
+   void AddSigData(Float_t, int, std::vector<std::string>);
+   void AddBkgData(std::vector<std::string>);
+   void SigModelFit(Float_t, TString signalname, std::vector<std::string>);
+   void BkgModelFit(Bool_t, std::vector<std::string>, RooFitResult** fitresults);
+   void MakePlots(Float_t, RooFitResult** , TString signalname, std::vector<std::string>);
+   void MakeSigWS(const char* filename, TString signalname, std::vector<std::string>);
+   void MakeBkgWS(const char* filename, std::vector<std::string>);
+   void SetConstantParams(const RooArgSet* params);
+   void MakeDataCard_1Channel(const char* fileBaseName, const char* fileBkgName, int iChan, TString signalname, int signalsample, std::vector<std::string> cat_names, double mass);
+   //Double_t effSigma(TH1 *hist);
    TStyle * style(); //DONE
-   ClassDef(bbggHighMassFitter,0);
+   //ClassDef(bbggHighMassFitter,0);
 };
 
 #endif
+

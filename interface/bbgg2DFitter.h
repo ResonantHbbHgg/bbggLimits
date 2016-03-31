@@ -7,7 +7,6 @@
 
 #ifndef bbgg2DFitter_h
 #define bbgg2DFitter_h
-
 // C++ headers
 //#include <iostream>
 //#include <sstream>
