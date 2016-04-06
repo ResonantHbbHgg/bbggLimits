@@ -8,26 +8,26 @@
 
 using namespace std;
 
-int Process(string file, string outFile, string mtotMin, string mtotMax,string scale, string photonCR, string doKinFit, string doMX){
+int Process(string file, string outFile, string mtotMin, string mtotMax,string scale, string photonCR, string doKinFit, string doMX, string doTilt, string tiltWindow, string doNoCat){
     TFile* iFile = new TFile(TString(file), "READ");
     TTree* iTree = (TTree*) iFile->Get("bbggSelectionTree");
     cout << "[LimitTreeMaker:Process] Processing tree with " << iTree->GetEntries() << " entries." << endl;
-    string option = outFile;
-    option.append(";");
-    option.append(mtotMin);
-    option.append(";");
-    option.append(mtotMax);
-    option.append(";");
-    option.append(scale);
-    option.append(";");
-    option.append(photonCR);
-    option.append(";");
-    option.append(doKinFit);
-    option.append(";");
-    option.append(doMX);
-    cout << "[LimitTreeMaker:Process] Option parsing: " << option << endl;
-    iTree->Process("flashgg/bbggTools/src/bbggLTMaker.cc+", TString(option)); 
-    delete iFile;
+    bbggLTMaker t(iTree);
+    t.SetMax( TString(mtotMax).Atof() );
+    t.SetMin( TString(mtotMin).Atof() );
+    t.SetNormalization( TString(scale).Atof() );
+    t.IsPhotonCR( TString(photonCR).Atoi() );
+    t.IsMX( TString(doMX).Atoi() );
+    t.IsKinFit( TString(doKinFit).Atoi() );
+    t.SetOutFileName( outFile );
+    t.SetBTagWP( 0.8 );
+//    t.SetTilt( TString(doTilt).Atoi(), TString(tiltWindow).Atof());
+    t.SetTilt( TString(doTilt).Atoi());
+    t.DoNoCat( TString(doNoCat).Atoi());
+    t.Loop();
+
+//    delete iFile;
+//    delete iTree;
     return 1;
 }
 
@@ -41,6 +41,9 @@ int main(int argc, char *argv[]) {
     string photonCR = "0";
     string doKinFit = "0";
     string doMX = "0";
+    string doTilt = "0";
+    string doNoCat = "0";
+    string tiltWindow = "0";
 
     for( int i = 1; i < argc; i++){
 	if ( std::string(argv[i]) == "-i"){
@@ -49,6 +52,17 @@ int main(int argc, char *argv[]) {
 			break;
 		}
 		inputFile = string(std::string(argv[i+1]));
+		i++;
+	}
+	else if ( std::string(argv[i]) == "-tilt"){
+		doTilt = "1";
+	}
+	else if ( std::string(argv[i]) == "-tiltWindow"){
+		if( (i+1) == argc){
+			std::cout << "Invalid number of arguments!" << std::endl;
+			break;
+		}
+		tiltWindow = string(std::string(argv[i+1]));
 		i++;
 	}
 	else if ( std::string(argv[i]) =="-o"){
@@ -86,12 +100,15 @@ int main(int argc, char *argv[]) {
 	else if ( std::string(argv[i]) =="-photonCR"){
 		photonCR = "1";
 	}
-    else if ( std::string(argv[i]) =="-KF"){
-        doKinFit = "1";
-    }
-    else if ( std::string(argv[i]) =="-MX"){
-        doMX = "1";
-    }
+    	else if ( std::string(argv[i]) =="-KF"){
+        	doKinFit = "1";
+    	}
+    	else if ( std::string(argv[i]) =="-MX"){
+        	doMX = "1";
+    	}
+	else if ( std::string(argv[i]) =="-doNoCat"){
+		doNoCat = "1";
+	}
 	else {
 		cout << "Usage: LimitTreeMaker -i <input list of files> -o <output location> [optional: -min <min mtot> -max <max mtot> -scale <scale factor> -photonCR (do photon control region) -KF (use Mtot_KF to cut on mass window) -MX (use MX to cut on mass window) (choose either -MX or -KF!)" << endl;
 		return -1;
@@ -102,25 +119,7 @@ int main(int argc, char *argv[]) {
 	cout << "Usage: LimitTreeMaker -i <input list of files> -o <output location> [optional: -min <min mtot> -max <max mtot> -scale <scale factor> -photonCR (do photon control region) -KF (use Mtot_KF to cut on mass window) -MX (use MX to cut on mass window) (choose either -MX or -KF!)" << endl;
 	return 0;
     }
-/*
-    if(argc < 6) {
-        cout << "[LimitTreeMaker] Usage: LimitTreeMaker <inputtextfile> <outputLocation> <mtotMax> <mtotMin> <scale> <isPhotonCR>" << endl;
-        return 0;
-    } else {
-        inputFile = argv[1];
-        outputLocation = argv[2];
-	mtotMin = argv[3];
-	mtotMax = argv[4];
-        cout << "Opening file: " << argv[1] << endl;
-        cout << "Output location: " << argv[2] << endl;
-	cout << "Minimum 4-body mass: " << argv[3] << endl;
-	cout << "Maximum 4-body mass: " << argv[4] << endl;
-	if(argc > 5) {
-		scale = argv[5];
-		cout << "Scale factor: " << argv[5] << endl;
-	}
-    }
-*/
+
     ifstream infile(inputFile);
     string line;
     while(getline(infile,line)){
@@ -140,7 +139,7 @@ int main(int argc, char *argv[]) {
         outF.append("/LT_");
         outF.append(line.substr(sLoc+1));
         cout << "Output file: " << outF << endl;
-        Process(line, outF, mtotMin, mtotMax, scale, photonCR, doKinFit, doMX);
+        Process(line, outF, mtotMin, mtotMax, scale, photonCR, doKinFit, doMX, doTilt, tiltWindow, doNoCat);
     }
     
     return 0;

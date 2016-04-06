@@ -21,7 +21,8 @@ Get bbggLimits:
 cd ${CMSSW_BASE}/src/HiggsAnalysis/
 git clone git@github.com:ResonantHbbHgg/bbggLimits.git
 cd bbggLimits
-scramv1 b -j 10
+#scramv1 b -j 10
+./Compile.sh
 ```
    
 ### Make Limits Trees
