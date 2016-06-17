@@ -942,7 +942,7 @@ void bbggHighMassFitter::MakeDataCard_1Channel(const char* fileBaseName, const c
 
 
   TString filename(cardDir+TString(fileBaseName)+Form("_%s.txt",cat_names[iChan].c_str()));
-  ofstream outFile(filename);
+  std::ofstream outFile(filename);
 
   std::cout << "================================================================ signalScaler = " << _signalScaler << std::endl;
 

@@ -1039,7 +1039,7 @@ void bbgg2DFitter::MakeDataCard(std::string fileBaseName, std::string fileBkgNam
   }
   std::cout << "====================================================" <<std::endl;
   TString filename(cardDir+fileBaseName+".txt");
-  ofstream outFile(filename);
+  std::ofstream outFile(filename);
   // outFile << "#CMS-HGG DataCard for Unbinned Limit Setting, " << lumi->getVal() << " pb-1 " << std::endl;
   outFile << "#Run with: combine -d hgg.mH350.0.shapes-Unbinned.txt -U -m 130 -H ProfileLikelihood -M MarkovChainMC --rMin=0 --rMax=20.0 -b 3500 -i 50000 --optimizeSim=1 --tries 30" << std::endl;
   outFile << "# Lumi = " << _lumi << " pb-1" << std::endl;
