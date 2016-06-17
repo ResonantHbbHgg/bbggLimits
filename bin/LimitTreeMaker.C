@@ -8,7 +8,9 @@
 
 using namespace std;
 
-int Process(string file, string outFile, string mtotMin, string mtotMax,string scale, string photonCR, string doKinFit, string doMX, string doTilt, string tiltWindow, string doNoCat){
+int Process(string file, string outFile, string mtotMin, string mtotMax,string scale, 
+		string photonCR, string doKinFit, string doMX, string doTilt, string tiltWindow, 
+		string doNoCat, string btagWP){
     TFile* iFile = new TFile(TString(file), "READ");
     TTree* iTree = (TTree*) iFile->Get("bbggSelectionTree");
     cout << "[LimitTreeMaker:Process] Processing tree with " << iTree->GetEntries() << " entries." << endl;
@@ -24,6 +26,7 @@ int Process(string file, string outFile, string mtotMin, string mtotMax,string s
 //    t.SetTilt( TString(doTilt).Atoi(), TString(tiltWindow).Atof());
     t.SetTilt( TString(doTilt).Atoi());
     t.DoNoCat( TString(doNoCat).Atoi());
+    t.SetBTagWP( TString(btagWP).Atof());
     t.Loop();
 
 //    delete iFile;
@@ -44,6 +47,7 @@ int main(int argc, char *argv[]) {
     string doTilt = "0";
     string doNoCat = "0";
     string tiltWindow = "0";
+    string btagWP = "0.8";
 
     for( int i = 1; i < argc; i++){
 	if ( std::string(argv[i]) == "-i"){
@@ -89,6 +93,14 @@ int main(int argc, char *argv[]) {
 		mtotMin = string(std::string(argv[i+1]));
 		i++;
 	}
+	else if ( std::string(argv[i]) =="-btagWP"){
+		if ( (i+1) == argc) {
+			std::cout << "Invalid number of arguments!" << std::endl;
+			break;
+		}
+		btagWP = string(std::string(argv[i+1]));
+		i++;
+	}
 	else if ( std::string(argv[i]) =="-scale"){
 		if ( (i+1) == argc) {
 			std::cout << "Invalid number of arguments!" << std::endl;
@@ -110,13 +122,31 @@ int main(int argc, char *argv[]) {
 		doNoCat = "1";
 	}
 	else {
-		cout << "Usage: LimitTreeMaker -i <input list of files> -o <output location> [optional: -min <min mtot> -max <max mtot> -scale <scale factor> -photonCR (do photon control region) -KF (use Mtot_KF to cut on mass window) -MX (use MX to cut on mass window) (choose either -MX or -KF!)" << endl;
+		cout << "Usage: LimitTreeMaker -i <input list of files> -o <output location>" << endl;// \n
+		cout << "options: " << endl;//\n
+		cout << "\t -min <min mtot> -max <max mtot> " << endl;//\n
+		cout << "\t -scale <scale factor> " << endl;//\n
+		cout << "\t -photonCR (do photon control region) " << endl;//\n
+		cout << "\t -KF (use Mtot_KF to cut on mass window) " << endl;//\n
+		cout << "\t -MX (use MX to cut on mass window) (choose either -MX or -KF!) " << endl;//\n
+		cout << "\t -tilt (select tilted mass window) " << endl;//\n
+		cout << "\t -doNoCat (dont cut on categories) " << endl;//\n
+		cout << "\t -btagWP <WP> (set btagging working point for categories." << endl;
 		return -1;
 	}	
     }
 
     if(inputFile == "" || outputLocation == "") {
-	cout << "Usage: LimitTreeMaker -i <input list of files> -o <output location> [optional: -min <min mtot> -max <max mtot> -scale <scale factor> -photonCR (do photon control region) -KF (use Mtot_KF to cut on mass window) -MX (use MX to cut on mass window) (choose either -MX or -KF!)" << endl;
+		cout << "Usage: LimitTreeMaker -i <input list of files> -o <output location>" << endl;// \n
+		cout << "options: " << endl;//\n
+		cout << "\t -min <min mtot> -max <max mtot> " << endl;//\n
+		cout << "\t -scale <scale factor> " << endl;//\n
+		cout << "\t -photonCR (do photon control region) " << endl;//\n
+		cout << "\t -KF (use Mtot_KF to cut on mass window) " << endl;//\n
+		cout << "\t -MX (use MX to cut on mass window) (choose either -MX or -KF!) " << endl;//\n
+		cout << "\t -tilt (select tilted mass window) " << endl;//\n
+		cout << "\t -doNoCat (dont cut on categories) " << endl;//\n
+		cout << "\t -btagWP <WP> (set btagging working point for categories." << endl;
 	return 0;
     }
 
@@ -139,7 +169,7 @@ int main(int argc, char *argv[]) {
         outF.append("/LT_");
         outF.append(line.substr(sLoc+1));
         cout << "Output file: " << outF << endl;
-        Process(line, outF, mtotMin, mtotMax, scale, photonCR, doKinFit, doMX, doTilt, tiltWindow, doNoCat);
+        Process(line, outF, mtotMin, mtotMax, scale, photonCR, doKinFit, doMX, doTilt, tiltWindow, doNoCat, btagWP);
     }
     
     return 0;
