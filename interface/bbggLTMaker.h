@@ -45,11 +45,15 @@ public :
    double mtotMax;
    double normalization;
    double btagWP;
+   double btagWP_low;
+   double btagWP_high;
    int photonCR;
    int doKinFit;
    int doMX;
    int tilt;
    int doNoCat;
+   int doCatMixed;
+   int doSingleCat;
    double tiltWindow;
    typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > LorentzVector;
 
@@ -123,7 +127,11 @@ public :
    void IsKinFit( int kf ) { doKinFit = kf; }
    void SetOutFileName( std::string fname ) { outFileName = fname; }
    void SetBTagWP( double wp ) { btagWP = wp; }
+   void SetBTagWP_High( double wp ) { btagWP_high= wp; }
+   void SetBTagWP_Low( double wp ) { btagWP_low = wp; }
    void DoNoCat( int cat ) { doNoCat = cat; }
+   void DoCatMixed( int cat ) { doCatMixed = cat; }
+   void DoSingleCat( int cat ) { doSingleCat = cat; }
 //   void SetTilt( int tt, double ttWind) { tilt = tt; tiltWindow = ttWind; }
    void SetTilt( int tt) { tilt = tt;}
 };
@@ -141,7 +149,11 @@ bbggLTMaker::bbggLTMaker(TTree *tree) : fChain(0)
    doKinFit = 0;
    outFileName = "LT_output.root";
    btagWP = 0.8;
+   btagWP_low = 0.8;
+   btagWP_high = 0.8;
    doNoCat = 0;
+   doCatMixed = 0;
+   doSingleCat = 0;
    Init(tree);
 }
 

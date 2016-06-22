@@ -138,6 +138,7 @@ int bbgg2DFitter::AddSigData(float mass, TString signalfile)
   } // close ncat
   std::cout << "======================================================================" <<std::endl;
   sigScaled.Print("v");
+  std::cout << "----- DONE With Adding Signal!" << std::endl;
   return 0;
 }
 
@@ -384,7 +385,7 @@ void bbgg2DFitter::MakePlots(float mass)
   // WARNING: Do not use it if Workspaces are created
   // SetParamNames(w);
   Float_t minSigPlotMgg(115),maxSigPlotMgg(135);
-  Float_t minSigPlotMjj(60),maxSigPlotMjj(180);
+  Float_t minSigPlotMjj(80),maxSigPlotMjj(200);
   mgg->setRange("SigPlotRange",minSigPlotMgg,maxSigPlotMgg);
   mjj->setRange("SigPlotRange",minSigPlotMjj,maxSigPlotMjj);
   Int_t nBinsMass(20); // just need to plot
@@ -579,7 +580,7 @@ void bbgg2DFitter::MakePlotsHiggs(float mass,std::vector<std::string>higgstrue,s
     // WARNING: Do not use it if Workspaces are created
     // SetParamNames(w);
     Float_t minHigPlotMgg(115);//,maxHigPlotMgg(135);
-    Float_t minHigPlotMjj(60);//,maxHigPlotMjj(180);
+    Float_t minHigPlotMjj(80);//,maxHigPlotMjj(180);
     Int_t nBinsMass(20); // just need to plot
     //RooPlot* plotmggAll = mgg->frame(Range(minSigFit,maxSigFit),Bins(nBinsMass));
     //higgsAll->plotOn(plotmggAll);
@@ -1014,10 +1015,12 @@ void bbgg2DFitter::MakeDataCard(std::string fileBaseName, std::string fileBkgNam
     data[c] = (RooDataSet*) _w->data(TString::Format("Data_cat%d",c));
     sigToFit[c] = (RooDataSet*) _w->data(TString::Format("Sig_cat%d",c));
     //
-    for(std::vector<std::string>::iterator it=Higgstrue.begin();it!=Higgstrue.end();++it)
-    {
-      higToFits[*it][c]=(RooDataSet*) _w->data(TString::Format("Hig_%d_cat%d",higgsNumber[*it],c));
-      std::cout<<*it<<" found "<<std::endl;
+    if(_addHiggs){
+       for(std::vector<std::string>::iterator it=Higgstrue.begin();it!=Higgstrue.end();++it)
+       {
+         higToFits[*it][c]=(RooDataSet*) _w->data(TString::Format("Hig_%d_cat%d",higgsNumber[*it],c));
+         std::cout<<*it<<" found "<<std::endl;
+       }
     }
   } // close cat
   ////////////////////////////////////////////////////////////////////////////////////
@@ -1048,7 +1051,7 @@ void bbgg2DFitter::MakeDataCard(std::string fileBaseName, std::string fileBkgNam
   outFile << "kmax *" << std::endl;
   outFile << "---------------" << std::endl;
   outFile << "shapes data_obs cat0 " << wsDir+fileBkgName+".root" << " w_all:data_obs_cat0" << std::endl;
-  outFile << "shapes data_obs cat1 "<< wsDir+fileBkgName+".root" << " w_all:data_obs_cat1" << std::endl;
+  if ( _NCAT > 1 ) outFile << "shapes data_obs cat1 "<< wsDir+fileBkgName+".root" << " w_all:data_obs_cat1" << std::endl;
   if ( _NCAT > 2 )
 	{
   outFile << "shapes data_obs cat2 " << wsDir+fileBkgName+".root" << " w_all:data_obs_cat2" << std::endl;
@@ -1056,7 +1059,7 @@ void bbgg2DFitter::MakeDataCard(std::string fileBaseName, std::string fileBkgNam
   }
   outFile << "############## shape with reparametrization" << std::endl;
   outFile << "shapes Bkg cat0 " << wsDir+fileBkgName+".root" << " w_all:CMS_bkg_8TeV_cat0" << std::endl;
-  outFile << "shapes Bkg cat1 "<< wsDir+fileBkgName+".root" << " w_all:CMS_bkg_8TeV_cat1" << std::endl;
+  if ( _NCAT > 1 ) outFile << "shapes Bkg cat1 "<< wsDir+fileBkgName+".root" << " w_all:CMS_bkg_8TeV_cat1" << std::endl;
   if ( _NCAT > 2 )
 	{
   	outFile << "shapes Bkg cat2 " << wsDir+fileBkgName+".root" << " w_all:CMS_bkg_8TeV_cat2" << std::endl;
@@ -1064,7 +1067,7 @@ void bbgg2DFitter::MakeDataCard(std::string fileBaseName, std::string fileBkgNam
   }
   outFile << "# signal" << std::endl;
   outFile << "shapes Sig cat0 " << wsDir+fileBaseName+".inputsig.root" << " w_all:CMS_sig_cat0" << std::endl;
-  outFile << "shapes Sig cat1 " << wsDir+fileBaseName+".inputsig.root" << " w_all:CMS_sig_cat1" << std::endl;
+  if ( _NCAT > 1 ) outFile << "shapes Sig cat1 " << wsDir+fileBaseName+".inputsig.root" << " w_all:CMS_sig_cat1" << std::endl;
   if ( _NCAT > 2 )
 	{
   	outFile << "shapes Sig cat2 " << wsDir+fileBaseName+".inputsig.root" << " w_all:CMS_sig_cat2" << std::endl;
@@ -1087,18 +1090,21 @@ void bbgg2DFitter::MakeDataCard(std::string fileBaseName, std::string fileBkgNam
   }
   outFile << "---------------" <<std::endl;
   /////////////////////////////////////
-  if(_addHiggs) 
+  if(1) 
 	{ //
-    outFile << "bin cat0 cat1 ";
+    outFile << "bin cat0 ";
+    if ( _NCAT > 1 ) outFile << "cat1 ";
     if ( _NCAT > 2 ) outFile << "cat2 cat3 ";
     if(!_doblinding)
 		{ 
-      outFile << "\nobservation "<< data[0]->sumEntries() <<" " << data[1]->sumEntries() <<" "; 
+      outFile << "\nobservation "<< data[0]->sumEntries() <<" " ;
+      if ( _NCAT > 1 ) outFile << data[1]->sumEntries() <<" "; 
       if ( _NCAT > 2 ) outFile << data[2]->sumEntries() <<" " << data[3]->sumEntries() <<" "; 
     }
     else
 		{
-      outFile << "\nobservation -1 -1 ";
+      outFile << "\nobservation -1 ";
+      if ( _NCAT > 1 ) outFile << " -1 ";
       if ( _NCAT > 2 ) outFile << "-1 -1 ";
     }
     outFile << "\n------------------------------" << std::endl;
@@ -1228,8 +1234,9 @@ void bbgg2DFitter::MakeDataCard(std::string fileBaseName, std::string fileBkgNam
     if(useSigTheoryUnc)
    {
       outFile << "############## Theory uncertainty on SM diHiggs production " << std::endl;
-      outFile << "SM_diHiggs_Theory lnN "<< " 0.857/1.136 - - - - - - "<< " 0.857/1.136 - - - - - - ";
-      if ( _NCAT > 2 )outFile << " 0.857/1.136 - - - - - - "<< " 0.857/1.136 - - - - - - ";
+      outFile << "SM_diHiggs_Theory lnN "<< " 0.857/1.136 - - - - - - ";
+      if ( _NCAT > 1 ) outFile << " 0.857/1.136 - - - - - - ";
+      if ( _NCAT > 2 ) outFile << " 0.857/1.136 - - - - - - "<< " 0.857/1.136 - - - - - - ";
       outFile << " # from 9.96 + 1.35 - 1.42 fb " << std::endl << std::endl;
     }
     outFile << "############## Signal parametric shape uncertainties " << std::endl;
@@ -1242,7 +1249,7 @@ void bbgg2DFitter::MakeDataCard(std::string fileBaseName, std::string fileBkgNam
     //
     outFile << "############## for mggxmjj fit - slopes" << std::endl;
     outFile << "CMS_bkg_8TeV_cat0_norm flatParam # Normalization uncertainty on background slope" << std::endl;
-    outFile << "CMS_bkg_8TeV_cat1_norm flatParam # Normalization uncertainty on background slope" << std::endl;
+    if ( _NCAT > 1 ) outFile << "CMS_bkg_8TeV_cat1_norm flatParam # Normalization uncertainty on background slope" << std::endl;
     if ( _NCAT > 2 )
 		{
     	outFile << "CMS_bkg_8TeV_cat2_norm flatParam # Normalization uncertainty on background slope" << std::endl;
@@ -1260,10 +1267,10 @@ void bbgg2DFitter::MakeDataCard(std::string fileBaseName, std::string fileBkgNam
 		{
     	outFile << "CMS_hgg_bkg_8TeV_slope2_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
     	outFile << "CMS_hgg_bkg_8TeV_slope3_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
-    	outFile << "CMS_hgg_bkg_8TeV_slope1_cat1 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
+    	if ( _NCAT > 1 ) outFile << "CMS_hgg_bkg_8TeV_slope1_cat1 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
 	outFile << "CMS_hbb_bkg_8TeV_slope2_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
     	outFile << "CMS_hbb_bkg_8TeV_slope3_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
-    	outFile << "CMS_hbb_bkg_8TeV_slope1_cat1 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
+    	if ( _NCAT > 1 ) outFile << "CMS_hbb_bkg_8TeV_slope1_cat1 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
     }
   } // if ncat == 2 or 4
   /////////////////////////////////////
@@ -1556,16 +1563,18 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs,std::vecto
     //plotmggBkg[c]->getObject(1)->Draw("SAME");
     //plotmggBkg[c]->getObject(2)->Draw("P SAME");
     ////////////////////////////////////////////////////////// plot higgs
-    for(unsigned int d=0;d!=higgstrue.size();++d)
-    {
-    	static std::vector<int>color{2,3,6,7,4};
-			int realint=higgsNumber[higgstrue[d]];
-    	sigToFitvec[realint][c] = (RooDataSet*) _w->data(TString::Format("Hig_%d_cat%d",realint,c));
-      double norm = 1.0*sigToFitvec[realint][c]->sumEntries(); //
-    	mggSigvec[realint][c] = (RooAbsPdf*) _w->pdf(TString::Format("mggHig_%d_cat%d",realint,c));
-    	// we are not constructing signal pdf, this is constructed on sig to fit function...
-    	mggSigvec[realint][c]->plotOn(plotmggBkg[c],Normalization(norm,RooAbsPdf::NumEvent),DrawOption("F"),LineColor(color[realint]),FillStyle(1001),FillColor(19));
-    	mggSigvec[realint][c]->plotOn(plotmggBkg[c],Normalization(norm,RooAbsPdf::NumEvent),LineColor(color[realint]),LineStyle(1));
+    if(addhiggs) {
+    	for(unsigned int d=0;d!=higgstrue.size();++d)
+    	{
+	    	static std::vector<int>color{2,3,6,7,4};
+				int realint=higgsNumber[higgstrue[d]];
+	    	sigToFitvec[realint][c] = (RooDataSet*) _w->data(TString::Format("Hig_%d_cat%d",realint,c));
+	      double norm = 1.0*sigToFitvec[realint][c]->sumEntries(); //
+	    	mggSigvec[realint][c] = (RooAbsPdf*) _w->pdf(TString::Format("mggHig_%d_cat%d",realint,c));
+	    	// we are not constructing signal pdf, this is constructed on sig to fit function...
+	    	mggSigvec[realint][c]->plotOn(plotmggBkg[c],Normalization(norm,RooAbsPdf::NumEvent),DrawOption("F"),LineColor(color[realint]),FillStyle(1001),FillColor(19));
+	    	mggSigvec[realint][c]->plotOn(plotmggBkg[c],Normalization(norm,RooAbsPdf::NumEvent),LineColor(color[realint]),LineStyle(1));
+    }
     }
     //////////////////////////////////////////////////////////
     plotmggBkg[c]->Draw("SAME");
@@ -1708,18 +1717,20 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs,std::vecto
     //plotmjjBkg[c]->getObject(1)->Draw("SAME");
     //plotmjjBkg[c]->getObject(2)->Draw("P SAME");
     ////////////////////////////////////////////////////////// plot higgs
-    for(unsigned int d=0;d!=higgstrue.size();++d)
-    {
-			static std::vector<int>color{2,3,6,7,4};
-			int realint=higgsNumber[higgstrue[d]];
-    	sigToFitvec[realint][c] = (RooDataSet*) _w->data(TString::Format("Hig_%d_cat%d",realint,c));
-    	double norm = 1.0*sigToFitvec[realint][c]->sumEntries(); //
-    	//norm0 = 0.0000001;
-    	mjjSigvec[realint][c] = (RooAbsPdf*) _w->pdf(TString::Format("mjjHig_%d_cat%d",realint,c));
-    	// we are not constructing signal pdf, this is constructed on sig to fit function...
-    	mjjSigvec[realint][c] ->plotOn(plotmjjBkg[c],Normalization(norm,RooAbsPdf::NumEvent),DrawOption("F"),LineColor(color[realint]),FillStyle(1001),FillColor(19));
-    	mjjSigvec[realint][c]->plotOn(plotmjjBkg[c],Normalization(norm,RooAbsPdf::NumEvent),LineColor(color[realint]),LineStyle(1));
+    if(addhiggs){
+	    for(unsigned int d=0;d!=higgstrue.size();++d)
+	    {
+				static std::vector<int>color{2,3,6,7,4};
+				int realint=higgsNumber[higgstrue[d]];
+	    	sigToFitvec[realint][c] = (RooDataSet*) _w->data(TString::Format("Hig_%d_cat%d",realint,c));
+	    	double norm = 1.0*sigToFitvec[realint][c]->sumEntries(); //
+	    	//norm0 = 0.0000001;
+	    	mjjSigvec[realint][c] = (RooAbsPdf*) _w->pdf(TString::Format("mjjHig_%d_cat%d",realint,c));
+	    	// we are not constructing signal pdf, this is constructed on sig to fit function...
+	    	mjjSigvec[realint][c] ->plotOn(plotmjjBkg[c],Normalization(norm,RooAbsPdf::NumEvent),DrawOption("F"),LineColor(color[realint]),FillStyle(1001),FillColor(19));
+	    	mjjSigvec[realint][c]->plotOn(plotmjjBkg[c],Normalization(norm,RooAbsPdf::NumEvent),LineColor(color[realint]),LineStyle(1));
     //
+    }
     }
     //////////////////////////////////////////////////////////
     plotmjjBkg[c]->Draw("SAME");

@@ -28,7 +28,8 @@ AutoDict_*
 *.pdf
 
 #Limit setting folder
-LimitSetting/*
+LimitSetting/*.json
+LimitSetting/*.root
 
 #test
 test/*json

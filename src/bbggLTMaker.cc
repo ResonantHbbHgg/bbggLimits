@@ -75,6 +75,8 @@ void bbggLTMaker::Loop()
 	continue;
      if(photonCR == 0 && isPhotonCR == 1)
 	continue;
+
+     o_category = 2;
    
 //   double sumbtag = leadingJet_bDis + subleadingJet_bDis;
 //   double upper = 1.83;
@@ -82,20 +84,59 @@ void bbggLTMaker::Loop()
 //   if ( sumbtag > upper ) o_category = 0;
 //   if (sumbtag > lower && sumbtag < upper ) o_category = 1;
 //   if (sumbtag < lower ) o_category = -1;
-      if ( doNoCat == 0 )
+/*      if (doCatMixed == 1 )
+      {
+	 if( leadingJet_bDis > btagWP_low && subleadingJet_bDis > btagWP_low ) {o_category = 0;}
+         else if ( leadingJet_bDis > btagWP_high && subleadingJet_bDis < btagWP_low  ) {o_category = 1;}
+         else if ( leadingJet_bDis < btagWP_low  && subleadingJet_bDis > btagWP_high ) {o_category = 1;}
+	 else if ( leadingJet_bDis < btagWP_low  && subleadingJet_bDis < btagWP_high ) {o_category = -1;}
+	 else if ( leadingJet_bDis < btagWP_high && subleadingJet_bDis < btagWP_low  ) {o_category = -1;}
+      }*/
+//      o_category = 2;
+//
+	if(doCatMixed == 1)
+	{
+	  if (o_category == 2 && ( leadingJet_bDis > btagWP_high || subleadingJet_bDis > btagWP_high ) ) {o_category = 0;}
+	  if (o_category == 2 && leadingJet_bDis < btagWP_high && subleadingJet_bDis < btagWP_high && subleadingJet_bDis > 0.8 ) {o_category = 1;}
+	  if (o_category == 2 && leadingJet_bDis < btagWP_high && subleadingJet_bDis < btagWP_high && leadingJet_bDis >  0.8 ) {o_category = 1;}
+	  if (o_category == 2 && leadingJet_bDis < 0.8 && subleadingJet_bDis < 0.8 ) {o_category = -1;}
+	  if (o_category == 2 && leadingJet_bDis < 0.8 && subleadingJet_bDis < btagWP_low ) {o_category = -1;}
+	  if (o_category == 2 && leadingJet_bDis < btagWP_low && subleadingJet_bDis < 0.8 ) {o_category = -1;}
+        }
+/*      if (doCatMixed == 1 )
+      {
+	 if( o_category == 2 && leadingJet_bDis > btagWP_high && subleadingJet_bDis > btagWP_high ) {o_category = 0;}
+	 if ( o_category == 2 && leadingJet_bDis > btagWP_high && subleadingJet_bDis > btagWP_low  ) {o_category = 0;}
+	 if ( o_category == 2 && leadingJet_bDis > btagWP_low  && subleadingJet_bDis > btagWP_high ) {o_category = 0;}
+	 if ( o_category == 2 && leadingJet_bDis > btagWP_low && leadingJet_bDis < btagWP_high && subleadingJet_bDis > btagWP_low && subleadingJet_bDis < btagWP_high ) {o_category = 1;}
+	 if ( o_category == 2 && leadingJet_bDis > btagWP_high && subleadingJet_bDis < btagWP_low  ) {o_category = 1;}
+	 if ( o_category == 2 && leadingJet_bDis < btagWP_low  && subleadingJet_bDis > btagWP_high ) {o_category = 1;}
+	 if ( o_category == 2 && leadingJet_bDis < btagWP_low  && subleadingJet_bDis < btagWP_high ) {o_category = -1;}
+	 if ( o_category == 2 && leadingJet_bDis < btagWP_high && subleadingJet_bDis < btagWP_low  ) {o_category = -1;}
+      }*/
+      if (doCatMixed == 1  && doSingleCat == 1)
+      {
+	 if( leadingJet_bDis > btagWP_low && subleadingJet_bDis > btagWP_low ) {o_category = 0;}
+         else if ( leadingJet_bDis > btagWP_high && subleadingJet_bDis < btagWP_low  ) {o_category = 0;}
+         else if ( leadingJet_bDis < btagWP_low  && subleadingJet_bDis > btagWP_high ) {o_category = 0;}
+	 else if ( leadingJet_bDis < btagWP_low  && subleadingJet_bDis < btagWP_high ) {o_category = -1;}
+	 else if ( leadingJet_bDis < btagWP_high && subleadingJet_bDis < btagWP_low  ) {o_category = -1;}
+      }
+      if ( doSingleCat == 0 && doCatMixed == 0)
       {
          if ( leadingJet_bDis > btagWP && subleadingJet_bDis > btagWP ) {o_category = 0;}
          else if ( leadingJet_bDis > btagWP && subleadingJet_bDis < btagWP ) { o_category = 1; }
          else if ( leadingJet_bDis < btagWP && subleadingJet_bDis > btagWP ) { o_category = 1; }
          else if ( leadingJet_bDis < btagWP && subleadingJet_bDis < btagWP ) { o_category = -1; }
        } 
-       else if ( doNoCat == 1 )
+       else if ( doSingleCat == 1 && doCatMixed == 0)
        {
 	 if ( leadingJet_bDis > btagWP && subleadingJet_bDis > btagWP ) {o_category = 0;}
 	 if ( leadingJet_bDis > btagWP && subleadingJet_bDis < btagWP ) {o_category = 0;}
 	 if ( leadingJet_bDis < btagWP && subleadingJet_bDis > btagWP ) {o_category = 0;}
 	 if ( leadingJet_bDis < btagWP && subleadingJet_bDis < btagWP ) {o_category = -1;}
        }
+       if ( o_category == 2 ) std::cout << "ERROR ERROR ERROR ERROR ERROR ERROR ERROR" << std::endl;
       outTree->Fill();
    }
 

@@ -1,18 +1,18 @@
 {
         "signal" : {
                 "type" : "Radion",
-                "dir" : "/afs/cern.ch/user/f/flagarde/CMSSW_7_1_5/src/HiggsAnalysis/bbggLimits/forFrancois/",
-                "mass" : [300,400,500],
+                "dir" : "/afs/cern.ch/work/r/rateixei/work/DiHiggs/NewLimits/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LimitSetting/Trees/EGM_MVA_2cat_0.46WP_MASS/",
+		"mass" : [250, 260, 280, 300, 320, 350, 400, 450, 500, 600, 700, 800],
                 "nonresFile" : "Lam_1d0_Yt_1d0_c2_0d0",
-		"signalModelCard" : "/afs/cern.ch/user/f/flagarde/CMSSW_7_1_5/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D.rs"
+		"signalModelCard" : "/afs/cern.ch/work/r/rateixei/work/DiHiggs/NewLimits/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D.rs"
         },
         "other" : {
                 "integratedLumi" : 29.80,
                 "energy" : "13TeV",
                 "higgsMass" : 125.0,
-                "addHiggs" : 1,
+                "addHiggs" : 0,
                 "doBlinding" : 1,
-                "doBands" : 1,
+                "doBands" : 0,
                 "ncat" : 2,
                 "analysisType" : "fitTo2D_resSearch_withRegKinFit",
                 "useSigTheoryUnc" : 0,
@@ -21,25 +21,25 @@
 		"runCombine" : true,
 		"minMggMassFit" : 100,
 		"maxMggMassFit" : 180,
-		"minMjjMassFit"	: 60,
-		"maxMjjMassFit"	: 180,
+		"minMjjMassFit"	: 80,
+		"maxMjjMassFit"	: 200,
 		"minSigFitMgg" :115,
 		"maxSigFitMgg" :135,
-		"minSigFitMjj" :60,
-		"maxSigFitMjj" :180,
+		"minSigFitMjj" :80,
+		"maxSigFitMjj" :200,
 		"minHigMggFit" :115,
 		"maxHigMggFit" :135,
-		"minHigMjjFit":60,
-		"maxHigMjjFit":180,
+		"minHigMjjFit":80,
+		"maxHigMjjFit":200,
 		"HH":false,
-		"base":false,
+		"base":true,
 		"low":false,
 		"obs":false,
 		"twotag":false
 		
         },
         "data" : {
-                "dir" : "/afs/cern.ch/user/f/flagarde/CMSSW_7_1_5/src/HiggsAnalysis/bbggLimits/forFrancois/",
+                "dir" : "/afs/cern.ch/work/r/rateixei/work/DiHiggs/NewLimits/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LimitSetting/Trees/EGM_MVA_2cat_0.46WP_MASS/",
                 "name" :"DoubleEG"
         },
         "higgs" : {

@@ -10,7 +10,7 @@ using namespace std;
 
 int Process(string file, string outFile, string mtotMin, string mtotMax,string scale, 
 		string photonCR, string doKinFit, string doMX, string doTilt, string tiltWindow, 
-		string doNoCat, string btagWP){
+		string doNoCat, string btagWP, string doCatMixed, string btagHigh, string btagLow, string singleCat){
     TFile* iFile = new TFile(TString(file), "READ");
     TTree* iTree = (TTree*) iFile->Get("bbggSelectionTree");
     cout << "[LimitTreeMaker:Process] Processing tree with " << iTree->GetEntries() << " entries." << endl;
@@ -22,11 +22,14 @@ int Process(string file, string outFile, string mtotMin, string mtotMax,string s
     t.IsMX( TString(doMX).Atoi() );
     t.IsKinFit( TString(doKinFit).Atoi() );
     t.SetOutFileName( outFile );
-    t.SetBTagWP( 0.8 );
 //    t.SetTilt( TString(doTilt).Atoi(), TString(tiltWindow).Atof());
     t.SetTilt( TString(doTilt).Atoi());
     t.DoNoCat( TString(doNoCat).Atoi());
     t.SetBTagWP( TString(btagWP).Atof());
+    t.DoCatMixed( TString(doCatMixed).Atoi());
+    t.SetBTagWP_High( TString(btagHigh).Atof());
+    t.SetBTagWP_Low( TString(btagLow).Atof());
+    t.DoSingleCat( TString(singleCat).Atoi());
     t.Loop();
 
 //    delete iFile;
@@ -48,6 +51,11 @@ int main(int argc, char *argv[]) {
     string doNoCat = "0";
     string tiltWindow = "0";
     string btagWP = "0.8";
+    string doCatMixed = "0";
+    string btagHigh = "0.8";
+    string btagLow = "0.435";
+    string singleCat = "0";
+    string inputRootFile = "";
 
     for( int i = 1; i < argc; i++){
 	if ( std::string(argv[i]) == "-i"){
@@ -58,6 +66,14 @@ int main(int argc, char *argv[]) {
 		inputFile = string(std::string(argv[i+1]));
 		i++;
 	}
+    if ( std::string(argv[i]) == "-inputFile") {
+        if ( (i+1) == argc) {
+            std::cout << "Invaliv number of arguments!" << std::endl;
+            break;
+        }
+        inputRootFile = string(std::string(argv[i+1]));
+        i++;
+    }
 	else if ( std::string(argv[i]) == "-tilt"){
 		doTilt = "1";
 	}
@@ -109,6 +125,22 @@ int main(int argc, char *argv[]) {
 		scale = string(std::string(argv[i+1]));
 		i++;
 	}
+	else if ( std::string(argv[i]) =="-btagHigh"){
+		if ( (i+1) == argc) {
+			std::cout << "Invalid number of arguments!" << std::endl;
+			break;
+		}
+		btagHigh = string(std::string(argv[i+1]));
+		i++;
+	}
+	else if ( std::string(argv[i]) =="-btagLow"){
+		if ( (i+1) == argc) {
+			std::cout << "Invalid number of arguments!" << std::endl;
+			break;
+		}
+		btagLow = string(std::string(argv[i+1]));
+		i++;
+	}
 	else if ( std::string(argv[i]) =="-photonCR"){
 		photonCR = "1";
 	}
@@ -121,8 +153,14 @@ int main(int argc, char *argv[]) {
 	else if ( std::string(argv[i]) =="-doNoCat"){
 		doNoCat = "1";
 	}
+	else if ( std::string(argv[i]) =="-doCatMixed"){
+		doCatMixed = "1";
+	}
+	else if ( std::string(argv[i]) =="-singleCat"){
+		singleCat = "1";
+	}
 	else {
-		cout << "Usage: LimitTreeMaker -i <input list of files> -o <output location>" << endl;// \n
+		cout << "Usage: LimitTreeMaker -i <input list of files> ( or -inputFile <single root file> ) -o <output location>" << endl;// \n
 		cout << "options: " << endl;//\n
 		cout << "\t -min <min mtot> -max <max mtot> " << endl;//\n
 		cout << "\t -scale <scale factor> " << endl;//\n
@@ -132,12 +170,16 @@ int main(int argc, char *argv[]) {
 		cout << "\t -tilt (select tilted mass window) " << endl;//\n
 		cout << "\t -doNoCat (dont cut on categories) " << endl;//\n
 		cout << "\t -btagWP <WP> (set btagging working point for categories." << endl;
+		cout << "\t -doCatMixed (do categories with mixed btagging - cat0: 2>low, cat1: 1<low+1>high)" << endl;
+		cout << "\t -btagHigh (for mixed cat, highest value)" << endl;
+		cout << "\t -btagLow (for mixed cat, lowest value)" << endl;
+		cout << "\t -singleCat (only one category)" << endl;
 		return -1;
 	}	
     }
 
-    if(inputFile == "" || outputLocation == "") {
-		cout << "Usage: LimitTreeMaker -i <input list of files> -o <output location>" << endl;// \n
+    if( (inputFile == "" && inputRootFile == "") || outputLocation == "") {
+		cout << "Usage: LimitTreeMaker -i <input list of files> ( or -inputFile <single root file> ) -o <output location>" << endl;// \n
 		cout << "options: " << endl;//\n
 		cout << "\t -min <min mtot> -max <max mtot> " << endl;//\n
 		cout << "\t -scale <scale factor> " << endl;//\n
@@ -147,9 +189,28 @@ int main(int argc, char *argv[]) {
 		cout << "\t -tilt (select tilted mass window) " << endl;//\n
 		cout << "\t -doNoCat (dont cut on categories) " << endl;//\n
 		cout << "\t -btagWP <WP> (set btagging working point for categories." << endl;
+		cout << "\t -doCatMixed (do categories with mixed btagging - cat0: 2>low, cat1: 1<low+1>high)" << endl;
+		cout << "\t -btagHigh (for mixed cat, highest value)" << endl;
+		cout << "\t -btagLow (for mixed cat, lowest value)" << endl;
+		cout << "\t -singleCat (only one category)" << endl;
 	return 0;
     }
 
+    if(inputRootFile != "") {
+        cout << "Processing file: " << inputRootFile << endl;
+        if (inputRootFile.find(".root")==std::string::npos) {
+            std::cout << inputRootFile << " is not a valid root file!" << std::endl;
+            return 0;
+        }
+        size_t sLoc = inputRootFile.find_last_of("/");
+        string outF = outputLocation;
+        outF.append("/LT_");
+        outF.append(inputRootFile.substr(sLoc+1));
+        cout << "Output file: " << outF << endl;
+        Process(inputRootFile, outF, mtotMin, mtotMax, scale, photonCR, doKinFit, doMX, doTilt, tiltWindow, doNoCat, btagWP, doCatMixed, btagHigh, btagLow, singleCat);
+        return 0;
+    }
+    
     ifstream infile(inputFile);
     string line;
     while(getline(infile,line)){
@@ -169,7 +230,7 @@ int main(int argc, char *argv[]) {
         outF.append("/LT_");
         outF.append(line.substr(sLoc+1));
         cout << "Output file: " << outF << endl;
-        Process(line, outF, mtotMin, mtotMax, scale, photonCR, doKinFit, doMX, doTilt, tiltWindow, doNoCat, btagWP);
+        Process(line, outF, mtotMin, mtotMax, scale, photonCR, doKinFit, doMX, doTilt, tiltWindow, doNoCat, btagWP, doCatMixed, btagHigh, btagLow, singleCat);
     }
     
     return 0;

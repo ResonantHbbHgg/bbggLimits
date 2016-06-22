@@ -18,15 +18,16 @@ void RunCombine(std::string path_dir,bool doblinding)
 		if (boost::filesystem::is_directory(itr->status()))
 		{
 			std::string folder_name=itr->path().filename().string();
-      const char * pattern = "\\d+";
-      boost::regex re(pattern);
-      boost::sregex_iterator it(folder_name.begin(), folder_name.end(), re);
-      boost::sregex_iterator end;
-      std::vector<std::string>number;
-      for( ; it != end; ++it)
-    {
-         number.push_back(it->str()); 
-    }
+            if (folder_name == "SeparateCategories") continue;
+            const char * pattern = "\\d+";
+            boost::regex re(pattern);
+            boost::sregex_iterator it(folder_name.begin(), folder_name.end(), re);
+            boost::sregex_iterator end;
+            std::vector<std::string>number;
+            for( ; it != end; ++it)
+            {
+                number.push_back(it->str()); 
+            }
 			std::string blinded="";
 			if(doblinding==1)blinded="--run blind ";
 			std::string txtname="hgg.mH125_8TeV";

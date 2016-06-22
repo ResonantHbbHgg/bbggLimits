@@ -22,6 +22,7 @@ float x01=0;
 float y01=0;
 float z01=0;
 using namespace std;
+bool PrintRadion13TeV=true;
 TStyle* CreateStyle(std::string name1,std::string name2)
 {
 	TStyle *defaultStyle = new TStyle(name1.c_str(),name2.c_str());
@@ -366,10 +367,10 @@ void BrazilianFlag(std::string path_dir,bool HH,bool base,bool low,bool obs,bool
     if(HH) mg->SetMinimum(10); // HH
     if(HH && low) mg->SetMinimum(0); // HH 1000000
     if(HH && low) mg->SetMaximum(5200); // HH 1000000
-    if(!HH && low) mg->SetMaximum(9.99); // 10000
+    if(!HH && low) mg->SetMaximum(39.99); // 10000
     if(HH && !low) mg->SetMaximum(200000); // HH 
     if(!HH && !low) mg->SetMaximum(600); // 
-    if(!HH && !low) mg->SetMaximum(10);
+    if(!HH && !low) mg->SetMaximum(40);
 
     TLine* T = new TLine(400, 0.01, 400, 1);
     T->SetLineStyle(2);
@@ -890,9 +891,36 @@ void BrazilianFlag(std::string path_dir,bool HH,bool base,bool low,bool obs,bool
   boost::filesystem::create_directory(folderr);
 	folderr+=name;
  
+
+ TGraph* ThisIsRadion;
+  if(PrintRadion13TeV){
+        Double_t RadToHH[] = {2238.55, 2376.22, 2104.53, 1804.82, 1540.86, 1154.92, 896.161, 733.914, 495.567, 362.581, 277.513, 219.251, 177.292, 146.142, 122.775, 104.76 , 90.6293, 79.4959};
+        Double_t RadTobbgg[18];
+        for ( int mm = 0; mm < 18; mm++){
+                RadTobbgg[mm] = RadToHH[mm]*2.6e-03;
+        }
+
+        Double_t RadMasses[] = {260, 280, 300, 320, 340, 360, 380, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900};
+
+        ThisIsRadion = new TGraph(18, RadMasses, RadTobbgg);
+        c1->cd();
+        ThisIsRadion->Draw("Csame");
+        ThisIsRadion->SetLineWidth(3);
+        ThisIsRadion->SetLineColor(1);
+        c1->Update();
+  } 
+
   c1->SaveAs((folderr+".png").c_str());
-	c1->SaveAs((folderr+".pdf").c_str());
-	c1->SaveAs((folderr+".root").c_str());
+        c1->SaveAs((folderr+".pdf").c_str());
+        c1->SaveAs((folderr+".root").c_str());
+
+  mg->SetMaximum(200);
+  mg->SetMinimum(0.01);
+  c1->SetLogy();
+  c1->Update();
+  c1->SaveAs((folderr+"LOG.png").c_str());
+  c1->SaveAs((folderr+"LOG.pdf").c_str());
+
  //if(HH && low ) c1->SaveAs("/WP4_cutbased_HH_low.png"); // HH
   //if(HH && low ) c1->SaveAs("/WP4_cutbased_HH_low.pdf"); // HH
 //  if(HH && low ) c1->SaveAs("/WP4_cutbased_HH_low.root"); // HH
