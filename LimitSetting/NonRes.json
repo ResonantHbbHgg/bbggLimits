@@ -1,0 +1,48 @@
+{
+        "signal" : {
+                "dir" : "/afs/cern.ch/work/r/rateixei/work/DiHiggs/NewLimits/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LimitSetting/NonResTrees/EGM_MVA_2cat_MediumWP_TYPE/",
+		"nodes" : [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13],
+        "types" : ["LowMass", "HighMass"],
+		"signalModelCard" : "/afs/cern.ch/work/r/rateixei/work/DiHiggs/NewLimits/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D.rs"
+        },
+        "other" : {
+                "integratedLumi" : 2.7,
+                "energy" : "13TeV",
+                "higgsMass" : 125.0,
+                "addHiggs" : 0,
+                "doBlinding" : 1,
+                "doBands" : 0,
+                "ncat" : 2,
+                "analysisType" : "fitTo2D_resSearch_withRegKinFit",
+                "useSigTheoryUnc" : 0,
+		"version" : 44,
+		"doBrazilianFlag" : true,
+		"runCombine" : true,
+		"minMggMassFit" : 100,
+		"maxMggMassFit" : 180,
+		"minMjjMassFit"	: 60,
+		"maxMjjMassFit"	: 180,
+		"minSigFitMgg" :115,
+		"maxSigFitMgg" :135,
+		"minSigFitMjj" :60,
+		"maxSigFitMjj" :180,
+		"minHigMggFit" :115,
+		"maxHigMggFit" :135,
+		"minHigMjjFit":60,
+		"maxHigMjjFit":180,
+		"HH":false,
+		"base":true,
+		"low":false,
+		"obs":false,
+		"twotag":false
+		
+        },
+        "data" : {
+                "dir" : "/afs/cern.ch/work/r/rateixei/work/DiHiggs/NewLimits/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LimitSetting/NonResTrees/EGM_MVA_2cat_MediumWP_low0.46_high0.936_TYPE/",
+                "name" :"DoubleEG"
+        },
+        "higgs" : {
+                "dir" : "/afs/cern.ch/work/o/obondu/public/forRadion/limitTrees",
+		"type" : ["ggh_m125_powheg_8TeV","tth_m125_8TeV"]
+        }
+}
