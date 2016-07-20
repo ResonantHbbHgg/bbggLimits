@@ -14,6 +14,10 @@ void bbggLTMaker::Loop()
 //      Root > t.Show(16);     // Read and show values of entry 16
 //      Root > t.Loop();       // Loop on all entries
 //
+  o_evt = 0;
+  o_run = 0;
+
+  for (UInt_t n=0; n<1507; n++) o_NRWeights[n]=0;
 
    o_weight = 0;
    o_bbMass = 0;
@@ -33,6 +37,11 @@ void bbggLTMaker::Loop()
    outTree->Branch("mgg", &o_ggMass, "o_ggMass/D");
    outTree->Branch("mtot", &o_bbggMass, "o_bbggMass/D"); //
 
+   outTree->Branch("evt", &o_evt, "o_evt/l");
+   outTree->Branch("run", &o_run, "o_run/i");
+
+   outTree->Branch("NRWeights", o_NRWeights, "o_NRWeights[1507]/F");
+
    if (fChain == 0) return;
 
    Long64_t nentries = fChain->GetEntriesFast();
@@ -43,7 +52,13 @@ void bbggLTMaker::Loop()
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
 
-     if( jentry%1000 == 0 ) std::cout << "[bbggLTMaker::Process] Reading entry #" << jentry << endl;   
+     if( jentry%10000 == 0 ) std::cout << "[bbggLTMaker::Process] Reading entry #" << jentry << endl;   
+
+     o_evt = event;
+     o_run = run;
+
+     if (doNonResWeights) 
+       for (UInt_t n=0; n<1507; n++) o_NRWeights[n]=NRWeights[n];
    
      o_weight = genTotalWeight*normalization;
      o_bbMass = dijetCandidate->M();
@@ -94,7 +109,7 @@ void bbggLTMaker::Loop()
       }*/
 //      o_category = 2;
 //
-	if(doCatMixed == 1)
+     if(doCatMixed == 1)
 	{
 	  if (o_category == 2 && ( leadingJet_bDis > btagWP_high || subleadingJet_bDis > btagWP_high ) ) {o_category = 0;}
 	  if (o_category == 2 && leadingJet_bDis < btagWP_high && subleadingJet_bDis < btagWP_high && subleadingJet_bDis > 0.8 ) {o_category = 1;}

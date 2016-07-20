@@ -9,8 +9,9 @@
 using namespace std;
 
 int Process(string file, string outFile, string mtotMin, string mtotMax,string scale, 
-		string photonCR, string doKinFit, string doMX, string doTilt, string tiltWindow, 
-		string doNoCat, string btagWP, string doCatMixed, string btagHigh, string btagLow, string singleCat){
+	    string photonCR, string doKinFit, string doMX, string doTilt, string tiltWindow, 
+	    string doNoCat, string btagWP, string doCatMixed, string btagHigh, string btagLow, string singleCat,
+	    string doNRWeights){
     TFile* iFile = new TFile(TString(file), "READ");
     TTree* iTree = (TTree*) iFile->Get("bbggSelectionTree");
     cout << "[LimitTreeMaker:Process] Processing tree with " << iTree->GetEntries() << " entries." << endl;
@@ -30,6 +31,8 @@ int Process(string file, string outFile, string mtotMin, string mtotMax,string s
     t.SetBTagWP_High( TString(btagHigh).Atof());
     t.SetBTagWP_Low( TString(btagLow).Atof());
     t.DoSingleCat( TString(singleCat).Atoi());
+
+    t.DoNRWeights( TString(doNRWeights).Atoi());
     t.Loop();
 
 //    delete iFile;
@@ -57,42 +60,56 @@ int main(int argc, char *argv[]) {
     string singleCat = "0";
     string inputRootFile = "";
 
+    string doNRWeights = "0";
+    
+    cout<<"\t argc =  "<<argc<<endl;
     for( int i = 1; i < argc; i++){
-	if ( std::string(argv[i]) == "-i"){
-		if ( (i+1) == argc) {
-			std::cout << "Invalid number of arguments!" << std::endl;
-			break;
-		}
-		inputFile = string(std::string(argv[i+1]));
-		i++;
+      cout<<"My args:  "<<i<<"  "<<argv[i]<<endl;
+    }
+    
+    for( int i = 1; i < argc; i++){
+
+      cout<<"My args:  "<<i<<"  "<<argv[i]<<endl;
+      if ( std::string(argv[i]) == "-i"){
+	cout<<"iiii We are here"<<endl;
+	if ( (i+1) == argc) {
+	  std::cout << "Invalid number of arguments!" << std::endl;
+	  break;
 	}
-    if ( std::string(argv[i]) == "-inputFile") {
+	inputFile = string(std::string(argv[i+1]));
+	i++;
+      }
+      else if ( std::string(argv[i]) == "-inputFile") {
         if ( (i+1) == argc) {
-            std::cout << "Invaliv number of arguments!" << std::endl;
-            break;
+	  std::cout << "Invaliv number of arguments!" << std::endl;
+	  break;
         }
         inputRootFile = string(std::string(argv[i+1]));
         i++;
-    }
-	else if ( std::string(argv[i]) == "-tilt"){
-		doTilt = "1";
+      }
+      else if ( std::string(argv[i]) == "-NRW"){
+	doNRWeights = "1";
+      }
+      else if ( std::string(argv[i]) == "-tilt"){
+	doTilt = "1";
+      }
+      else if ( std::string(argv[i]) == "-tiltWindow"){
+	if( (i+1) == argc){
+	  std::cout << "Invalid number of arguments!" << std::endl;
+	  break;
 	}
-	else if ( std::string(argv[i]) == "-tiltWindow"){
-		if( (i+1) == argc){
-			std::cout << "Invalid number of arguments!" << std::endl;
-			break;
-		}
-		tiltWindow = string(std::string(argv[i+1]));
-		i++;
+	tiltWindow = string(std::string(argv[i+1]));
+	i++;
+      }
+      else if ( std::string(argv[i]) =="-o"){
+	cout<<"\t ooo We are here"<<endl;
+	if ( (i+1) == argc) {
+	  std::cout << "Invalid number of arguments!" << std::endl;
+	  break;
 	}
-	else if ( std::string(argv[i]) =="-o"){
-		if ( (i+1) == argc) {
-			std::cout << "Invalid number of arguments!" << std::endl;
-			break;
-		}
-		outputLocation = string(std::string(argv[i+1]));
-		i++;
-	}
+	outputLocation = string(std::string(argv[i+1]));
+	i++;
+      }
 	else if ( std::string(argv[i]) =="-max"){
 		if ( (i+1) == argc) {
 			std::cout << "Invalid number of arguments!" << std::endl;
@@ -160,6 +177,9 @@ int main(int argc, char *argv[]) {
 		singleCat = "1";
 	}
 	else {
+
+	  cout<<"Are we here or something?"<<endl;
+
 		cout << "Usage: LimitTreeMaker -i <input list of files> ( or -inputFile <single root file> ) -o <output location>" << endl;// \n
 		cout << "options: " << endl;//\n
 		cout << "\t -min <min mtot> -max <max mtot> " << endl;//\n
@@ -207,7 +227,7 @@ int main(int argc, char *argv[]) {
         outF.append("/LT_");
         outF.append(inputRootFile.substr(sLoc+1));
         cout << "Output file: " << outF << endl;
-        Process(inputRootFile, outF, mtotMin, mtotMax, scale, photonCR, doKinFit, doMX, doTilt, tiltWindow, doNoCat, btagWP, doCatMixed, btagHigh, btagLow, singleCat);
+        Process(inputRootFile, outF, mtotMin, mtotMax, scale, photonCR, doKinFit, doMX, doTilt, tiltWindow, doNoCat, btagWP, doCatMixed, btagHigh, btagLow, singleCat, doNRWeights);
         return 0;
     }
     
@@ -230,7 +250,7 @@ int main(int argc, char *argv[]) {
         outF.append("/LT_");
         outF.append(line.substr(sLoc+1));
         cout << "Output file: " << outF << endl;
-        Process(line, outF, mtotMin, mtotMax, scale, photonCR, doKinFit, doMX, doTilt, tiltWindow, doNoCat, btagWP, doCatMixed, btagHigh, btagLow, singleCat);
+        Process(line, outF, mtotMin, mtotMax, scale, photonCR, doKinFit, doMX, doTilt, tiltWindow, doNoCat, btagWP, doCatMixed, btagHigh, btagLow, singleCat, doNRWeights);
     }
     
     return 0;
