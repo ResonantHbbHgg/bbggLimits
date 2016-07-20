@@ -34,6 +34,12 @@ public :
 //   Output file and tree
    TTree *outTree;
    TFile *outFile;
+
+   ULong64_t o_evt;
+   UInt_t o_run;
+
+   Float_t  o_NRWeights[1507];
+
    Int_t           o_category;
    Double_t        o_normalization;
    Double_t        o_weight;
@@ -54,10 +60,14 @@ public :
    int doNoCat;
    int doCatMixed;
    int doSingleCat;
+   int doNonResWeights;
    double tiltWindow;
    typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > LorentzVector;
 
    // Declaration of leaf types
+
+   Float_t         NRWeights[1507];
+
    vector<double>   *genWeights;
    Double_t         genTotalWeight;
    LorentzVector    *leadingPhoton;
@@ -83,7 +93,14 @@ public :
    Int_t	isSignal;
    Int_t	isPhotonCR;
 
+   ULong64_t event;
+   UInt_t run;
+
    // List of branches
+   TBranch        *b_event;   //!
+   TBranch        *b_run;   //!
+
+   TBranch        *b_NRWeights;   //!                                                                                                                       
    TBranch        *b_genWeights;   //!
    TBranch        *b_genTotalWeight;   //!
    TBranch        *b_leadingPhoton;   //!
@@ -132,6 +149,9 @@ public :
    void DoNoCat( int cat ) { doNoCat = cat; }
    void DoCatMixed( int cat ) { doCatMixed = cat; }
    void DoSingleCat( int cat ) { doSingleCat = cat; }
+
+   void DoNRWeights(int doNRW) { doNonResWeights = doNRW; }
+
 //   void SetTilt( int tt, double ttWind) { tilt = tt; tiltWindow = ttWind; }
    void SetTilt( int tt) { tilt = tt;}
 };
@@ -154,6 +174,8 @@ bbggLTMaker::bbggLTMaker(TTree *tree) : fChain(0)
    doNoCat = 0;
    doCatMixed = 0;
    doSingleCat = 0;
+
+   doNonResWeights = 0;
    Init(tree);
 }
 
@@ -213,6 +235,10 @@ void bbggLTMaker::Init(TTree *tree)
    if (!tree) return;
    fChain = tree;
 //   fChain->SetMakeClass(1);
+   fChain->SetBranchAddress("event", &event, &b_event);
+   fChain->SetBranchAddress("run", &run, &b_run);
+
+   fChain->SetBranchAddress("NRWeights", NRWeights, &b_NRWeights);
 
    fChain->SetBranchAddress("genWeights", &genWeights, &b_genWeights);
    fChain->SetBranchAddress("genTotalWeight", &genTotalWeight, &b_genTotalWeight);
