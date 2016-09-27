@@ -1,7 +1,7 @@
 {
         "signal" : {
                 "dir" : "/afs/cern.ch/work/r/rateixei/work/DiHiggs/LimitsForPush/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LimitSetting/NonResTrees/NonResAnalysis_ICHEP_TYPE/",
-		"nodes" : [1],
+		"nodes" : [0,1,2,3,4,5,6,7,8,9,10,11,12,13],
         "types" : ["LowMass", "HighMass"],
 		"signalModelCard" : "/afs/cern.ch/work/r/rateixei/work/DiHiggs/LimitsForPush/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D_sig.rs"
         },

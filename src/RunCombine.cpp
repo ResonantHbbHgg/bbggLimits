@@ -38,7 +38,7 @@ void RunCombine(std::string path_dir,bool doblinding)
 			std::string mvv="mv higgsCombineTest.Asymptotic.mH120.root "+cresult+"/higgsCombineTest.Asymptotic.mH125_m"+number[0];        				
 			boost::filesystem::create_directory(logs);
 			boost::filesystem::create_directory(cresult);
-		  std::string command1="combine -M Asymptotic "+blinded+location+txtname+".txt >>"+logs+"/higgsCombineTest.Asymptotic.mH125.0._m"+number[0]+"_higgs.txt";
+		  std::string command1="combine -M Asymptotic "+blinded+location+txtname+".txt --X-rtd TMCSO_AdaptivePseudoAsimov=50 >>"+logs+"/higgsCombineTest.Asymptotic.mH125.0._m"+number[0]+"_higgs.txt";
 			//std::string command2="combine -M Asymptotic "+blinded+location+txtname+"onecatnohiggs.txt >>"+logs+"/higgsCombineTest.Asymptotic.mH125.0._m"+number[0]+"_onecatnohiggs.txt";
 			//std::string command3="combine -M Asymptotic "+blinded+location+txtname+".txt -S 0 >>"+logs+"/higgsCombineTest.Asymptotic.mH125.0._m"+number[0]+"_nosyst_higgs.txt";
 			std::cout<<green<<"RUNNING COMBINE FOR "<<folder_name<<" : "<<normal<<std::endl;
