@@ -8,9 +8,9 @@
 
 using namespace std;
 
-int Process(string file, string outFile, string mtotMin, string mtotMax,string scale, 
+int Process(string file, string outFile, string mtotMin, string mtotMax, string cosThetaStar, string CTScats, string scale, 
 		string photonCR, string doKinFit, string doMX, string doTilt, string tiltWindow, 
-		string doNoCat, string btagWP, string doCatMixed, string btagHigh, string btagLow, string singleCat){
+		string doNoCat, string btagWP, string doCatMixed, string btagHigh, string btagLow, string singleCat, string doVariation, string doPhoVariation ){
     TFile* iFile = new TFile(TString(file), "READ");
     TTree* iTree = (TTree*) iFile->Get("bbggSelectionTree");
     cout << "[LimitTreeMaker:Process] Processing tree with " << iTree->GetEntries() << " entries." << endl;
@@ -22,7 +22,6 @@ int Process(string file, string outFile, string mtotMin, string mtotMax,string s
     t.IsMX( TString(doMX).Atoi() );
     t.IsKinFit( TString(doKinFit).Atoi() );
     t.SetOutFileName( outFile );
-//    t.SetTilt( TString(doTilt).Atoi(), TString(tiltWindow).Atof());
     t.SetTilt( TString(doTilt).Atoi());
     t.DoNoCat( TString(doNoCat).Atoi());
     t.SetBTagWP( TString(btagWP).Atof());
@@ -30,10 +29,11 @@ int Process(string file, string outFile, string mtotMin, string mtotMax,string s
     t.SetBTagWP_High( TString(btagHigh).Atof());
     t.SetBTagWP_Low( TString(btagLow).Atof());
     t.DoSingleCat( TString(singleCat).Atoi());
+    t.DoBVariation( TString(doVariation).Atoi());
+    t.DoPhoVariation( TString(doPhoVariation).Atoi());
+    t.SetCosThetaStar( TString(cosThetaStar).Atof(), TString(CTScats).Atoi());
     t.Loop();
 
-//    delete iFile;
-//    delete iTree;
     return 1;
 }
 
@@ -56,6 +56,10 @@ int main(int argc, char *argv[]) {
     string btagLow = "0.435";
     string singleCat = "0";
     string inputRootFile = "";
+    string doVariation = "-999";
+    string doPhoVariation = "-999";
+    string cosThetaStar = "100";
+    string cosThetaStarCats = "0";
 
     for( int i = 1; i < argc; i++){
 	if ( std::string(argv[i]) == "-i"){
@@ -66,14 +70,14 @@ int main(int argc, char *argv[]) {
 		inputFile = string(std::string(argv[i+1]));
 		i++;
 	}
-    if ( std::string(argv[i]) == "-inputFile") {
-        if ( (i+1) == argc) {
-            std::cout << "Invaliv number of arguments!" << std::endl;
-            break;
-        }
-        inputRootFile = string(std::string(argv[i+1]));
-        i++;
-    }
+    	else if ( std::string(argv[i]) == "-inputFile") {
+        	if ( (i+1) == argc) {
+            		std::cout << "Invaliv number of arguments!" << std::endl;
+            		break;
+           	}
+        	inputRootFile = string(std::string(argv[i+1]));
+        	i++;
+    	}
 	else if ( std::string(argv[i]) == "-tilt"){
 		doTilt = "1";
 	}
@@ -141,6 +145,38 @@ int main(int argc, char *argv[]) {
 		btagLow = string(std::string(argv[i+1]));
 		i++;
 	}
+	else if ( std::string(argv[i]) =="-doBVariation"){
+		if ( (i+1) == argc) {
+			std::cout << "Invalid number of arguments!" << std::endl;
+			break;
+		}
+		doVariation = string(std::string(argv[i+1]));
+		i++;
+	}
+	else if ( std::string(argv[i]) =="-doPhoVariation"){
+		if ( (i+1) == argc) {
+			std::cout << "Invalid number of arguments!" << std::endl;
+			break;
+		}
+		doPhoVariation = string(std::string(argv[i+1]));
+		i++;
+	}
+	else if ( std::string(argv[i]) =="-cosThetaStar"){
+		if ( (i+1) == argc) {
+			std::cout << "Invalid number of arguments!" << std::endl;
+			break;
+		}
+		cosThetaStar = string(std::string(argv[i+1]));
+		i++;
+	}
+	else if ( std::string(argv[i]) =="-cosThetaStarCats"){
+		if ( (i+1) == argc) {
+			std::cout << "Invalid number of arguments!" << std::endl;
+			break;
+		}
+		cosThetaStarCats = string(std::string(argv[i+1]));
+		i++;
+	}
 	else if ( std::string(argv[i]) =="-photonCR"){
 		photonCR = "1";
 	}
@@ -160,6 +196,7 @@ int main(int argc, char *argv[]) {
 		singleCat = "1";
 	}
 	else {
+		cout << "UNKNOWN OPTION! " << std::string(argv[i]) << endl;
 		cout << "Usage: LimitTreeMaker -i <input list of files> ( or -inputFile <single root file> ) -o <output location>" << endl;// \n
 		cout << "options: " << endl;//\n
 		cout << "\t -min <min mtot> -max <max mtot> " << endl;//\n
@@ -174,11 +211,13 @@ int main(int argc, char *argv[]) {
 		cout << "\t -btagHigh (for mixed cat, highest value)" << endl;
 		cout << "\t -btagLow (for mixed cat, lowest value)" << endl;
 		cout << "\t -singleCat (only one category)" << endl;
+		cout << "\t -doBVariation (Apply b-tagging SF factors: 1 or -1)" << endl;
 		return -1;
 	}	
     }
 
     if( (inputFile == "" && inputRootFile == "") || outputLocation == "") {
+		cout << "YOU DIDNT SPECIFY INPUT AND OR OUTPUT" << endl;
 		cout << "Usage: LimitTreeMaker -i <input list of files> ( or -inputFile <single root file> ) -o <output location>" << endl;// \n
 		cout << "options: " << endl;//\n
 		cout << "\t -min <min mtot> -max <max mtot> " << endl;//\n
@@ -207,7 +246,7 @@ int main(int argc, char *argv[]) {
         outF.append("/LT_");
         outF.append(inputRootFile.substr(sLoc+1));
         cout << "Output file: " << outF << endl;
-        Process(inputRootFile, outF, mtotMin, mtotMax, scale, photonCR, doKinFit, doMX, doTilt, tiltWindow, doNoCat, btagWP, doCatMixed, btagHigh, btagLow, singleCat);
+        Process(inputRootFile, outF, mtotMin, mtotMax, cosThetaStar, cosThetaStarCats, scale, photonCR, doKinFit, doMX, doTilt, tiltWindow, doNoCat, btagWP, doCatMixed, btagHigh, btagLow, singleCat, doVariation, doPhoVariation);
         return 0;
     }
     
@@ -230,7 +269,7 @@ int main(int argc, char *argv[]) {
         outF.append("/LT_");
         outF.append(line.substr(sLoc+1));
         cout << "Output file: " << outF << endl;
-        Process(line, outF, mtotMin, mtotMax, scale, photonCR, doKinFit, doMX, doTilt, tiltWindow, doNoCat, btagWP, doCatMixed, btagHigh, btagLow, singleCat);
+        Process(line, outF, mtotMin, mtotMax, cosThetaStar, cosThetaStarCats, scale, photonCR, doKinFit, doMX, doTilt, tiltWindow, doNoCat, btagWP, doCatMixed, btagHigh, btagLow, singleCat, doVariation, doPhoVariation);
     }
     
     return 0;

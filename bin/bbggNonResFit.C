@@ -282,6 +282,9 @@ std::map<std::string,int>higgsNumber
       {
           
             int sigMas=sigMass[i].first;
+	    int sigCat=sigMas;
+	    if(signalType[t] == "HighMass") sigCat = sigMass[i].first + 9000;
+	    if(signalType[t] == "HighMass") cout << "DOING HIGH MASS" << endl;
 //            std::string signalDir2="";
 //          if(energy=="13TeV") signalDir2 = sigMass[i].second;
             //signalDir2 = TString(TString(signalDir).ReplaceAll( std::string("MASS"), std::string(v.second.data())) ).Data()+part+signalType+part2+v.second.data()+end
@@ -292,6 +295,7 @@ std::map<std::string,int>higgsNumber
             std::string signalDir2 = TString(baseSignalDir + baseFile).Data();
             
             std::string folder_name=path_dir+"/"+signalType[t]+"_Node"+to_string(sigMas);
+            cout << folder_name << endl;
             
             std::string HLFactoryname= TString(TString(signalType[t]) +TString("_M")+TString(to_string(sigMas))).Data();
 	        std::string ddata = baseSignalDir.Data() + std::string("/LT_DoubleEG.root");
@@ -307,35 +311,45 @@ std::map<std::string,int>higgsNumber
             bbgg2DFitter TheFitter;
             if(ParamsForFits.find(sigMas)!=ParamsForFits.end())
             {
-        	TheFitter.Initialize( w, sigMas, lumi,folder_name,energy,doblinding, NCAT, addHiggs,ParamsForFits[sigMas][0],ParamsForFits[sigMas][1],ParamsForFits[sigMas][2],ParamsForFits[sigMas][3],ParamsForFits[sigMas][4],ParamsForFits[sigMas][5],ParamsForFits[sigMas][6],ParamsForFits[sigMas][7],ParamsForFits[sigMas][8],ParamsForFits[sigMas][9],ParamsForFits[sigMas][10],ParamsForFits[sigMas][11]);
+        	TheFitter.Initialize( w, sigCat, lumi,folder_name,energy,doblinding, NCAT,
+					addHiggs,ParamsForFits[sigMas][0],ParamsForFits[sigMas][1],
+					ParamsForFits[sigMas][2],ParamsForFits[sigMas][3],ParamsForFits[sigMas][4],
+					ParamsForFits[sigMas][5],ParamsForFits[sigMas][6],ParamsForFits[sigMas][7],
+					ParamsForFits[sigMas][8],ParamsForFits[sigMas][9],ParamsForFits[sigMas][10],
+					ParamsForFits[sigMas][11]);
             }
-            else TheFitter.Initialize( w, sigMas, lumi,folder_name,energy,doblinding, NCAT, addHiggs,minMggMassFit,maxMggMassFit,minMjjMassFit,maxMjjMassFit,minSigFitMgg,maxSigFitMgg,minSigFitMjj,maxSigFitMjj,minHigMggFit,maxHigMggFit,minHigMjjFit,maxHigMjjFit);
+            else TheFitter.Initialize( w, sigCat, lumi,folder_name,energy,doblinding, NCAT,
+					addHiggs,minMggMassFit,maxMggMassFit,minMjjMassFit,maxMjjMassFit,minSigFitMgg,
+					maxSigFitMgg,minSigFitMjj,maxSigFitMjj,minHigMggFit,maxHigMggFit,minHigMjjFit,maxHigMjjFit);
             TheFitter.style();
+
+	    if(signalType[t] == "LowMass") TheFitter.SetFitStrategy(1);
+//	    TheFitter.SetFitStrategy(1);
             
-          	int opened=TheFitter.AddSigData( mass,signalDir2);
+            int opened=TheFitter.AddSigData( mass,signalDir2);
             std::cout << "[bbggNonResFit] Signal of node " << sigMas << " and type " << signalType[t] << " added!" << std::endl;
-        	if(opened==-1)
-        	{
-        		std::cout<<yellow<<" File "<<signalDir2<<" not found or not openeable !!"<<normal<<std::endl;
-        		std::cout<<yellow<<" File skipped !!"<<normal<<std::endl;
-        		continue;
-        	}
+            if(opened==-1)
+            {
+        	std::cout<<yellow<<" File "<<signalDir2<<" not found or not openeable !!"<<normal<<std::endl;
+        	std::cout<<yellow<<" File skipped !!"<<normal<<std::endl;
+        	continue;
+            }
             boost::filesystem::path diree( folder_name );
             
-         	if(boost::filesystem::create_directory(diree)) 
-         	{
-          	    boost::filesystem::path dirwork(folder_name+"/workspaces");
-        		boost::filesystem::create_directory(dirwork);
-        		boost::filesystem::path dirdata(folder_name+"/datacards");
-        		boost::filesystem::create_directory(dirdata);
-          	}
-         	cout<<green<<"SIGNAL ADDED"<<normal<<endl;
-          	TheFitter.SigModelFit( mass); // constructing signal pdf
-        	cout<<green<<"SIGNAL FITTED"<<normal<<endl;
-          	TheFitter.MakeSigWS( fileBaseName);
-                cout<<green<<"SIGNAL'S WORKSPACE DONE"<<normal<<endl;
-          	TheFitter.MakePlots( mass);
-        	cout<<green<<"SIGNAL'S PLOT DONE"<<normal<<endl;
+            if(boost::filesystem::create_directory(diree)) 
+            {
+                boost::filesystem::path dirwork(folder_name+"/workspaces");
+                boost::filesystem::create_directory(dirwork);
+        	boost::filesystem::path dirdata(folder_name+"/datacards");
+        	boost::filesystem::create_directory(dirdata);
+            }
+            cout<<green<<"SIGNAL ADDED"<<normal<<endl;
+            TheFitter.SigModelFit( mass); // constructing signal pdf
+            cout<<green<<"SIGNAL FITTED"<<normal<<endl;
+            TheFitter.MakeSigWS( fileBaseName);
+            cout<<green<<"SIGNAL'S WORKSPACE DONE"<<normal<<endl;
+            TheFitter.MakePlots( mass);
+            cout<<green<<"SIGNAL'S PLOT DONE"<<normal<<endl;
         	//
         	if (addHiggs) {
                 	for(unsigned int J=0;J!=higgstrue.size();++J)
@@ -368,11 +382,35 @@ std::map<std::string,int>higgsNumber
           	TheFitter.MakeDataCard( fileBaseName, fileBkgName,higgsfilename,useSigTheoryUnc,higgstrue,higgsNumber);
         	cout<<green<<"DATACARD DONE"<<normal<<endl;
           	fitresults->Print();
+      		 //MakeFancyDatacard
+	        //GetNumber of Observed Events:
+	        float sigExp[NCAT];
+	        float bkgObs[NCAT];
+	        for (int cc = 0; cc < NCAT; cc++){
+	                sigExp[cc] = -1;
+	                bkgObs[cc] = -1;
+	        }
+	        TString sigExpStr = TString("");
+	        TString bkgObsStr = TString("");
+	        for (int cc = 0; cc < NCAT; cc++) {
+	                sigExp[cc] = TheFitter.GetSigExpectedCats(cc);
+	                if(doblinding==false) bkgObs[cc] = TheFitter.GetObservedCats(cc);
+	                sigExpStr += TString::Format("%f", sigExp[cc]);
+	                bkgObsStr += TString::Format("%f", bkgObs[cc]);
+	                if(cc < NCAT - 1) {
+	                        sigExpStr += TString(",");
+	                        bkgObsStr += TString(",");
+	                }
+	        }
+	        TString DCcommand = TString("python scripts/DataCardMaker.py -f ") + TString(folder_name) + TString::Format(" -n %d ", NCAT) + TString("-s ") + sigExpStr + TString(" -o ") + bkgObsStr;
+	        std::cout << DCcommand << std::endl;
+	        system(DCcommand);
+
         }
   }
   //End of individual limits
   //Do Python ~magic~
-  system( TString("python NonResonantOrganizer.py -f " + path_dir).Data());
+  system( TString("python scripts/NonResonantOrganizer.py -f " + path_dir).Data());
   
   //
   if(docombine==true)
@@ -382,8 +420,8 @@ std::map<std::string,int>higgsNumber
   if(doBrazilianFlag==true)
   {
       std::stringstream ss;
-      ss << std::fixed << std::setprecision(2) << lumi;
-      system( TString("python NonResPlotter.py -f "+ path_dir + " -l "+ ss.str() ).Data());
+      ss << std::fixed << std::setprecision(1) << lumi;
+      system( TString("python scripts/NonResPlotter.py -f "+ path_dir + " -l "+ ss.str() ).Data());
       if(0)	BrazilianFlag(path_dir,HH,base,low,obs,twotag,energy,lumi);
   }
   return 0;		

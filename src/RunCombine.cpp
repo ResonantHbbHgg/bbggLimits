@@ -30,7 +30,8 @@ void RunCombine(std::string path_dir,bool doblinding)
             }
 			std::string blinded="";
 			if(doblinding==1)blinded="--run blind ";
-			std::string txtname="hgg.mH125_8TeV";
+//			std::string txtname="hgg.mH125_8TeV";
+			std::string txtname="hhbbgg_13TeV_DataCard";
 		 	std::string location=path_dir+"/"+folder_name+"/datacards/";
 		 	std::string logs=path_dir+"/"+folder_name+"/logs";
 			std::string cresult=path_dir+"/"+folder_name+"/combine"; 

@@ -1,17 +1,17 @@
 {
         "signal" : {
-                "type" : "Radion",
-                "dir" : "/afs/cern.ch/work/r/rateixei/work/DiHiggs/NewLimits/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LimitSetting/Trees/EGM_MVA_2cat_0.46WP_MASS/",
-		"mass" : [250, 260, 280, 300, 320, 350, 400, 450, 500, 600, 700, 800],
+                "type" : "BulkGraviton",
+                "dir" : "/afs/cern.ch/work/r/rateixei/work/DiHiggs/NewLimits/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LimitSetting/Trees/GravNewTraining_EGM_MVA_2cat_MixedMod4_low0.46_high0.936_MASS/",
+		"mass" : [250, 260, 270, 280, 300, 320, 340, 350, 400, 450, 500],
                 "nonresFile" : "Lam_1d0_Yt_1d0_c2_0d0",
-		"signalModelCard" : "/afs/cern.ch/work/r/rateixei/work/DiHiggs/NewLimits/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D.rs"
+		"signalModelCard" : "/afs/cern.ch/work/r/rateixei/work/DiHiggs/NewLimits/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D_sig.rs"
         },
         "other" : {
-                "integratedLumi" : 29.80,
+                "integratedLumi" : 2.70,
                 "energy" : "13TeV",
                 "higgsMass" : 125.0,
                 "addHiggs" : 0,
-                "doBlinding" : 1,
+                "doBlinding" : 0,
                 "doBands" : 0,
                 "ncat" : 2,
                 "analysisType" : "fitTo2D_resSearch_withRegKinFit",
@@ -39,7 +39,7 @@
 		
         },
         "data" : {
-                "dir" : "/afs/cern.ch/work/r/rateixei/work/DiHiggs/NewLimits/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LimitSetting/Trees/EGM_MVA_2cat_0.46WP_MASS/",
+                "dir" : "/afs/cern.ch/work/r/rateixei/work/DiHiggs/NewLimits/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LimitSetting/Trees/GravNewTraining_EGM_MVA_2cat_MixedMod4_low0.46_high0.936_MASS/",
                 "name" :"DoubleEG"
         },
         "higgs" : {

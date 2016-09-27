@@ -12,6 +12,7 @@
 #include <TChain.h>
 #include <TFile.h>
 #include <TSelector.h>
+#include <TH2F.h>
 
 // Header file for the classes stored in the TTree if any.
 #include <vector>
@@ -20,6 +21,10 @@
 #include <algorithm>
 #include <string>
 #include <utility>
+
+#include "CondFormats/BTauObjects/interface/BTagCalibration.h"
+#include "CondFormats/BTauObjects/interface/BTagCalibrationReader.h"
+
 
 using namespace std;
 
@@ -36,10 +41,17 @@ public :
    TFile *outFile;
    Int_t           o_category;
    Double_t        o_normalization;
+   Double_t	   o_preweight;
+   Double_t        o_btagweight;
    Double_t        o_weight;
    Double_t        o_bbMass;
    Double_t        o_ggMass;
    Double_t        o_bbggMass;
+   Double_t        o_phoevWeight;
+   Double_t        jet1PT;
+   Double_t	   jet2PT;
+   Double_t	   jet1ETA;
+   Double_t	   jet2ETA;
    std::string outFileName;
    double mtotMin;
    double mtotMax;
@@ -47,6 +59,8 @@ public :
    double btagWP;
    double btagWP_low;
    double btagWP_high;
+   double cosThetaStarCut;
+   int cosThetaStarCutCats;
    int photonCR;
    int doKinFit;
    int doMX;
@@ -54,6 +68,8 @@ public :
    int doNoCat;
    int doCatMixed;
    int doSingleCat;
+   int bVariation;
+   int phoVariation;
    double tiltWindow;
    typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > LorentzVector;
 
@@ -80,8 +96,14 @@ public :
    LorentzVector    *dijetCandidate_KF;
    LorentzVector    *diHiggsCandidate;
    LorentzVector    *diHiggsCandidate_KF;
+   Float_t	    CosThetaStar;
    Int_t	isSignal;
    Int_t	isPhotonCR;
+   Int_t	leadingJet_flavour;
+   Int_t	subleadingJet_flavour;
+   Int_t	leadingJet_hadFlavour;
+   Int_t	subleadingJet_hadFlavour;
+   std::vector<std::pair<float,float>> btmap;
 
    // List of branches
    TBranch        *b_genWeights;   //!
@@ -108,6 +130,57 @@ public :
    TBranch        *b_diHiggsCandidate_KF;   //!
    TBranch	  *b_isSignal;	//!
    TBranch	  *b_isPhotonCR;  //!
+   TBranch	  *b_leadingJet_flavour;
+   TBranch	  *b_subleadingJet_flavour;
+   TBranch	  *b_leadingJet_hadFlavour;
+   TBranch	  *b_subleadingJet_hadFlavour;
+   TBranch	  *b_CosThetaStar;
+
+   //Photon ID SF stuff
+   TFile* photonidFile;
+   TH2F* photonIDhist;
+   TFile* csevFile;
+   TH2F* csevhist;
+
+   //BTaggin weights stuff
+   BTagCalibration* calib;
+   TFile* effsFile;
+   TH2F* b_eff_medium;
+   TH2F* b_eff_tight;
+   TH2F* b_eff_loose;
+   TH2F* c_eff_medium;
+   TH2F* c_eff_tight;
+   TH2F* c_eff_loose;
+   TH2F* l_eff_medium;
+   TH2F* l_eff_tight;
+   TH2F* l_eff_loose;
+   BTagCalibrationReader* b_reader_tight;
+   BTagCalibrationReader* b_reader_tight_up;
+   BTagCalibrationReader* b_reader_tight_down;
+   BTagCalibrationReader* b_reader_medium;
+   BTagCalibrationReader* b_reader_medium_up;
+   BTagCalibrationReader* b_reader_medium_down;
+   BTagCalibrationReader* b_reader_loose;
+   BTagCalibrationReader* b_reader_loose_up;
+   BTagCalibrationReader* b_reader_loose_down;
+   BTagCalibrationReader* c_reader_tight;
+   BTagCalibrationReader* c_reader_tight_up;
+   BTagCalibrationReader* c_reader_tight_down;
+   BTagCalibrationReader* c_reader_medium;
+   BTagCalibrationReader* c_reader_medium_up;
+   BTagCalibrationReader* c_reader_medium_down;
+   BTagCalibrationReader* c_reader_loose;
+   BTagCalibrationReader* c_reader_loose_up;
+   BTagCalibrationReader* c_reader_loose_down;
+   BTagCalibrationReader* l_reader_tight;
+   BTagCalibrationReader* l_reader_tight_up;
+   BTagCalibrationReader* l_reader_tight_down;
+   BTagCalibrationReader* l_reader_medium;
+   BTagCalibrationReader* l_reader_medium_up;
+   BTagCalibrationReader* l_reader_medium_down;
+   BTagCalibrationReader* l_reader_loose;
+   BTagCalibrationReader* l_reader_loose_up;
+   BTagCalibrationReader* l_reader_loose_down;
 
 
    bbggLTMaker(TTree *tree=0);
@@ -134,6 +207,14 @@ public :
    void DoSingleCat( int cat ) { doSingleCat = cat; }
 //   void SetTilt( int tt, double ttWind) { tilt = tt; tiltWindow = ttWind; }
    void SetTilt( int tt) { tilt = tt;}
+   void DoBVariation( int tt) { bVariation = tt; }
+   void BTagSetup(TString btagfile, TString effsfile);
+   std::vector<std::pair<float,float>> BTagWeight(bbggLTMaker::LorentzVector jet1, int flavour1, bbggLTMaker::LorentzVector jet2, int flavour2, int variation=0);
+   void SetupPhotonSF(TString idfile, TString evfile);
+   float PhotonSF(LorentzVector pho, int phovar = 0);
+   void DoPhoVariation(int tt) { phoVariation = tt;}
+   void SetCosThetaStar(float cut, int cat) { cosThetaStarCut = cut; cosThetaStarCutCats = cat;}
+
 };
 
 #endif
@@ -154,6 +235,10 @@ bbggLTMaker::bbggLTMaker(TTree *tree) : fChain(0)
    doNoCat = 0;
    doCatMixed = 0;
    doSingleCat = 0;
+   bVariation = -999;
+   phoVariation = -999;
+   cosThetaStarCut = 10;
+   cosThetaStarCutCats = 0;
    Init(tree);
 }
 
@@ -161,6 +246,9 @@ bbggLTMaker::~bbggLTMaker()
 {
    if (!fChain) return;
    delete fChain->GetCurrentFile();
+//   photonidFile->Close();
+//   csevFile->Close();
+//   effsFile->Close();
 }
 
 Int_t bbggLTMaker::GetEntry(Long64_t entry)
@@ -209,6 +297,7 @@ void bbggLTMaker::Init(TTree *tree)
    leadingPhotonISO = 0;
    subleadingPhotonID = 0;
    subleadingPhotonISO = 0;
+   CosThetaStar = 0;
    // Set branch addresses and branch pointers
    if (!tree) return;
    fChain = tree;
@@ -238,8 +327,11 @@ void bbggLTMaker::Init(TTree *tree)
    fChain->SetBranchAddress("diHiggsCandidate_KF", &diHiggsCandidate_KF, &b_diHiggsCandidate_KF);
    fChain->SetBranchAddress("isSignal", &isSignal, &b_isSignal);
    fChain->SetBranchAddress("isPhotonCR", &isPhotonCR, &b_isPhotonCR);
-
-
+   fChain->SetBranchAddress("leadingJet_flavour", &leadingJet_flavour, &b_leadingJet_flavour);
+   fChain->SetBranchAddress("subleadingJet_flavour", &subleadingJet_flavour, &b_subleadingJet_flavour);
+   fChain->SetBranchAddress("leadingJet_hadFlavour", &leadingJet_hadFlavour, &b_leadingJet_hadFlavour);
+   fChain->SetBranchAddress("subleadingJet_hadFlavour", &subleadingJet_hadFlavour, &b_subleadingJet_hadFlavour);
+   fChain->SetBranchAddress("CosThetaStar", &CosThetaStar, &b_CosThetaStar);
    Notify();
 }
 

@@ -40,14 +40,15 @@ def main(argv):
 	if len(nodesList) < 1:
 		print "EMPTY LIST OF NODES!!"
 		sys.exit(2)
-	
+
+	postFix = "/datacards/hhbbgg_13TeV_DataCard.txt"
 	for n in nodesList:
 		if not os.path.isdir(folder+"/"+n): os.mkdir(folder+"/"+n)
 		if not os.path.isdir(folder+"/"+n+"/datacards/"): os.mkdir(folder+"/"+n+"/datacards/")
-		HMdatacard = nodeSeparateLocation+"/HighMass_"+n+"/datacards/hgg.mH125_8TeV.txt"
-		LMdatacard = nodeSeparateLocation+"/LowMass_"+n+"/datacards/hgg.mH125_8TeV.txt"
-		os.system("combineCards.py "+ HMdatacard + " " + LMdatacard + " > " + folder+"/"+n+"/datacards/hgg.mH125_8TeV.txt")
-		combinedCardName = folder+"/"+n+"/datacards/hgg.mH125_8TeV.txt"
+		HMdatacard = nodeSeparateLocation+"/HighMass_"+n+postFix
+		LMdatacard = nodeSeparateLocation+"/LowMass_"+n+postFix
+		os.system("combineCards.py "+ HMdatacard + " " + LMdatacard + " > " + folder+"/"+n+postFix)
+		combinedCardName = folder+"/"+n+postFix
 		#CombineDatacards_MediumBTag_v44/SeparateCategories//HighMass_Node0/datacards/
 		combinedCard = open(combinedCardName, "r")
 		lines = []

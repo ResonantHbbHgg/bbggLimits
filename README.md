@@ -3,17 +3,7 @@ Package for computing limits for the Run II analyses
 
 ### Instalation
 First, setup the environment with the Higgs Combine tools: https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideHiggsAnalysisCombinedLimit#For_end_users_that_don_t_need_to   
-Currently recommended CMSSW version: 71X
-```
-setenv SCRAM_ARCH slc6_amd64_gcc481
-cmsrel CMSSW_7_1_5 ### must be a 7_1_X release  >= 7_1_5;  (7.0.X and 7.2.X are NOT supported either) 
-cd CMSSW_7_1_5/src 
-cmsenv
-git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
-cd HiggsAnalysis/CombinedLimit
-git fetch origin
-git checkout v5.0.2   # try v5.0.1 if any issues occur
-scramv1 b clean; scramv1 b # always make a clean build, as scram doesn't always see updates to src/LinkDef.h
+Currently working with 74X (check latest on HiggsCombine twiki).   
 
 ```    
 Get bbggLimits:   
@@ -26,13 +16,7 @@ cd bbggLimits
 ```
    
 ### Make Limits Trees
-```
-LimitTreeMaker -i <input list of files> -o <output location> [optional: -min <min mtot> -max <max mtot> -scale <scale factor> -photonCR (do photon control region) -KF (use Mtot_KF to cut on mass window) -MX (use MX to cut on mass window) (choose either -MX or -KF!)
-```   
-*-min and max*: use it to cut on the 4-body invariant mass;   
-*-scale*: set this to the scale factor to be multiplied to normalize your input file, for example xsec*lumi/(sum of weights);   
-*-photonCR*: use this flag to use data from photon control region (one photon fails the ID requirements);   
-*-KF or -MX*: cut on kinematic fitted 4body mass (KF) or on the MX variable (MX)   
+See LimitSetting folder.   
 
 ### How to run it :
 ```
