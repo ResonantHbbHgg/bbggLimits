@@ -323,7 +323,7 @@ std::map<std::string,int>higgsNumber
 					maxSigFitMgg,minSigFitMjj,maxSigFitMjj,minHigMggFit,maxHigMggFit,minHigMjjFit,maxHigMjjFit);
             TheFitter.style();
 
-	    if(signalType[t] == "LowMass") TheFitter.SetFitStrategy(1);
+//	    if(signalType[t] == "LowMass") TheFitter.SetFitStrategy(1);
 //	    TheFitter.SetFitStrategy(1);
             
             int opened=TheFitter.AddSigData( mass,signalDir2);
