@@ -5,7 +5,6 @@ Package for computing limits for the Run II analyses
 First, setup the environment with the Higgs Combine tools: https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideHiggsAnalysisCombinedLimit#For_end_users_that_don_t_need_to   
 Currently working with 74X (check latest on HiggsCombine twiki).   
 
-```    
 Get bbggLimits:   
 ```
 cd ${CMSSW_BASE}/src/HiggsAnalysis/

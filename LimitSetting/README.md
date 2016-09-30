@@ -59,6 +59,10 @@ python scripts/MakeBkgPlot.py \
 ```     
 
 ### Running Non-Resonant Limits
+```
+bbggNonRes NonRes.json
+```   
+
 Follow same procedure of Resonant limits, but with NonRes.json.   
 Instead of defining masses, define the NonRes nodes you want to run:
 * 0: Box only
