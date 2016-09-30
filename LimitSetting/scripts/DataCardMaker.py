@@ -35,7 +35,7 @@ def main(argv):
 
 	if nCats == 2:
 		inputDatacardName = 'Models/LowMassResDatacardModel.txt'
-		if isRes == 1:
+		if isRes == 0:
 			inputDatacardName = 'Models/NonResDatacardModel.txt'
 		inputDatacard = open(inputDatacardName, 'r')
 		outputDatacard = open(Folder+'/datacards/hhbbgg_13TeV_DataCard.txt', 'w')
@@ -51,7 +51,7 @@ def main(argv):
 				newTemp1 = outTemp6
 				newTemp2 = newTemp1.replace('CMS_hhbbgg_13TeV_mgg_bkg_slope3_cat0', '### CMS_hhbbgg_13TeV_mgg_bkg_slope3_cat0')
 				outTemp6 = newTemp2.replace('CMS_hhbbgg_13TeV_mjj_bkg_slope3_cat0', '### CMS_hhbbgg_13TeV_mjj_bkg_slope3_cat0')
-			if float(observed.split(',')[0]) < 11:
+			if float(observed.split(',')[1]) < 11:
 				newTemp1 = outTemp6
 				newTemp2 = newTemp1.replace('CMS_hhbbgg_13TeV_mgg_bkg_slope3_cat1', '### CMS_hhbbgg_13TeV_mgg_bkg_slope3_cat1')
 				outTemp6 = newTemp2.replace('CMS_hhbbgg_13TeV_mjj_bkg_slope3_cat1', '### CMS_hhbbgg_13TeV_mjj_bkg_slope3_cat1')
@@ -59,7 +59,7 @@ def main(argv):
 		outputDatacard.write(outToWrite)
 		outputDatacard.close()
 
-	if nCats == 1 and isRes == 0:
+	if nCats == 1 and isRes == 1:
 		inputDatacardName = 'Models/HighMassResDatacardModel.txt'
 		inputDatacard = open(inputDatacardName, 'r')
 		outputDatacard = open(Folder+'/datacards/hhbbgg_13TeV_DataCard.txt', 'w')

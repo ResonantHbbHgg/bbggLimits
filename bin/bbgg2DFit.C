@@ -377,7 +377,7 @@ std::map<std::string,int>higgsNumber
 			bkgObsStr += TString(",");
 		}
 	}
-	TString DCcommand = TString("python scripts/DataCardMaker.py -f ") + TString(folder_name) + TString::Format(" -n %d ", NCAT) + TString("-s ") + sigExpStr + TString(" -o ") + bkgObsStr;
+	TString DCcommand = TString("python scripts/DataCardMaker.py -r -f ") + TString(folder_name) + TString::Format(" -n %d ", NCAT) + TString("-s ") + sigExpStr + TString(" -o ") + bkgObsStr;
 	std::cout << DCcommand << std::endl;
 	system(DCcommand);
   }

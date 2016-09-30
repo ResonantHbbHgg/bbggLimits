@@ -25,7 +25,7 @@ lumi_13TeV lnN 1.027  -  1.027  -
 CMS_eff_DiphoTriggerAndPreSel lnN 1.020  -  1.020  -  
 CMS_eff_PhoEGMMVAID lnN 1.010 - 1.010 - 
 CMS_eff_MXCutJetSel lnN 1.030 - 1.030 -
-CMS_eff_bTagging lnN 1.045/0.955 - 0.99/1.01 -
+CMS_eff_bTagging lnN 1.0/0.955 - 0.99/1.045 -
 #Shape
 CMS_hgg_sig_m0_absShift param 1 0.01 # displacement of the dipho mean error = sqrt(0.4^ 2 + 0.2^ 2) 
 CMS_hgg_sig_sigmaScale param 1 0.01 # optimistic estimate of resolution uncertainty 
