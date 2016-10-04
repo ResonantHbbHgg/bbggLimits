@@ -654,9 +654,9 @@ void bbgg2DFitter::MakePlots(float mass)
       if(trueSigMass == 1 )str_desc=TString::Format(" Nonresonant HH, SM");
       tlat0->DrawLatex(0.16, 0.82, str_desc);
 
-      str_desc=TString::Format(" #mu = %.2f GeV",mean_mgg[c]);
+      str_desc=TString::Format(" #mu = %.2f GeV",mean_mjj[c]);
       tlat0->DrawLatex(0.165, 0.77, str_desc);
-      str_desc=TString::Format(" #sigma_{eff} = %.2f GeV",sigma_mgg[c]);
+      str_desc=TString::Format(" #sigma_{eff} = %.2f GeV",sigma_mjj[c]);
       tlat0->DrawLatex(0.165, 0.72, str_desc);
 
       ctmp->SaveAs(TString::Format("%s/sigmodelMjj_cat%d.pdf",_folder_name.data(),c),"QUIET");
