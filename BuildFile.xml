@@ -12,6 +12,7 @@
 <use name="boost_header"/>
 <use name="boost_regex"/>
 <use name="CondFormats/BTauObjects"/>
+<Flags CXXFLAGS="-Wno-delete-non-virtual-dtor -Wno-error=unused-but-set-variable -Wno-error=unused-variable -lboost_program_options"/>
 <export>
    <lib name="1"/>
 </export>

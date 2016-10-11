@@ -39,6 +39,12 @@ public :
 //   Output file and tree
    TTree *outTree;
    TFile *outFile;
+
+   ULong64_t o_evt;
+   UInt_t o_run;
+
+   Float_t o_NRWeights[1507];
+
    Int_t           o_category;
    Double_t        o_normalization;
    Double_t	   o_preweight;
@@ -70,6 +76,7 @@ public :
    int doSingleCat;
    int bVariation;
    int phoVariation;
+   int doNonResWeights;
    double tiltWindow;
    typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > LorentzVector;
 
@@ -105,8 +112,19 @@ public :
    Int_t	subleadingJet_hadFlavour;
    std::vector<std::pair<float,float>> btmap;
 
+   Float_t gen_mHH, gen_cosTheta;
+   ULong64_t event;
+   UInt_t run;
+
+   
    // List of branches
-   TBranch        *b_genWeights;   //!
+   TBranch        *b_event;   //!
+   TBranch        *b_run;   //!
+
+   TBranch        *b_gen_mHH;   //!
+   TBranch        *b_gen_cosTheta;   //!
+
+   TBranch        *b_genWeights; //!
    TBranch        *b_genTotalWeight;   //!
    TBranch        *b_leadingPhoton;   //!
    TBranch        *b_leadingPhotonID;   //!
@@ -214,13 +232,14 @@ public :
    float PhotonSF(LorentzVector pho, int phovar = 0);
    void DoPhoVariation(int tt) { phoVariation = tt;}
    void SetCosThetaStar(float cut, int cat) { cosThetaStarCut = cut; cosThetaStarCutCats = cat;}
-
+   
+   void DoNRWeights(int doNRW) { doNonResWeights = doNRW; }
 };
 
 #endif
 
 #ifdef bbggLTMaker_cxx
-bbggLTMaker::bbggLTMaker(TTree *tree) : fChain(0) 
+bbggLTMaker::bbggLTMaker(TTree *tree) : fChain(0)
 {
    mtotMax = 1200.;
    mtotMin = 230.;
@@ -239,6 +258,7 @@ bbggLTMaker::bbggLTMaker(TTree *tree) : fChain(0)
    phoVariation = -999;
    cosThetaStarCut = 10;
    cosThetaStarCutCats = 0;
+   doNonResWeights = 0;
    Init(tree);
 }
 

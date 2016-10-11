@@ -18,6 +18,12 @@ void bbggLTMaker::Loop()
 //      Root > t.Loop();       // Loop on all entries
 //
 
+  o_evt = 0;
+  o_run = 0;
+
+  for (UInt_t n=0; n<1507; n++) o_NRWeights[n]=0;
+
+
    o_weight = 0;
    o_preweight = 0;
    o_btagweight = 0;
@@ -31,7 +37,7 @@ void bbggLTMaker::Loop()
 
    std::cout << "Output file name: " << outFileName << std::endl;
    std::cout << "Options:\n\t Mtot min: " << mtotMin << "\n\t Mtot max: " <<  mtotMax << "\n\t isPhotonCR: " << photonCR << "\n\t Normalization: " << normalization << std::endl;
- 
+
    outFile = new TFile(outFileName.c_str(), "RECREATE");
    outTree = new TTree("TCVARS", "Limit tree for HH->bbgg analyses");
    outTree->Branch("cut_based_ct", &o_category, "o_category/I"); //0: 2btag, 1: 1btag
@@ -47,6 +53,12 @@ void bbggLTMaker::Loop()
    outTree->Branch("jet2PT", &jet2PT, "jet2PT/D");
    outTree->Branch("jet1ETA", &jet1ETA, "jet1ETA/D");
    outTree->Branch("jet2ETA", &jet2ETA, "jet2ETA/D");
+
+   outTree->Branch("evt", &o_evt, "o_evt/l");
+   outTree->Branch("run", &o_run, "o_run/i");
+
+   outTree->Branch("NRWeights", o_NRWeights, "o_NRWeights[1507]/F");
+
 
    if (fChain == 0) return;
 
@@ -87,8 +99,15 @@ void bbggLTMaker::Loop()
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
 
-     if( jentry%1000 == 0 ) std::cout << "[bbggLTMaker::Process] Reading entry #" << jentry << endl;   
-   
+     if( jentry%1000 == 0 ) std::cout << "[bbggLTMaker::Process] Reading entry #" << jentry << endl;
+
+     o_evt = event;
+     o_run = run;
+
+     if (doNonResWeights)
+       for (UInt_t n=0; n<1507; n++) o_NRWeights[n]=1;
+     
+
      o_preweight = genTotalWeight*normalization;
      o_bbMass = dijetCandidate->M();
      o_ggMass = diphotonCandidate->M();
@@ -97,10 +116,10 @@ void bbggLTMaker::Loop()
         o_bbggMass = diHiggsCandidate_KF->M();
      if(doMX)
         o_bbggMass = diHiggsCandidate->M() - dijetCandidate->M() + 125.;
-  
+
      //mtot cut
      bool passedMassCut = 1;
-     
+
      if(o_bbggMass < mtotMin || o_bbggMass > mtotMax)
 	passedMassCut = 0;
 
@@ -121,7 +140,7 @@ void bbggLTMaker::Loop()
 	continue;
 
      o_category = 2;
-   
+
      if(bVariation > -100) btmap = bbggLTMaker::BTagWeight(*leadingJet, leadingJet_hadFlavour, *subleadingJet, subleadingJet_hadFlavour, bVariation);
 
      float btagweight = -99;
@@ -158,19 +177,19 @@ void bbggLTMaker::Loop()
 		o_category = 0;
 		if(bVariation > -100) btagweight = btmap[1].first*btmap[4].first;
 	 }
-         else if ( leadingJet_bDis > btagWP && subleadingJet_bDis < btagWP ) { 
-		o_category = 1; 
+         else if ( leadingJet_bDis > btagWP && subleadingJet_bDis < btagWP ) {
+		o_category = 1;
 		if(bVariation > -100) btagweight = btmap[1].first*( (1 - btmap[4].first*btmap[4].second)/(1 - btmap[4].second) );
 	 }
-         else if ( leadingJet_bDis < btagWP && subleadingJet_bDis > btagWP ) { 
-		o_category = 1; 
+         else if ( leadingJet_bDis < btagWP && subleadingJet_bDis > btagWP ) {
+		o_category = 1;
 		if(bVariation > -100) btagweight = btmap[4].first*( (1 - btmap[1].first*btmap[1].second)/(1 - btmap[1].second) );
 	 }
-         else if ( leadingJet_bDis < btagWP && subleadingJet_bDis < btagWP ) { 
-		o_category = -1; 
+         else if ( leadingJet_bDis < btagWP && subleadingJet_bDis < btagWP ) {
+		o_category = -1;
 		if(bVariation > -100) btagweight = ( (1 - btmap[1].first*btmap[1].second)/(1 - btmap[1].second) )*( (1 - btmap[4].first*btmap[4].second)/(1 - btmap[4].second) );
 	 }
-       } 
+       }
        else if ( doSingleCat == 1 && doCatMixed == 0)
        {
 	 if ( leadingJet_bDis > btagWP && subleadingJet_bDis > btagWP ) {
@@ -258,7 +277,7 @@ void bbggLTMaker::BTagSetup(TString btagfile, TString effsfile)
    b_reader_loose = new BTagCalibrationReader(calib, BTagEntry::OP_LOOSE, "mujets", "central");
    b_reader_loose_up = new BTagCalibrationReader(calib, BTagEntry::OP_LOOSE, "mujets", "up");
    b_reader_loose_down = new BTagCalibrationReader(calib, BTagEntry::OP_LOOSE, "mujets", "down");
-   
+
    c_reader_tight = new BTagCalibrationReader(calib, BTagEntry::OP_TIGHT, "mujets", "central");
    c_reader_tight_up = new BTagCalibrationReader(calib, BTagEntry::OP_TIGHT, "mujets", "up");
    c_reader_tight_down = new BTagCalibrationReader(calib, BTagEntry::OP_TIGHT, "mujets", "down");
@@ -268,7 +287,7 @@ void bbggLTMaker::BTagSetup(TString btagfile, TString effsfile)
    c_reader_loose = new BTagCalibrationReader(calib, BTagEntry::OP_LOOSE, "mujets", "central");
    c_reader_loose_up = new BTagCalibrationReader(calib, BTagEntry::OP_LOOSE, "mujets", "up");
    c_reader_loose_down = new BTagCalibrationReader(calib, BTagEntry::OP_LOOSE, "mujets", "down");
-   
+
    l_reader_tight = new BTagCalibrationReader(calib, BTagEntry::OP_TIGHT, "incl", "central");
    l_reader_tight_up = new BTagCalibrationReader(calib, BTagEntry::OP_TIGHT, "incl", "up");
    l_reader_tight_down = new BTagCalibrationReader(calib, BTagEntry::OP_TIGHT, "incl", "down");
