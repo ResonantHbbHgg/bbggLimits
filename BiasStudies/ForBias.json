@@ -1,0 +1,59 @@
+{
+  "file" : "/afs/cern.ch/work/r/rateixei/work/DiHiggs/NewLimits/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/BiasStudies/TreePicker/nr_hm_cat0.root",
+  "vars" : { 
+		"mjj[80,200]" : "M(jj)",
+        	"mgg[100, 180]" : "M(#gamma#gamma)"
+	   },
+  "nbins" : ["40", "80"],
+  "prefix" : "BiasMC_New_Fit_",
+  "plotsDir" : "/afs/cern.ch/user/r/rateixei/www/HHBBGG/2DBias/",
+  "selection" : "mgg > 100 && mgg < 180 && mjj > 80 && mjj < 200",
+  "plotTitle" : "Non Resonant (High Mass) - CombCat.",
+  "categories" : { 
+			"noreq" : "cut_based_ct==0"
+		 },
+  "blinding" : { " && ( mgg < 115 || mgg > 135 )" : "0" },
+  "functions" : [
+
+
+                "RooFormulaVar:mod_b2_p0_mgg_bb('b2_p0_mgg_bb*b2_p0_mgg_bb', {b2_p0_mgg_bb[0.1, -30, 30]})",
+                "RooFormulaVar:mod_b2_p1_mgg_bb('b2_p1_mgg_bb*b2_p1_mgg_bb', {b2_p1_mgg_bb[0.001, -10, 10]})",
+                "RooFormulaVar:mod_b2_p2_mgg_bb('b2_p2_mgg_bb*b2_p2_mgg_bb', {b2_p2_mgg_bb[0.7, -70, 70]})",
+                "RooBernstein:Bern3_mgg_bb(mgg, {mod_b2_p0_mgg_bb, mod_b2_p1_mgg_bb} )",
+
+                "RooFormulaVar:mod_b2_p0_mjj_bb('b2_p0_mjj_bb*b2_p0_mjj_bb', {b2_p0_mjj_bb[1., -30, 30]})",
+                "RooFormulaVar:mod_b2_p1_mjj_bb('b2_p1_mjj_bb*b2_p1_mjj_bb', {b2_p1_mjj_bb[0.5, -5, 5]})",
+                "RooFormulaVar:mod_b2_p2_mjj_bb('b2_p2_mjj_bb*b2_p2_mjj_bb', {b2_p2_mjj_bb[0.7, -70, 70]})",
+                "RooBernstein:Bern2_mjj_bb(mjj, {mod_b2_p0_mjj_bb, mod_b2_p1_mjj_bb} )",
+                "PROD:BackgroundModel_Bern3Bern2( Bern3_mgg_bb, Bern2_mjj_bb)"
+
+
+	],
+  "functionsToFit" :  ["BackgroundModel_Bern3Bern2"],
+  "functionsToPlot" : ["Bern2_mjj_bb", "Bern3_mgg_bb"],
+  "biasFunctions" :   ["BackgroundModel_Bern3Bern2"],
+  "functionLegends" : ["2nd Order Bernstein"],
+  "error" : "1",
+  "signal_File" : "/afs/cern.ch/work/r/rateixei/work/DiHiggs/NewLimits/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LimitSetting/NonResTrees/REGCORR_BTAGSF_EGM_MVA_2cat_MediumWP_NewTraining_HighMass/LT_output_GluGluToHHTo2B2G_node_SM_13TeV-madgraph.root",
+  "signal_Functions" : [
+
+      "RooGaussian:GausCB_mgg(mgg, meanSigCB[125, 120, 128], sigmaSigCB[4.0, 0.5, 10.0])",
+      "RooCBShape:CBSig_mgg(mgg, meanSigCB, cb_sigma[2.0, .50, 3.0], cb_alpha[1., 0., 2.5], cb_n[2., 1., 5.0])",
+      "SUM:SigCBGaus_mgg(ng1cb[0.2, 0.1, 1.]*CBSig_mgg, GausCB_mgg)",
+      "RooGaussian:GausCB_mjj(mjj, meanSigCB_mjj[100, 80, 120], sigmaSigCB_mjj[50, 10, 100])",
+      "RooCBShape:CBSig_mjj(mjj, meanSigCB_mjj, cb_sigma_mjj[25, 10, 50], cb_alpha_mjj[1.0, 0.0, 2.5], cb_n_mjj[2.0, 1.0, 5.0])",
+      "SUM:SigCBGaus_mjj(ng1cb_mjj[0.5, 0.00001, 1.]*CBSig_mjj, GausCB_mjj)",
+      "PROD:SignalModel(SigCBGaus_mgg, SigCBGaus_mjj)"
+
+  ],
+  "signal_functionsToFit" : ["SignalModel"],
+  "signal_functionsToPlot" : ["SigCBGaus_mjj:CBSig_mjj,GausCB_mjj", "SigCBGaus_mgg:CBSig_mgg,GausCB_mgg"],
+  "signalFit" : "SignalModel",
+  "signal_norm_lumi_fb" : 2.7,
+  "signal_norm_totEvs" : 50000,
+  "signal_norm_xsec" : 1,
+  "bkgNorm" : 10,
+  "bkgNorm_up" : 100,
+  "bkgNorm_down" : 0.000001
+}
+

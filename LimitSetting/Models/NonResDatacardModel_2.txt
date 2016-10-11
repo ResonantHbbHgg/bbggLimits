@@ -1,0 +1,46 @@
+imax 2
+jmax 1
+kmax *
+---------------
+shapes data_obs cat0 INPUTBKGLOC w_all:data_obs_cat0
+shapes data_obs cat1 INPUTBKGLOC w_all:data_obs_cat1
+############## shape with reparametrization
+shapes Bkg cat0 INPUTBKGLOC w_all:BkgPdf_cat0
+shapes Bkg cat1 INPUTBKGLOC w_all:BkgPdf_cat1
+# signal
+shapes Sig cat0 INPUTSIGLOC w_all:CMS_sig_cat0
+shapes Sig cat1 INPUTSIGLOC w_all:CMS_sig_cat1
+---------------
+bin cat0 cat1 
+observation OBSCAT0 OBSCAT1
+------------------------------
+bin cat0 cat0 cat1 cat1 
+process Sig Bkg  Sig Bkg 
+process 0 1 0 1 
+rate  SIGCAT0 1  SIGCAT1 1
+
+# General
+lumi_13TeV lnN 1.027  -  1.027  -  
+#Normalization
+CMS_eff_DiphoTriggerAndPreSel lnN 1.020  -  1.020  -  
+CMS_eff_PhoEGMMVAID lnN 1.010 - 1.010 - 
+CMS_eff_MXCutJetSel lnN 1.030 - 1.030 -
+CMS_eff_bTagging lnN 1.0/0.955 - 0.99/1.045 -
+#Shape
+CMS_hgg_sig_m0_absShift param 1 0.01 # displacement of the dipho mean error = sqrt(0.4^ 2 + 0.2^ 2) 
+CMS_hgg_sig_sigmaScale param 1 0.01 # optimistic estimate of resolution uncertainty 
+CMS_hbb_sig_m0_absShift param 1 0.02 # displacement of the dijet mean error 
+CMS_hbb_sig_sigmaScale param 1 0.08 # optimistic estimate of resolution uncertainty 
+
+#Curve Normalization params
+BkgPdf_cat0_norm flatParam # Normalization uncertainty on background slope
+BkgPdf_cat1_norm flatParam # Normalization uncertainty on background slope
+
+#Curve Shape params
+CMS_hhbbgg_13TeV_mgg_bkg_slope1_cat0 flatParam # Mean and absolute uncertainty on background slope
+CMS_hhbbgg_13TeV_mgg_bkg_slope2_cat0 flatParam # Mean and absolute uncertainty on background slope
+CMS_hhbbgg_13TeV_mgg_bkg_slope3_cat0 flatParam # Mean and absolute uncertainty on background slope
+CMS_hhbbgg_13TeV_mjj_bkg_slope1_cat1 flatParam # Mean and absolute uncertainty on background slope
+CMS_hhbbgg_13TeV_mjj_bkg_slope2_cat1 flatParam # Mean and absolute uncertainty on background slope
+CMS_hhbbgg_13TeV_mjj_bkg_slope3_cat1 flatParam # Mean and absolute uncertainty on background slope
+

@@ -1,22 +1,22 @@
 {
         "signal" : {
-                "dir" : "/afs/cern.ch/work/r/rateixei/work/DiHiggs/NewLimits/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LimitSetting/NonResTrees/EGM_MVA_2cat_MediumWP_TYPE/",
-		"nodes" : [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13],
+                "dir" : "/afs/cern.ch/work/r/rateixei/work/DiHiggs/LimitsForPush/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LimitSetting/NonResTrees/NonResAnalysis_ICHEP_TYPE/",
+		"nodes" : [0,1,2,3,4,5,6,7,8,9,10,11,12,13],
         "types" : ["LowMass", "HighMass"],
-		"signalModelCard" : "/afs/cern.ch/work/r/rateixei/work/DiHiggs/NewLimits/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D.rs"
+		"signalModelCard" : "/afs/cern.ch/work/r/rateixei/work/DiHiggs/LimitsForPush/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D_sig.rs"
         },
         "other" : {
                 "integratedLumi" : 2.7,
                 "energy" : "13TeV",
                 "higgsMass" : 125.0,
                 "addHiggs" : 0,
-                "doBlinding" : 1,
-                "doBands" : 0,
+                "doBlinding" : 0,
+                "doBands" : 1,
                 "ncat" : 2,
                 "analysisType" : "fitTo2D_resSearch_withRegKinFit",
                 "useSigTheoryUnc" : 0,
 		"version" : 44,
-		"doBrazilianFlag" : true,
+		"doBrazilianFlag" : false,
 		"runCombine" : true,
 		"minMggMassFit" : 100,
 		"maxMggMassFit" : 180,
@@ -38,7 +38,7 @@
 		
         },
         "data" : {
-                "dir" : "/afs/cern.ch/work/r/rateixei/work/DiHiggs/NewLimits/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LimitSetting/NonResTrees/EGM_MVA_2cat_MediumWP_low0.46_high0.936_TYPE/",
+                "dir" : "/afs/cern.ch/work/r/rateixei/work/DiHiggs/LimitsForPush/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LimitSetting/NonResTrees/NonResAnalysis_ICHEP_TYPE/",
                 "name" :"DoubleEG"
         },
         "higgs" : {

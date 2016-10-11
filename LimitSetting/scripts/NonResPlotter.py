@@ -3,6 +3,8 @@ gROOT.SetBatch(True)
 import sys, getopt, os
 from array import array
 
+col1 = TColor(11111, 249./255., 243./255., 33./255.)
+
 def main(argv):
 	folder = ""
 	lumi = ""
@@ -71,27 +73,29 @@ def main(argv):
 	print s1_down, s2_down
 	gr_centralVal_1s = TGraphAsymmErrors(len(nodesList), array('d', nodesList), array('d', centralVal), array('d', zeros), array('d', zeros), array('d', s1_down), array('d', s1_up))
 	gr_centralVal_2s = TGraphAsymmErrors(len(nodesList), array('d', nodesList), array('d', centralVal), array('d', zeros), array('d', zeros), array('d', s2_down), array('d', s2_up))
-	
-	leg = TLegend(0.65, 0.7, 0.89, 0.89)
+	for i,n in enumerate(nodesList):
+		print "Node",n," - ",centralVal[i]
+
+	leg = TLegend(0.5, 0.7, 0.89, 0.89)
 	leg.SetFillStyle(0);
 	leg.SetLineWidth(0);
 	leg.SetBorderSize(0);
 	
 	c0 = TCanvas("c", "c", 800, 600)
 	gr_centralVal_2s.SetMaximum(Maximum*2)
-	gr_centralVal_2s.Draw("AP")
-	gr_centralVal_2s.SetLineColor(kGreen+1)
-	gr_centralVal_2s.SetLineWidth(4)
+	gr_centralVal_2s.Draw("APZ")
+	gr_centralVal_2s.SetLineColor(11111)
+	gr_centralVal_2s.SetLineWidth(8)
 	gr_centralVal_2s.SetTitle("")
 	gr_centralVal_2s.GetXaxis().SetLimits(-1, 14)
-	gr_centralVal_2s.GetXaxis().SetTitle("Benchmark Points")
+	gr_centralVal_2s.GetXaxis().SetTitle("Shape Benchmark Points")
 	gr_centralVal_2s.GetYaxis().SetTitle("#sigma(pp#rightarrowHH#rightarrowbb#gamma#gamma) [fb]")
 	c0.Update()
-	gr_centralVal_1s.Draw("EP")
+	gr_centralVal_1s.Draw("EPZ")
 	gr_centralVal_1s.SetMarkerStyle(21)
 	gr_centralVal_1s.SetMarkerColor(kBlue+1)
-	gr_centralVal_1s.SetLineWidth(5)
-	gr_centralVal_1s.SetLineColor(kYellow)
+	gr_centralVal_1s.SetLineWidth(7)
+	gr_centralVal_1s.SetLineColor(kGreen+1)
 	
 	leg.AddEntry(gr_centralVal_1s, "Expected 95% upper limit", "p")
 	leg.AddEntry(gr_centralVal_1s, "Expected limit #pm 1#sigma", "l")
@@ -109,6 +113,7 @@ def main(argv):
 	tlatex.SetTextFont(53)
 	tlatex.DrawLatex(0.18, 0.91, "Preliminary")
 	tlatex.SetTextFont(43)
+	tlatex.SetTextSize(23)
 	tlatex.DrawLatex(0.6, 0.91, "#sqrt{s} = 13 TeV, L = " + str(lumi) + " fb^{-1}")
 	c0.SaveAs(folder+"/NonResPlot.pdf")
 	
@@ -117,19 +122,19 @@ def main(argv):
 
 	c0 = TCanvas("c", "c", 800, 600)
 	gr_centralVal_2s_hh.SetMaximum(Maximum*2/2.6)
-	gr_centralVal_2s_hh.Draw("AP")
-	gr_centralVal_2s_hh.SetLineColor(kGreen+1)
-	gr_centralVal_2s_hh.SetLineWidth(4)
+	gr_centralVal_2s_hh.Draw("APZ")
+	gr_centralVal_2s_hh.SetLineColor(11111)
+	gr_centralVal_2s_hh.SetLineWidth(8)
 	gr_centralVal_2s_hh.SetTitle("")
 	gr_centralVal_2s_hh.GetXaxis().SetLimits(-1, 14)
 	gr_centralVal_2s_hh.GetXaxis().SetTitle("Benchmark Points")
 	gr_centralVal_2s_hh.GetYaxis().SetTitle("#sigma(pp#rightarrowHH)/Br(HH#rightarrowbb#gamma#gamma) [pb]")
 	c0.Update()
-	gr_centralVal_1s_hh.Draw("EP")
+	gr_centralVal_1s_hh.Draw("EPZ")
 	gr_centralVal_1s_hh.SetMarkerStyle(21)
 	gr_centralVal_1s_hh.SetMarkerColor(kBlue+1)
-	gr_centralVal_1s_hh.SetLineWidth(5)
-	gr_centralVal_1s_hh.SetLineColor(kYellow)
+	gr_centralVal_1s_hh.SetLineWidth(7)
+	gr_centralVal_1s_hh.SetLineColor(kGreen+1)
 
 	tlatex.SetTextAngle(0)
 	tlatex.SetTextColor(kBlack)

@@ -8,7 +8,7 @@
 #ifndef bbgg2DFitter_h
 #define bbgg2DFitter_h
 // C++ headers
-//#include <iostream>
+#include <iostream>
 //#include <sstream>
 #include <string>
 //#include <cmath>
@@ -58,6 +58,8 @@
 //using namespace RooStats;
 
 class RooWorkspace;
+class RooRealVar;
+class RooAbsPdf;
 struct RooFitResult;
 struct RooArgSet;
 
@@ -71,18 +73,23 @@ public :
    float _lumi;
    TString _cut;
    std::string _energy;
+   std::string _signalType; 
    float _minMggMassFit;
    float _maxMggMassFit;
    float _minMjjMassFit;
    float _maxMjjMassFit;
    float _minSigFitMgg;
    float _maxSigFitMgg;
-  	float _minSigFitMjj;
-	float _maxSigFitMjj;
- float _minHigMggFit;
-	float _maxHigMggFit;
-  float _minHigMjjFit;
-	float _maxHigMjjFit;
+   float _minSigFitMjj;
+   float _maxSigFitMjj;
+   float _minHigMggFit;
+   float _maxHigMggFit;
+   float _minHigMjjFit;
+   float _maxHigMjjFit;
+   int _fitStrategy = 2;
+   std::map<int,float> sigExpec;
+   std::map<int,float> bkgExpec;
+   std::map<int,float> dataObs;
    //Workspace
    RooWorkspace* _w;
    std::string _folder_name;
@@ -90,6 +97,7 @@ public :
    void Initialize(RooWorkspace* workspace, Int_t SigMass, float Lumi,std::string folder_name,std::string energy, Bool_t doBlinding, Int_t nCat, bool AddHiggs,float minMggMassFit,float maxMggMassFit,float minMjjMassFit,float maxMjjMassFit,float minSigFitMgg,float maxSigFitMgg,float minSigFitMjj,float maxSigFitMjj,float minHigMggFit,float maxHigMggFit,float minHigMjjFit,float maxHigMjjFit);
    virtual ~bbgg2DFitter() { }
    void SetCut(TString cut) {_cut = cut;}
+   void SetType(std::string tp) { _signalType = tp; }
    RooArgSet* defineVariables(); //DONE
    int AddSigData(float mass, TString signalfile); //DONE
    void AddHigData(float mass, TString signalfile, int higgschannel); //DONE
@@ -98,6 +106,7 @@ public :
    void HigModelFit(float mass, int higgschannel); //DONE
    RooFitResult* BkgModelFit(Bool_t,bool,std::vector<std::string>higgstrue,std::map<std::string,int>higgsNumber); //DONE
    void MakePlots(float mass); //DONE
+   void SetFitStrategy( int st) { _fitStrategy = st; }
    void MakePlotsHiggs(float mass,std::vector<std::string>higgstrue,std::map<std::string,int>higgsNumber); //DONE
    void MakeSigWS(std::string filename); //DONE
    void MakeHigWS(std::string filename, int higgschannel); //DONE
@@ -107,7 +116,16 @@ public :
    void SetConstantParams(const RooArgSet* params); //DONE
    void PrintWorkspace();// {_w->Print("v");}
    TStyle * style(); //DONE
-   
+   void SetSigExpectedCats(int cat, float expec) { if(sigExpec.find(cat) != sigExpec.end() ){std::cout << "[SetSigExpectedCats] Cat already set!" << std::endl;} else { sigExpec[cat] = expec; }}
+   void SetBkgExpectedCats(int cat, float expec) { if(bkgExpec.find(cat) != bkgExpec.end() ){std::cout << "[SetBkgExpectedCats] Cat already set!" << std::endl;} else { bkgExpec[cat] = expec; }}
+   void SetObservedCats(int cat, float observ) { if(dataObs.find(cat) != dataObs.end() ){std::cout << "[DataObservedCats] Cat already set!" << std::endl;} else { dataObs[cat] = observ; }}
+
+   float GetSigExpectedCats(int cat) { if(sigExpec.find(cat) == sigExpec.end() ){std::cout << "[GetSigExpectedCats] Cat not found!" << std::endl; return -1;} else { return sigExpec[cat]; }} 
+   float GetBkgExpectedCats(int cat) { if(bkgExpec.find(cat) == bkgExpec.end() ){std::cout << "[GetBkgExpectedCats] Cat not found!" << std::endl; return -1;} else { return bkgExpec[cat]; }} 
+   float GetObservedCats(int cat) { if(dataObs.find(cat) == dataObs.end() ){std::cout << "[GetObservedCats] Cat not found!" << std::endl; return -1;} else { return dataObs[cat]; }}
+
+   std::vector<float> EffectiveSigma(RooRealVar* mass, RooAbsPdf* binned_pdf, float wmin, float wmax, float step, float epsilon);
+ 
    ClassDef(bbgg2DFitter,0);
 };
 

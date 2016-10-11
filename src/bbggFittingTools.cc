@@ -16,6 +16,7 @@
 #include "TChain.h"
 #include "TLegend.h"
 #include "RooMinuit.h"
+#include <TStyle.h>
 #include "TH1F.h"
 #include "RooChi2Var.h"
 #include "RooFitResult.h"
@@ -34,18 +35,20 @@ using namespace RooFit;
 int colors[] = {kBlue, 632, 417, 616, 432, 800, 820, 840, 860};
 int styles[] = {2, 3, 0, 5, 6, 7, 8, 9};
 
-void bbggFittingTools::PlotCurves(RooWorkspace* w, std::vector<std::string> functionsToFit, std::vector<bbggFittingTools::FitRes> fitResults, RooDataSet* data, std::string sVar, std::string nbins, std::string plotName, int error, int isBkg, float totNorm)
+void bbggFittingTools::PlotCurves(std::string plotTitle, RooWorkspace* w, std::vector<std::string> functionsToFit, std::vector<std::string> legends, std::vector<bbggFittingTools::FitRes> fitResults, RooDataSet* data, std::string sVar, std::string nbins, std::string plotName, int error, int isBkg, float totNorm)
 {
     RooPlot* frame = w->var(sVar.c_str())->frame(Bins(TString( nbins ).Atoi() ));
     data->plotOn(frame, DataError(RooAbsData::SumW2));
     int funcCounter = 0;
 
-    TLegend* leg = new TLegend(0.75, 0.6, 0.89, 0.89);
+//    TStyle * gStyle = new TStyle("a", "a");
+//    gStyle->SetLegendTextSize(0.03);
+    TLegend* leg = new TLegend(0.5, 0.75, 0.89, 0.89);
     leg->SetFillStyle(0);
     leg->SetLineWidth(0);
     leg->SetBorderSize(0);
     for ( unsigned int ff = 0; ff < functionsToFit.size(); ff++) {
-        
+ 	std::cout << "PRINTING FUNCTION: " << functionsToFit[ff] << std::endl;       
         TObjArray* funcNames = (TObjArray*) TString(functionsToFit[ff]).Tokenize(":");
         const char* modelName = ((TObjString*) funcNames->At(0) )->String().Data();
         
@@ -95,11 +98,13 @@ void bbggFittingTools::PlotCurves(RooWorkspace* w, std::vector<std::string> func
         }
 	funcCounter++;
 
-	leg->AddEntry( frame->findObject( modelName), modelName, "l");
+        leg->SetHeader(plotTitle.c_str());
+	leg->AddEntry( frame->findObject( modelName), legends[ff].c_str(), "l");
         
     }
     
     TCanvas* c = new TCanvas("a", "a", 1200, 1000);
+    frame->SetTitle("");
     frame->Draw();
     if(TString(sVar).Contains("mgg") && !isBkg){
         frame->GetXaxis()->SetRangeUser(115, 135);

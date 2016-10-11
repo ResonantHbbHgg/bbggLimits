@@ -856,9 +856,9 @@ void BrazilianFlag(std::string path_dir,bool HH,bool base,bool low,bool obs,bool
   leg1->AddEntry(gryellow, "Expected limit #pm 1 #sigma", "f");
   leg1->AddEntry(grgreen, "Expected limit #pm 2 #sigma", "f");
   leg->AddEntry(radion, "radion (#Lambda_{R} = 3 TeV)", "L");
-  if(!low)  leg->AddEntry(radion10, "radion (#Lambda_{R} = 1 TeV)", "L");
-  if(base)  leg->AddEntry(rsgrav, "RS1 KK-graviton  ", "L");
-  if(base && !low)  leg->AddEntry(bulk3, "Bulk KK-graviton ", "L");
+//  if(!low)  leg->AddEntry(radion10, "radion (#Lambda_{R} = 1 TeV)", "L");
+//  if(base)  leg->AddEntry(rsgrav, "RS1 KK-graviton  ", "L");
+//  if(base && !low)  leg->AddEntry(bulk3, "Bulk KK-graviton ", "L");
 
 
   if(!base)

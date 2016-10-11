@@ -134,7 +134,9 @@ int main(int argc, const char* argv[])
      	 	cout << "\t Signal samples location: " << signalDir << endl;
       		cout << "\t Signal model card: " << cardName << endl;
                 cout << "\t Signal mass: " << v.second.data() << endl;
-                folder_to_create.push_back("/"+signalType+"_M"+v.second.data());
+		TString fdtc = TString(signalType);
+		fdtc.ReplaceAll("Bulk", "");
+                folder_to_create.push_back("/"+std::string(fdtc.Data())+"_M"+v.second.data());
                 std::string filename=TString(TString(signalDir).ReplaceAll( std::string("MASS"), std::string(v.second.data())) ).Data()+part+signalType+part2+v.second.data()+end;
                 std::pair<int,std::string>a(stoi(v.second.data()),filename);
    		sigMass.push_back(a);
@@ -277,6 +279,8 @@ std::map<std::string,int>higgsNumber
   {
     int sigMas=sigMass[i].first;
     std::string signalDir2="";
+    TString newType = TString(signalType).ReplaceAll("Bulk", "");
+    signalType = newType;
     if(energy=="13TeV") signalDir2 = sigMass[i].second;
     else signalDir2=signalDir+"/v"+to_string(version)+"/v"+to_string(version)+"_"+analysisType+"/"+signalType+"_m"+to_string(sigMas)+"_8TeV_m"+to_string(sigMas)+".root";
     std::string folder_name=path_dir+"/"+signalType+"_M"+to_string(sigMas);
@@ -296,6 +300,7 @@ std::map<std::string,int>higgsNumber
     }
     else TheFitter.Initialize( w, sigMas, lumi,folder_name,energy,doblinding, NCAT, addHiggs,minMggMassFit,maxMggMassFit,minMjjMassFit,maxMjjMassFit,minSigFitMgg,maxSigFitMgg,minSigFitMjj,maxSigFitMjj,minHigMggFit,maxHigMggFit,minHigMjjFit,maxHigMjjFit);
     TheFitter.style();
+    TheFitter.SetType(signalType);
     
   	int opened=TheFitter.AddSigData( mass,signalDir2);
 	if(opened==-1)
@@ -351,6 +356,30 @@ std::map<std::string,int>higgsNumber
   	TheFitter.MakeDataCard( fileBaseName, fileBkgName,higgsfilename,useSigTheoryUnc,higgstrue,higgsNumber);
 	cout<<green<<"DATACARD DONE"<<normal<<endl;
   	fitresults->Print();
+
+	//MakeFancyDatacard
+	//GetNumber of Observed Events:
+	float sigExp[NCAT];
+        float bkgObs[NCAT];
+	for (int cc = 0; cc < NCAT; cc++){
+		sigExp[cc] = -1;
+		bkgObs[cc] = -1;
+	}
+	TString sigExpStr = TString("");
+	TString bkgObsStr = TString("");
+        for (int cc = 0; cc < NCAT; cc++) {
+		sigExp[cc] = TheFitter.GetSigExpectedCats(cc);
+		bkgObs[cc] = TheFitter.GetObservedCats(cc);
+		sigExpStr += TString::Format("%f", sigExp[cc]);
+		bkgObsStr += TString::Format("%f", bkgObs[cc]);
+		if(cc < NCAT - 1) {
+			sigExpStr += TString(",");
+			bkgObsStr += TString(",");
+		}
+	}
+	TString DCcommand = TString("python scripts/DataCardMaker.py -r -f ") + TString(folder_name) + TString::Format(" -n %d ", NCAT) + TString("-s ") + sigExpStr + TString(" -o ") + bkgObsStr;
+	std::cout << DCcommand << std::endl;
+	system(DCcommand);
   }
   if(docombine==true)
   {
@@ -358,6 +387,9 @@ std::map<std::string,int>higgsNumber
   }
   if(doBrazilianFlag==true)
   {
+        std::stringstream ss;
+        ss << std::fixed << std::setprecision(1) << lumi;
+	system(TString("python scripts/ResPlotter.py -f" + path_dir+ " -l " + ss.str() ));
 	BrazilianFlag(path_dir,HH,base,low,obs,twotag,energy,lumi);
   }
   return 0;		

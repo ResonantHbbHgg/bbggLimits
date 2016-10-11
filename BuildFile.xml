@@ -11,6 +11,7 @@
 <use name="boost"/>
 <use name="boost_header"/>
 <use name="boost_regex"/>
+<use name="CondFormats/BTauObjects"/>
 <export>
    <lib name="1"/>
 </export>

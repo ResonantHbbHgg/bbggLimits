@@ -82,6 +82,8 @@ int main(int argc, const char* argv[])
   std::vector<std::string> signal_Functions;
   std::vector<std::string> signal_functionsToFit;
   std::vector<std::string> signal_functionsToPlot;
+  std::string plotTitle;
+  std::vector<std::string> legends;
   double signal_normalization_lumi_fb;
   double signal_normalization_totEvs;
   double signal_normalization_xsec;
@@ -105,6 +107,8 @@ int main(int argc, const char* argv[])
   bkgNorm = TString( pt.get_child("bkgNorm").data().c_str()).Atof();
 
   signalFit = pt.get_child("signalFit").data();
+
+  plotTitle = pt.get_child("plotTitle").data();
   
   std::cout << signal_normalization_lumi_fb << " " << signal_normalization_totEvs << " " << signal_normalization_xsec << std::endl;
 
@@ -133,6 +137,10 @@ int main(int argc, const char* argv[])
   
   BOOST_FOREACH( boost::property_tree::ptree::value_type const& rowPair, pt.get_child( "functionsToPlot" ) ){
     functionsToPlot.push_back(rowPair.second.data());
+  }
+
+  BOOST_FOREACH( boost::property_tree::ptree::value_type const& rowPair, pt.get_child( "functionLegends" ) ){
+    legends.push_back(rowPair.second.data());
   }
 
   BOOST_FOREACH( boost::property_tree::ptree::value_type const& rowPair, pt.get_child( "biasFunctions" ) ){
@@ -220,7 +228,7 @@ int main(int argc, const char* argv[])
       
       for( unsigned int i = 0; i < vars.size(); i++){
           std::string sVar = ( (TObjString *) ( (TObjArray *) (TString(vars[i]).Tokenize("[")) )->At(0) )->String().Data();
-          bbggFittingTools::PlotCurves(w, signal_functionsToPlot, fitresults, dataSig, sVar, nbins[i], plotsDir+"/signal"+sVar, 1, 0, -1);
+          bbggFittingTools::PlotCurves(plotTitle, w, signal_functionsToPlot, signal_functionsToPlot, fitresults, dataSig, sVar, nbins[i], plotsDir+"/signal"+sVar, 1, 0, -1);
           
           //Make signal parameters constant
           for( unsigned int ff = 0; ff < signal_functionsToFit.size(); ff++){
@@ -239,9 +247,12 @@ int main(int argc, const char* argv[])
       }
       
       std::vector<bbggFittingTools::FitRes> bkgresults = bbggFittingTools::FitFunctions(w, functionsToFit, data);
+      for( unsigned int ftp = 0; ftp < functionsToPlot.size(); ftp++) {
+	std::cout << functionsToPlot[ftp] << std::endl;
+	}
       for( unsigned int i = 0; i < vars.size(); i++){
           std::string sVar = ( (TObjString *) ( (TObjArray *) (TString(vars[i]).Tokenize("[")) )->At(0) )->String().Data();
-          bbggFittingTools::PlotCurves(w, functionsToPlot, bkgresults, data, sVar, nbins[i], plotsDir+"/bkg"+sVar, 0, 1);
+          bbggFittingTools::PlotCurves(plotTitle, w, functionsToPlot, legends, bkgresults, data, sVar, nbins[i], plotsDir+"/bkg"+sVar+ TString(plotTitle).ReplaceAll(" ", "_").Data(), 0, 1);
       }
       
       //Do bias study business: create multipdf, etc
