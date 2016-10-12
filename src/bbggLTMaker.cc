@@ -6,7 +6,7 @@
 #include "CondFormats/BTauObjects/interface/BTagCalibration.h"
 #include "CondFormats/BTauObjects/interface/BTagCalibrationReader.h"
 
-bool DEBUG = 0;
+bool DEBUG = 1;
 void bbggLTMaker::Loop()
 {
 //   In a ROOT session, you can do:
@@ -23,7 +23,6 @@ void bbggLTMaker::Loop()
 
   for (UInt_t n=0; n<1507; n++) o_NRWeights[n]=0;
 
-
    o_weight = 0;
    o_preweight = 0;
    o_btagweight = 0;
@@ -33,10 +32,11 @@ void bbggLTMaker::Loop()
    o_category = -1;
    o_phoevWeight = 1;
    o_normalization = normalization;
-//   btmap = 0;
+   //   btmap = 0;
 
    std::cout << "Output file name: " << outFileName << std::endl;
-   std::cout << "Options:\n\t Mtot min: " << mtotMin << "\n\t Mtot max: " <<  mtotMax << "\n\t isPhotonCR: " << photonCR << "\n\t Normalization: " << normalization << std::endl;
+   std::cout << "Options:\n\t Mtot min: " << mtotMin << "\n\t Mtot max: " <<  mtotMax << "\n\t isPhotonCR: " << photonCR
+	     << "\n\t Normalization: " << normalization << std::endl;
 
    outFile = new TFile(outFileName.c_str(), "RECREATE");
    outTree = new TTree("TCVARS", "Limit tree for HH->bbgg analyses");
@@ -57,10 +57,44 @@ void bbggLTMaker::Loop()
    outTree->Branch("evt", &o_evt, "o_evt/l");
    outTree->Branch("run", &o_run, "o_run/i");
 
-   outTree->Branch("NRWeights", o_NRWeights, "o_NRWeights[1507]/F");
-
+   if (doNonResWeights)
+     outTree->Branch("NRWeights", o_NRWeights, "o_NRWeights[1507]/F");
 
    if (fChain == 0) return;
+
+   //cout<<"We are here"<<endl;
+   
+   // Get input histogrems for non-resonant re-weighting.
+   if (doNonResWeights){
+
+     // First check that input branches exis:
+     if (!b_gen_mHH || !b_gen_cosTheta) {
+       cout<<" Looks like you're trying to run non-resonant reweighting, but gen_mHH and gen_cosTheta branches don't exist in your input tree. \n"
+	   <<" What a shame...  Fix that and then try again!"<<endl;
+       exit(1);
+     }
+
+     // Now get the Histograms for re-weighting from the root file.
+     // Note that the following file is not committed to git (it's too large).
+     // Get it from /afs/cern.ch/user/a/andrey/public/HH/weights_v1_1507_points.root
+     // and copy in your working directory:
+     TString fileNameWei = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/weights_v1_1507_points.root");
+     NRwFile = new TFile(fileNameWei, "OPEN");
+     
+     if (NRwFile->IsZombie()){
+       cout<<" Input file does not exist!"<<endl;
+       exit(1);
+     }
+     NRwFile->Print();
+
+     TList *histList = NRwFile->GetListOfKeys();
+     for (UInt_t n=0; n<1507; n++)
+       if (histList->Contains(Form("point_%i_weights",n)))
+	 NR_Wei_Hists[n] = (TH2F*)NRwFile->Get(Form("point_%i_weights",n));
+       else
+	 cout<<"This one does not existe pas: "<<n<<endl;
+
+   }
 
    Long64_t nentries = fChain->GetEntriesFast();
 
@@ -94,7 +128,7 @@ void bbggLTMaker::Loop()
       o_category = -1;
       o_phoevWeight = 1;
 
-
+      
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
@@ -104,9 +138,36 @@ void bbggLTMaker::Loop()
      o_evt = event;
      o_run = run;
 
-     if (doNonResWeights)
-       for (UInt_t n=0; n<1507; n++) o_NRWeights[n]=1;
-     
+
+
+     // ----------------
+     // -- Weights for Non-Res samples are added here
+     //------------------------------
+
+     if (doNonResWeights){
+       //std::cout << "Doing Non-Resonant Signal weights " << std::endl;
+
+       for (UInt_t n=0; n<1507; n++){
+	 if (n==324 || n==910 || n==985 || n==990){
+	   // The points above do not exist in the input file provided by Alexandra
+	   o_NRWeights[n]=1;
+	 }
+	 else {
+	   //Check if histogram exist
+	   UInt_t binNum = NR_Wei_Hists[n]->FindBin(gen_mHH, fabs(gen_cosTheta));
+	   o_NRWeights[n] = NR_Wei_Hists[n]->GetBinContent(binNum);
+	   // Just print out for one n:
+	   if (DEBUG && n==100 && jentry%1000 == 0)
+	     cout<<n<<" **  mHH = "<<gen_mHH<<"   cosT*="<<fabs(gen_cosTheta)<<"  bin="<<binNum<<" wei="<<o_NRWeights[n]<<endl;
+
+	 }
+       }
+     }
+     // ---------------------------
+     // Finished with Non-Res weights
+     // ---------------------------
+
+
 
      o_preweight = genTotalWeight*normalization;
      o_bbMass = dijetCandidate->M();

@@ -13,7 +13,19 @@ int Process(string file, string outFile, string mtotMin, string mtotMax, string 
 	    string doNoCat, string btagWP, string doCatMixed, string btagHigh, string btagLow, string singleCat,
 	    string doVariation, string doPhoVariation, string doNRWeights ){
     TFile* iFile = new TFile(TString(file), "READ");
-    TTree* iTree = (TTree*) iFile->Get("bbggSelectionTree");
+    TTree* iTree;
+
+    if (iFile->Get("bbggSelectionTree"))
+      iTree = (TTree*) iFile->Get("bbggSelectionTree");
+    else if (iFile->Get("fsDir/bbggSelectionTree"))
+      // For thechnical reasons, I have my tree saved in a subdirectory.
+      // This code allows to detect that. -AP-
+      iTree = (TTree*) iFile->Get("fsDir/bbggSelectionTree");
+    else{
+      cout<<" Hey! It looks like your =bbggSelectionTree= does not exist. Do something about it!"<<endl;
+      exit(1);
+    }	
+
     cout << "[LimitTreeMaker:Process] Processing tree with " << iTree->GetEntries() << " entries." << endl;
     bbggLTMaker t(iTree);
     t.SetMax( TString(mtotMax).Atof() );

@@ -44,7 +44,9 @@ public :
    UInt_t o_run;
 
    Float_t o_NRWeights[1507];
-
+   TFile * NRwFile;
+   TH2F * NR_Wei_Hists[1507];
+   
    Int_t           o_category;
    Double_t        o_normalization;
    Double_t	   o_preweight;
@@ -112,7 +114,7 @@ public :
    Int_t	subleadingJet_hadFlavour;
    std::vector<std::pair<float,float>> btmap;
 
-   Float_t gen_mHH, gen_cosTheta;
+   Double_t gen_mHH, gen_cosTheta;
    ULong64_t event;
    UInt_t run;
 
@@ -321,7 +323,11 @@ void bbggLTMaker::Init(TTree *tree)
    // Set branch addresses and branch pointers
    if (!tree) return;
    fChain = tree;
-//   fChain->SetMakeClass(1);
+   //   fChain->SetMakeClass(1);
+
+
+   fChain->SetBranchAddress("gen_mHH", &gen_mHH, &b_gen_mHH);
+   fChain->SetBranchAddress("gen_cosTheta", &gen_cosTheta, &b_gen_cosTheta);
 
    fChain->SetBranchAddress("genWeights", &genWeights, &b_genWeights);
    fChain->SetBranchAddress("genTotalWeight", &genTotalWeight, &b_genTotalWeight);
