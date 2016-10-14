@@ -12,8 +12,10 @@ int Process(string file, string outFile, string mtotMin, string mtotMax, string 
 	    string photonCR, string doKinFit, string doMX, string doTilt, string tiltWindow, 
 	    string doNoCat, string btagWP, string doCatMixed, string btagHigh, string btagLow, string singleCat,
 	    string doVariation, string doPhoVariation, string doNRWeights ){
-    TFile* iFile = new TFile(TString(file), "READ");
-    TTree* iTree;
+  TFile* iFile;
+  iFile = TFile::Open(TString(file));
+
+  TTree* iTree;
 
     if (iFile->Get("bbggSelectionTree"))
       iTree = (TTree*) iFile->Get("bbggSelectionTree");
@@ -257,7 +259,7 @@ int main(int argc, char *argv[]) {
     }
 
     if(inputRootFile != "") {
-        cout << "Processing file: " << inputRootFile << endl;
+      cout << "Processing file: _" << inputRootFile <<"_"<< endl;
         if (inputRootFile.find(".root")==std::string::npos) {
             std::cout << inputRootFile << " is not a valid root file!" << std::endl;
             return 0;

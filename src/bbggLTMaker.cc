@@ -6,7 +6,7 @@
 #include "CondFormats/BTauObjects/interface/BTagCalibration.h"
 #include "CondFormats/BTauObjects/interface/BTagCalibrationReader.h"
 
-bool DEBUG = 1;
+bool DEBUG = 0;
 void bbggLTMaker::Loop()
 {
 //   In a ROOT session, you can do:
