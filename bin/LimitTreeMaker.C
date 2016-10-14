@@ -9,10 +9,25 @@
 using namespace std;
 
 int Process(string file, string outFile, string mtotMin, string mtotMax, string cosThetaStar, string CTScats, string scale, 
-		string photonCR, string doKinFit, string doMX, string doTilt, string tiltWindow, 
-		string doNoCat, string btagWP, string doCatMixed, string btagHigh, string btagLow, string singleCat, string doVariation, string doPhoVariation ){
-    TFile* iFile = new TFile(TString(file), "READ");
-    TTree* iTree = (TTree*) iFile->Get("bbggSelectionTree");
+	    string photonCR, string doKinFit, string doMX, string doTilt, string tiltWindow, 
+	    string doNoCat, string btagWP, string doCatMixed, string btagHigh, string btagLow, string singleCat,
+	    string doVariation, string doPhoVariation, string doNRWeights ){
+  TFile* iFile;
+  iFile = TFile::Open(TString(file));
+
+  TTree* iTree;
+
+    if (iFile->Get("bbggSelectionTree"))
+      iTree = (TTree*) iFile->Get("bbggSelectionTree");
+    else if (iFile->Get("fsDir/bbggSelectionTree"))
+      // For thechnical reasons, I have my tree saved in a subdirectory.
+      // This code allows to detect that. -AP-
+      iTree = (TTree*) iFile->Get("fsDir/bbggSelectionTree");
+    else{
+      cout<<" Hey! It looks like your =bbggSelectionTree= does not exist. Do something about it!"<<endl;
+      exit(1);
+    }	
+
     cout << "[LimitTreeMaker:Process] Processing tree with " << iTree->GetEntries() << " entries." << endl;
     bbggLTMaker t(iTree);
     t.SetMax( TString(mtotMax).Atof() );
@@ -32,6 +47,8 @@ int Process(string file, string outFile, string mtotMin, string mtotMax, string 
     t.DoBVariation( TString(doVariation).Atoi());
     t.DoPhoVariation( TString(doPhoVariation).Atoi());
     t.SetCosThetaStar( TString(cosThetaStar).Atof(), TString(CTScats).Atoi());
+    t.DoNRWeights( TString(doNRWeights).Atoi());
+    
     t.Loop();
 
     return 1;
@@ -61,6 +78,8 @@ int main(int argc, char *argv[]) {
     string cosThetaStar = "100";
     string cosThetaStarCats = "0";
 
+    string doNRWeights = "0";
+    
     for( int i = 1; i < argc; i++){
 	if ( std::string(argv[i]) == "-i"){
 		if ( (i+1) == argc) {
@@ -195,6 +214,9 @@ int main(int argc, char *argv[]) {
 	else if ( std::string(argv[i]) =="-singleCat"){
 		singleCat = "1";
 	}
+	else if ( std::string(argv[i]) == "-NRW"){
+	  doNRWeights = "1";
+	}
 	else {
 		cout << "UNKNOWN OPTION! " << std::string(argv[i]) << endl;
 		cout << "Usage: LimitTreeMaker -i <input list of files> ( or -inputFile <single root file> ) -o <output location>" << endl;// \n
@@ -212,6 +234,7 @@ int main(int argc, char *argv[]) {
 		cout << "\t -btagLow (for mixed cat, lowest value)" << endl;
 		cout << "\t -singleCat (only one category)" << endl;
 		cout << "\t -doBVariation (Apply b-tagging SF factors: 1 or -1)" << endl;
+		cout << "\t -NRW (add non-resonant weights)" << endl;
 		return -1;
 	}	
     }
@@ -236,7 +259,7 @@ int main(int argc, char *argv[]) {
     }
 
     if(inputRootFile != "") {
-        cout << "Processing file: " << inputRootFile << endl;
+      cout << "Processing file: _" << inputRootFile <<"_"<< endl;
         if (inputRootFile.find(".root")==std::string::npos) {
             std::cout << inputRootFile << " is not a valid root file!" << std::endl;
             return 0;
@@ -246,7 +269,7 @@ int main(int argc, char *argv[]) {
         outF.append("/LT_");
         outF.append(inputRootFile.substr(sLoc+1));
         cout << "Output file: " << outF << endl;
-        Process(inputRootFile, outF, mtotMin, mtotMax, cosThetaStar, cosThetaStarCats, scale, photonCR, doKinFit, doMX, doTilt, tiltWindow, doNoCat, btagWP, doCatMixed, btagHigh, btagLow, singleCat, doVariation, doPhoVariation);
+        Process(inputRootFile, outF, mtotMin, mtotMax, cosThetaStar, cosThetaStarCats, scale, photonCR, doKinFit, doMX, doTilt, tiltWindow, doNoCat, btagWP, doCatMixed, btagHigh, btagLow, singleCat, doVariation, doPhoVariation, doNRWeights);
         return 0;
     }
     
@@ -269,7 +292,7 @@ int main(int argc, char *argv[]) {
         outF.append("/LT_");
         outF.append(line.substr(sLoc+1));
         cout << "Output file: " << outF << endl;
-        Process(line, outF, mtotMin, mtotMax, cosThetaStar, cosThetaStarCats, scale, photonCR, doKinFit, doMX, doTilt, tiltWindow, doNoCat, btagWP, doCatMixed, btagHigh, btagLow, singleCat, doVariation, doPhoVariation);
+        Process(line, outF, mtotMin, mtotMax, cosThetaStar, cosThetaStarCats, scale, photonCR, doKinFit, doMX, doTilt, tiltWindow, doNoCat, btagWP, doCatMixed, btagHigh, btagLow, singleCat, doVariation, doPhoVariation, doNRWeights);
     }
     
     return 0;
