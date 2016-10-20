@@ -120,7 +120,8 @@ int main(int argc, const char* argv[])
   cout << "Reading input configuration file..." << endl;
   BOOST_FOREACH( boost::property_tree::ptree::value_type const& rowPair, pt.get_child( "" ) )
   {
-  	cout << "Reading " << rowPair.first << " options..." << endl;
+    cout << "Reading " << rowPair.first << " options..." << endl;
+    
     if (rowPair.first == "signal") 
     {
       signalType = rowPair.second.get<std::string>("type");

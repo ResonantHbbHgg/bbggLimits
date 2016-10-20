@@ -83,7 +83,7 @@ int main(int argc, const char* argv[])
 	std::string path_dir="./bbggToolsResults";
   std::vector<string>folder_to_create;
 	//name files
-	std::string fileBkgName = "hgg.inputbkg_8TeV";
+	std::string fileBkgName = "hhbbgg.inputbkg_13TeV";
 	std::string part="LT_output_GluGluTo";
 	std::string part2="ToHHTo2B2G_M-";
 	std::string end="_narrow_13TeV-madgraph.root";
@@ -134,7 +134,7 @@ int main(int argc, const char* argv[])
       BOOST_FOREACH (boost::property_tree::ptree::value_type const& v, rowPair.second.get_child("nodes"))
       {  
 		static int color=1;
-		if(color%2==0)cout<<grey;
+		if(color%2==0)cout<<blue;
      	 	cout << "\t Signal samples location: " << signalDir << endl;
       		cout << "\t Signal model card: " << cardName << endl;
                 cout << "\t Signal mass: " << v.second.data() << endl;
@@ -179,11 +179,11 @@ int main(int argc, const char* argv[])
       doblinding = rowPair.second.get<bool>("doBlinding");
       doBands = rowPair.second.get<bool>("doBands");
       NCAT = rowPair.second.get<int>("ncat");
-			doBrazilianFlag=rowPair.second.get<bool>("doBrazilianFlag");
+      doBrazilianFlag=rowPair.second.get<bool>("doBrazilianFlag");
       if(NCAT>3)
-      {
-				std::cout<<red<<"Error NCAT>3 !!!"<<normal<<std::endl;
-				std::exit(0);
+	{
+	  std::cout<<red<<"Error NCAT>3 !!!"<<normal<<std::endl;
+	  std::exit(0);
       }
       version=rowPair.second.get<int>("version");
       docombine=rowPair.second.get<bool>("runCombine");
@@ -234,7 +234,7 @@ int main(int argc, const char* argv[])
         { 
 		static int  color=1;
       		if(addHiggs) higgstrue.push_back(v.second.data());
-		if(color%2==0)cout<<grey;
+		if(color%2==0)cout<<blue;
                 cout << "\t Higgs signal location: " << dirhiggs << endl;
 		cout << "\t Higgs signal type: " << v.second.data() << endl;
 		cout<<normal;
@@ -256,25 +256,25 @@ if(boost::filesystem::is_directory(path_dir)==true)
 std::string masswthout0 = std::to_string (mass);
 masswthout0.erase ( masswthout0.find_last_not_of('0') + 1, std::string::npos );
 if ((masswthout0.size () > 0)& (masswthout0.back()=='.'))  masswthout0.resize (masswthout0.size () - 1);
-std::string fileBaseName = "hgg.mH"+masswthout0+"_8TeV";
+std::string fileBaseName = "hhbbgg.mH"+masswthout0+"_13TeV";
 boost::filesystem::path dire(path_dir);
 boost::filesystem::create_directory(dire);
 std::system(("cp "+std::string(argv[1])+" "+path_dir).c_str());
-std::map<std::string,std::string>higgsfilename
+ std::map<std::string,std::string>higgsfilename
 {
-		{"ggh_m125_powheg_8TeV","hgg.hig.mH"+masswthout0+"_8TeV.ggh"},
-		{"tth_m125_8TeV","hgg.hig.mH"+masswthout0+"_8TeV.tth"},
-		{"vbf_m125_8TeV","hgg.hig.mH"+masswthout0+"_8TeV.vbf"},
-		{"wzh_m125_8TeV_zh","hgg.hig.mH"+masswthout0+"_8TeV.vh"},
-		{"bbh_m125_8TeV","hgg.hig.mH"+masswthout0+"_8TeV.bbh"}
+		{"ggh_m125_powheg_13TeV","hgg.hig.mH"+masswthout0+"_13TeV.ggh"},
+		{"tth_m125_13TeV","hgg.hig.mH"+masswthout0+"_13TeV.tth"},
+		{"vbf_m125_13TeV","hgg.hig.mH"+masswthout0+"_13TeV.vbf"},
+		{"wzh_m125_13TeV_zh","hgg.hig.mH"+masswthout0+"_13TeV.vh"},
+		{"bbh_m125_13TeV","hgg.hig.mH"+masswthout0+"_13TeV.bbh"}
 };
 std::map<std::string,int>higgsNumber
 {
-		{"ggh_m125_powheg_8TeV",0},
-		{"tth_m125_8TeV",1},
-		{"vbf_m125_8TeV",2},
-		{"wzh_m125_8TeV_zh",3},
-		{"bbh_m125_8TeV",4}
+		{"ggh_m125_powheg_13TeV",0},
+		{"tth_m125_13TeV",1},
+		{"vbf_m125_13TeV",2},
+		{"wzh_m125_13TeV_zh",3},
+		{"bbh_m125_13TeV",4}
 };
   for(unsigned int i=0;i!=sigMass.size();++i)
   {
@@ -285,9 +285,9 @@ std::map<std::string,int>higgsNumber
 	    int sigCat=sigMas;
 	    if(signalType[t] == "HighMass") sigCat = sigMass[i].first + 9000;
 	    if(signalType[t] == "HighMass") cout << "DOING HIGH MASS" << endl;
-//            std::string signalDir2="";
-//          if(energy=="13TeV") signalDir2 = sigMass[i].second;
-            //signalDir2 = TString(TString(signalDir).ReplaceAll( std::string("MASS"), std::string(v.second.data())) ).Data()+part+signalType+part2+v.second.data()+end
+	    // std::string signalDir2="";
+	    // if(energy=="13TeV") signalDir2 = sigMass[i].second;
+            // signalDir2 = TString(TString(signalDir).ReplaceAll( std::string("MASS"), std::string(v.second.data())) ).Data()+part+signalType+part2+v.second.data()+end
             TString baseSignalDir =  TString(signalDir).ReplaceAll(std::string("TYPE"), std::string(signalType[t])).Data();
             TString baseFile = TString(NonResSignalFile).ReplaceAll("THISNODE", to_string( sigMas ) );
             if(sigMas == 0) baseFile = TString(NonResSignalFile).ReplaceAll("THISNODE", std::string("box") );
@@ -298,7 +298,7 @@ std::map<std::string,int>higgsNumber
             cout << folder_name << endl;
             
             std::string HLFactoryname= TString(TString(signalType[t]) +TString("_M")+TString(to_string(sigMas))).Data();
-	        std::string ddata = baseSignalDir.Data() + std::string("/LT_DoubleEG.root");
+	    std::string ddata = baseSignalDir.Data() + std::string("/LT_DoubleEG.root");
 
 
 
@@ -375,13 +375,16 @@ std::map<std::string,int>higgsNumber
         		std::cout<<"Problem with fitresults !!"<<std::endl;
         		std::exit(3);
         	}
-          	TheFitter.MakeBkgWS( fileBkgName);
+          	fitresults->Print();
+
+		TheFitter.MakeBkgWS( fileBkgName);
         	cout<<green<<"BKG'S WORKSPACE DONE"<<normal<<endl;
           	// construct the models to fit
           	//
-          	TheFitter.MakeDataCard( fileBaseName, fileBkgName,higgsfilename,useSigTheoryUnc,higgstrue,higgsNumber);
-        	cout<<green<<"DATACARD DONE"<<normal<<endl;
-          	fitresults->Print();
+		// Don't make this datacard. Not needed no more
+          	//TheFitter.MakeDataCard( fileBaseName, fileBkgName,useSigTheoryUnc);
+        	//cout<<green<<"DATACARD DONE"<<normal<<endl;
+          	
       		 //MakeFancyDatacard
 	        //GetNumber of Observed Events:
 	        float sigExp[NCAT];
@@ -416,6 +419,8 @@ std::map<std::string,int>higgsNumber
   if(docombine==true)
   {
 	RunCombine(path_dir,doblinding);
+
+	std::cout<<" DONE with Limits ** "<<std::endl;
   }
   if(doBrazilianFlag==true)
   {

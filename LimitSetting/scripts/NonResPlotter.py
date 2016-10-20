@@ -116,6 +116,7 @@ def main(argv):
 	tlatex.SetTextSize(23)
 	tlatex.DrawLatex(0.6, 0.91, "#sqrt{s} = 13 TeV, L = " + str(lumi) + " fb^{-1}")
 	c0.SaveAs(folder+"/NonResPlot.pdf")
+	c0.SaveAs(folder+"/NonResPlot.png")
 	
 	gr_centralVal_1s_hh = TGraphAsymmErrors(len(nodesList), array('d', nodesList), array('d', [i/2.6 for i in centralVal]), array('d', zeros), array('d', zeros), array('d', [i/2.6 for i in s1_down]), array('d', [i/2.6 for i in s1_up]))
 	gr_centralVal_2s_hh = TGraphAsymmErrors(len(nodesList), array('d', nodesList), array('d', [i/2.6 for i in centralVal]), array('d', zeros), array('d', zeros), array('d', [i/2.6 for i in s2_down]), array('d', [i/2.6 for i in s2_up]))
@@ -148,6 +149,7 @@ def main(argv):
 	tlatex.DrawLatex(0.6, 0.91, "#sqrt{s} = 13 TeV, L = " + str(lumi) + " fb^{-1}")
 	leg.Draw("same")
 	c0.SaveAs(folder+"/NonResPlot_hh.pdf")
+	c0.SaveAs(folder+"/NonResPlot_hh.png")
 
 
 if __name__ == "__main__":

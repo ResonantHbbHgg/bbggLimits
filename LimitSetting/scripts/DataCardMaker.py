@@ -34,15 +34,16 @@ def main(argv):
 		sys.exit(2)	
 
 	if nCats == 2:
-		inputDatacardName = 'Models/LowMassResDatacardModel.txt'
+		inputDatacardName = os.getenv("CMSSW_BASE")+'/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/LowMassResDatacardModel.txt'
 		if isRes == 0:
-			inputDatacardName = 'Models/NonResDatacardModel.txt'
+			inputDatacardName = os.getenv("CMSSW_BASE")+'/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/NonResDatacardModel.txt'
+                        
 		inputDatacard = open(inputDatacardName, 'r')
 		outputDatacard = open(Folder+'/datacards/hhbbgg_13TeV_DataCard.txt', 'w')
 		outToWrite = ''
 		for line in inputDatacard:
-			outTemp = line.replace("INPUTBKGLOC", Folder+'/workspaces/hgg.inputbkg_8TeV.root')
-			outTemp2 = outTemp.replace("INPUTSIGLOC", Folder+'/workspaces/hgg.mH125_8TeV.inputsig.root')
+			outTemp = line.replace("INPUTBKGLOC", Folder+'/workspaces/hhbbgg.inputbkg_13TeV.root')
+			outTemp2 = outTemp.replace("INPUTSIGLOC", Folder+'/workspaces/hhbbgg.mH125_13TeV.inputsig.root')
 			outTemp3 = outTemp2.replace("OBSCAT0", '{:.0f}'.format(float(str(observed.split(',')[0]))))
 			outTemp4 = outTemp3.replace("OBSCAT1", '{:.0f}'.format(float(str(observed.split(',')[1])))) 
 			outTemp5 = outTemp4.replace("SIGCAT0", str(signalExp.split(',')[0]))
@@ -65,8 +66,8 @@ def main(argv):
 		outputDatacard = open(Folder+'/datacards/hhbbgg_13TeV_DataCard.txt', 'w')
 		outToWrite = ''
 		for line in inputDatacard:
-			outTemp = line.replace("INPUTBKGLOC", Folder+'/workspaces/hgg.inputbkg_8TeV.root')
-			outTemp2 = outTemp.replace("INPUTSIGLOC", Folder+'/workspaces/hgg.mH125_8TeV.inputsig.root')
+			outTemp = line.replace("INPUTBKGLOC", Folder+'/workspaces/hhbbgg.inputbkg_13TeV.root')
+			outTemp2 = outTemp.replace("INPUTSIGLOC", Folder+'/workspaces/hhbbgg.mH125_13TeV.inputsig.root')
 			outTemp3 = outTemp2.replace("OBSCAT0", str(observed))
 			outTemp5 = outTemp3.replace("SIGCAT0", str(signalExp))
 			if float(observed.split(',')[0]) < 11:
