@@ -1,9 +1,9 @@
 {
     "signal" : {
-        "dir" : "/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LimitSetting/NonResAnalysis_ICHEP_TYPE/",
-	"nodes" : [1],
+        "dir" : "/src/HiggsAnalysis/bbggLimits/LimitSetting/NonResAnalysis_ICHEP_TYPE/",
+	"nodes" : ["SM","box","2","3","4","5","6","7","8","9","10","11","12","13"],
         "types" : ["LowMass", "HighMass"],
-	"signalModelCard" : "/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D_sig.rs"
+	"signalModelCard" : "/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D_sig.rs"
     },
     "other" : {
         "version" : 46,
@@ -38,7 +38,7 @@
 	
     },
     "data" : {
-        "dir" : "/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LimitSetting/NonResAnalysis_ICHEP_TYPE/",
+        "dir" : "/src/HiggsAnalysis/bbggLimits/LimitSetting/NonResAnalysis_ICHEP_TYPE/",
         "name" :"DoubleEG"
     },
     "higgs" : {
