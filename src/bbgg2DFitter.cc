@@ -105,11 +105,12 @@ void bbgg2DFitter::Initialize(RooWorkspace* workspace, Int_t SigMass, float Lumi
 
 RooArgSet* bbgg2DFitter::defineVariables()
 {
-  RooRealVar* mgg = new RooRealVar("mgg","M(#gamma#gamma)",_minMggMassFit,_maxMggMassFit,"GeV");
+  RooRealVar* mgg  = new RooRealVar("mgg","M(#gamma#gamma)",_minMggMassFit,_maxMggMassFit,"GeV");
   RooRealVar* mtot = new RooRealVar("mtot","M(#gamma#gammajj)",200,1600,"GeV");
-  RooRealVar* mjj = new RooRealVar("mjj","M(jj)",_minMjjMassFit,_maxMjjMassFit,"GeV");
-  RooRealVar* evWeight = new RooRealVar("evWeight","HqT x PUwei",0.,100,"");
+  RooRealVar* mjj  = new RooRealVar("mjj","M(jj)",_minMjjMassFit,_maxMjjMassFit,"GeV");
   RooCategory* cut_based_ct = new RooCategory("cut_based_ct","event category 4") ;
+  RooRealVar* evWeight = new RooRealVar("evWeight","HqT x PUwei",0.,100,"");
+  RooRealVar* evNRW    = new RooRealVar("NRWeight","NR",0.,100,"");
   //
   cut_based_ct->defineType("cat4_0",0);
   cut_based_ct->defineType("cat4_1",1);
@@ -145,7 +146,14 @@ int bbgg2DFitter::AddSigData(float mass, TString signalfile)
       //if(sigTree==nullptr) 
     }
   //Data set
+
+  //Double_t W;
+  //ccbar->SetBranchAddress("weight", &wCCBar);
+  //ccbar->GetEntry();
+  //RooRealVar ccbarweight("NRweight", "NRweight", );
+  
   RooDataSet sigScaled("sigScaled","dataset",sigTree,*ntplVars,_cut,"evWeight");
+  
   if (_verbLvl>=1 && _verbLvl<4) std::cout << "======================================================================" <<std::endl;
   RooDataSet* sigToFit[_NCAT];
   TString cut0 = " && 1>0";
@@ -421,7 +429,11 @@ void bbgg2DFitter::MakePlots(float mass)
 {
   std::vector<TString> catdesc;
   int trueSigMass = _sigMass;
+
+  // AP: What a hell is this?! :
   if(_sigMass >= 9000) trueSigMass = _sigMass - 9000;
+  //
+
   if( _NCAT == 2 )catdesc={" High Purity Category"," Med. Purity Category"};
   if( _NCAT == 1 )catdesc={" High Mass Analysis"," High Mass Analysis"};
   //  else catdesc={" #splitline{High Purity}{High m_{#gamma#gammajj}^{kin}}"," #splitline{Med. Purity}{High m_{#gamma#gammajj}^{kin}}",
@@ -456,15 +468,15 @@ void bbgg2DFitter::MakePlots(float mass)
   for (int c = 0; c < _NCAT; ++c) 
     {
       // data[c] = (RooDataSet*) w->data(TString::Format("Data_cat%d",c));
-      sigToFit[c] = (RooDataSet*) _w->data(TString::Format("Sig_cat%d",c));
+      sigToFit[c]    = (RooDataSet*) _w->data(TString::Format("Sig_cat%d",c));
       mggGaussSig[c] = (RooAbsPdf*) _w->pdf(TString::Format("mggGaussSig_cat%d",c));
-      mggCBSig[c] = (RooAbsPdf*) _w->pdf(TString::Format("mggCBSig_cat%d",c));
-      mggSig[c] = (RooAbsPdf*) _w->pdf(TString::Format("mggSig_cat%d",c));
-      mggBkg[c] = (RooAbsPdf*) _w->pdf(TString::Format("mggBkg_cat%d",c));
+      mggCBSig[c]    = (RooAbsPdf*) _w->pdf(TString::Format("mggCBSig_cat%d",c));
+      mggSig[c]      = (RooAbsPdf*) _w->pdf(TString::Format("mggSig_cat%d",c));
+      mggBkg[c]      = (RooAbsPdf*) _w->pdf(TString::Format("mggBkg_cat%d",c));
       mjjGaussSig[c] = (RooAbsPdf*) _w->pdf(TString::Format("mjjGaussSig_cat%d",c));
-      mjjCBSig[c] = (RooAbsPdf*) _w->pdf(TString::Format("mjjCBSig_cat%d",c));
-      mjjSig[c] = (RooAbsPdf*) _w->pdf(TString::Format("mjjSig_cat%d",c));
-      mjjBkg[c] = (RooAbsPdf*) _w->pdf(TString::Format("mjjBkg_cat%d",c));
+      mjjCBSig[c]    = (RooAbsPdf*) _w->pdf(TString::Format("mjjCBSig_cat%d",c));
+      mjjSig[c]      = (RooAbsPdf*) _w->pdf(TString::Format("mjjSig_cat%d",c));
+      mjjBkg[c]      = (RooAbsPdf*) _w->pdf(TString::Format("mjjBkg_cat%d",c));
 
       std::vector<float> effSigmaVecMgg = EffectiveSigma( _w->var("mgg"), mggSig[c], _minSigFitMgg, _maxSigFitMgg);
       sigma_mgg.push_back(effSigmaVecMgg[0]);
