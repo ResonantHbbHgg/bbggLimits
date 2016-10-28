@@ -76,6 +76,9 @@ class bbgg2DFitter {
   //   Parameters
   
   Int_t _verbLvl;
+
+  Int_t _nonResWeightIndex;
+  std::string _wName;
   
   Bool_t _doblinding;
   Int_t _NCAT;
@@ -112,7 +115,8 @@ class bbgg2DFitter {
 		   std::string energy, Bool_t doBlinding, Int_t nCat, bool AddHiggs,
 		   float minMggMassFit,float maxMggMassFit,float minMjjMassFit,float maxMjjMassFit,
 		   float minSigFitMgg,float maxSigFitMgg,float minSigFitMjj,float maxSigFitMjj,
-		   float minHigMggFit,float maxHigMggFit,float minHigMjjFit,float maxHigMjjFit);
+		   float minHigMggFit,float maxHigMggFit,float minHigMjjFit,float maxHigMjjFit,
+		   Int_t doNRW=-1);
    void SetVerbosityLevel(Int_t v) {_verbLvl=v;}
    void SetCut(TString cut) {_cut = cut;}
    void SetType(std::string tp) { _signalType = tp; }

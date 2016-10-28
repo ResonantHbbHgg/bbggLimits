@@ -52,7 +52,8 @@ void bbgg2DFitter::Initialize(RooWorkspace* workspace, Int_t SigMass, float Lumi
 			      std::string energy, Bool_t doBlinding, Int_t nCat, bool AddHiggs,
 			      float minMggMassFit,float maxMggMassFit,float minMjjMassFit,float maxMjjMassFit,
 			      float minSigFitMgg,float maxSigFitMgg,float minSigFitMjj,float maxSigFitMjj,
-			      float minHigMggFit,float maxHigMggFit,float minHigMjjFit,float maxHigMjjFit)
+			      float minHigMggFit,float maxHigMggFit,float minHigMjjFit,float maxHigMjjFit,
+			      Int_t doNRW)
 {
   //std::cout<<"DBG.  We Initialize..."<<std::endl;
   
@@ -99,6 +100,14 @@ void bbgg2DFitter::Initialize(RooWorkspace* workspace, Int_t SigMass, float Lumi
       {"bbh_m125_13TeV","hgg.hig.mH125_13TeV.bbh"}
     };
 
+
+  _nonResWeightIndex = doNRW;
+
+  if (_nonResWeightIndex!=-1)
+    _wName = Form("evWeight_NRW_%d",doNRW);
+  else
+    _wName = "evWeight";
+
   //std::cout<<"DBG.  Finished Initialize..."<<std::endl;
 
 }
@@ -109,8 +118,8 @@ RooArgSet* bbgg2DFitter::defineVariables()
   RooRealVar* mtot = new RooRealVar("mtot","M(#gamma#gammajj)",200,1600,"GeV");
   RooRealVar* mjj  = new RooRealVar("mjj","M(jj)",_minMjjMassFit,_maxMjjMassFit,"GeV");
   RooCategory* cut_based_ct = new RooCategory("cut_based_ct","event category 4") ;
-  RooRealVar* evWeight = new RooRealVar("evWeight","HqT x PUwei",0.,100,"");
-  RooRealVar* evNRW    = new RooRealVar("NRWeight","NR",0.,100,"");
+
+  RooRealVar* evWeight = new RooRealVar(_wName.c_str(),"HqT x PUwei",0.,100,"");
   //
   cut_based_ct->defineType("cat4_0",0);
   cut_based_ct->defineType("cat4_1",1);
@@ -118,10 +127,13 @@ RooArgSet* bbgg2DFitter::defineVariables()
   cut_based_ct->defineType("cat4_3",3);
   //
   RooArgSet* ntplVars = new RooArgSet(*mgg, *mjj, *cut_based_ct, *evWeight);
-  ntplVars->add(*mgg);
-  ntplVars->add(*mtot);
-  ntplVars->add(*mjj);
-  ntplVars->add(*cut_based_ct);
+  if (_nonResWeightIndex!=-1)
+    ntplVars->add(*mtot);
+  // AP: Why these are here? They are already in the set:
+  //ntplVars->add(*mgg);
+  //ntplVars->add(*mjj);
+  //ntplVars->add(*cut_based_ct);
+
   return ntplVars;
 }
 
@@ -151,31 +163,53 @@ int bbgg2DFitter::AddSigData(float mass, TString signalfile)
   //ccbar->SetBranchAddress("weight", &wCCBar);
   //ccbar->GetEntry();
   //RooRealVar ccbarweight("NRweight", "NRweight", );
+
+  if (_verbLvl==4) {
+    std::cout<<"[DBG]  Prining ntplVars from sig"<<std::endl;
+    ntplVars->Print();
+  }
+
+  RooDataSet sigScaled("sigScaled","dataset",sigTree,*ntplVars,_cut, _wName.c_str());
   
-  RooDataSet sigScaled("sigScaled","dataset",sigTree,*ntplVars,_cut,"evWeight");
   
-  if (_verbLvl>=1 && _verbLvl<4) std::cout << "======================================================================" <<std::endl;
   RooDataSet* sigToFit[_NCAT];
   TString cut0 = " && 1>0";
+
+  RooArgList myArgList(*_w->var("mgg"));
+  
+  if (_fitStrategy != 1)
+    myArgList.add(*_w->var("mjj"));
+
+  if (_nonResWeightIndex!=-1)
+    myArgList.add(*_w->var("mtot"));
+  
   for ( int i=0; i<_NCAT; ++i)
     {
 
-      sigToFit[i] = (RooDataSet*) sigScaled.reduce(RooArgList(*_w->var("mgg"),*_w->var("mjj")),_cut+TString::Format(" && cut_based_ct==%d ",i)+cut0);
+      sigToFit[i] = (RooDataSet*) sigScaled.reduce(myArgList,_cut+TString::Format(" && cut_based_ct==%d ",i)+cut0);
       if (_fitStrategy == 1)
-	sigToFit[i] = (RooDataSet*) sigScaled.reduce(RooArgList(*_w->var("mgg")),_cut+TString::Format(" && cut_based_ct==%d && mjj < 140 ",i)+cut0);
+	sigToFit[i] = (RooDataSet*) sigScaled.reduce(myArgList,_cut+TString::Format(" && cut_based_ct==%d && mjj < 140 ",i)+cut0);
 
       this->SetSigExpectedCats(i, sigToFit[i]->sumEntries());
-      //if (_verbLvl==4)
-      //std::cout<<"DBG.  Cat="<<i<< "\t Sig sumEntries="<<sigToFit[i]->sumEntries()<<std::endl;
-      
+      if (_verbLvl==4) {
+	std::cout << "======================================================================" <<std::endl;
+	std::cout<<"[DBG]  Cat="<<i<< "\t Sig sumEntries="<<sigToFit[i]->sumEntries()<<std::endl;
+	std::cout<<"mGG:  Mean = "<<sigToFit[i]->mean(*_w->var("mgg"))<<"  sigma = "<<sigToFit[i]->sigma(*_w->var("mgg"))<<std::endl;
+	if (_fitStrategy != 1)
+	  std::cout<<"mJJ:  Mean = "<<sigToFit[i]->mean(*_w->var("mjj"))<<"  sigma = "<<sigToFit[i]->sigma(*_w->var("mjj"))<<std::endl;
+
+	if (_nonResWeightIndex!=-1)
+	  std::cout<<"mTot: Mean = "<<sigToFit[i]->mean(*_w->var("mtot"))<<"  sigma = "<<sigToFit[i]->sigma(*_w->var("mtot"))<<std::endl;
+      }
+
       /*This defines each category*/
       _w->import(*sigToFit[i],Rename(TString::Format("Sig_cat%d",i)));
     }
   // Create full signal data set without categorization
-  RooDataSet* sigToFitAll = (RooDataSet*) sigScaled.reduce(RooArgList(*_w->var("mgg"),*_w->var("mjj")),_cut);
+  RooDataSet* sigToFitAll = (RooDataSet*) sigScaled.reduce(myArgList,_cut);
   if (_fitStrategy == 1)
-    sigToFitAll = (RooDataSet*) sigScaled.reduce(RooArgList(*_w->var("mgg")),_cut+TString(" && mjj < 140 "));
-
+    sigToFitAll = (RooDataSet*) sigScaled.reduce(myArgList,_cut+TString(" && mjj < 140 "));
+  
   _w->import(*sigToFitAll,Rename("Sig"));
   // here we print the number of entries on the different categories
   if (_verbLvl>=1 && _verbLvl<4) {
@@ -258,8 +292,10 @@ void bbgg2DFitter::AddBkgData(TString datafile)
   TString cut0 = "&& 1>0";
   TString cut1 = "&& 1>0";
   if (_verbLvl>=1 && _verbLvl<4) std::cout<<"================= Add Bkg ==============================="<<std::endl;
+
   for( int i=0; i<_NCAT; ++i)
     {
+
       dataToFit[i] = (RooDataSet*) Data.reduce(RooArgList(*_w->var("mgg"),*_w->var("mjj")),_cut+TString::Format(" && cut_based_ct==%d",i));
 
       this->SetObservedCats(i, dataToFit[i]->sumEntries());
@@ -277,8 +313,7 @@ void bbgg2DFitter::AddBkgData(TString datafile)
 	else
 	  dataToPlot[i] = (RooDataSet*) Data.reduce(RooArgList(*_w->var("mgg"),*_w->var("mjj")),_cut+TString::Format(" && cut_based_ct==%d && mjj < 140 ",i) );
 
-      }
-      
+      }      
       _w->import(*dataToFit[i],Rename(TString::Format("Data_cat%d",i)));
       _w->import(*dataToPlot[i],Rename(TString::Format("Dataplot_cat%d",i)));
     }
@@ -497,6 +532,8 @@ void bbgg2DFitter::MakePlots(float mass)
       mean_mjj.push_back(mjj_mean);
 
     } // close categories
+
+
   RooRealVar* mgg = _w->var("mgg");
   mgg->setUnit("GeV");
   //RooAbsPdf* mggGaussSigAll = _w->pdf("mggGaussSig");
@@ -532,9 +569,26 @@ void bbgg2DFitter::MakePlots(float mass)
   //  text->SetNDC();
   //  text->SetTextSize(0.04);
   RooPlot* plotmgg[_NCAT];
+
+  RooRealVar* mtot = _w->var("mtot");
+  mtot->setUnit("GeV");
+  RooPlot* plotmtot[_NCAT];
+  Float_t minSigPlotMtot(300),maxSigPlotMtot(1600);
+  mtot->setRange("SigPlotRange",minSigPlotMtot,maxSigPlotMtot);
+  
+  TCanvas* ctmp = new TCanvas("c1","Canvas",800,800);
+
   if (_verbLvl>=1 && _verbLvl<4) std::cout << "[MakePlots] Doing now sig Mgg plot" << std::endl;
   for (int c = 0; c < _NCAT; ++c) 
     {
+
+      plotmtot[c] = mtot->frame(Range("SigPlotRange"),Bins(30));
+      sigToFit[c]->plotOn(plotmtot[c]);
+      plotmtot[c]->Draw();
+      
+      ctmp->SaveAs(TString::Format("%s/sigMtot_cat%d.png",_folder_name.data(),c),"QUIET");
+      
+      
       plotmgg[c] = mgg->frame(Range("SigPlotRange"),Bins(nBinsMass));
       sigToFit[c]->plotOn(plotmgg[c]);
       mggSig[c] ->plotOn(plotmgg[c]);
@@ -550,8 +604,6 @@ void bbgg2DFitter::MakePlots(float mass)
       plotmgg[c]->SetMinimum(0.0);
       plotmgg[c]->SetMaximum(1.40*plotmgg[c]->GetMaximum());
       plotmgg[c]->GetXaxis()->SetTitle("M(#gamma#gamma) [GeV]");
-      TCanvas* ctmp = new TCanvas(TString::Format("ctmpSigMgg_cat%d",c),"Background Categories",800,800);
-      ctmp->Clear();
       plotmgg[c]->Draw();
 
       //    plotmgg[c]->Draw("SAME");
@@ -604,8 +656,9 @@ void bbgg2DFitter::MakePlots(float mass)
       ctmp->SaveAs(TString::Format("%s/sigmodelMgg_cat%d.pdf",_folder_name.data(),c),"QUIET");
       ctmp->SaveAs(TString::Format("%s/sigmodelMgg_cat%d.png",_folder_name.data(),c),"QUIET");
       //ctmp->SaveAs(TString::Format("sigmodelMgg_cat%d.C",c));
-      if (ctmp) ctmp->Close();
     } // close categories
+
+  //if (ctmp) ctmp->Close();
   //  c1 = new TCanvas("cMjj","mgg",800,600);
   //  c1->cd(1);
   //********************************************//
@@ -632,7 +685,7 @@ void bbgg2DFitter::MakePlots(float mass)
 	plotmjj[c]->SetMaximum(1.40*plotmjj[c]->GetMaximum());
 	plotmjj[c]->GetXaxis()->SetTitle("M(jj) [GeV]");
 	//    TCanvas* ctmp = new TCanvas(TString::Format("ctmpSigMjj_cat%d",c),"Background Categories",0,0,500,500);
-	TCanvas* ctmp = new TCanvas(TString::Format("ctmpSigMjj_cat%d",c),"Background Categories",800,800);
+	//TCanvas* ctmp = new TCanvas(TString::Format("ctmpSigMjj_cat%d",c),"Background Categories",800,800);
 	plotmjj[c]->Draw();
 	plotmjj[c]->Draw("SAME");
 	//    TLegend *legmc = new TLegend(0.62,0.75,0.85,0.85);
@@ -681,10 +734,10 @@ void bbgg2DFitter::MakePlots(float mass)
 	ctmp->SaveAs(TString::Format("%s/sigmodelMjj_cat%d.png",_folder_name.data(),c),"QUIET");
 	//ctmp->SaveAs(TString::Format("sigmodelMjj_cat%d.C",c));
 
-	if (ctmp) ctmp->Close();
-
       } // close categories
   }
+
+  if (ctmp) ctmp->Close();
   
 } // close makeplots signal
 

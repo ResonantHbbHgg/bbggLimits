@@ -566,3 +566,5 @@ mjjHig_4_cat2 = AddPdf(mjjGaussHig_4_cat2, mjjCBHig_4_cat2, mjj_hig_frac_4_cat2)
 mjjGaussHig_4_cat3 = Gaussian(mjj, mjj_hig_m0_4_cat3, mjj_hig_gsigma_4_cat3);
 mjjCBHig_4_cat3 = CBShape(mjj, mjj_hig_m0_4_cat3, mjj_hig_sigma_4_cat3, mjj_hig_alpha_4_cat3, mjj_hig_n_4_cat3);
 mjjHig_4_cat3 = AddPdf(mjjGaussHig_4_cat3, mjjCBHig_4_cat3, mjj_hig_frac_4_cat3);
+
+mtot[200,1600];

@@ -37,13 +37,13 @@ begin = time.time()
 def createDir(myDir):
   if opt.verb>0 and opt.verb<4: print 'Creating a new directory: ', myDir
   if os.path.exists(myDir):
-    if opt.verb<4:
+    if opt.verb<=4:
       print "\t This directory already exists:", myDir
     if opt.overwrite:
-      if opt.verb<4:
-        print ' But we will continue anyway (--rewrite it!)'
+      if opt.verb<=4:
+        print "  But we will continue anyway (-- I'll overwrite it!)"
     else:
-      if opt.verb<4:
+      if opt.verb<=4:
         print ' And so I exit this place...'
       sys.exit(1)
   else:
@@ -60,7 +60,7 @@ def printTime(t1, t2):
 def runCombine(inDir, doBlind, Label = None, asimov=False):
   print 'Running combine tool.  Dir:', inDir, 'Blind:', doBlind
   if opt.verb==4:
-    print 'inDir should be the immediate directory where the card is located'
+    print '[DBG] inDir should be the immediate directory where the card is located'
   
   if doBlind:
     blinded = "--run blind"
@@ -83,27 +83,28 @@ def runCombine(inDir, doBlind, Label = None, asimov=False):
   os.rename(fName, outDir+'/'+fName)
 
 
-def runFullChain(Params, NRnode=None, NRgridPoint=None):
+def runFullChain(Params, NRnode=None, NRgridPoint=-1):
   #print 'Running: ', sys._getframe().f_code.co_name, " Node=",NRnode
   # print sys._getframe().f_code
 
   if opt.verb>1:
-    print 'Node=',NRnode, 'gridPoint=',NRgridPoint,'Options:\n ', opt, 
+    print 'Node=',NRnode, '  gridPoint=',NRgridPoint,',  Options:\n ', opt
   
-  if NRnode!=None and NRgridPoint!=None:
+
+  if NRnode!=None and NRgridPoint!=-1:
     print 'WARning: cannot have both the Node and grid Point. Chose one and try again'
     sys.exit(1)
   elif NRnode!=None:
-    Label = "_Node_"+NRnode
-  elif NRgridPoint!=None:
-    Label = "_gridPoint_"+NRgridPoint
+    Label = "_Node_"+str(NRnode)
+  elif NRgridPoint!=-1:
+    Label = "_gridPoint_"+str(NRgridPoint)
   else:
     print 'WARning: must provide one of these: NRnode or NRgridPoint'
     sys.exit(1)
 
   start = time.clock()
 
-  signalDir   = os.getenv("CMSSW_BASE")+Params['signal']['dir']
+  LTDir   = os.getenv("CMSSW_BASE")+Params['LTDIR']
   signalTypes = Params['signal']['types']
   signalModelCard = os.getenv("CMSSW_BASE")+Params['signal']['signalModelCard']
 
@@ -129,7 +130,6 @@ def runFullChain(Params, NRnode=None, NRgridPoint=None):
   obs  = Params['other']["obs"]
   twotag=Params['other']["twotag"]
 
-  dataDir  = os.getenv("CMSSW_BASE")+Params['data']['dir']
   dataName = Params['data']['name']
 
   sigCat = 1
@@ -150,9 +150,19 @@ def runFullChain(Params, NRnode=None, NRgridPoint=None):
   # For now the mass cuts are all the same, but can be changed in future.
   # ParamsForFits = {'SM': massCuts, 'box': massCuts}
 
-  NonResSignalFile = "/LT_output_GluGluToHHTo2B2G_node_"+NRnode+"_13TeV-madgraph.root"
+  # TODO: unify this:
+  if 'APZ' in LTDir:
+    NonResSignalFile = "/LT_output_GluGluToHHTo2B2G_node_"+str(NRnode)+"_13TeV-madgraph.root"
+  else:
+    NonResSignalFile = "/LT_output_GluGluToHHTo2B2G_node_"+str(NRnode)+"_13TeV-madgraph_0.root"
 
+  if NRgridPoint!=-1:
+    NonResSignalFile = "/LT_output_GluGluToHHTo2B2G_node_2_13TeV-madgraph_0.root"
 
+  if opt.verb==4:
+    print '[DBG]:', NonResSignalFile, signalTypes
+  
+      
   for t in signalTypes:
     newFolder = baseFolder+ str('/'+t+Label)
     if opt.verb>1:
@@ -169,53 +179,52 @@ def runFullChain(Params, NRnode=None, NRgridPoint=None):
                           massCuts[0],massCuts[1],massCuts[2],
                           massCuts[3],massCuts[4],massCuts[5],
                           massCuts[6],massCuts[7],massCuts[8],
-                          massCuts[9],massCuts[10],massCuts[11])
+                          massCuts[9],massCuts[10],massCuts[11], NRgridPoint)
 
     theFitter.SetVerbosityLevel(opt.verb)
     theFitter.style()
 
-    signalDir = signalDir.replace('TYPE', t)
-    dataDir   = dataDir.replace('TYPE', t)
+    LTDir = LTDir.replace('TYPE', t)
     mass = 125.0
 
-    openStatus = theFitter.AddSigData( mass, str(signalDir+NonResSignalFile))
+    openStatus = theFitter.AddSigData( mass, str(LTDir+NonResSignalFile))
     if openStatus==-1:
       print 'There is a problem with openStatus'
       sys.exit(1)
-    print "\t SIGNAL ADDED. Node=",NRnode, 'type=',t
+    print "\t SIGNAL ADDED. Node=",NRnode, '  GridPoint=',NRgridPoint, 'type=',t
     if opt.verb>0: p1 = printTime(start, start)
     
     createDir(newFolder+'/workspaces')
     createDir(newFolder+'/datacards')
 
     theFitter.SigModelFit( mass)
-    print "\t SIGNAL FITTED. Node=",NRnode, 'type=',t
+    print "\t SIGNAL FITTED. Node=",NRnode, '  GridPoint=',NRgridPoint, 'type=',t
     if opt.verb>0: p2 = printTime(p1,start)
 
     fileBaseName = "hhbbgg.mH"+str(mass)[0:3]+"_13TeV"
     theFitter.MakeSigWS( fileBaseName)
-    print "\t SIGNAL'S WORKSPACE DONE. Node=",NRnode, 'type=',t
+    print "\t SIGNAL'S WORKSPACE DONE. Node=",NRnode, '  GridPoint=',NRgridPoint, 'type=',t
     if opt.verb>0: p3 = printTime(p2,start)
 
     theFitter.MakePlots( mass)
-    print "\t SIGNAL'S PLOT DONE.. Node=",NRnode, 'type=',t
+    print "\t SIGNAL'S PLOT DONE.. Node=",NRnode, '  GridPoint=',NRgridPoint, 'type=',t
     if opt.verb>0: p4 = printTime(p3,start)
 
     if addHiggs:
       print 'Here will add SM Higgs contributions'
       # theFitter.AddHigData( mass,direc,1)
 
-    ddata = str(dataDir + '/LT_'+dataName+'.root')
+    ddata = str(LTDir + '/LT_'+dataName+'.root')
 
     theFitter.AddBkgData(ddata)
-    print "\t BKG ADDED. Node=",NRnode, 'type=',t
+    print "\t BKG ADDED. Node=",NRnode, '  GridPoint=',NRgridPoint, 'type=',t
     if opt.verb>0: p4 = printTime(p3,start)
 
     if opt.verb==3:
       TheFitter.PrintWorkspace();
 
     fitresults = theFitter.BkgModelFit( doBands, addHiggs)
-    print "\t BKG FITTED. Node=",NRnode, 'type=',t
+    print "\t BKG FITTED. Node=",NRnode, '  GridPoint=',NRgridPoint, 'type=',t
     if opt.verb>0: p5 = printTime(p4,start)
     if fitresults==None:
       print "PROBLEM with fitresults !!"
@@ -226,7 +235,7 @@ def runFullChain(Params, NRnode=None, NRgridPoint=None):
 
     wsFileBkgName = "hhbbgg.inputbkg_13TeV"
     theFitter.MakeBkgWS( wsFileBkgName);
-    print "\t BKG'S WORKSPACE DONE. Node=",NRnode, 'type=',t
+    print "\t BKG'S WORKSPACE DONE. Node=",NRnode, '  GridPoint=',NRgridPoint, 'type=',t
     if opt.verb>0: p6 = printTime(p5,start)
 
     # This is making cards ala 8 TeV. We don't need this for now
@@ -257,7 +266,7 @@ def runFullChain(Params, NRnode=None, NRgridPoint=None):
     if opt.verb==4:
       print DCcommand
     os.system(DCcommand)
-    print "\t DATACARD DONE. Node=",NRnode, 'type=',t
+    print "\t DATACARD DONE. Node=",NRnode, '  GridPoint=',NRgridPoint, 'type=',t
 
     if opt.verb>0: p7 = printTime(p6,start)
 
@@ -317,12 +326,13 @@ if __name__ == "__main__":
 
   if opt.NRW:
     print 'Running over 5D space points'
-    for p in xrange(0,10):
+    #for p in [0, 10, 200, 400, 600, 1200, 1500, 1505]:
+    for p in xrange(0,30):
       pool.apply_async(runFullChain, args = (Params, None,p,))
   else:
     print 'Running over nodes'
-    for n in nodes:
-      #for n in ['2','SM']:
+    #for n in nodes:
+    for n in ['2','SM']:
       # print 'Node = ', n
     
       # Run on multiple cores:
