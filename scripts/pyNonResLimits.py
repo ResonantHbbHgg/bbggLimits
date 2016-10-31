@@ -1,18 +1,34 @@
 #!/usr/bin/env python
 
 from ROOT import *
-import os,sys,json,time
+import os,sys,json,time,re
 gROOT.SetBatch()
 
 __author__ = 'Andrey Pozdnyakov'
+
 import argparse
+
+def parseNumList(string):
+  m = re.match(r'(\d+)(?:-(\d+))?$', string)
+  # ^ (or use .split('-'). anyway you like.)
+  if not m:
+    raise argparse.ArgumentTypeError("'" + string + "' is not a range of number. Expected forms like '0-5' or '2'.")
+  start = m.group(1)
+  end = m.group(2) or start
+  return list(range(int(start,10), int(end,10)+1))
+
 parser =  argparse.ArgumentParser(description='Limit Tree maker')
 parser.add_argument('-f', '--inputFile', dest="fname", type=str, default=None, required=True,
                     help="Json config file")
 parser.add_argument('-o', '--outDir', dest="outDir", type=str, default=None,
                     help="Output directory (will be created).")
-parser.add_argument('--NRW', dest="NRW", action="store_true", default=False,
-                    help="Use non-resonant weights")
+parser.add_argument('--nodes', dest="nodes", default=None, type=str, nargs='+',
+                    choices=['2','3','4','5','6','7','8','9','10','11','12','13','SM','box','all'], 
+                    help = "Choose the nodes to run")
+parser.add_argument('--points', dest="points", default=None, type=parseNumList,
+                    help = "Choose the points in the grid to run")
+#parser.add_argument('--NRW', dest="NRW", action="store_true", default=False,
+#                    help="Use non-resonant weights")
 parser.add_argument('--overwrite', dest="overwrite", action="store_true", default=False,
                     help="Overwrite the results into the same directory")
 parser.add_argument("-v", dest="verb", type=int, default=0,
@@ -156,8 +172,8 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
   else:
     NonResSignalFile = "/LT_output_GluGluToHHTo2B2G_node_"+str(NRnode)+"_13TeV-madgraph_0.root"
 
-  if NRgridPoint!=-1:
-    NonResSignalFile = "/LT_output_GluGluToHHTo2B2G_node_2_13TeV-madgraph_0.root"
+  if NRgridPoint >= 0:
+    NonResSignalFile = "/LT_NR_Nodes_2to13_merged.root"
 
   if opt.verb==4:
     print '[DBG]:', NonResSignalFile, signalTypes
@@ -291,7 +307,8 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
   
   if doCombine:
     runCombine(newDir, doBlinding, Label=Label)
-    print "\t COMBINE DONE. Node=",NRnode
+    print "\t COMBINE DONE. Node=",NRnode, '  GridPoint=',NRgridPoint
+    
   if opt.verb>0: p8 = printTime(p7,start)
 
   
@@ -324,22 +341,28 @@ if __name__ == "__main__":
   from multiprocessing import Pool, TimeoutError  
   pool = Pool(processes=opt.ncpu)
 
-  if opt.NRW:
-    print 'Running over 5D space points'
-    #for p in [0, 10, 200, 400, 600, 1200, 1500, 1505]:
-    for p in xrange(0,30):
-      pool.apply_async(runFullChain, args = (Params, None,p,))
-  else:
-    print 'Running over nodes'
-    #for n in nodes:
-    for n in ['2','SM']:
-      # print 'Node = ', n
-    
+
+  if opt.nodes!=None:
+    print 'Running over nodes:',opt.nodes
+
+    if 'all' in opt.nodes:
+      myNodes=['2','3','4','5','6','7','8','9','10','11','12','13','SM','box']
+    else:
+      myNoeds = opt.nodes
+      
+    for n in myNodes:
+      #for n in ['2','SM']:
       # Run on multiple cores:
       pool.apply_async(runFullChain, args = (Params, n,))
-
+    
       # Use signle core:
       #runFullChain(Params, NRnode=n)
+    
+  #for p in [0, 10, 200, 400, 600, 1200, 1500, 1505]:
+  if opt.points!=None:
+    print 'Running over 5D space points:', opt.points
+    for p in opt.points:
+      pool.apply_async(runFullChain, args = (Params, None,p,))
     
   pool.close()  
   pool.join()

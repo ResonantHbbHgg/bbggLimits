@@ -107,16 +107,18 @@ class bbgg2DFitter {
   //Workspace
   RooWorkspace* _w;
   std::string _folder_name;
+
+  TCanvas *_c1, *_c2;
   
  public :
    bbgg2DFitter() {}
-   virtual ~bbgg2DFitter() { }
+   virtual ~bbgg2DFitter() { if (_c1) _c1->Close(); if (_c2) _c2->Close(); }
    void Initialize(RooWorkspace* workspace, Int_t SigMass, float Lumi,std::string folder_name,
 		   std::string energy, Bool_t doBlinding, Int_t nCat, bool AddHiggs,
 		   float minMggMassFit,float maxMggMassFit,float minMjjMassFit,float maxMjjMassFit,
 		   float minSigFitMgg,float maxSigFitMgg,float minSigFitMjj,float maxSigFitMjj,
 		   float minHigMggFit,float maxHigMggFit,float minHigMjjFit,float maxHigMjjFit,
-		   Int_t doNRW=-1);
+		   Int_t doNRW=-2);
    void SetVerbosityLevel(Int_t v) {_verbLvl=v;}
    void SetCut(TString cut) {_cut = cut;}
    void SetType(std::string tp) { _signalType = tp; }

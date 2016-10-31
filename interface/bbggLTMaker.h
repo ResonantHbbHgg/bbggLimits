@@ -64,6 +64,7 @@ public :
    double mtotMin;
    double mtotMax;
    double normalization;
+   double normalizationNR;
    double btagWP;
    double btagWP_low;
    double btagWP_high;
@@ -214,7 +215,7 @@ public :
    virtual void     Show(Long64_t entry = -1);
    void SetMax( double max ){ mtotMax = max; }
    void SetMin( double min ){ mtotMin = min; }
-   void SetNormalization(double norm) { normalization = norm; }
+   void SetNormalization(double norm, double norm2=1) { normalization = norm; normalizationNR = norm2;}
    void IsPhotonCR( int pcr ) { photonCR = pcr; }
    void IsMX( int mx ) { doMX = mx; }
    void IsKinFit( int kf ) { doKinFit = kf; }
@@ -246,6 +247,7 @@ bbggLTMaker::bbggLTMaker(TTree *tree) : fChain(0)
    mtotMax = 1200.;
    mtotMin = 230.;
    normalization = 1.;
+   normalizationNR = 1.;
    photonCR = 0;
    doMX = 1;
    doKinFit = 0;

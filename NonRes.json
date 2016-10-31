@@ -1,13 +1,13 @@
 {
 
-    "LTDIR" : "/src/HiggsAnalysis/bbggLimits/LT-Oct28_TYPE/",
+    "LTDIR" : "/src/HiggsAnalysis/bbggLimits/LT-Oct31-APZ_TYPE/",
     "signal" : {
 	"nodes" : ["SM","box","2","3","4","5","6","7","8","9","10","11","12","13"],
         "types" : ["HighMass"],
 	"signalModelCard" : "/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D_sig.rs"
     },
     "other" : {
-        "version" : 50,
+        "version" : 52,
 	"integratedLumi" : 2.7,
         "energy" : "13TeV",
         "higgsMass" : 125.0,

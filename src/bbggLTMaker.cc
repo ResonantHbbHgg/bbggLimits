@@ -266,13 +266,19 @@ void bbggLTMaker::Loop()
     // -- Weights for Non-Res samples are added here
     //------------------------------
 
+    // Lumi, devided by the Total number of events in nodes 2-13.
+    // This is needed because those nodes must be merged later for NonRes weighting.
+    // BAD that it's hardcoded, need to set as parameter.
+    // Float_t S = 2.7/597400;
+    
+    
     if (doNonResWeights){
       //std::cout << "Doing Non-Resonant Signal weights " << std::endl;
 
       for (UInt_t n=0; n<NRWTOT; n++){
 	if (n==324 || n==910 || n==985 || n==990){
 	  // The points above do not exist in the input file provided by Alexandra
-	  o_NRWeights[n]=o_weight;
+	  o_NRWeights[n] = normalizationNR*o_weight/normalization;
 	}
 	else {
 	  //Check if histogram exist
