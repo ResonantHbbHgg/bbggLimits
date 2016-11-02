@@ -278,12 +278,13 @@ void bbggLTMaker::Loop()
       for (UInt_t n=0; n<NRWTOT; n++){
 	if (n==324 || n==910 || n==985 || n==990){
 	  // The points above do not exist in the input file provided by Alexandra
-	  o_NRWeights[n] = normalizationNR*o_weight/normalization;
+	  o_NRWeights[n] = 1;
 	}
 	else {
 	  //Check if histogram exist
 	  UInt_t binNum = NR_Wei_Hists[n]->FindBin(gen_mHH, fabs(gen_cosTheta));
-	  o_NRWeights[n] = o_weight*NR_Wei_Hists[n]->GetBinContent(binNum);
+	  // Excluded b-tag weight for now (there is some problem with it):
+	  o_NRWeights[n] = normalizationNR*genTotalWeight*pho1_sf*pho2_sf*NR_Wei_Hists[n]->GetBinContent(binNum);
 	  // Just print out for one n:
 	  if (DEBUG && n==100 && jentry%1000 == 0)
 	    cout<<n<<" **  mHH = "<<gen_mHH<<"   cosT*="<<fabs(gen_cosTheta)<<"  bin="<<binNum<<" wei="<<o_NRWeights[n]<<endl;

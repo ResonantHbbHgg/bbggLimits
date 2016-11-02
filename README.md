@@ -15,18 +15,26 @@ scramv1 b -j 10
 
 ### Making Limit Trees
 
-The code to produce the Limit Trees is located at
-*src/bbggLTMaker.cc*. In order to run it, we use the python script
-under *scripts/pyLimitTreeMaker.py*, which exists in the *$PATH* after
-scram build. To run it just do: 
+In order to make limit trees from all samples use these script:
 ```
-pyLimitTreeMaker.py -i fList.txt -o outDir
+makeAllTrees.py -x nonres [--NRW]
 ```
-where `fList.txt` is a list of root files to be run over, and
-`outDir` is where the output trees will be created. The ```fList.txt``` can be obtained with the following simple command: `ls /path/to/flatTrees/output* > fList.txt`.
+
+The *C++ Loop* code to produce the Limit Trees is located at
+*src/bbggLTMaker.cc*. In order to run it over a single tree use the
+python script *scripts/pyLimitTreeMaker.py*, which exists in the
+*$PATH* after scram build. To run it just do:
+```
+pyLimitTreeMaker.py -f fileName.root -o outDir
+```
+
+where `fileName.root` is a an input Flat tree to be run over, and
+`outDir` is where the output trees will be created. The
+`makeAllTrees.py` mentioned in the beginning utilizes the
+`pyLimitTreeMaker.py` and runs it over many input  files.
 
 
-Other options can be specified:
+More options for the `pyLimitTreeMaker.py` can be specified:
 * `-f <input File>` or `-i <Text file with a List of Root files full paths>`
 * `-o  <output location>` - directory will be created.
 * `--min  <min mtot>`, `--max <max mtot>`
@@ -43,10 +51,6 @@ Other options can be specified:
 * `--doPhoVariation <VAR>`  - Apply photon SF factors: 0, 1 or -1.
 * `--cosThetaStar <VAR>`  - cut on CosTheta Star variable
 
-In order to make limit trees from all sample use these scripts:
-```
-makeAllTrees.py -x nonres
-```
 
 ### Using C++ script to make Limit Trees (will be depricated soon):
 The script is located in *bin/LimitTreeMaker.C*
@@ -80,9 +84,11 @@ For setting the Resonant limits, follow instructions in *LimitSetting* sub-direc
 
 For Non-Resonant limit, stay here and run:
 ```
-pyNonResLimits.py -f NonRes.json
-
+pyNonResLimits.py -f NonRes.json --nodes 2 3 SM --points 0-10
 ```
-The results of the combined limit should appear in *outDir/CombinedCard_Node_X/* subdirectories.
+This example will run all fitting and limits for *Nodes 2,3,SM* and
+the re-weighting to *points 0-10* out of 0-1506 avaialable The results
+of the combined limit should appear in *outDir/CombinedCard_Node_X/*
+subdirectories.
 
 Good luck!

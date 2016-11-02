@@ -117,7 +117,16 @@ void bbgg2DFitter::Initialize(RooWorkspace* workspace, Int_t SigMass, float Lumi
 
   _c1 = new TCanvas("c1","Square Canvas",800,800);
   _c2 = new TCanvas("c2","Rectangular Canvas",800,600);
-  
+
+
+  _NR_MassRegion=0;
+  if (folder_name.find("LowMass")!=std::string::npos)
+    _NR_MassRegion=1;
+  else if (folder_name.find("HighMass")!=std::string::npos)
+    _NR_MassRegion=2;
+  else
+    _NR_MassRegion=99;
+
 }
 
 RooArgSet* bbgg2DFitter::defineVariables()
@@ -135,7 +144,7 @@ RooArgSet* bbgg2DFitter::defineVariables()
   cut_based_ct->defineType("cat4_3",3);
   //
   RooArgSet* ntplVars = new RooArgSet(*mgg, *mjj, *cut_based_ct, *evWeight);
-  if (_nonResWeightIndex>=0)
+  if (_nonResWeightIndex>=-1)
     ntplVars->add(*mtot);
   // AP: Why these are here? They are already in the set:
   //ntplVars->add(*mgg);
@@ -188,7 +197,7 @@ int bbgg2DFitter::AddSigData(float mass, TString signalfile)
   if (_fitStrategy != 1)
     myArgList.add(*_w->var("mjj"));
 
-  if (_nonResWeightIndex>=0)
+  if (_nonResWeightIndex>=-1)
     myArgList.add(*_w->var("mtot"));
 
   for ( int i=0; i<_NCAT; ++i)
@@ -206,7 +215,7 @@ int bbgg2DFitter::AddSigData(float mass, TString signalfile)
 	if (_fitStrategy != 1)
 	  std::cout<<"mJJ:  Mean = "<<sigToFit[i]->mean(*_w->var("mjj"))<<"  sigma = "<<sigToFit[i]->sigma(*_w->var("mjj"))<<std::endl;
 
-	if (_nonResWeightIndex>=0)
+	if (_nonResWeightIndex>=-1)
 	  std::cout<<"mTot: Mean = "<<sigToFit[i]->mean(*_w->var("mtot"))<<"  sigma = "<<sigToFit[i]->sigma(*_w->var("mtot"))<<std::endl;
       }
 
@@ -472,7 +481,7 @@ void bbgg2DFitter::MakePlots(float mass)
 {
 
   _c1->cd();
-  
+
   std::vector<TString> catdesc;
   int trueSigMass = _sigMass;
 
@@ -586,13 +595,13 @@ void bbgg2DFitter::MakePlots(float mass)
   RooPlot* plotmtot[_NCAT];
   Float_t minSigPlotMtot(300),maxSigPlotMtot(1600);
   mtot->setRange("SigPlotRange",minSigPlotMtot,maxSigPlotMtot);
-  
+
   //TCanvas* ctmp = new TCanvas("c1","Canvas",800,800);
 
   if (_verbLvl>=1 && _verbLvl<4) std::cout << "[MakePlots] Doing now sig Mgg  and Mtot plots" << std::endl;
   for (int c = 0; c < _NCAT; ++c)
     {
-      if (_nonResWeightIndex>=0){
+      if (_nonResWeightIndex>=-1){
 	plotmtot[c] = mtot->frame(Range("SigPlotRange"),Bins(30));
 	sigToFit[c]->plotOn(plotmtot[c]);
 	plotmtot[c]->Draw();
@@ -646,16 +655,46 @@ void bbgg2DFitter::MakePlots(float mass)
       tlat0->SetTextFont(63);
       tlat0->SetTextSize(27);
 
-      if(_sigMass >=9000) tlat0->DrawLatex(0.16, 0.87, catdesc.at(c) + "");
-      if(_sigMass < 250 ) tlat0->DrawLatex(0.16, 0.87, catdesc.at(c) + " (Low Mass)");
-      if(_sigMass > 200 && _sigMass < 8000 ) tlat0->DrawLatex(0.16, 0.87, catdesc.at(c) + " ");
 
-      tlat0->SetTextFont(43);
       TString str_desc;
-      if(trueSigMass < 250 )str_desc=TString::Format(" Nonresonant HH, Node %d", trueSigMass);
-      else str_desc=TString::Format(" %s, M_{X} = %d GeV",_signalType.c_str(), trueSigMass);
-      if(trueSigMass == 0 )str_desc=TString::Format(" Nonresonant HH, Box Diagram Only");
-      if(trueSigMass == 1 )str_desc=TString::Format(" Nonresonant HH, SM");
+
+      if (_nonResWeightIndex==-2){
+	// This is resonant case
+
+	// What is this? Don't know:
+	if(_sigMass >=9000) tlat0->DrawLatex(0.16, 0.87, catdesc.at(c) + "");
+
+	else if (_sigMass < 250 ) tlat0->DrawLatex(0.16, 0.87, catdesc.at(c) + " (Low Mass)");
+	else if(_sigMass > 200 && _sigMass < 8000 ) tlat0->DrawLatex(0.16, 0.87, catdesc.at(c) + " ");
+	tlat0->SetTextFont(43);
+
+	str_desc=TString::Format(" %s, M_{X} = %d GeV",_signalType.c_str(), trueSigMass);
+      }
+      else {
+	// This is Non-resonant case
+
+	
+	if (_NR_MassRegion==1)
+	  tlat0->DrawLatex(0.16, 0.87, catdesc.at(c) + " (Low Mass)");
+	if (_NR_MassRegion==2)
+	  tlat0->DrawLatex(0.16, 0.87, catdesc.at(c) + " (High Mass)");
+
+	
+	if (_nonResWeightIndex==-1){
+	  // This is the Nodes
+	  if (_sigMass==0) str_desc=TString::Format(" Nonresonant HH, SM");
+	  else if (_sigMass==1)	str_desc=TString::Format(" Nonresonant HH, Box Diagram Only");
+	  else str_desc=TString::Format(" Nonresonant HH, Node %d", _sigMass);
+	}
+	else if (_nonResWeightIndex<1507){
+	  // This is the points
+	  str_desc=TString::Format(" Nonresonant HH, Weight No.%d", _nonResWeightIndex);
+	}
+	else
+	  std::cout<<"Warning this index is BAD: "<<_nonResWeightIndex<<std::endl;
+      }
+     
+      
       tlat0->DrawLatex(0.16, 0.82, str_desc);
 
       str_desc=TString::Format(" #mu = %.2f GeV",mean_mgg[c]);
@@ -728,6 +767,9 @@ void bbgg2DFitter::MakePlots(float mass)
 	if(_sigMass > 200 && _sigMass < 8000 ) tlat0->DrawLatex(0.16, 0.87, catdesc.at(c) + " ");
 
 	tlat0->SetTextFont(43);
+
+	// Ahhhh common... Repeating the same shit here... Who wrote this code?
+	// Not gonna change it here. Better re-write from scracth
 	TString str_desc;
 	if(trueSigMass < 250 )str_desc=TString::Format(" Nonresonant HH, Node %d", trueSigMass);
 	else str_desc=TString::Format(" %s, M_{X} = %d GeV",_signalType.c_str(), trueSigMass);
@@ -1638,6 +1680,7 @@ void bbgg2DFitter::SetConstantParams(const RooArgSet* params)
 
 TStyle * bbgg2DFitter::style()
 {
+  // TODO: Need to get this outside of this class..
 
   TStyle *hggStyle = new TStyle("hggPaperStyle","Hgg Paper Style");
 
@@ -1656,22 +1699,22 @@ TStyle * bbgg2DFitter::style()
   hggStyle->SetPadColor(kWhite);
   hggStyle->SetCanvasColor(kWhite);
 
-  hggStyle->SetCanvasDefH(600); //Height of canvas
-  hggStyle->SetCanvasDefW(600); //Width of canvas
+  //hggStyle->SetCanvasDefH(600); //Height of canvas
+  //hggStyle->SetCanvasDefW(600); //Width of canvas
   hggStyle->SetCanvasDefX(0);   //POsition on screen
   hggStyle->SetCanvasDefY(0);
 
-  hggStyle->SetPadLeftMargin(0.13);//0.16);
-  hggStyle->SetPadRightMargin(0.1);//0.02);
-  hggStyle->SetPadTopMargin(0.085);//0.02);
-  hggStyle->SetPadBottomMargin(0.12);//0.02);
+  hggStyle->SetPadLeftMargin(0.10);//0.16);
+  hggStyle->SetPadRightMargin(0.05);//0.02);
+  hggStyle->SetPadTopMargin(0.04);//0.02);
+  hggStyle->SetPadBottomMargin(0.09);//0.02);
 
   // For hgg axis titles:
   hggStyle->SetTitleColor(1, "XYZ");
   hggStyle->SetTitleFont(42, "XYZ");
   hggStyle->SetTitleSize(0.04, "XYZ");
   hggStyle->SetTitleXOffset(1.2);//0.9);
-  hggStyle->SetTitleYOffset(1.75); // => 1.15 if exponents
+  hggStyle->SetTitleYOffset(1.2); // => 1.15 if exponents
 
   // For hgg axis labels:
   hggStyle->SetLabelColor(1, "XYZ");
@@ -1925,7 +1968,7 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs)
 	  if(c == 0 || c == 2) mggBkgTmpExp1->plotOn(plotmggBkg[c],LineColor(kBlue),Range("BkgFitRange"),NormRange("BkgFitRange"));
 	  else if(c == 1 || c == 3) mggBkgTmpPow1->plotOn(plotmggBkg[c],LineColor(kBlue),Range("BkgFitRange"),NormRange("BkgFitRange"));
 	  }*/
-    if(_sigMass > -1)
+    if(_sigMass > -2)
       {
 	mggBkgTmpBer1->plotOn(plotmggBkg[c],LineColor(kBlue),Range("BkgFitRange"),NormRange("BkgFitRange"));
 	//       else if(c == 1) mggBkgTmpPow1->plotOn(plotmggBkg[c],LineColor(kBlue),Range("BkgFitRange"),NormRange("BkgFitRange"));
@@ -2045,7 +2088,7 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs)
     legmcH->AddEntry(plotmggBkg[c]->getObject(7),"VBF ","LPE"); // not...
     legmcH->AddEntry(plotmggBkg[c]->getObject(9),"VH ","LPE"); // not...
     legmcH->AddEntry(plotmggBkg[c]->getObject(11),"bbH ","LPE"); // not...
-    if(_sigMass==0)
+    if(_nonResWeightIndex>=-1)
       legmc->SetHeader(" Nonresonant HH");
     else
       legmc->SetHeader(TString::Format(" %s, M_{X} = %d GeV",_signalType.c_str(), _sigMass));
@@ -2083,7 +2126,7 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs)
       dataplot[c] = (RooDataSet*) _w->data(TString::Format("Dataplot_cat%d",c));
       if(_doblinding) dataplot[c]->plotOn(plotmjjBkg[c],Invisible());
       else dataplot[c]->plotOn(plotmjjBkg[c]);
-      if(_sigMass > -1)
+      if(_sigMass > -2)
 	{
           mjjBkgTmpBer1->plotOn(plotmjjBkg[c],LineColor(kBlue),Range("BkgFitRange"),NormRange("BkgFitRange"));
 	  //       else if(c == 1) mjjBkgTmpPow1->plotOn(plotmjjBkg[c],LineColor(kBlue),Range("BkgFitRange"),NormRange("BkgFitRange"));
@@ -2200,7 +2243,7 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs)
 	legmcH->AddEntry(plotmjjBkg[c]->getObject(11),"bbH ","LPE"); // not...
       }
 
-      if(_sigMass==0)legmc->SetHeader(" Nonresonant HH");
+      if(_nonResWeightIndex>=-1)legmc->SetHeader(" Nonresonant HH");
       else legmc->SetHeader(TString::Format(" %s, M_{X} = %d GeV",_signalType.c_str(), _sigMass));
       legmcH->SetHeader(" Higgs");
       legmc->SetBorderSize(0);

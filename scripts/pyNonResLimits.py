@@ -27,8 +27,6 @@ parser.add_argument('--nodes', dest="nodes", default=None, type=str, nargs='+',
                     help = "Choose the nodes to run")
 parser.add_argument('--points', dest="points", default=None, type=parseNumList,
                     help = "Choose the points in the grid to run")
-#parser.add_argument('--NRW', dest="NRW", action="store_true", default=False,
-#                    help="Use non-resonant weights")
 parser.add_argument('--overwrite', dest="overwrite", action="store_true", default=False,
                     help="Overwrite the results into the same directory")
 parser.add_argument("-v", dest="verb", type=int, default=0,
@@ -148,8 +146,16 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
 
   dataName = Params['data']['name']
 
-  sigCat = 1
-  sigMas = '125'
+  sigCat = 0
+  if NRnode==None:
+    sigCat = -1
+  elif NRnode == 'SM':
+    sigCat = 0
+  elif NRnode == 'box':
+    sigCat = 1
+  else:
+    sigCat = int(NRnode)
+    
 
   if opt.outDir:
     baseFolder=outDir+"_v"+str(Params['other']["version"])
@@ -191,6 +197,9 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
     w = hlf.GetWs()
 
     theFitter = bbgg2DFitter()
+    theStyle = theFitter.style()
+    gROOT.SetStyle('hggPaperStyle')
+    
     theFitter.Initialize( w, sigCat, lumi, newFolder, energy, doBlinding, NCAT, addHiggs,
                           massCuts[0],massCuts[1],massCuts[2],
                           massCuts[3],massCuts[4],massCuts[5],
@@ -198,8 +207,6 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
                           massCuts[9],massCuts[10],massCuts[11], NRgridPoint)
 
     theFitter.SetVerbosityLevel(opt.verb)
-    theFitter.style()
-
     LTDir = LTDir.replace('TYPE', t)
     mass = 125.0
 
@@ -348,7 +355,7 @@ if __name__ == "__main__":
     if 'all' in opt.nodes:
       myNodes=['2','3','4','5','6','7','8','9','10','11','12','13','SM','box']
     else:
-      myNoeds = opt.nodes
+      myNodes = opt.nodes
       
     for n in myNodes:
       #for n in ['2','SM']:
