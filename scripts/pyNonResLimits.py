@@ -118,7 +118,7 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
 
   start = time.clock()
 
-  LTDir   = os.getenv("CMSSW_BASE")+Params['LTDIR']
+  LTDir_type  = os.getenv("CMSSW_BASE")+Params['LTDIR']
   signalTypes = Params['signal']['types']
   signalModelCard = os.getenv("CMSSW_BASE")+Params['signal']['signalModelCard']
 
@@ -173,7 +173,7 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
   # ParamsForFits = {'SM': massCuts, 'box': massCuts}
 
   # TODO: unify this:
-  if 'APZ' in LTDir:
+  if 'APZ' in LTDir_type:
     NonResSignalFile = "/LT_output_GluGluToHHTo2B2G_node_"+str(NRnode)+"_13TeV-madgraph.root"
   else:
     NonResSignalFile = "/LT_output_GluGluToHHTo2B2G_node_"+str(NRnode)+"_13TeV-madgraph_0.root"
@@ -207,7 +207,7 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
                           massCuts[9],massCuts[10],massCuts[11], NRgridPoint)
 
     theFitter.SetVerbosityLevel(opt.verb)
-    LTDir = LTDir.replace('TYPE', t)
+    LTDir = LTDir_type.replace('TYPE', t)
     mass = 125.0
 
     openStatus = theFitter.AddSigData( mass, str(LTDir+NonResSignalFile))
@@ -228,7 +228,7 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
     theFitter.MakeSigWS( fileBaseName)
     print "\t SIGNAL'S WORKSPACE DONE. Node=",NRnode, '  GridPoint=',NRgridPoint, 'type=',t
     if opt.verb>0: p3 = printTime(p2,start)
-
+    
     theFitter.MakePlots( mass)
     print "\t SIGNAL'S PLOT DONE.. Node=",NRnode, '  GridPoint=',NRgridPoint, 'type=',t
     if opt.verb>0: p4 = printTime(p3,start)

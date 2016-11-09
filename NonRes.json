@@ -1,12 +1,12 @@
 {
-    "LTDIR" : "/src/HiggsAnalysis/bbggLimits/LT-Nov02-bbgg_TYPE/",
+    "LTDIR" : "/src/HiggsAnalysis/bbggLimits/LT-Nov09-APZ_TYPE/",
     "signal" : {
 	"nodes" : ["SM","box","2","3","4","5","6","7","8","9","10","11","12","13"],
-        "types" : ["HighMass"],
+        "types" : ["LowMass","HighMass"],
 	"signalModelCard" : "/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D_sig.rs"
     },
     "other" : {
-        "version" : 54,
+        "version" : 57,
 	"integratedLumi" : 2.7,
         "energy" : "13TeV",
         "higgsMass" : 125.0,
@@ -17,7 +17,7 @@
         "analysisType" : "fitTo2D_resSearch_withRegKinFit",
         "useSigTheoryUnc" : 0,
 	"doBrazilianFlag" : false,
-	"runCombine" : false,
+	"runCombine" : true,
 	"minMggMassFit" : 100,
 	"maxMggMassFit" : 180,
 	"minMjjMassFit"	: 80,
