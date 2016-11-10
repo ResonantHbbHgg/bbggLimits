@@ -20,6 +20,8 @@ parser.add_argument('--max', dest="mtotMax", type=float, default=10000,
                     help="Mtot maximum cut")
 parser.add_argument('-s', '--scale', dest="scale", type=float, default=1,
                     help="Scale Factor")
+parser.add_argument('--NRscale', dest="NRscale", type=float, default=1,
+                    help="Scale Factor for NonRes weights")
 parser.add_argument('--photonCR', dest="photonCR", action="store_true", default=False,
                     help="Do photon control region")
 parser.add_argument('--KF', dest="KF", action="store_true", default=False,
@@ -98,7 +100,7 @@ def setAndLoop(fname, options, outFile):
  
   LTM.SetMax( options.mtotMax )
   LTM.SetMin( options.mtotMin )
-  LTM.SetNormalization( options.scale )
+  LTM.SetNormalization( options.scale, options.NRscale )
   LTM.IsPhotonCR( options.photonCR )
   LTM.IsMX( options.MX )
   LTM.IsKinFit( options.KF )

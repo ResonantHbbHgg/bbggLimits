@@ -1,12 +1,12 @@
 {
     "signal" : {
         "dir" : "/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LimitSetting/NonResAnalysis_ICHEP_TYPE/",
-	"nodes" : [1],
-        "types" : ["LowMass", "HighMass"],
+	"nodes" : [2],
+        "types" : ["LowMass","HighMass"],
 	"signalModelCard" : "/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D_sig.rs"
     },
     "other" : {
-        "version" : 46,
+        "version" : 56,
 	"integratedLumi" : 2.7,
         "energy" : "13TeV",
         "higgsMass" : 125.0,

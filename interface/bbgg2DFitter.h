@@ -74,9 +74,13 @@ class bbgg2DFitter {
   std::map<std::string,std::string> _singleHiggsWSfileNames;
 
   //   Parameters
-  
+
   Int_t _verbLvl;
-  
+
+  Int_t _nonResWeightIndex;
+  std::string _wName;
+  Int_t _NR_MassRegion;
+
   Bool_t _doblinding;
   Int_t _NCAT;
   Int_t _sigMass;
@@ -84,7 +88,7 @@ class bbgg2DFitter {
   float _lumi;
   TString _cut;
   std::string _energy;
-  std::string _signalType; 
+  std::string _signalType;
   float _minMggMassFit;
   float _maxMggMassFit;
   float _minMjjMassFit;
@@ -104,15 +108,18 @@ class bbgg2DFitter {
   //Workspace
   RooWorkspace* _w;
   std::string _folder_name;
-  
+
+  TCanvas *_c1, *_c2;
+
  public :
    bbgg2DFitter() {}
-   virtual ~bbgg2DFitter() { }
+   virtual ~bbgg2DFitter() { if (_c1) _c1->Close(); if (_c2) _c2->Close(); }
    void Initialize(RooWorkspace* workspace, Int_t SigMass, float Lumi,std::string folder_name,
 		   std::string energy, Bool_t doBlinding, Int_t nCat, bool AddHiggs,
 		   float minMggMassFit,float maxMggMassFit,float minMjjMassFit,float maxMjjMassFit,
 		   float minSigFitMgg,float maxSigFitMgg,float minSigFitMjj,float maxSigFitMjj,
-		   float minHigMggFit,float maxHigMggFit,float minHigMjjFit,float maxHigMjjFit);
+		   float minHigMggFit,float maxHigMggFit,float minHigMjjFit,float maxHigMjjFit,
+		   Int_t doNRW=-2);
    void SetVerbosityLevel(Int_t v) {_verbLvl=v;}
    void SetCut(TString cut) {_cut = cut;}
    void SetType(std::string tp) { _signalType = tp; }
@@ -151,16 +158,16 @@ class bbgg2DFitter {
 
    float GetSigExpectedCats(int cat) {
      if(sigExpec.find(cat) == sigExpec.end() ){std::cout << "[GetSigExpectedCats] Cat not found! Cat=" <<cat<< std::endl; return -1;}
-     else { return sigExpec[cat]; }} 
+     else { return sigExpec[cat]; }}
    float GetBkgExpectedCats(int cat) {
      if(bkgExpec.find(cat) == bkgExpec.end() ){std::cout << "[GetBkgExpectedCats] Cat not found! Cat="<<cat<< std::endl; return -1;}
-     else { return bkgExpec[cat]; }} 
+     else { return bkgExpec[cat]; }}
    float GetObservedCats(int cat) {
      if(dataObs.find(cat) == dataObs.end() ){std::cout << "[GetObservedCats] Cat not found! Cat ="<<cat << std::endl; return -1;}
      else { return dataObs[cat]; }}
 
    std::vector<float> EffectiveSigma(RooRealVar* mass, RooAbsPdf* binned_pdf, float wmin, float wmax, float step, float epsilon);
- 
+
    ClassDef(bbgg2DFitter,0);
 };
 

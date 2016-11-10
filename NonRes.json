@@ -1,12 +1,12 @@
 {
+    "LTDIR" : "/src/HiggsAnalysis/bbggLimits/LT-Nov09-APZ_TYPE/",
     "signal" : {
-        "dir" : "/src/HiggsAnalysis/bbggLimits/LimitSetting/NonResAnalysis_ICHEP_TYPE/",
 	"nodes" : ["SM","box","2","3","4","5","6","7","8","9","10","11","12","13"],
-        "types" : ["LowMass", "HighMass"],
+        "types" : ["LowMass","HighMass"],
 	"signalModelCard" : "/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D_sig.rs"
     },
     "other" : {
-        "version" : 46,
+        "version" : 58,
 	"integratedLumi" : 2.7,
         "energy" : "13TeV",
         "higgsMass" : 125.0,
@@ -38,11 +38,9 @@
 	
     },
     "data" : {
-        "dir" : "/src/HiggsAnalysis/bbggLimits/LimitSetting/NonResAnalysis_ICHEP_TYPE/",
         "name" :"DoubleEG"
     },
     "higgs" : {
-        "dir" : "/afs/cern.ch/work/o/obondu/public/forRadion/limitTrees",
 	"type" : ["ggh_m125_powheg_8TeV","tth_m125_8TeV"]
     }
 }

@@ -1,18 +1,32 @@
 #!/usr/bin/env python
 
 from ROOT import *
-import os,sys,json,time
+import os,sys,json,time,re
 gROOT.SetBatch()
 
 __author__ = 'Andrey Pozdnyakov'
+
 import argparse
+
+def parseNumList(string):
+  m = re.match(r'(\d+)(?:-(\d+))?$', string)
+  # ^ (or use .split('-'). anyway you like.)
+  if not m:
+    raise argparse.ArgumentTypeError("'" + string + "' is not a range of number. Expected forms like '0-5' or '2'.")
+  start = m.group(1)
+  end = m.group(2) or start
+  return list(range(int(start,10), int(end,10)+1))
+
 parser =  argparse.ArgumentParser(description='Limit Tree maker')
 parser.add_argument('-f', '--inputFile', dest="fname", type=str, default=None, required=True,
                     help="Json config file")
 parser.add_argument('-o', '--outDir', dest="outDir", type=str, default=None,
                     help="Output directory (will be created).")
-parser.add_argument('--NRW', dest="NRW", action="store_true", default=False,
-                    help="Use non-resonant weights")
+parser.add_argument('--nodes', dest="nodes", default=None, type=str, nargs='+',
+                    choices=['2','3','4','5','6','7','8','9','10','11','12','13','SM','box','all'], 
+                    help = "Choose the nodes to run")
+parser.add_argument('--points', dest="points", default=None, type=parseNumList,
+                    help = "Choose the points in the grid to run")
 parser.add_argument('--overwrite', dest="overwrite", action="store_true", default=False,
                     help="Overwrite the results into the same directory")
 parser.add_argument("-v", dest="verb", type=int, default=0,
@@ -37,13 +51,13 @@ begin = time.time()
 def createDir(myDir):
   if opt.verb>0 and opt.verb<4: print 'Creating a new directory: ', myDir
   if os.path.exists(myDir):
-    if opt.verb<4:
+    if opt.verb<=4:
       print "\t This directory already exists:", myDir
     if opt.overwrite:
-      if opt.verb<4:
-        print ' But we will continue anyway (--rewrite it!)'
+      if opt.verb<=4:
+        print "  But we will continue anyway (-- I'll overwrite it!)"
     else:
-      if opt.verb<4:
+      if opt.verb<=4:
         print ' And so I exit this place...'
       sys.exit(1)
   else:
@@ -60,7 +74,7 @@ def printTime(t1, t2):
 def runCombine(inDir, doBlind, Label = None, asimov=False):
   print 'Running combine tool.  Dir:', inDir, 'Blind:', doBlind
   if opt.verb==4:
-    print 'inDir should be the immediate directory where the card is located'
+    print '[DBG] inDir should be the immediate directory where the card is located'
   
   if doBlind:
     blinded = "--run blind"
@@ -83,27 +97,28 @@ def runCombine(inDir, doBlind, Label = None, asimov=False):
   os.rename(fName, outDir+'/'+fName)
 
 
-def runFullChain(Params, NRnode=None, NRgridPoint=None):
+def runFullChain(Params, NRnode=None, NRgridPoint=-1):
   #print 'Running: ', sys._getframe().f_code.co_name, " Node=",NRnode
   # print sys._getframe().f_code
 
   if opt.verb>1:
-    print 'Node=',NRnode, 'gridPoint=',NRgridPoint,'Options:\n ', opt, 
+    print 'Node=',NRnode, '  gridPoint=',NRgridPoint,',  Options:\n ', opt
   
-  if NRnode!=None and NRgridPoint!=None:
+
+  if NRnode!=None and NRgridPoint!=-1:
     print 'WARning: cannot have both the Node and grid Point. Chose one and try again'
     sys.exit(1)
   elif NRnode!=None:
-    Label = "_Node_"+NRnode
-  elif NRgridPoint!=None:
-    Label = "_gridPoint_"+NRgridPoint
+    Label = "_Node_"+str(NRnode)
+  elif NRgridPoint!=-1:
+    Label = "_gridPoint_"+str(NRgridPoint)
   else:
     print 'WARning: must provide one of these: NRnode or NRgridPoint'
     sys.exit(1)
 
   start = time.clock()
 
-  signalDir   = os.getenv("CMSSW_BASE")+Params['signal']['dir']
+  LTDir_type  = os.getenv("CMSSW_BASE")+Params['LTDIR']
   signalTypes = Params['signal']['types']
   signalModelCard = os.getenv("CMSSW_BASE")+Params['signal']['signalModelCard']
 
@@ -129,11 +144,18 @@ def runFullChain(Params, NRnode=None, NRgridPoint=None):
   obs  = Params['other']["obs"]
   twotag=Params['other']["twotag"]
 
-  dataDir  = os.getenv("CMSSW_BASE")+Params['data']['dir']
   dataName = Params['data']['name']
 
-  sigCat = 1
-  sigMas = '125'
+  sigCat = 0
+  if NRnode==None:
+    sigCat = -1
+  elif NRnode == 'SM':
+    sigCat = 0
+  elif NRnode == 'box':
+    sigCat = 1
+  else:
+    sigCat = int(NRnode)
+    
 
   if opt.outDir:
     baseFolder=outDir+"_v"+str(Params['other']["version"])
@@ -150,9 +172,19 @@ def runFullChain(Params, NRnode=None, NRgridPoint=None):
   # For now the mass cuts are all the same, but can be changed in future.
   # ParamsForFits = {'SM': massCuts, 'box': massCuts}
 
-  NonResSignalFile = "/LT_output_GluGluToHHTo2B2G_node_"+NRnode+"_13TeV-madgraph.root"
+  # TODO: unify this:
+  if 'APZ' in LTDir_type:
+    NonResSignalFile = "/LT_output_GluGluToHHTo2B2G_node_"+str(NRnode)+"_13TeV-madgraph.root"
+  else:
+    NonResSignalFile = "/LT_output_GluGluToHHTo2B2G_node_"+str(NRnode)+"_13TeV-madgraph_0.root"
 
+  if NRgridPoint >= 0:
+    NonResSignalFile = "/LT_NR_Nodes_2to13_merged.root"
 
+  if opt.verb==4:
+    print '[DBG]:', NonResSignalFile, signalTypes
+  
+      
   for t in signalTypes:
     newFolder = baseFolder+ str('/'+t+Label)
     if opt.verb>1:
@@ -165,57 +197,57 @@ def runFullChain(Params, NRnode=None, NRgridPoint=None):
     w = hlf.GetWs()
 
     theFitter = bbgg2DFitter()
+    theStyle = theFitter.style()
+    gROOT.SetStyle('hggPaperStyle')
+    
     theFitter.Initialize( w, sigCat, lumi, newFolder, energy, doBlinding, NCAT, addHiggs,
                           massCuts[0],massCuts[1],massCuts[2],
                           massCuts[3],massCuts[4],massCuts[5],
                           massCuts[6],massCuts[7],massCuts[8],
-                          massCuts[9],massCuts[10],massCuts[11])
+                          massCuts[9],massCuts[10],massCuts[11], NRgridPoint)
 
     theFitter.SetVerbosityLevel(opt.verb)
-    theFitter.style()
-
-    signalDir = signalDir.replace('TYPE', t)
-    dataDir   = dataDir.replace('TYPE', t)
+    LTDir = LTDir_type.replace('TYPE', t)
     mass = 125.0
 
-    openStatus = theFitter.AddSigData( mass, str(signalDir+NonResSignalFile))
+    openStatus = theFitter.AddSigData( mass, str(LTDir+NonResSignalFile))
     if openStatus==-1:
       print 'There is a problem with openStatus'
       sys.exit(1)
-    print "\t SIGNAL ADDED. Node=",NRnode, 'type=',t
+    print "\t SIGNAL ADDED. Node=",NRnode, '  GridPoint=',NRgridPoint, 'type=',t
     if opt.verb>0: p1 = printTime(start, start)
     
     createDir(newFolder+'/workspaces')
     createDir(newFolder+'/datacards')
 
     theFitter.SigModelFit( mass)
-    print "\t SIGNAL FITTED. Node=",NRnode, 'type=',t
+    print "\t SIGNAL FITTED. Node=",NRnode, '  GridPoint=',NRgridPoint, 'type=',t
     if opt.verb>0: p2 = printTime(p1,start)
 
     fileBaseName = "hhbbgg.mH"+str(mass)[0:3]+"_13TeV"
     theFitter.MakeSigWS( fileBaseName)
-    print "\t SIGNAL'S WORKSPACE DONE. Node=",NRnode, 'type=',t
+    print "\t SIGNAL'S WORKSPACE DONE. Node=",NRnode, '  GridPoint=',NRgridPoint, 'type=',t
     if opt.verb>0: p3 = printTime(p2,start)
-
+    
     theFitter.MakePlots( mass)
-    print "\t SIGNAL'S PLOT DONE.. Node=",NRnode, 'type=',t
+    print "\t SIGNAL'S PLOT DONE.. Node=",NRnode, '  GridPoint=',NRgridPoint, 'type=',t
     if opt.verb>0: p4 = printTime(p3,start)
 
     if addHiggs:
       print 'Here will add SM Higgs contributions'
       # theFitter.AddHigData( mass,direc,1)
 
-    ddata = str(dataDir + '/LT_'+dataName+'.root')
+    ddata = str(LTDir + '/LT_'+dataName+'.root')
 
     theFitter.AddBkgData(ddata)
-    print "\t BKG ADDED. Node=",NRnode, 'type=',t
+    print "\t BKG ADDED. Node=",NRnode, '  GridPoint=',NRgridPoint, 'type=',t
     if opt.verb>0: p4 = printTime(p3,start)
 
     if opt.verb==3:
       TheFitter.PrintWorkspace();
 
     fitresults = theFitter.BkgModelFit( doBands, addHiggs)
-    print "\t BKG FITTED. Node=",NRnode, 'type=',t
+    print "\t BKG FITTED. Node=",NRnode, '  GridPoint=',NRgridPoint, 'type=',t
     if opt.verb>0: p5 = printTime(p4,start)
     if fitresults==None:
       print "PROBLEM with fitresults !!"
@@ -226,7 +258,7 @@ def runFullChain(Params, NRnode=None, NRgridPoint=None):
 
     wsFileBkgName = "hhbbgg.inputbkg_13TeV"
     theFitter.MakeBkgWS( wsFileBkgName);
-    print "\t BKG'S WORKSPACE DONE. Node=",NRnode, 'type=',t
+    print "\t BKG'S WORKSPACE DONE. Node=",NRnode, '  GridPoint=',NRgridPoint, 'type=',t
     if opt.verb>0: p6 = printTime(p5,start)
 
     # This is making cards ala 8 TeV. We don't need this for now
@@ -257,7 +289,7 @@ def runFullChain(Params, NRnode=None, NRgridPoint=None):
     if opt.verb==4:
       print DCcommand
     os.system(DCcommand)
-    print "\t DATACARD DONE. Node=",NRnode, 'type=',t
+    print "\t DATACARD DONE. Node=",NRnode, '  GridPoint=',NRgridPoint, 'type=',t
 
     if opt.verb>0: p7 = printTime(p6,start)
 
@@ -282,7 +314,8 @@ def runFullChain(Params, NRnode=None, NRgridPoint=None):
   
   if doCombine:
     runCombine(newDir, doBlinding, Label=Label)
-    print "\t COMBINE DONE. Node=",NRnode
+    print "\t COMBINE DONE. Node=",NRnode, '  GridPoint=',NRgridPoint
+    
   if opt.verb>0: p8 = printTime(p7,start)
 
   
@@ -315,21 +348,28 @@ if __name__ == "__main__":
   from multiprocessing import Pool, TimeoutError  
   pool = Pool(processes=opt.ncpu)
 
-  if opt.NRW:
-    print 'Running over 5D space points'
-    for p in xrange(0,10):
-      pool.apply_async(runFullChain, args = (Params, None,p,))
-  else:
-    print 'Running over nodes'
-    for n in nodes:
+
+  if opt.nodes!=None:
+    print 'Running over nodes:',opt.nodes
+
+    if 'all' in opt.nodes:
+      myNodes=['2','3','4','5','6','7','8','9','10','11','12','13','SM','box']
+    else:
+      myNodes = opt.nodes
+      
+    for n in myNodes:
       #for n in ['2','SM']:
-      # print 'Node = ', n
-    
       # Run on multiple cores:
       pool.apply_async(runFullChain, args = (Params, n,))
-
+    
       # Use signle core:
       #runFullChain(Params, NRnode=n)
+    
+  #for p in [0, 10, 200, 400, 600, 1200, 1500, 1505]:
+  if opt.points!=None:
+    print 'Running over 5D space points:', opt.points
+    for p in opt.points:
+      pool.apply_async(runFullChain, args = (Params, None,p,))
     
   pool.close()  
   pool.join()
