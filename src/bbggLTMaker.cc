@@ -284,7 +284,10 @@ void bbggLTMaker::Loop()
 	  //Check if histogram exist
 	  UInt_t binNum = NR_Wei_Hists[n]->FindBin(gen_mHH, fabs(gen_cosTheta));
 	  // Excluded b-tag weight for now (there is some problem with it):
-	  o_NRWeights[n] = normalizationNR*genTotalWeight*pho1_sf*pho2_sf*NR_Wei_Hists[n]->GetBinContent(binNum);
+	  //o_NRWeights[n] = normalizationNR*genTotalWeight*pho1_sf*pho2_sf*NR_Wei_Hists[n]->GetBinContent(binNum);
+	  
+	  // With btagweights:
+	  o_NRWeights[n] = normalizationNR*genTotalWeight*o_btagweight*pho1_sf*pho2_sf*NR_Wei_Hists[n]->GetBinContent(binNum);
 	  // Just print out for one n:
 	  if (DEBUG && n==100 && jentry%1000 == 0)
 	    cout<<n<<" **  mHH = "<<gen_mHH<<"   cosT*="<<fabs(gen_cosTheta)<<"  bin="<<binNum<<" wei="<<o_NRWeights[n]<<endl;

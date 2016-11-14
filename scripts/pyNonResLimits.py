@@ -2,6 +2,7 @@
 
 from ROOT import *
 import os,sys,json,time,re
+from shutil import copy
 gROOT.SetBatch()
 
 __author__ = 'Andrey Pozdnyakov'
@@ -344,7 +345,9 @@ if __name__ == "__main__":
     baseFolder="./bbggToolsResults_v"+str(Params['other']["version"])
 
   createDir(baseFolder)
-    
+  
+  copy(opt.fname, baseFolder)
+
   from multiprocessing import Pool, TimeoutError  
   pool = Pool(processes=opt.ncpu)
 
@@ -353,7 +356,7 @@ if __name__ == "__main__":
     print 'Running over nodes:',opt.nodes
 
     if 'all' in opt.nodes:
-      myNodes=['2','3','4','5','6','7','8','9','10','11','12','13','SM','box']
+      myNodes=['SM','box','2','3','4','5','6','7','8','9','10','11','12','13']
     else:
       myNodes = opt.nodes
       

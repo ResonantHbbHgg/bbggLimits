@@ -24,7 +24,7 @@ if 'nonres' in opt.x:
   
 
   # APZ trees:
-  Signals = "/afs/cern.ch/user/a/andrey/work/hh/CMSSW_8_0_8_patch1/src/APZ/fgg-ana/NotATestNov09/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph.root" 
+  Signals = "/afs/cern.ch/user/a/andrey/work/hh/CMSSW_8_0_8_patch1/src/APZ/fgg-ana/NotATestNov12/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph.root" 
   # bbggTools trees:
   #Signals = "/afs/cern.ch/user/a/andrey/work/hh/CMSSW_8_0_8_patch1/src/flashgg/bbggTools/test/RunJobs/NonResAll/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph_0.root" 
   #Signals = "root://eoscms//eos/cms/store/user/rateixei/HHbbgg/FlatTrees/ICHEP_Regressed4b/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph.root"
@@ -32,7 +32,7 @@ if 'nonres' in opt.x:
 
   Data = "root://eoscms//eos/cms/store/user/rateixei/HHbbgg/FlatTrees/ICHEP_Regressed4b/DoubleEG.root"
 
-  dirPrefix = "LT-Nov10-APZ"
+  dirPrefix = "LT-Nov12-APZ"
 
   postFix = " --MX --btagWP 0.8 "
   SFs = " --bVariation 0 --phoVariation 0"
