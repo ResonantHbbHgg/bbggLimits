@@ -6,7 +6,7 @@
 	"signalModelCard" : "/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D_sig.rs"
     },
     "other" : {
-        "version" : 59,
+        "version" : 60,
 	"integratedLumi" : 2.7,
         "energy" : "13TeV",
         "higgsMass" : 125.0,
