@@ -1,12 +1,12 @@
 {
-    "LTDIR" : "/src/HiggsAnalysis/bbggLimits/LT-Nov12-APZ_TYPE/",
+    "LTDIR" : "/src/HiggsAnalysis/bbggLimits/LT-Nov18-APZ_TYPE/",
     "signal" : {
 	"nodes" : ["SM","box","2","3","4","5","6","7","8","9","10","11","12","13"],
         "types" : ["HighMass", "LowMass"],
 	"signalModelCard" : "/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D_sig.rs"
     },
     "other" : {
-        "version" : 60,
+        "version" : 62,
 	"integratedLumi" : 2.7,
         "energy" : "13TeV",
         "higgsMass" : 125.0,

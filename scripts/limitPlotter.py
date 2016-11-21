@@ -122,7 +122,7 @@ if __name__ == "__main__":
     sys.exit(0)
 
 
-  print 'Missed points:', misssedPoints
+  print 'Missed points:', missedPoints
   # Create the arrays for graphs
   zeros_Array = np.zeros(len(xAxis),dtype = float)
   xAxis_Array = np.array(xAxis)

@@ -32,7 +32,7 @@ if 'nonres' in opt.x:
 
   Data = "root://eoscms//eos/cms/store/user/rateixei/HHbbgg/FlatTrees/ICHEP_Regressed4b/DoubleEG.root"
 
-  dirPrefix = "LT-Nov12-APZ"
+  dirPrefix = "LT-Nov18-APZ"
 
   postFix = " --MX --btagWP 0.8 "
   SFs = " --bVariation 0 --phoVariation 0"
