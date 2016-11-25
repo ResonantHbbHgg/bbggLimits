@@ -164,7 +164,7 @@ if __name__ == "__main__":
     mg.Add(twoSigma,'PZ')
     mg.Add(oneSigma, 'EPZ')
     
-    mg.Add(observed)
+    #mg.Add(observed)
 
     mg.Draw('APZ')
 
@@ -189,7 +189,7 @@ if __name__ == "__main__":
     mg.Add(oneSigma)
     mg.Add(expected,'L')
 
-    mg.Add(observed,'L')
+    #mg.Add(observed,'L')
 
     mg.Draw('A')
 

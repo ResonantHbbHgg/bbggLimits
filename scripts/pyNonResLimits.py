@@ -6,6 +6,7 @@ from shutil import copy
 gROOT.SetBatch()
 
 __author__ = 'Andrey Pozdnyakov'
+__BAD__ = 666
 
 import argparse
 
@@ -34,6 +35,8 @@ parser.add_argument("-v", dest="verb", type=int, default=0,
                     help="Verbosity level: 0 - Minimal; 1 - Talk to me; 2 - talk more, I like to listen; 3 - not used; 4 - Debug messages only (minimal of other messages)")
 parser.add_argument('-j', '--ncpu',dest="ncpu", type=int, default=2,
                     help="Number of cores to run on.")
+parser.add_argument('-t', '--timeout',dest="timeout", type=int, default=800,
+                    help="Per job timeout (in seconds) for multiprocessing. Jobs will be killed if run longer than this.")
 
 opt = parser.parse_args()
 #opt.func()
@@ -68,7 +71,7 @@ def createDir(myDir):
       else: raise
 
 def printTime(t1, t2):
-  tNew = time.clock()
+  tNew = time.time()
   print 'Time since start of worker: %.2f sec; since previous point: %.2f sec' %(tNew-t2,tNew-t1)
   return tNew
 
@@ -90,18 +93,20 @@ def runCombine(inDir, doBlind, Label = None, asimov=False):
   logFile  = inDir+"/result.log"
 
   command1 = "combine -M Asymptotic -m 125 -n "+Label+" "+blinded+" "+asimovOpt+" "+cardName+" > "+logFile+" 2>&1"
-  os.system(command1)
+
+  combExitCode = os.system(command1)
 
   fName = 'higgsCombine'+Label+'.Asymptotic.mH125.root'
 
   outDir = inDir
   os.rename(fName, outDir+'/'+fName)
 
+  return combExitCode
 
 #def giveMeName(pName='UnKnown'):
 #  # This function is used for naming the processes in the Pool later on.
 #  return pName
-              
+
 def runFullChain(Params, NRnode=None, NRgridPoint=-1):
   #print 'Running: ', sys._getframe().f_code.co_name, " Node=",NRnode
   # print sys._getframe().f_code
@@ -112,24 +117,24 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
 
   if NRnode!=None and NRgridPoint!=-1:
     print 'WARning: cannot have both the Node and grid Point. Chose one and try again'
-    return 666
+    return __BAD__
   elif NRnode!=None:
     Label = "_Node_"+str(NRnode)
   elif NRgridPoint!=-1:
     Label = "_gridPoint_"+str(NRgridPoint)
   else:
     print 'WARning: must provide one of these: NRnode or NRgridPoint'
-    return 666
+    return __BAD__
 
   # Create PID file to track the job:
   pidfile = "/tmp/PoolWorker"+Label+".pid"
   if os.path.isfile(pidfile):
     print "%s already exists, exiting" % pidfile
-    return 666
+    return __BAD__
   file(pidfile, 'w').write(str(PID))
 
 
-  start = time.clock()
+  start = time.time()
 
   LTDir_type  = os.getenv("CMSSW_BASE")+Params['LTDIR']
   signalTypes = Params['signal']['types']
@@ -146,7 +151,7 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
 
   if NCAT > 3:
     print "Error NCAT>3!"
-    sys.exit(1)
+    return __BAD__
 
   doCombine       = Params['other']["runCombine"]
   useSigTheoryUnc = Params['other']["useSigTheoryUnc"]
@@ -226,7 +231,7 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
     openStatus = theFitter.AddSigData( mass, str(LTDir+NonResSignalFile))
     if openStatus==-1:
       print 'There is a problem with openStatus'
-      sys.exit(1)
+      return __BAD__
     print "\t SIGNAL ADDED. Node=",NRnode, '  GridPoint=',NRgridPoint, 'type=',t
     if opt.verb>0: p1 = printTime(start, start)
 
@@ -264,7 +269,7 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
     if opt.verb>0: p5 = printTime(p4,start)
     if fitresults==None:
       print "PROBLEM with fitresults !!"
-      sys.exit(1)
+      return __BAD__
 
     if opt.verb in [1,2,3]:
       fitresults.Print()
@@ -326,8 +331,10 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
     os.system("sed -i 's|"+strReplace+"./|./|g' "+combCard)
 
   if doCombine:
-    runCombine(newDir, doBlinding, Label=Label)
+    combStatus = runCombine(newDir, doBlinding, Label=Label, asimov=Params['other']['AdaptivePseudoAsimov'])
     print "\t COMBINE DONE. Node=",NRnode, '  GridPoint=',NRgridPoint
+    if combStatus!=0:
+      return __BAD__
 
   if opt.verb>0: p8 = printTime(p7,start)
 
@@ -362,6 +369,13 @@ if __name__ == "__main__":
 
   copy(opt.fname, baseFolder)
 
+  # Before we run let's clean-up tmp directory off the files may be left from previous failed jobs:
+  import glob
+  filelist = glob.glob("/tmp/PoolWorker*.pid")
+  for f in filelist:
+    os.remove(f)
+
+
   # import pebble as pb
   from multiprocessing import Pool, TimeoutError, active_children
 
@@ -393,6 +407,7 @@ if __name__ == "__main__":
 
       res_Points.append((str(p), pool.apply_async(runFullChain, args = (Params, None,p,))))
 
+
   pool.close()
 
 
@@ -407,17 +422,19 @@ if __name__ == "__main__":
 
   # Using a modified implementation of [1]:
 
+  badJobs = []
   for i, r in enumerate([res_Nodes, res_Points]):
+    badJobs.append([])
+
     if opt.verb==4:
-      print 'type of r:',i, 'Length of r:', len(r)
-    
+      print 'Type of r:',i, 'Length of r:', len(r)
+
     while r:
       try:
         j, res = r.pop(0)
         procCheckT = time.time()
-        if opt.verb==4:
-          print res.get(timeout=500), ' Job %s has been finished. Was waiting only for %f Seconds.' % (j, time.time()-procCheckT)
-   
+        print res.get(opt.timeout), ' Job %s has been finished. Was waiting only for %f Seconds.' % (j, time.time()-procCheckT)
+
       except Exception as e:
         print str(e)
         if opt.verb==4:
@@ -435,27 +452,29 @@ if __name__ == "__main__":
           PID = str(open(pidfile).read())
 
         for p in pool._pool:
-          # Here we loop over all running processes and check if PID matches with the one who's overtime: 
+          # Here we loop over all running processes and check if PID matches with the one who's overtime:
           # print p, p.pid
           if str(p.pid)==PID:
             if opt.verb==4:
               print 'Found it still running indeed!', p, p.pid, p.is_alive(), p.exitcode
-            
+
             # We can also double-check how long it's been running with system 'ps' command:"
             # tt = str(subprocess.check_output('ps -p "'+str(p.pid)+'" o etimes=', shell=True)).strip()
             # print 'Run time from OS (may be way off the real time..) = ', tt
-            
+
             # Now, KILL the m*$@r:
             p.terminate
             pool._pool.remove(p)
             pool._repopulate_pool()
+
+            badJobs[i].append(j)
 
             if opt.verb==4:
               print 'Here you go,',p.name, ', pid=', p.pid, ', you have been served.'
 
             os.remove(pidfile)
             break
-  
+
     if opt.verb==4:
       print 'Broke out of the while loop..'
 
@@ -463,12 +482,13 @@ if __name__ == "__main__":
   pool.join()
 
 
+
   # Just in case, let's remove all pid files from /tmp
-  import glob
   filelist = glob.glob("/tmp/PoolWorker*.pid")
   for f in filelist:
     os.remove(f)
 
+  print 'Bad jobs:', badJobs
   if opt.verb>0:
     end = time.time()
     print '\t Total Time: %.2f'%(end-begin)

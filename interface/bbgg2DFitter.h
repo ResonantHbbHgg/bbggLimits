@@ -125,6 +125,7 @@ class bbgg2DFitter {
    void SetType(std::string tp) { _signalType = tp; }
    RooArgSet* defineVariables(); //DONE
    int AddSigData(float mass, TString signalfile); //DONE
+   int AddSigData(float mass, TFile *sFile);    
    void AddHigData(float mass, TString signalfile, int higgschannel); //DONE
    void AddBkgData(TString datafile); //DONE
    void SigModelFit(float mass); //DONE

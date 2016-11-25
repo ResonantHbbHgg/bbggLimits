@@ -154,19 +154,32 @@ RooArgSet* bbgg2DFitter::defineVariables()
   return ntplVars;
 }
 
-int bbgg2DFitter::AddSigData(float mass, TString signalfile)
+int bbgg2DFitter::AddSigData(float mass, TString signalfile){
+  // Open the root file for signal inside the bbgg2Dfit class 
+  TFile sigFile(signalfile);
+  bool opened=sigFile.IsOpen();
+  if(opened==false) return -1;
+
+  // Now call the other function:
+  return bbgg2DFitter::AddSigData(mass, &sigFile);
+}
+
+int bbgg2DFitter::AddSigData(float mass, TFile *sigFile)
 {
+  // The signal file is provided from outside the bbgg2DFit class
+  // This is usefull if needs to be run many times (as in the case of Non-Res grid limits): saves the memory
+
+  //Signal file & tree
+  bool opened=sigFile->IsOpen();
+  if(opened==false) return -1;
+  TTree* sigTree = (TTree*)sigFile->Get("TCVARS");
+  
   if (_verbLvl>=1 && _verbLvl<4) std::cout << "================= Add Signal==============================" <<std::endl;
   //Luminosity
   RooRealVar lumi("lumi","lumi", _lumi);
   _w->import(lumi);
   //Define variables
   RooArgSet* ntplVars = bbgg2DFitter::defineVariables();
-  //Signal file & tree
-  TFile sigFile(signalfile);
-  bool opened=sigFile.IsOpen();
-  if(opened==false) return -1;
-  TTree* sigTree = (TTree*) sigFile.Get("TCVARS");
   if(sigTree==nullptr)
     {
       if (_verbLvl>=1 && _verbLvl<4) std::cout<<"TCVARS for AddSigData  not founded in TTree trying with TCVARS"<<std::endl;
@@ -188,7 +201,6 @@ int bbgg2DFitter::AddSigData(float mass, TString signalfile)
 
   RooDataSet sigScaled("sigScaled","dataset",sigTree,*ntplVars,_cut, _wName.c_str());
 
-
   RooDataSet* sigToFit[_NCAT];
   TString cut0 = " && 1>0";
 
@@ -199,6 +211,7 @@ int bbgg2DFitter::AddSigData(float mass, TString signalfile)
 
   if (_nonResWeightIndex>=-1)
     myArgList.add(*_w->var("mtot"));
+
 
   for ( int i=0; i<_NCAT; ++i)
     {
