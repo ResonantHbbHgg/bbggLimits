@@ -2,6 +2,9 @@
 #include "HiggsAnalysis/bbggLimits/interface/bbgg2DFitter.h"
 #include "HiggsAnalysis/bbggLimits/interface/Colors.h"
 
+std::ofstream newCout;
+
+
 std::vector<float> bbgg2DFitter::EffectiveSigma(RooRealVar* mass, RooAbsPdf* binned_pdf, float wmin, float wmax, float step=0.002, float epsilon=1.e-4)
 {
   RooAbsReal* binned_cdf = (RooAbsReal*) binned_pdf->createCdf(*mass);
@@ -53,10 +56,10 @@ void bbgg2DFitter::Initialize(RooWorkspace* workspace, Int_t SigMass, float Lumi
 			      float minMggMassFit,float maxMggMassFit,float minMjjMassFit,float maxMjjMassFit,
 			      float minSigFitMgg,float maxSigFitMgg,float minSigFitMjj,float maxSigFitMjj,
 			      float minHigMggFit,float maxHigMggFit,float minHigMjjFit,float maxHigMjjFit,
-			      Int_t doNRW)
+			      Int_t doNRW, std::string logFileName)
 {
   //std::cout<<"DBG.  We Initialize..."<<std::endl;
-
+  
   _doblinding = doBlinding;
   _NCAT = nCat;
   _sigMass = SigMass;
@@ -127,6 +130,13 @@ void bbgg2DFitter::Initialize(RooWorkspace* workspace, Int_t SigMass, float Lumi
   else
     _NR_MassRegion=99;
 
+
+  if (logFileName!=""){
+    // If the file for logging specified, redirect all std::out to it:
+    newCout.open(logFileName, std::ofstream::out | std::ofstream::app);
+    std::cout.rdbuf(newCout.rdbuf());
+  }
+
 }
 
 RooArgSet* bbgg2DFitter::defineVariables()
@@ -154,25 +164,12 @@ RooArgSet* bbgg2DFitter::defineVariables()
   return ntplVars;
 }
 
-int bbgg2DFitter::AddSigData(float mass, TString signalfile){
-  // Open the root file for signal inside the bbgg2Dfit class 
+int bbgg2DFitter::AddSigData(float mass, TString signalfile)
+{
   TFile sigFile(signalfile);
   bool opened=sigFile.IsOpen();
   if(opened==false) return -1;
-
-  // Now call the other function:
-  return bbgg2DFitter::AddSigData(mass, &sigFile);
-}
-
-int bbgg2DFitter::AddSigData(float mass, TFile *sigFile)
-{
-  // The signal file is provided from outside the bbgg2DFit class
-  // This is usefull if needs to be run many times (as in the case of Non-Res grid limits): saves the memory
-
-  //Signal file & tree
-  bool opened=sigFile->IsOpen();
-  if(opened==false) return -1;
-  TTree* sigTree = (TTree*)sigFile->Get("TCVARS");
+  TTree* sigTree = (TTree*)sigFile.Get("TCVARS");
   
   if (_verbLvl>=1 && _verbLvl<4) std::cout << "================= Add Signal==============================" <<std::endl;
   //Luminosity

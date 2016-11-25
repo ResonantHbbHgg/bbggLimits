@@ -2,7 +2,9 @@
 
 from ROOT import *
 import os,sys,json,time,re
+import logging
 from shutil import copy
+from pprint import pformat
 gROOT.SetBatch()
 
 __author__ = 'Andrey Pozdnyakov'
@@ -41,28 +43,36 @@ parser.add_argument('-t', '--timeout',dest="timeout", type=int, default=800,
 opt = parser.parse_args()
 #opt.func()
 
-#if opt.hhelp:
 #  parser.print_help()
-#  sys.exit(1)
 
 if opt.verb in [0,4]:
   gROOT.ProcessLine("gErrorIgnoreLevel = 1001;")
   RooMsgService.instance().setGlobalKillBelow(RooFit.FATAL)
   RooMsgService.instance().setSilentMode(True)
 
+  if opt.verb==0:  
+    logLvl = logging.ERROR
+  if opt.verb in [1,2,3]:  
+    logLvl = logging.INFO
+  if opt.verb==4: 
+    logLvl = logging.DEBUG
+  else:
+    logLvl = logging.ERROR
+    
 begin = time.time()
 
-def createDir(myDir):
-  if opt.verb>0 and opt.verb<4: print 'Creating a new directory: ', myDir
+def createDir(myDir, log=None):
+  if log!=None:
+    log.info('Creating a new directory: %s', myDir)
   if os.path.exists(myDir):
-    if opt.verb<=4:
-      print "\t This directory already exists:", myDir
+    if log!=None:
+      log.warning("\t This directory already exists: %s", myDir)
     if opt.overwrite:
-      if opt.verb<=4:
-        print "  But we will continue anyway (-- I'll overwrite it!)"
+      if log!=None:
+        log.warning("But we will continue anyway (-- I'll overwrite it!)")
     else:
-      if opt.verb<=4:
-        print ' And so I exit this place...'
+      if log!=None:
+        log.error(' And so I exit this place...')
       sys.exit(1)
   else:
     try: os.makedirs(myDir)
@@ -70,15 +80,14 @@ def createDir(myDir):
       if os.path.isdir(myDir): pass
       else: raise
 
-def printTime(t1, t2):
+def printTime(t1, t2, log):
   tNew = time.time()
-  print 'Time since start of worker: %.2f sec; since previous point: %.2f sec' %(tNew-t2,tNew-t1)
+  log.debug('Time since start of worker: %.2f sec; since previous point: %.2f sec' %(tNew-t2,tNew-t1))
   return tNew
 
-def runCombine(inDir, doBlind, Label = None, asimov=False):
-  print 'Running combine tool.  Dir:', inDir, 'Blind:', doBlind
-  if opt.verb==4:
-    print '[DBG] inDir should be the immediate directory where the card is located'
+def runCombine(inDir, doBlind, log, Label = None, asimov=False):
+  log.info('Running combine tool.  Dir: %s Blinded: %r', inDir, doBlind)
+  log.debug('inDir should be the immediate directory where the card is located')
 
   if doBlind:
     blinded = "--run blind"
@@ -90,9 +99,9 @@ def runCombine(inDir, doBlind, Label = None, asimov=False):
     asimovOpt = '--X-rtd TMCSO_AdaptivePseudoAsimov=50'
 
   cardName = inDir+"/hhbbgg_13TeV_DataCard.txt"
-  logFile  = inDir+"/result.log"
+  resFile  = inDir+"/result.log"
 
-  command1 = "combine -M Asymptotic -m 125 -n "+Label+" "+blinded+" "+asimovOpt+" "+cardName+" > "+logFile+" 2>&1"
+  command1 = "combine -M Asymptotic -m 125 -n "+Label+" "+blinded+" "+asimovOpt+" "+cardName+" > "+resFile+" 2>&1"
 
   combExitCode = os.system(command1)
 
@@ -112,9 +121,6 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
   # print sys._getframe().f_code
   PID = os.getpid()
 
-  if opt.verb>1:
-    print 'Node=',NRnode, '  gridPoint=',NRgridPoint,' PID=',PID, '\n Options: ', opt
-
   if NRnode!=None and NRgridPoint!=-1:
     print 'WARning: cannot have both the Node and grid Point. Chose one and try again'
     return __BAD__
@@ -127,12 +133,23 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
     return __BAD__
 
   # Create PID file to track the job:
-  pidfile = "/tmp/PoolWorker"+Label+".pid"
-  if os.path.isfile(pidfile):
-    print "%s already exists, exiting" % pidfile
-    return __BAD__
+  pidfile = "/tmp/PIDs/PoolWorker"+Label+".pid"
   file(pidfile, 'w').write(str(PID))
 
+  try:
+    logging.basicConfig(level=logLvl,
+                        format='%(asctime)s %(process)d %(name)-12s %(levelname)-8s %(message)s',
+                        datefmt='%m-%d %H:%M',
+                        filename='/tmp/logs/processLog'+str(Label)+'.log',
+                        filemode='w')
+  except:
+    print 'I got excepted!'
+    return __BAD__
+
+  procLog = logging.getLogger('Process.Log')
+  procLog.info("THis log filename="+logging.getLoggerClass().root.handlers[0].baseFilename)
+  procLog.info('Process Log started. PID = %d', PID)
+  procLog.info('Node=%r  gridPoint=%r PID=%r \n Options: %s',NRnode, NRgridPoint, PID, pformat(opt))
 
   start = time.time()
 
@@ -150,7 +167,7 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
   doBrazilianFlag = Params['other']["doBrazilianFlag"]
 
   if NCAT > 3:
-    print "Error NCAT>3!"
+    procLog.error("Error NCAT>3!")
     return __BAD__
 
   doCombine       = Params['other']["runCombine"]
@@ -180,6 +197,7 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
   else:
     baseFolder="./bbggToolsResults_v"+str(Params['other']["version"])
 
+
   massCuts = [Params['other']["minMggMassFit"], Params['other']["maxMggMassFit"],
               Params['other']["minMjjMassFit"], Params['other']["maxMjjMassFit"],
               Params['other']["minSigFitMgg"],  Params['other']["maxSigFitMgg"],
@@ -190,25 +208,19 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
   # For now the mass cuts are all the same, but can be changed in future.
   # ParamsForFits = {'SM': massCuts, 'box': massCuts}
 
-  # TODO: unify this:
-  if 'APZ' in LTDir_type:
-    NonResSignalFile = "/LT_output_GluGluToHHTo2B2G_node_"+str(NRnode)+"_13TeV-madgraph.root"
-  else:
-    NonResSignalFile = "/LT_output_GluGluToHHTo2B2G_node_"+str(NRnode)+"_13TeV-madgraph_0.root"
+  NonResSignalFile = "/LT_output_GluGluToHHTo2B2G_node_"+str(NRnode)+"_13TeV-madgraph.root"
 
   if NRgridPoint >= 0:
     NonResSignalFile = "/LT_NR_Nodes_2to13_merged.root"
 
-  if opt.verb==4:
-    print '[DBG]:', NonResSignalFile, signalTypes
+  procLog.debug('%s, %s', NonResSignalFile, pformat(signalTypes))
 
 
   for t in signalTypes:
     newFolder = baseFolder+ str('/'+t+Label)
-    if opt.verb>1:
-      print 'Type = ', t, newFolder
+    procLog.info('Type = %s, %s', t, newFolder)
 
-    createDir(newFolder)
+    createDir(newFolder,procLog)
 
     HLFactoryname= str(t+Label)
     hlf = RooStats.HLFactory(HLFactoryname, signalModelCard, False)
@@ -222,7 +234,8 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
                           massCuts[0],massCuts[1],massCuts[2],
                           massCuts[3],massCuts[4],massCuts[5],
                           massCuts[6],massCuts[7],massCuts[8],
-                          massCuts[9],massCuts[10],massCuts[11], NRgridPoint)
+                          massCuts[9],massCuts[10],massCuts[11], NRgridPoint,
+                          logging.getLoggerClass().root.handlers[0].baseFilename+'.bbgg2D')
 
     theFitter.SetVerbosityLevel(opt.verb)
     LTDir = LTDir_type.replace('TYPE', t)
@@ -230,54 +243,54 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
 
     openStatus = theFitter.AddSigData( mass, str(LTDir+NonResSignalFile))
     if openStatus==-1:
-      print 'There is a problem with openStatus'
+      procLog.error('There is a problem with openStatus')
       return __BAD__
-    print "\t SIGNAL ADDED. Node=",NRnode, '  GridPoint=',NRgridPoint, 'type=',t
-    if opt.verb>0: p1 = printTime(start, start)
+    procLog.debug("\t SIGNAL ADDED. Node=%r, GridPoint=%r, type=%r", NRnode,NRgridPoint,t)
+    if opt.verb>0: p1 = printTime(start, start, procLog)
 
-    createDir(newFolder+'/workspaces')
-    createDir(newFolder+'/datacards')
+    createDir(newFolder+'/workspaces',procLog)
+    createDir(newFolder+'/datacards',procLog)
 
     theFitter.SigModelFit( mass)
-    print "\t SIGNAL FITTED. Node=",NRnode, '  GridPoint=',NRgridPoint, 'type=',t
-    if opt.verb>0: p2 = printTime(p1,start)
+    procLog.debug("\t SIGNAL FITTED. Node=%r, GridPoint=%r, type=%r", NRnode,NRgridPoint,t)
+    if opt.verb>0: p2 = printTime(p1,start, procLog)
 
     fileBaseName = "hhbbgg.mH"+str(mass)[0:3]+"_13TeV"
     theFitter.MakeSigWS( fileBaseName)
-    print "\t SIGNAL'S WORKSPACE DONE. Node=",NRnode, '  GridPoint=',NRgridPoint, 'type=',t
-    if opt.verb>0: p3 = printTime(p2,start)
+    procLog.debug("\t SIGNAL'S WORKSPACE DONE. Node=%r, GridPoint=%r, type=%r", NRnode,NRgridPoint,t)
+    if opt.verb>0: p3 = printTime(p2,start,procLog)
 
     theFitter.MakePlots( mass)
-    print "\t SIGNAL'S PLOT DONE.. Node=",NRnode, '  GridPoint=',NRgridPoint, 'type=',t
-    if opt.verb>0: p4 = printTime(p3,start)
+    procLog.debug("\t SIGNAL'S PLOT DONE. Node=%r, GridPoint=%r, type=%r", NRnode,NRgridPoint,t)
+    if opt.verb>0: p4 = printTime(p3,start,procLog)
 
     if addHiggs:
-      print 'Here will add SM Higgs contributions'
+      procLog.info('Here will add SM Higgs contributions')
       # theFitter.AddHigData( mass,direc,1)
 
     ddata = str(LTDir + '/LT_'+dataName+'.root')
 
     theFitter.AddBkgData(ddata)
-    print "\t BKG ADDED. Node=",NRnode, '  GridPoint=',NRgridPoint, 'type=',t
-    if opt.verb>0: p4 = printTime(p3,start)
+    procLog.debug("\t BKG ADDED. Node=%r, GridPoint=%r, type=%r", NRnode,NRgridPoint,t)
+    if opt.verb>0: p4 = printTime(p3,start, procLog)
 
     if opt.verb==3:
       TheFitter.PrintWorkspace();
 
     fitresults = theFitter.BkgModelFit( doBands, addHiggs)
-    print "\t BKG FITTED. Node=",NRnode, '  GridPoint=',NRgridPoint, 'type=',t
-    if opt.verb>0: p5 = printTime(p4,start)
+    procLog.debug("\t BKG FITTED. Node=%r, GridPoint=%r, type=%r", NRnode,NRgridPoint,t)
+    if opt.verb>0: p5 = printTime(p4,start,procLog)
     if fitresults==None:
-      print "PROBLEM with fitresults !!"
+      procLog.error("PROBLEM with fitresults !!")
       return __BAD__
 
     if opt.verb in [1,2,3]:
-      fitresults.Print()
+      procLog.info(pformat(fitresults.Print()))
 
     wsFileBkgName = "hhbbgg.inputbkg_13TeV"
     theFitter.MakeBkgWS( wsFileBkgName);
-    print "\t BKG'S WORKSPACE DONE. Node=",NRnode, '  GridPoint=',NRgridPoint, 'type=',t
-    if opt.verb>0: p6 = printTime(p5,start)
+    procLog.debug("\t BKG'S WORKSPACE DONE. Node=%r, GridPoint=%r, type=%r", NRnode,NRgridPoint,t)
+    if opt.verb>0: p6 = printTime(p5,start,procLog)
 
     # This is making cards ala 8 TeV. We don't need this for now
     #theFitter.MakeDataCard( fileBaseName, wsFileBkgName, useSigTheoryUnc)
@@ -305,11 +318,10 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
     # TODO: This script needs to be included as a py function:
     DCcommand = "python LimitSetting/scripts/DataCardMaker.py -f " + str(newFolder) + str(" -n %d " % NCAT) + "-s " + sigExpStr + " -o " + bkgObsStr;
     if opt.verb==4:
-      print DCcommand
+      procLog.debug(DCcommand)
     os.system(DCcommand)
-    print "\t DATACARD DONE. Node=",NRnode, '  GridPoint=',NRgridPoint, 'type=',t
-
-    if opt.verb>0: p7 = printTime(p6,start)
+    procLog.debug("\t DATACARD DONE. Node=%r, GridPoint=%r, type=%r", NRnode,NRgridPoint,t)
+    if opt.verb>0: p7 = printTime(p6,start,procLog)
 
     # End of loop over Types
   ## <-- indent
@@ -320,7 +332,7 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
     cardsToMerge += baseFolder+'/'+t+Label+'/datacards/hhbbgg_13TeV_DataCard.txt '
 
   newDir = baseFolder+'/CombinedCard'+Label
-  createDir(newDir)
+  createDir(newDir,procLog)
 
   combCard = newDir+'/hhbbgg_13TeV_DataCard.txt'
   os.system("combineCards.py "+ cardsToMerge + " > " + combCard+' ')
@@ -331,12 +343,16 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
     os.system("sed -i 's|"+strReplace+"./|./|g' "+combCard)
 
   if doCombine:
-    combStatus = runCombine(newDir, doBlinding, Label=Label, asimov=Params['other']['AdaptivePseudoAsimov'])
-    print "\t COMBINE DONE. Node=",NRnode, '  GridPoint=',NRgridPoint
+    try:
+      combStatus = runCombine(newDir, doBlinding, procLog, Label=Label, asimov=Params['other']['AdaptivePseudoAsimov'])
+    except:
+      return __BAD__
+    procLog.debug("\t COMBINE DONE. Node=%r, GridPoint=%r, type=%r", NRnode,NRgridPoint,t)
     if combStatus!=0:
+      procLog.error('Combine failed...')
       return __BAD__
 
-  if opt.verb>0: p8 = printTime(p7,start)
+  if opt.verb>0: p8 = printTime(p7,start,procLog)
 
   os.remove(pidfile)
   return 42
@@ -369,21 +385,24 @@ if __name__ == "__main__":
 
   copy(opt.fname, baseFolder)
 
-  # Before we run let's clean-up tmp directory off the files may be left from previous failed jobs:
-  import glob
-  filelist = glob.glob("/tmp/PoolWorker*.pid")
-  for f in filelist:
-    os.remove(f)
-
-
   # import pebble as pb
-  from multiprocessing import Pool, TimeoutError, active_children
+  from multiprocessing import Pool, TimeoutError
 
   pool = Pool(processes=opt.ncpu)
 
+  logging.basicConfig(level=logLvl,
+                      format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+                      datefmt='%m-%d %H:%M',
+                      filename=baseFolder+'/mainLog_'+time.strftime("%Y%m%d-%H%M%S")+'.log',
+                      filemode='w')
+
+  mainLog = logging.getLogger('Main.Log')
+  mainLog.info('Main Log started')
+  
+
   res_Nodes = []
   if opt.nodes!=None:
-    print 'Running over nodes:',opt.nodes
+    mainLog.info('Running over nodes:\n'+pformat(opt.nodes))
 
     if 'all' in opt.nodes:
       myNodes=['SM','box','2','3','4','5','6','7','8','9','10','11','12','13']
@@ -398,15 +417,12 @@ if __name__ == "__main__":
       # Use signle core:
       #runFullChain(Params, NRnode=n)
 
-  #for p in [0, 10, 200, 400, 600, 1200, 1500, 1505]:
 
   res_Points = []
   if opt.points!=None:
-    print 'Running over 5D space points:', opt.points
+    mainLog.info('Running over 5D space points:\n'+pformat(opt.points))
     for p in opt.points:
-
       res_Points.append((str(p), pool.apply_async(runFullChain, args = (Params, None,p,))))
-
 
   pool.close()
 
@@ -422,31 +438,37 @@ if __name__ == "__main__":
 
   # Using a modified implementation of [1]:
 
+  pCount=0
+  totJobs = len(res_Nodes)+len(res_Points)
+
   badJobs = []
   for i, r in enumerate([res_Nodes, res_Points]):
     badJobs.append([])
 
-    if opt.verb==4:
-      print 'Type of r:',i, 'Length of r:', len(r)
-
+    #mainLog.debug('Type of r: %r,  length of r: %r', i, len(r))
+    
     while r:
+      #sys.stdout.write("\r Progress: %.1f%%\n" % (float(pCount)*100/totJobs))
+      #sys.stdout.flush()
+      #pCount+=1
+      
       try:
         j, res = r.pop(0)
         procCheckT = time.time()
-        print res.get(opt.timeout), ' Job %s has been finished. Was waiting only for %f Seconds.' % (j, time.time()-procCheckT)
-
+        procRes = res.get(opt.timeout)
+        mainLog.info('%d Job %s has been finished. Was waiting only for %f Seconds.' % (procRes, j, time.time()-procCheckT))
+        
       except Exception as e:
         print str(e)
-        if opt.verb==4:
-          print "%s is timed out! It's been %f sec that you're running, dear %s" % (j, time.time()-procCheckT, j)
-          print "That is too long. Because of that we've gotta kill you. Sorry."
+        mainLog.debug("%s is timed out! It's been %f sec that you're running, dear %s" % (j, time.time()-procCheckT, j))
+        mainLog.debug("That is too long. Because of that we've gotta kill you. Sorry.")
 
         # We know which process gave us an exception: it is "j" in "i", so let's kill it!
         # First, let's get the PID of that process:
         if i==0:
-          pidfile = '/tmp/PoolWorker_Node_'+str(j)+'.pid'
+          pidfile = '/tmp/PIDs/PoolWorker_Node_'+str(j)+'.pid'
         elif i==1:
-          pidfile = '/tmp/PoolWorker_gridPoint_'+str(j)+'.pid'
+          pidfile = '/tmp/PIDs/PoolWorker_gridPoint_'+str(j)+'.pid'
         PID = None
         if os.path.isfile(pidfile):
           PID = str(open(pidfile).read())
@@ -455,40 +477,35 @@ if __name__ == "__main__":
           # Here we loop over all running processes and check if PID matches with the one who's overtime:
           # print p, p.pid
           if str(p.pid)==PID:
-            if opt.verb==4:
-              print 'Found it still running indeed!', p, p.pid, p.is_alive(), p.exitcode
+            mainLog.debug('Found it still running indeed! :: %r, %r, %r %r', p, p.pid, p.is_alive(), p.exitcode)
 
             # We can also double-check how long it's been running with system 'ps' command:"
             # tt = str(subprocess.check_output('ps -p "'+str(p.pid)+'" o etimes=', shell=True)).strip()
             # print 'Run time from OS (may be way off the real time..) = ', tt
 
             # Now, KILL the m*$@r:
-            p.terminate
+            p.terminate()
             pool._pool.remove(p)
             pool._repopulate_pool()
 
             badJobs[i].append(j)
 
-            if opt.verb==4:
-              print 'Here you go,',p.name, ', pid=', p.pid, ', you have been served.'
+            #if opt.verb==4:
+            mainLog.debug('Here you go, %s, pid=%d, you have been served.', p.name, p.pid)
 
             os.remove(pidfile)
             break
 
-    if opt.verb==4:
-      print 'Broke out of the while loop..'
-
+    mainLog.debug('Broke out of the while loop.. for '+pformat(r))
+  mainLog.debug('Broke out of the enumerate loop...')
+    
+    
   pool.terminate()
   pool.join()
 
+  mainLog.info('Bad jobs:'+ pformat(badJobs))
 
+  end = time.time()
+  mainLog.info('\t Total Time: %.2f'%(end-begin))
 
-  # Just in case, let's remove all pid files from /tmp
-  filelist = glob.glob("/tmp/PoolWorker*.pid")
-  for f in filelist:
-    os.remove(f)
-
-  print 'Bad jobs:', badJobs
-  if opt.verb>0:
-    end = time.time()
-    print '\t Total Time: %.2f'%(end-begin)
+  mainLog.info('My Main Log Finished')

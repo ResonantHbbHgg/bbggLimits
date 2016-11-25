@@ -119,13 +119,12 @@ class bbgg2DFitter {
 		   float minMggMassFit,float maxMggMassFit,float minMjjMassFit,float maxMjjMassFit,
 		   float minSigFitMgg,float maxSigFitMgg,float minSigFitMjj,float maxSigFitMjj,
 		   float minHigMggFit,float maxHigMggFit,float minHigMjjFit,float maxHigMjjFit,
-		   Int_t doNRW=-2);
+		   Int_t doNRW=-2, std::string logFileName="");
    void SetVerbosityLevel(Int_t v) {_verbLvl=v;}
    void SetCut(TString cut) {_cut = cut;}
    void SetType(std::string tp) { _signalType = tp; }
    RooArgSet* defineVariables(); //DONE
    int AddSigData(float mass, TString signalfile); //DONE
-   int AddSigData(float mass, TFile *sFile);    
    void AddHigData(float mass, TString signalfile, int higgschannel); //DONE
    void AddBkgData(TString datafile); //DONE
    void SigModelFit(float mass); //DONE
