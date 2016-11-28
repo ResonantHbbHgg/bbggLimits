@@ -133,7 +133,7 @@ void bbgg2DFitter::Initialize(RooWorkspace* workspace, Int_t SigMass, float Lumi
 
   if (logFileName!=""){
     // If the file for logging specified, redirect all std::out to it:
-    newCout.open(logFileName, std::ofstream::out | std::ofstream::app);
+    newCout.open(logFileName, std::ofstream::out);
     std::cout.rdbuf(newCout.rdbuf());
   }
 

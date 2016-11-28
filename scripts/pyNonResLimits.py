@@ -5,6 +5,7 @@ import os,sys,json,time,re
 import logging
 from shutil import copy
 from pprint import pformat
+#from sets import Set
 gROOT.SetBatch()
 
 __author__ = 'Andrey Pozdnyakov'
@@ -13,14 +14,33 @@ __BAD__ = 666
 import argparse
 
 def parseNumList(string):
-  m = re.match(r'(\d+)(?:-(\d+))?$', string)
-  # ^ (or use .split('-'). anyway you like.)
-  if not m:
-    raise argparse.ArgumentTypeError("'" + string + "' is not a range of number. Expected forms like '0-5' or '2'.")
-  start = m.group(1)
-  end = m.group(2) or start
-  return list(range(int(start,10), int(end,10)+1))
+  # This function is used to pass arguments like: 
+  # --points 2,4 5-20, 60, 200-400
+  # That it, it will parse all those combinations and create lists of points to run over
 
+  # print 'Input string:',string
+  chunks = re.split('[,]', string)
+  chunks = filter(None, chunks)
+  mylist = []
+  if len(chunks)==0:
+    return None
+  for ch in chunks:
+    # print '\t This chunk=', ch
+    try:
+      mylist.append(int(ch))
+      # print "It's an int. Append it"
+    except ValueError:
+      # print 'It is not an int. Try a pattern: number1-number2'
+      m = re.match(r'\d*-\d*', ch)
+      if m:
+        # print 'Matched the chunk:', ch
+        start,end = m.group().split('-')
+        mylist.extend(range(int(start),int(end)+1))
+      else:
+        raise argparse.ArgumentTypeError("'" + string + "' is not in acceptable format.")
+  # print mylist
+  return list(set(mylist))
+      
 parser =  argparse.ArgumentParser(description='Limit Tree maker')
 parser.add_argument('-f', '--inputFile', dest="fname", type=str, default=None, required=True,
                     help="Json config file")
@@ -29,7 +49,7 @@ parser.add_argument('-o', '--outDir', dest="outDir", type=str, default=None,
 parser.add_argument('--nodes', dest="nodes", default=None, type=str, nargs='+',
                     choices=['2','3','4','5','6','7','8','9','10','11','12','13','SM','box','all'],
                     help = "Choose the nodes to run")
-parser.add_argument('--points', dest="points", default=None, type=parseNumList,
+parser.add_argument('--points', dest="points", default=None, type=parseNumList, nargs='+',
                     help = "Choose the points in the grid to run")
 parser.add_argument('--overwrite', dest="overwrite", action="store_true", default=False,
                     help="Overwrite the results into the same directory")
@@ -41,7 +61,8 @@ parser.add_argument('-t', '--timeout',dest="timeout", type=int, default=800,
                     help="Per job timeout (in seconds) for multiprocessing. Jobs will be killed if run longer than this.")
 
 opt = parser.parse_args()
-#opt.func()
+print opt
+# opt.func()
 
 #  parser.print_help()
 
@@ -61,18 +82,20 @@ if opt.verb in [0,4]:
     
 begin = time.time()
 
-def createDir(myDir, log=None):
+def createDir(myDir, log=None, over=True):
   if log!=None:
     log.info('Creating a new directory: %s', myDir)
   if os.path.exists(myDir):
     if log!=None:
       log.warning("\t This directory already exists: %s", myDir)
-    if opt.overwrite:
+    if over:
+      # Overwrite it...
       if log!=None:
         log.warning("But we will continue anyway (-- I'll overwrite it!)")
     else:
       if log!=None:
         log.error(' And so I exit this place...')
+      print 'The directory exist and we exit. Dir = ', myDir
       sys.exit(1)
   else:
     try: os.makedirs(myDir)
@@ -85,7 +108,7 @@ def printTime(t1, t2, log):
   log.debug('Time since start of worker: %.2f sec; since previous point: %.2f sec' %(tNew-t2,tNew-t1))
   return tNew
 
-def runCombine(inDir, doBlind, log, Label = None, asimov=False):
+def runCombine(inDir, doBlind, log, combineOpt = 1, Label = None):
   log.info('Running combine tool.  Dir: %s Blinded: %r', inDir, doBlind)
   log.debug('inDir should be the immediate directory where the card is located')
 
@@ -94,14 +117,20 @@ def runCombine(inDir, doBlind, log, Label = None, asimov=False):
   else:
     blinded = ''
 
-  asimovOpt = ''
-  if asimov:
-    asimovOpt = '--X-rtd TMCSO_AdaptivePseudoAsimov=50'
+  if combineOpt==1:
+    combineMethod = 'Asymptotic'
+  elif combineOpt==2:
+    combineMethod = 'Asymptotic --X-rtd TMCSO_AdaptivePseudoAsimov=50'
+  elif combineOpt==3:
+    combineMethod = 'HybridNew'
+  else:
+    log.error('This opttion is not supported: %r', combineOpt)
+    return __BAD__
 
   cardName = inDir+"/hhbbgg_13TeV_DataCard.txt"
   resFile  = inDir+"/result.log"
 
-  command1 = "combine -M Asymptotic -m 125 -n "+Label+" "+blinded+" "+asimovOpt+" "+cardName+" > "+resFile+" 2>&1"
+  command1 = ' '.join(['combine -M', combineMethod,'-m 125 -n',Label,blinded,cardName,">",resFile,"2>&1"])
 
   combExitCode = os.system(command1)
 
@@ -138,7 +167,7 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
 
   try:
     logging.basicConfig(level=logLvl,
-                        format='%(asctime)s %(process)d %(name)-12s %(levelname)-8s %(message)s',
+                        format='%(asctime)s PID:%(process)d %(name)-12s %(levelname)-8s %(message)s',
                         datefmt='%m-%d %H:%M',
                         filename='/tmp/logs/processLog'+str(Label)+'.log',
                         filemode='w')
@@ -344,7 +373,7 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
 
   if doCombine:
     try:
-      combStatus = runCombine(newDir, doBlinding, procLog, Label=Label, asimov=Params['other']['AdaptivePseudoAsimov'])
+      combStatus = runCombine(newDir, doBlinding, procLog, Params['other']['combineOption'], Label=Label)
     except:
       return __BAD__
     procLog.debug("\t COMBINE DONE. Node=%r, GridPoint=%r, type=%r", NRnode,NRgridPoint,t)
@@ -381,7 +410,7 @@ if __name__ == "__main__":
   else:
     baseFolder="./bbggToolsResults_v"+str(Params['other']["version"])
 
-  createDir(baseFolder)
+  createDir(baseFolder, over=opt.overwrite)
 
   copy(opt.fname, baseFolder)
 
@@ -391,7 +420,7 @@ if __name__ == "__main__":
   pool = Pool(processes=opt.ncpu)
 
   logging.basicConfig(level=logLvl,
-                      format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+                      format='%(asctime)s PID:%(process)d %(name)-12s %(levelname)-8s %(message)s',
                       datefmt='%m-%d %H:%M',
                       filename=baseFolder+'/mainLog_'+time.strftime("%Y%m%d-%H%M%S")+'.log',
                       filemode='w')
@@ -399,6 +428,8 @@ if __name__ == "__main__":
   mainLog = logging.getLogger('Main.Log')
   mainLog.info('Main Log started')
   
+  createDir('/tmp/PIDs/',mainLog,True)
+  createDir('/tmp/logs/',mainLog,True)
 
   res_Nodes = []
   if opt.nodes!=None:
@@ -420,8 +451,10 @@ if __name__ == "__main__":
 
   res_Points = []
   if opt.points!=None:
+    listOfPoints = list(set([item for sublist in opt.points for item in sublist]))
+
     mainLog.info('Running over 5D space points:\n'+pformat(opt.points))
-    for p in opt.points:
+    for p in listOfPoints:
       res_Points.append((str(p), pool.apply_async(runFullChain, args = (Params, None,p,))))
 
   pool.close()
@@ -448,9 +481,9 @@ if __name__ == "__main__":
     #mainLog.debug('Type of r: %r,  length of r: %r', i, len(r))
     
     while r:
-      #sys.stdout.write("\r Progress: %.1f%%\n" % (float(pCount)*100/totJobs))
-      #sys.stdout.flush()
-      #pCount+=1
+      sys.stdout.write("\r Progress: %.1f%%\n" % (float(pCount)*100/totJobs))
+      sys.stdout.flush()
+      pCount+=1
       
       try:
         j, res = r.pop(0)
