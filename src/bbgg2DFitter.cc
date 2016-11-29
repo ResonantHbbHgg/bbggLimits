@@ -37,7 +37,7 @@ std::vector<float> bbgg2DFitter::EffectiveSigma(RooRealVar* mass, RooAbsPdf* bin
     }
   }
 
-  if (_verbLvl>=1 && _verbLvl<4)
+  if (_verbLvl>1)
     std::cout << "#Sigma effective: xLow: " << low << ", xHigh: " << high << ", width: " << width << std::endl;
 
   std::vector<float> outVec;
@@ -171,7 +171,7 @@ int bbgg2DFitter::AddSigData(float mass, TString signalfile)
   if(opened==false) return -1;
   TTree* sigTree = (TTree*)sigFile.Get("TCVARS");
   
-  if (_verbLvl>=1 && _verbLvl<4) std::cout << "================= Add Signal==============================" <<std::endl;
+  if (_verbLvl>1) std::cout << "================= Add Signal==============================" <<std::endl;
   //Luminosity
   RooRealVar lumi("lumi","lumi", _lumi);
   _w->import(lumi);
@@ -179,7 +179,7 @@ int bbgg2DFitter::AddSigData(float mass, TString signalfile)
   RooArgSet* ntplVars = bbgg2DFitter::defineVariables();
   if(sigTree==nullptr)
     {
-      if (_verbLvl>=1 && _verbLvl<4) std::cout<<"TCVARS for AddSigData  not founded in TTree trying with TCVARS"<<std::endl;
+      if (_verbLvl>1) std::cout<<"TCVARS for AddSigData  not founded in TTree trying with TCVARS"<<std::endl;
       std::exit(1);
       //sigTree = (TTree*) sigFile.Get("TCVARS");
       //if(sigTree==nullptr)
@@ -191,7 +191,7 @@ int bbgg2DFitter::AddSigData(float mass, TString signalfile)
   //ccbar->GetEntry();
   //RooRealVar ccbarweight("NRweight", "NRweight", );
 
-  if (_verbLvl==4) {
+  if (_verbLvl>0) {
     std::cout<<"[DBG]  Prining ntplVars from sig"<<std::endl;
     ntplVars->Print();
   }
@@ -218,7 +218,7 @@ int bbgg2DFitter::AddSigData(float mass, TString signalfile)
 	sigToFit[i] = (RooDataSet*) sigScaled.reduce(myArgList,_cut+TString::Format(" && cut_based_ct==%d && mjj < 140 ",i)+cut0);
 
       this->SetSigExpectedCats(i, sigToFit[i]->sumEntries());
-      if (_verbLvl==4) {
+      if (_verbLvl>0) {
 	std::cout << "======================================================================" <<std::endl;
 	std::cout<<"[DBG]  Cat="<<i<< "\t Sig sumEntries="<<sigToFit[i]->sumEntries()<<std::endl;
 	std::cout<<"mGG:  Mean = "<<sigToFit[i]->mean(*_w->var("mgg"))<<"  sigma = "<<sigToFit[i]->sigma(*_w->var("mgg"))<<std::endl;
@@ -239,7 +239,7 @@ int bbgg2DFitter::AddSigData(float mass, TString signalfile)
 
   _w->import(*sigToFitAll,Rename("Sig"));
   // here we print the number of entries on the different categories
-  if (_verbLvl>=1 && _verbLvl<4) {
+  if (_verbLvl>1) {
     std::cout << "======================================================================" <<std::endl;
     std::cout << "========= the number of entries on the different categories ==========" <<std::endl;
     std::cout << "---- one channel: " << sigScaled.sumEntries() <<std::endl;
@@ -262,7 +262,7 @@ void bbgg2DFitter::AddHigData(float mass, TString signalfile, int higgschannel)
   TTree* higTree = (TTree*) higFile.Get("TCVARS");
   if(higTree==nullptr)
     {
-      if (_verbLvl>=1 && _verbLvl<4) std::cout<<"TCVARS for AddHigData  not founded in TTree trying with TCVARS"<<std::endl;
+      if (_verbLvl>1) std::cout<<"TCVARS for AddHigData  not founded in TTree trying with TCVARS"<<std::endl;
       std::exit(1);
       //higTree = (TTree*) higFile.Get("TCVARS");
       //if(higTree==nullptr)std::exit(1);
@@ -283,7 +283,7 @@ void bbgg2DFitter::AddHigData(float mass, TString signalfile, int higgschannel)
   if(_fitStrategy == 1) higToFitAll = (RooDataSet*) higScaled.reduce(RooArgList(*_w->var("mgg")),_cut + TString(" && mjj < 140 "));
   _w->import(*higToFitAll,Rename("Hig"));
   // here we print the number of entries on the different categories
-  if (_verbLvl>=1 && _verbLvl<4) {
+  if (_verbLvl>1) {
     std::cout << "========= the number of entries on the different categories (Higgs data) ==========" <<std::endl;
     std::cout << "---- one channel: " << higScaled.sumEntries() <<std::endl;
     for (int c = 0; c < _NCAT; ++c)
@@ -308,7 +308,7 @@ void bbgg2DFitter::AddBkgData(TString datafile)
   TTree* dataTree = (TTree*) dataFile.Get("TCVARS");
   if(dataTree==nullptr)
     {
-      if (_verbLvl>=1 && _verbLvl<4) std::cout<<"TCVARS for AddBkgData  not founded in TTree trying with TCVARS"<<std::endl;
+      if (_verbLvl>1) std::cout<<"TCVARS for AddBkgData  not founded in TTree trying with TCVARS"<<std::endl;
       std::exit(1);
       //dataTree = (TTree*) dataFile.Get("TCVARS");
       //if(dataTree==nullptr)std::exit(1);
@@ -318,7 +318,7 @@ void bbgg2DFitter::AddBkgData(TString datafile)
   RooDataSet* dataToPlot[_NCAT];
   TString cut0 = "&& 1>0";
   TString cut1 = "&& 1>0";
-  if (_verbLvl>=1 && _verbLvl<4) std::cout<<"================= Add Bkg ==============================="<<std::endl;
+  if (_verbLvl>1) std::cout<<"================= Add Bkg ==============================="<<std::endl;
 
   for( int i=0; i<_NCAT; ++i)
     {
@@ -349,7 +349,7 @@ void bbgg2DFitter::AddBkgData(TString datafile)
   if (_fitStrategy == 1)
     data = (RooDataSet*) Data.reduce(RooArgList(*_w->var("mgg")),_cut + TString(" && mjj < 140 "));
   _w->import(*data, Rename("Data"));
-  if (_verbLvl>=1 && _verbLvl<4) data->Print("v");
+  if (_verbLvl>1) data->Print("v");
 }
 
 void bbgg2DFitter::SigModelFit(float mass)
@@ -385,16 +385,16 @@ void bbgg2DFitter::SigModelFit(float mass)
 
       //RooRealVar* peak = w->var(TString::Format("mgg_sig_m0_cat%d",c));
       //peak->setVal(MASS);
-      if (_verbLvl>=1 && _verbLvl<4) std::cout << "OK up to now... Mass point: " <<mass<<std::endl;
+      if (_verbLvl>1) std::cout << "OK up to now... Mass point: " <<mass<<std::endl;
       if(_fitStrategy == 2) SigPdf[c]->fitTo(*sigToFit[c],Range("SigFitRange"),SumW2Error(kTRUE),PrintLevel(-1));
       if(_fitStrategy == 1) SigPdf1[c]->fitTo(*sigToFit[c],Range("SigFitRange"),SumW2Error(kTRUE),PrintLevel(-1));
 
-      if (_verbLvl>=1 && _verbLvl<4) std::cout << "old = " << ((RooRealVar*) _w->var(TString::Format("mgg_sig_m0_cat%d",c)))->getVal() <<std::endl;
+      if (_verbLvl>1) std::cout << "old = " << ((RooRealVar*) _w->var(TString::Format("mgg_sig_m0_cat%d",c)))->getVal() <<std::endl;
       double mPeak = ((RooRealVar*) _w->var(TString::Format("mgg_sig_m0_cat%d",c)))->getVal()+(mass-125.0); // shift the peak //This should be an option
 
       ((RooRealVar*) _w->var(TString::Format("mgg_sig_m0_cat%d",c)))->setVal(mPeak); // shift the peak
-      if (_verbLvl>=1 && _verbLvl<4) std::cout << "mPeak = " << mPeak << std::endl;
-      if (_verbLvl>=1 && _verbLvl<4) std::cout << "new mPeak position = " << ((RooRealVar*) _w->var(TString::Format("mgg_sig_m0_cat%d",c)))->getVal() <<std::endl;
+      if (_verbLvl>1) std::cout << "mPeak = " << mPeak << std::endl;
+      if (_verbLvl>1) std::cout << "new mPeak position = " << ((RooRealVar*) _w->var(TString::Format("mgg_sig_m0_cat%d",c)))->getVal() <<std::endl;
 
       // IMPORTANT: fix all pdf parameters to constant, why?
       RooArgSet sigParams( *_w->var(TString::Format("mgg_sig_m0_cat%d",c)),
@@ -414,7 +414,7 @@ void bbgg2DFitter::SigModelFit(float mass)
       }
       _w->defineSet(TString::Format("SigPdfParam_cat%d",c), sigParams);
       SetConstantParams(_w->set(TString::Format("SigPdfParam_cat%d",c)));
-      if (_verbLvl>=1 && _verbLvl<4) std::cout<<std::endl;
+      if (_verbLvl>1) std::cout<<std::endl;
       if(_fitStrategy == 2) _w->import(*SigPdf[c]);
       if(_fitStrategy == 1) _w->import(*SigPdf1[c]);
     }
@@ -443,14 +443,14 @@ void bbgg2DFitter::HigModelFit(float mass, int higgschannel)
       else mjjHig[c] = new RooPolynomial(TString::Format("mjjHig_pol0_%d_cat%d",higgschannel,c),"",*mjj,RooArgList());;
       HigPdf[c] = new RooProdPdf(TString::Format("HigPdf_%d_cat%d",higgschannel,c),"",RooArgSet(*mggHig[c], *mjjHig[c]));
       //((RooRealVar*) w->var(TString::Format("mgg_hig_m0_%d_cat%d",higgschannel,c)))->setVal(MASS);
-      if (_verbLvl>=1 && _verbLvl<4) std::cout << "OK up to now... Mass point: " <<mass<<std::endl;
+      if (_verbLvl>1) std::cout << "OK up to now... Mass point: " <<mass<<std::endl;
       HigPdf[c]->fitTo(*higToFit[c],Range("HigFitRange"),SumW2Error(kTRUE),PrintLevel(-1));
       RooArgSet* paramsMjj;
       paramsMjj = (RooArgSet*) mjjHig[c]->getParameters(*mjj);
       TIterator* iterMjj = paramsMjj->createIterator();
       TObject* tempObjMjj=nullptr;
 
-      if (_verbLvl>=1 && _verbLvl<4) {
+      if (_verbLvl>1) {
 	while((tempObjMjj=iterMjj->Next()))
 	  {
 	    RooRealVar* var = (RooRealVar*)tempObjMjj;
@@ -462,8 +462,8 @@ void bbgg2DFitter::HigModelFit(float mass, int higgschannel)
       ((RooRealVar*) _w->var(TString::Format("mgg_hig_m0_%d_cat%d",higgschannel,c)))->setMax( ((RooRealVar*) _w->var(TString::Format("mgg_hig_m0_%d_cat%d",higgschannel,c)))->getMax()+(mass-125.0) );
       double mPeak = ((RooRealVar*) _w->var(TString::Format("mgg_hig_m0_%d_cat%d",higgschannel,c)))->getVal()+(mass-125.0); // shift the peak
       ((RooRealVar*) _w->var(TString::Format("mgg_hig_m0_%d_cat%d",higgschannel,c)))->setVal(mPeak); // shift the peak
-      if (_verbLvl>=1 && _verbLvl<4) std::cout << "mPeak = " << mPeak <<std::endl;
-      if (_verbLvl>=1 && _verbLvl<4) std::cout << "new mPeak position = " << ((RooRealVar*) _w->var(TString::Format("mgg_hig_m0_%d_cat%d",higgschannel,c)))->getVal() <<std::endl;
+      if (_verbLvl>1) std::cout << "mPeak = " << mPeak <<std::endl;
+      if (_verbLvl>1) std::cout << "new mPeak position = " << ((RooRealVar*) _w->var(TString::Format("mgg_hig_m0_%d_cat%d",higgschannel,c)))->getVal() <<std::endl;
       // IMPORTANT: fix all pdf parameters to constant
       RooArgSet sigParams( *_w->var(TString::Format("mgg_hig_m0_%d_cat%d",higgschannel,c)),
 			   *_w->var(TString::Format("mgg_hig_sigma_%d_cat%d",higgschannel,c)),
@@ -482,7 +482,7 @@ void bbgg2DFitter::HigModelFit(float mass, int higgschannel)
       }
       _w->defineSet(TString::Format("HigPdfParam_%d_cat%d",higgschannel,c), sigParams);
       SetConstantParams(_w->set(TString::Format("HigPdfParam_%d_cat%d",higgschannel,c)));
-      if (_verbLvl>=1 && _verbLvl<4) std::cout<<std::endl;
+      if (_verbLvl>1) std::cout<<std::endl;
       _w->import(*HigPdf[c]);
     } // close for ncat
 } // close higgs model fit
@@ -608,7 +608,7 @@ void bbgg2DFitter::MakePlots(float mass)
 
   //TCanvas* ctmp = new TCanvas("c1","Canvas",800,800);
 
-  if (_verbLvl>=1 && _verbLvl<4) std::cout << "[MakePlots] Doing now sig Mgg  and Mtot plots" << std::endl;
+  if (_verbLvl>1) std::cout << "[MakePlots] Doing now sig Mgg  and Mtot plots" << std::endl;
   for (int c = 0; c < _NCAT; ++c)
     {
       if (_nonResWeightIndex>=-1){
@@ -622,7 +622,7 @@ void bbgg2DFitter::MakePlots(float mass)
       sigToFit[c]->plotOn(plotmgg[c]);
       mggSig[c] ->plotOn(plotmgg[c]);
       //    double chi2n = plotmgg[c]->chiSquare(0) ;
-      //    if (_verbLvl>=1 && _verbLvl<4) std::cout << "------------------------- Experimental chi2 = " << chi2n <<std::endl;
+      //    if (_verbLvl>1) std::cout << "------------------------- Experimental chi2 = " << chi2n <<std::endl;
       mggSig[c] ->plotOn(plotmgg[c],Components(TString::Format("mggGaussSig_cat%d",c)),LineStyle(kDashed),LineColor(kGreen));
       mggSig[c] ->plotOn(plotmgg[c],Components(TString::Format("mggCBSig_cat%d",c)),LineStyle(kDashed),LineColor(kRed));
       //    mggSig[c] ->paramOn(plotmgg[c]);
@@ -728,14 +728,14 @@ void bbgg2DFitter::MakePlots(float mass)
     text->SetNDC();
     text->SetTextSize(0.04);
     RooPlot* plotmjj[_NCAT];
-    if (_verbLvl>=1 && _verbLvl<4) std::cout << "[MakePlots] Doing now sig Mjj plot" << std::endl;
+    if (_verbLvl>1) std::cout << "[MakePlots] Doing now sig Mjj plot" << std::endl;
     for (int c = 0; c < _NCAT; ++c)
       {
 	plotmjj[c] = mjj->frame(Range("SigPlotRange"),Bins(nBinsMass));
 	sigToFit[c]->plotOn(plotmjj[c]);
 	mjjSig[c] ->plotOn(plotmjj[c]);
 	double chi2n = plotmjj[c]->chiSquare(0) ;
-	if (_verbLvl>=1 && _verbLvl<4) std::cout << "------------------------- Experimental chi2 = " << chi2n <<std::endl;
+	if (_verbLvl>1) std::cout << "------------------------- Experimental chi2 = " << chi2n <<std::endl;
 	mjjSig[c] ->plotOn(plotmjj[c],Components(TString::Format("mjjGaussSig_cat%d",c)),LineStyle(kDashed),LineColor(kGreen));
 	mjjSig[c] ->plotOn(plotmjj[c],Components(TString::Format("mjjCBSig_cat%d",c)),LineStyle(kDashed),LineColor(kRed));
 	//    mjjSig[c] ->paramOn(plotmjj[c]);
@@ -885,7 +885,7 @@ void bbgg2DFitter::MakePlotsHiggs(float mass)
 	  higToFit[c]->plotOn(plotmgg[c]);
 	  mggSig[c] ->plotOn(plotmgg[c]);
 	  double chi2n = plotmgg[c]->chiSquare(0) ;
-	  if (_verbLvl>=1 && _verbLvl<4) std::cout << "------------------------- Experimental chi2 = " << chi2n <<std::endl;
+	  if (_verbLvl>1) std::cout << "------------------------- Experimental chi2 = " << chi2n <<std::endl;
 	  mggSig[c] ->plotOn(plotmgg[c],Components(TString::Format("mggGaussHig_%d_cat%d",realint,c)),LineStyle(kDashed),LineColor(kGreen));
 	  mggSig[c] ->plotOn(plotmgg[c],Components(TString::Format("mggCBHig_%d_cat%d",realint,c)),LineStyle(kDashed),LineColor(kRed));
 	  mggSig[c] ->paramOn(plotmgg[c]);
@@ -963,7 +963,7 @@ void bbgg2DFitter::MakePlotsHiggs(float mass)
 	  higToFit[c]->plotOn(plotmjj[c]);
 	  mjjSig[c] ->plotOn(plotmjj[c]);
 	  double chi2n = plotmjj[c]->chiSquare(0) ;
-	  if (_verbLvl>=1 && _verbLvl<4) std::cout << "------------------------- Experimental chi2 = " << chi2n <<std::endl;
+	  if (_verbLvl>1) std::cout << "------------------------- Experimental chi2 = " << chi2n <<std::endl;
 	  if(d == 1 || d == 3)
 	    {
 	      mjjSig[c] ->plotOn(plotmjj[c],Components(TString::Format("mjjGaussHig_%d_cat%d",realint,c)),LineStyle(kDashed),LineColor(kGreen));
@@ -1169,7 +1169,7 @@ void bbgg2DFitter::MakeSigWS(std::string fileBaseName)
   }
   TString filename(wsDir+TString(fileBaseName)+".inputsig.root");
   wAll->writeToFile(filename);
-  if (_verbLvl>=1 && _verbLvl<4) std::cout << "Write signal workspace in: " << filename << " file" << std::endl;
+  if (_verbLvl>1) std::cout << "Write signal workspace in: " << filename << " file" << std::endl;
   return;
 } // close make signal WP
 
@@ -1264,7 +1264,7 @@ void bbgg2DFitter::MakeHigWS(std::string fileHiggsName,int higgschannel)
     }
   TString filename(wsDir+fileHiggsName+".inputhig.root");
   wAll->writeToFile(filename);
-  if (_verbLvl>=1 && _verbLvl<4) std::cout << "Write signal workspace in: " << filename << " file" << std::endl;
+  if (_verbLvl>1) std::cout << "Write signal workspace in: " << filename << " file" << std::endl;
   return;
 } // close make higgs WP
 
@@ -1326,7 +1326,7 @@ void bbgg2DFitter::MakeBkgWS(std::string fileBaseName)
   //                        TString::Format("mbb_bkg_13TeV_slope2_cat%d=CMS_mbb_bkg_13TeV_slope2_cat%d, ", c, c) +
   //                        TString::Format("CMS_hhbbgg_13TeV_mgg_bkg_slope3_cat%d=CMS_mgg_bkg_13TeV_slope3_cat%d, ", c, c) +
   //                        TString::Format("mbb_bkg_13TeV_slope3_cat%d=CMS_mbb_bkg_13TeV_slope3_cat%d )", c, c);
-  //        if (_verbLvl>=1 && _verbLvl<4) std::cout << "** MODIFICATIONS: " << modifications << std::endl;
+  //        if (_verbLvl>1) std::cout << "** MODIFICATIONS: " << modifications << std::endl;
 
   //        wAll->factory( modifications );
 
@@ -1371,19 +1371,19 @@ void bbgg2DFitter::MakeBkgWS(std::string fileBaseName)
   //  } // close for cat
   TString filename(wsDir+fileBaseName+".root");
   wAll->writeToFile(filename);
-  if (_verbLvl>=1 && _verbLvl<4) std::cout << "Write background workspace in: " << filename << " file" <<std::endl;
-  if (_verbLvl>=1 && _verbLvl<4) std::cout << "observation ";
+  if (_verbLvl>1) std::cout << "Write background workspace in: " << filename << " file" <<std::endl;
+  if (_verbLvl>1) std::cout << "observation ";
   for (int c = 0; c < _NCAT; ++c)
     {
-      if (_verbLvl>=1 && _verbLvl<4) std::cout << " " << wAll->data(TString::Format("data_obs_cat%d",c))->sumEntries();
+      if (_verbLvl>1) std::cout << " " << wAll->data(TString::Format("data_obs_cat%d",c))->sumEntries();
     }
-  if (_verbLvl>=1 && _verbLvl<4) std::cout << std::endl;
+  if (_verbLvl>1) std::cout << std::endl;
   return;
 } // close make BKG workspace
 
 void bbgg2DFitter::MakeDataCard(std::string fileBaseName, std::string fileBkgName ,Bool_t useSigTheoryUnc)
 {
-  if (_verbLvl==4){
+  if (_verbLvl>0){
     std::cout<<" DBG.  Making Data card"<<std::endl;
     std::cout<<" fileBaseName ="<<fileBaseName<<"\n   fileBkgName="<<fileBkgName<<std::endl;
   }
@@ -1404,13 +1404,13 @@ void bbgg2DFitter::MakeDataCard(std::string fileBaseName, std::string fileBkgNam
 	for(std::vector<std::string>::iterator it=_singleHiggsNames.begin();it!=_singleHiggsNames.end();++it)
 	  {
 	    higToFits[*it][c]=(RooDataSet*) _w->data(TString::Format("Hig_%d_cat%d",_singleHiggsMap[*it],c));
-	    if (_verbLvl>=1 && _verbLvl<4) std::cout<<*it<<" found "<<std::endl;
+	    if (_verbLvl>1) std::cout<<*it<<" found "<<std::endl;
 	  }
       }
     } // close cat
   ////////////////////////////////////////////////////////////////////////////////////
   //RooRealVar* lumi = w->var("lumi");
-  if (_verbLvl>=1 && _verbLvl<4) {
+  if (_verbLvl>1) {
 
     std::cout << "======== Expected Events Number =====================" <<std::endl;
     std::cout << ".........Measured Data for L = " << _lumi << " pb-1 ............................" <<std::endl;
@@ -1674,7 +1674,7 @@ void bbgg2DFitter::MakeDataCard(std::string fileBaseName, std::string fileBkgNam
     } // if ncat == 2 or 4
   /////////////////////////////////////
   outFile.close();
-  if (_verbLvl>=1 && _verbLvl<4) std::cout << "Write data card in: " << filename << " file" << std::endl;
+  if (_verbLvl>1) std::cout << "Write data card in: " << filename << " file" << std::endl;
 } // close write full datacard
 
 void bbgg2DFitter::SetConstantParams(const RooArgSet* params)
@@ -1684,7 +1684,7 @@ void bbgg2DFitter::SetConstantParams(const RooArgSet* params)
   for (TObject *a = iter->Next(); a != 0; a = iter->Next())
     {
       RooRealVar *rrv = dynamic_cast<RooRealVar *>(a);
-      if (rrv) rrv->setConstant(true); if (_verbLvl>=1 && _verbLvl<4) std::cout << " " << rrv->GetName();
+      if (rrv) rrv->setConstant(true); if (_verbLvl>1) std::cout << " " << rrv->GetName();
     }
 } // close set const parameters
 
@@ -1801,7 +1801,7 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs)
   text->SetNDC();
   text->SetTextSize(0.04);
   //
-  if (_verbLvl>=1 && _verbLvl<4) std::cout << "[BkgModelFit] Starting cat loop " << std::endl;
+  if (_verbLvl>1) std::cout << "[BkgModelFit] Starting cat loop " << std::endl;
   for (int c = 0; c < ncat; ++c) { // to each category
     data[c] = (RooDataSet*) _w->data(TString::Format("Data_cat%d",c));
 
@@ -1810,7 +1810,7 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs)
     if(_fitStrategy==2)  data_h2= (TH2*) data[c]->createHistogram("mgg,mjj", 60, 40);
     if(_fitStrategy==1)  data_h11= (TH1*) data[c]->createHistogram("mgg", 60);
 
-    if (_verbLvl>=1 && _verbLvl<4) {
+    if (_verbLvl>1) {
       if(_doblinding==0 && _fitStrategy==2) std::cout << "########NUMBER OF OBSERVED EVENTSSSS::: " << data_h2->Integral() << std::endl;
       if(_doblinding==0 && _fitStrategy==1) std::cout << "########NUMBER OF OBSERVED EVENTSSSS::: " << data_h11->Integral() << std::endl;
     }
@@ -1820,7 +1820,7 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs)
 
     //data_h11->Delete();
 
-    if (_verbLvl>=1 && _verbLvl<4) std::cout << "[BkgModelFit] Cat loop 1 - cat" << c << std::endl;
+    if (_verbLvl>1) std::cout << "[BkgModelFit] Cat loop 1 - cat" << c << std::endl;
 
     ////////////////////////////////////
     // these are the parameters for the bkg polinomial
@@ -1828,7 +1828,7 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs)
     // we first wrap the normalization of mggBkgTmp0, mjjBkgTmp0
     // CMS_hhbbgg_13TeV_mgg_bkg_slope1
     _w->factory(TString::Format("BkgPdf_cat%d_norm[1.0,0.0,100000]",c));
-    if (_verbLvl>=1 && _verbLvl<4) std::cout << "[BkgModelFit] Cat loop 2 - cat" << c << std::endl;
+    if (_verbLvl>1) std::cout << "[BkgModelFit] Cat loop 2 - cat" << c << std::endl;
     /*
       RooFormulaVar *mgg_p0amp = new RooFormulaVar(TString::Format("mgg_p0amp_cat%d",c),"","@0*@0",
       *_w->var(TString::Format("CMS_hhbbgg_13TeV_mgg_bkg_slope1_cat%d",c)));
@@ -1845,7 +1845,7 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs)
       RooArgList(*_w->var(TString::Format("CMS_hhbbgg_13TeV_mjj_bkg_slope3_cat%d",c)), *mjj_p0amp ));}
     */
 
-    if (_verbLvl>=1 && _verbLvl<4) std::cout << "[BkgModelFit] Cat loop 3 - cat" << c << std::endl;
+    if (_verbLvl>1) std::cout << "[BkgModelFit] Cat loop 3 - cat" << c << std::endl;
 
     RooFormulaVar *mgg_p0amp = new RooFormulaVar(TString::Format("mgg_p0amp_cat%d",c),"","@0*@0",
 						 *_w->var(TString::Format("CMS_hhbbgg_13TeV_mgg_bkg_slope1_cat%d",c)));
@@ -1862,7 +1862,7 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs)
 						 RooArgList(*_w->var(TString::Format("CMS_hhbbgg_13TeV_mjj_bkg_slope3_cat%d",c)) ));
 
 
-    if (_verbLvl>=1 && _verbLvl<4) std::cout << "[BkgModelFit] Cat loop 4 - cat" << c << std::endl;
+    if (_verbLvl>1) std::cout << "[BkgModelFit] Cat loop 4 - cat" << c << std::endl;
 
     mggBkgTmpBer1 = new RooBernstein(TString::Format("mggBkgTmpBer1_cat%d",c),"",*mgg,RooArgList(*mgg_p0amp,*mgg_p1amp));
     mjjBkgTmpBer1 = new RooBernstein(TString::Format("mjjBkgTmpBer1_cat%d",c),"",*mjj,RooArgList(*mjj_p0amp,*mjj_p1amp));
@@ -1872,12 +1872,12 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs)
       mjjBkgTmpBer1 = new RooBernstein(TString::Format("mjjBkgTmpBer1_cat%d",c),"",*mjj,RooArgList(*mjj_p0amp,*mjj_p1amp, *mjj_p2amp));
     }
 
-    if (_verbLvl>=1 && _verbLvl<4) std::cout << "[BkgModelFit] Cat loop 5 - cat" << c << std::endl;
+    if (_verbLvl>1) std::cout << "[BkgModelFit] Cat loop 5 - cat" << c << std::endl;
 
     if(_fitStrategy==2) BkgPdf = new RooProdPdf(TString::Format("BkgPdf_cat%d",c), "", RooArgList(*mggBkgTmpBer1, *mjjBkgTmpBer1));
     //    if(_fitStrategy==1) BkgPdf1 = (RooAbsPdf*) mggBkgTmpBer1->Clone(TString::Format("BkgPdf_cat%d",c));
 
-    if (_verbLvl>=1 && _verbLvl<4) std::cout << "[BkgModelFit] Cat loop " << c << std::endl;
+    if (_verbLvl>1) std::cout << "[BkgModelFit] Cat loop " << c << std::endl;
 
     RooExtendPdf* BkgPdfExt;
 
@@ -1894,14 +1894,14 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs)
       _w->import(*BkgPdf1);
     }
 
-    if (_verbLvl>=1 && _verbLvl<4) std::cout << "[BkgModelFit] Done with fit " << c << std::endl;
+    if (_verbLvl>1) std::cout << "[BkgModelFit] Done with fit " << c << std::endl;
 
     ///////////////////////////////////
     //Calculate 2D chisquare by hand //
     ///////////////////////////////////
     //    TH2* pdf_h2 = BkgPdfExt.createHistogram("mgg vs mjj pdf", mgg, Binning(60), YVar(mjj, Binning(40)));
     //    TH2* data_h2 = (TH2*) data[c]->createHistogram("mgg,mjj", 60, 40);
-    //    if (_verbLvl>=1 && _verbLvl<4) std::cout << "########NUMBER OF OBSERVED EVENTSSSS::: " << data_h2->Integral() << std::endl;
+    //    if (_verbLvl>1) std::cout << "########NUMBER OF OBSERVED EVENTSSSS::: " << data_h2->Integral() << std::endl;
     if(_fitStrategy == 2) {
       TH2* pdf_h2 = (TH2*) BkgPdf->createHistogram("mgg,mjj", 60, 40);
       TH1F* data_h1 = new TH1F("data_h1", "data_h1", 2400, 0, 2400);
@@ -1913,7 +1913,7 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs)
       //    float Total2DChiSquare = 0;
       int counterBin = 1;
       if( nbins_data_x != nbins_pdf_x || nbins_data_y != nbins_pdf_y ) {
-	if (_verbLvl>=1 && _verbLvl<4) std::cout << "Number of bins for 2D chi square are different!!!!" << std::endl;
+	if (_verbLvl>1) std::cout << "Number of bins for 2D chi square are different!!!!" << std::endl;
       } else {
 	for (unsigned int nbx = 1; nbx < nbins_pdf_x + 1; nbx++) {
 	  for ( unsigned int nby = 1; nby < nbins_pdf_y + 1; nby++) {
@@ -1926,7 +1926,7 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs)
 	    pdf_h1->SetBinContent(counterBin, expected_h2);
 	    pdf_h1->SetBinError(counterBin, errExp_h2);
 	    counterBin++;
-	    //if (_verbLvl>=1 && _verbLvl<4) std::cout << "bin x: " << nbx << " bin y: " << nby << " exp: " << expected_h2 << " obs: " << observed_h2 << std::endl;
+	    //if (_verbLvl>1) std::cout << "bin x: " << nbx << " bin y: " << nby << " exp: " << expected_h2 << " obs: " << observed_h2 << std::endl;
 	    // float csq = (observed_h2 - expected_h2)*(observed_h2 - expected_h2)/expected_h2;
 	    // Total2DChiSquare += csq;
 	  }
@@ -1939,12 +1939,12 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs)
       if (!pdf_h1->GetSumw2N()) pdf_h2->Sumw2();
       pdf_h1->Scale(data_h1->Integral()/pdfNormalization);
       pdf_h2->Scale(data_h2->Integral()/pdfNormalization2);
-      if (_verbLvl>=1 && _verbLvl<4) {
+      if (_verbLvl>1) {
 	std::cout << "########NUMBER OF PDFFF EVENTSSSS::: " << pdf_h2->Integral() << std::endl;
 	std::cout << "################################################################" << std::endl;
-	std::cout << "################################################################" << std::endl;
-	std::cout << "################ 1DKSTEST:" << data_h1->KolmogorovTest(pdf_h1, "D") << " ##################################" << std::endl;
-	std::cout << "################ 2DKSTEST:" << data_h2->KolmogorovTest(pdf_h2, "D") << " ##################################" << std::endl;
+	std::cout << "#############  KolmogorovTests  #############################" << std::endl;
+	std::cout << "################ 1DKSTEST:" << data_h1->KolmogorovTest(pdf_h1, "") << " ##################################" << std::endl;
+	std::cout << "################ 2DKSTEST:" << data_h2->KolmogorovTest(pdf_h2, "") << " ##################################" << std::endl;
 	std::cout << "################################################################" << std::endl;
 	std::cout << "################################################################" << std::endl;
       }
@@ -1964,7 +1964,7 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs)
     //************************************************//
     // Plot mgg background fit results per categories
     //************************************************//
-    if (_verbLvl>=1 && _verbLvl<4) std::cout << "[BkgModelFit] Plotting Mgg - cat" << c << std::endl;
+    if (_verbLvl>1) std::cout << "[BkgModelFit] Plotting Mgg - cat" << c << std::endl;
     //TCanvas* ctmp = new TCanvas(TString::Format("ctmpBkgMgg_cat%d",c),"mgg Background Categories",800,600);
     Int_t nBinsMass(80);
     plotmggBkg[c] = mgg->frame(nBinsMass);
@@ -2126,7 +2126,7 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs)
     //if (ctmp) ctmp->Close();
 
     if(_fitStrategy == 2) {
-      if (_verbLvl>=1 && _verbLvl<4 ) std::cout << "[BkgModelFit] Plotting Mgg - cat" << c << std::endl;
+      if (_verbLvl>1 ) std::cout << "[BkgModelFit] Plotting Mgg - cat" << c << std::endl;
       //************************************************//
       // Plot mjj background fit results per categories
       //************************************************//

@@ -54,7 +54,7 @@ parser.add_argument('--points', dest="points", default=None, type=parseNumList, 
 parser.add_argument('--overwrite', dest="overwrite", action="store_true", default=False,
                     help="Overwrite the results into the same directory")
 parser.add_argument("-v", dest="verb", type=int, default=0,
-                    help="Verbosity level: 0 - Minimal; 1 - Talk to me; 2 - talk more, I like to listen; 3 - not used; 4 - Debug messages only (minimal of other messages)")
+                    help="Verbosity level: 0 - Minimal or no messages; 1 - DEBUG; 2 - Talk to me; 3 - Go crazy")
 parser.add_argument('-j', '--ncpu',dest="ncpu", type=int, default=2,
                     help="Number of cores to run on.")
 parser.add_argument('-t', '--timeout',dest="timeout", type=int, default=800,
@@ -66,19 +66,18 @@ print opt
 
 #  parser.print_help()
 
-if opt.verb in [0,4]:
+if opt.verb==0:  
+  logLvl = logging.ERROR
+elif opt.verb==1:
+  logLvl = logging.DEBUG
+else:
+  logLvl = logging.INFO
+
+if opt.verb < 3:
   gROOT.ProcessLine("gErrorIgnoreLevel = 1001;")
   RooMsgService.instance().setGlobalKillBelow(RooFit.FATAL)
   RooMsgService.instance().setSilentMode(True)
 
-  if opt.verb==0:  
-    logLvl = logging.ERROR
-  if opt.verb in [1,2,3]:  
-    logLvl = logging.INFO
-  if opt.verb==4: 
-    logLvl = logging.DEBUG
-  else:
-    logLvl = logging.ERROR
     
 begin = time.time()
 
@@ -91,7 +90,7 @@ def createDir(myDir, log=None, over=True):
     if over:
       # Overwrite it...
       if log!=None:
-        log.warning("But we will continue anyway (-- I'll overwrite it!)")
+        log.warning("But we will continue anyway (I will --overwrite it!)")
     else:
       if log!=None:
         log.error(' And so I exit this place...')
@@ -112,10 +111,12 @@ def runCombine(inDir, doBlind, log, combineOpt = 1, Label = None):
   log.info('Running combine tool.  Dir: %s Blinded: %r', inDir, doBlind)
   log.debug('inDir should be the immediate directory where the card is located')
 
-  if doBlind:
+  if doBlind and combineOpt!=3:
+    # In HybridNew this option does not work
     blinded = "--run blind"
   else:
     blinded = ''
+
 
   if combineOpt==1:
     combineMethod = 'Asymptotic'
@@ -124,26 +125,29 @@ def runCombine(inDir, doBlind, log, combineOpt = 1, Label = None):
   elif combineOpt==3:
     combineMethod = 'HybridNew'
   else:
-    log.error('This opttion is not supported: %r', combineOpt)
+    log.error('This option is not supported: %r', combineOpt)
     return __BAD__
 
+
   cardName = inDir+"/hhbbgg_13TeV_DataCard.txt"
-  resFile  = inDir+"/result.log"
+  resFile  = inDir+"/result_"+str(combineOpt)+".log"
+
 
   command1 = ' '.join(['combine -M', combineMethod,'-m 125 -n',Label,blinded,cardName,">",resFile,"2>&1"])
+  log.debug('Combine command we run:\n%s', command1)
 
   combExitCode = os.system(command1)
 
-  fName = 'higgsCombine'+Label+'.Asymptotic.mH125.root'
+  if combineOpt in [1,2]:
+    fName = 'higgsCombine'+Label+'.Asymptotic.mH125.root'
+  elif combineOpt in [3]:
+    fName = 'higgsCombine'+Label+'.HybridNew.mH125.root'
 
   outDir = inDir
-  os.rename(fName, outDir+'/'+fName)
+  os.rename(fName, outDir+'/'+fName.replace('.root', '_%i.root'%combineOpt))
 
   return combExitCode
 
-#def giveMeName(pName='UnKnown'):
-#  # This function is used for naming the processes in the Pool later on.
-#  return pName
 
 def runFullChain(Params, NRnode=None, NRgridPoint=-1):
   #print 'Running: ', sys._getframe().f_code.co_name, " Node=",NRnode
@@ -303,7 +307,7 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
     procLog.debug("\t BKG ADDED. Node=%r, GridPoint=%r, type=%r", NRnode,NRgridPoint,t)
     if opt.verb>0: p4 = printTime(p3,start, procLog)
 
-    if opt.verb==3:
+    if opt.verb>1:
       TheFitter.PrintWorkspace();
 
     fitresults = theFitter.BkgModelFit( doBands, addHiggs)
@@ -313,8 +317,7 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
       procLog.error("PROBLEM with fitresults !!")
       return __BAD__
 
-    if opt.verb in [1,2,3]:
-      procLog.info(pformat(fitresults.Print()))
+    procLog.info(pformat(fitresults.Print()))
 
     wsFileBkgName = "hhbbgg.inputbkg_13TeV"
     theFitter.MakeBkgWS( wsFileBkgName);
@@ -346,8 +349,7 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
 
     # TODO: This script needs to be included as a py function:
     DCcommand = "python LimitSetting/scripts/DataCardMaker.py -f " + str(newFolder) + str(" -n %d " % NCAT) + "-s " + sigExpStr + " -o " + bkgObsStr;
-    if opt.verb==4:
-      procLog.debug(DCcommand)
+    procLog.debug(DCcommand)
     os.system(DCcommand)
     procLog.debug("\t DATACARD DONE. Node=%r, GridPoint=%r, type=%r", NRnode,NRgridPoint,t)
     if opt.verb>0: p7 = printTime(p6,start,procLog)
@@ -372,14 +374,21 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
     os.system("sed -i 's|"+strReplace+"./|./|g' "+combCard)
 
   if doCombine:
-    try:
-      combStatus = runCombine(newDir, doBlinding, procLog, Params['other']['combineOption'], Label=Label)
-    except:
-      return __BAD__
-    procLog.debug("\t COMBINE DONE. Node=%r, GridPoint=%r, type=%r", NRnode,NRgridPoint,t)
-    if combStatus!=0:
-      procLog.error('Combine failed...')
-      return __BAD__
+    combineOpt = Params['other']['combineOption']
+    for method in [1,2,3]:
+      # If options 1,2,3 are provided - run the corresponding limits:
+      # 1 - asymptotic, 2 - asymptotoc with adaptive azimov option; 3 - hybridnew
+      # If combineOpt==4: run all of them at once 
+      if combineOpt!=4 and method!=combineOpt: continue
+      try:
+        combStatus = runCombine(newDir, doBlinding, procLog, method, Label=Label)
+      except:
+        return __BAD__
+      procLog.debug("\t COMBINE with Option=%r is DONE. Node=%r, GridPoint=%r, type=%r \n \t Status = %r",
+                    method, NRnode,NRgridPoint,t, combStatus)
+      if combStatus!=0:
+        procLog.error('Combine failed...')
+        # return __BAD__
 
   if opt.verb>0: p8 = printTime(p7,start,procLog)
 
@@ -398,7 +407,7 @@ if __name__ == "__main__":
   with open(opt.fname, 'r') as fp:
     Params = json.load(fp)
 
-  if opt.verb==2:
+  if opt.verb>1:
     print '\t Input JSON config file:'
     print json.dumps(Params, sort_keys=True,indent=4)
 
@@ -427,14 +436,16 @@ if __name__ == "__main__":
 
   mainLog = logging.getLogger('Main.Log')
   mainLog.info('Main Log started')
+
+  mainLog.info(pformat(opt))
   
   createDir('/tmp/PIDs/',mainLog,True)
   createDir('/tmp/logs/',mainLog,True)
 
   res_Nodes = []
   if opt.nodes!=None:
-    mainLog.info('Running over nodes:\n'+pformat(opt.nodes))
 
+    mainLog.info('Running over nodes:\n'+pformat(opt.nodes))
     if 'all' in opt.nodes:
       myNodes=['SM','box','2','3','4','5','6','7','8','9','10','11','12','13']
     else:
@@ -523,7 +534,6 @@ if __name__ == "__main__":
 
             badJobs[i].append(j)
 
-            #if opt.verb==4:
             mainLog.debug('Here you go, %s, pid=%d, you have been served.', p.name, p.pid)
 
             os.remove(pidfile)

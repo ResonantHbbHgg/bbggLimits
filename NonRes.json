@@ -6,7 +6,7 @@
 	"signalModelCard" : "/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D_sig.rs"
     },
     "other" : {
-        "version" : 65,
+        "version" : 66,
 	"integratedLumi" : 2.7,
         "energy" : "13TeV",
         "higgsMass" : 125.0,
@@ -18,7 +18,7 @@
         "useSigTheoryUnc" : 0,
 	"doBrazilianFlag" : false,
 	"runCombine" : true,
-	"combineOption" : 2,
+	"combineOption" : 4,
 	"minMggMassFit" : 100,
 	"maxMggMassFit" : 180,
 	"minMjjMassFit"	: 80,
