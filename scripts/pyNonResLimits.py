@@ -14,7 +14,7 @@ __BAD__ = 666
 import argparse
 
 def parseNumList(string):
-  # This function is used to pass arguments like: 
+  # This function is used to pass arguments like:
   # --points 2,4 5-20, 60, 200-400
   # That it, it will parse all those combinations and create lists of points to run over
 
@@ -40,7 +40,7 @@ def parseNumList(string):
         raise argparse.ArgumentTypeError("'" + string + "' is not in acceptable format.")
   # print mylist
   return list(set(mylist))
-      
+
 parser =  argparse.ArgumentParser(description='Limit Tree maker')
 parser.add_argument('-f', '--inputFile', dest="fname", type=str, default=None, required=True,
                     help="Json config file")
@@ -54,7 +54,7 @@ parser.add_argument('--points', dest="points", default=None, type=parseNumList, 
 parser.add_argument('--overwrite', dest="overwrite", action="store_true", default=False,
                     help="Overwrite the results into the same directory")
 parser.add_argument("-v", dest="verb", type=int, default=0,
-                    help="Verbosity level: 0 - Minimal or no messages; 1 - DEBUG; 2 - Talk to me; 3 - Go crazy")
+                    help="Verbosity level: 0 - Minimal or no messages; 1 - INFO; 2 - DEBUG; 3 - Go crazy")
 parser.add_argument('-j', '--ncpu',dest="ncpu", type=int, default=2,
                     help="Number of cores to run on.")
 parser.add_argument('-t', '--timeout',dest="timeout", type=int, default=800,
@@ -63,22 +63,21 @@ parser.add_argument('-t', '--timeout',dest="timeout", type=int, default=800,
 opt = parser.parse_args()
 print opt
 # opt.func()
-
 #  parser.print_help()
 
-if opt.verb==0:  
+if opt.verb==0:
   logLvl = logging.ERROR
 elif opt.verb==1:
-  logLvl = logging.DEBUG
-else:
   logLvl = logging.INFO
+else:
+  logLvl = logging.DEBUG
 
 if opt.verb < 3:
   gROOT.ProcessLine("gErrorIgnoreLevel = 1001;")
   RooMsgService.instance().setGlobalKillBelow(RooFit.FATAL)
   RooMsgService.instance().setSilentMode(True)
 
-    
+
 begin = time.time()
 
 def createDir(myDir, log=None, over=True):
@@ -134,7 +133,7 @@ def runCombine(inDir, doBlind, log, combineOpt = 1, Label = None):
 
 
   command1 = ' '.join(['combine -M', combineMethod,'-m 125 -n',Label,blinded,cardName,">",resFile,"2>&1"])
-  log.debug('Combine command we run:\n%s', command1)
+  log.info('Combine command we run:\n%s', command1)
 
   combExitCode = os.system(command1)
 
@@ -180,7 +179,7 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
     return __BAD__
 
   procLog = logging.getLogger('Process.Log')
-  procLog.info("THis log filename="+logging.getLoggerClass().root.handlers[0].baseFilename)
+  procLog.info("This log filename="+logging.getLoggerClass().root.handlers[0].baseFilename)
   procLog.info('Process Log started. PID = %d', PID)
   procLog.info('Node=%r  gridPoint=%r PID=%r \n Options: %s',NRnode, NRgridPoint, PID, pformat(opt))
 
@@ -278,50 +277,51 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
     if openStatus==-1:
       procLog.error('There is a problem with openStatus')
       return __BAD__
-    procLog.debug("\t SIGNAL ADDED. Node=%r, GridPoint=%r, type=%r", NRnode,NRgridPoint,t)
+    procLog.info("\t SIGNAL ADDED. Node=%r, GridPoint=%r, type=%r", NRnode,NRgridPoint,t)
     if opt.verb>0: p1 = printTime(start, start, procLog)
 
     createDir(newFolder+'/workspaces',procLog)
     createDir(newFolder+'/datacards',procLog)
 
     theFitter.SigModelFit( mass)
-    procLog.debug("\t SIGNAL FITTED. Node=%r, GridPoint=%r, type=%r", NRnode,NRgridPoint,t)
+    procLog.info("\t SIGNAL FITTED. Node=%r, GridPoint=%r, type=%r", NRnode,NRgridPoint,t)
     if opt.verb>0: p2 = printTime(p1,start, procLog)
 
     fileBaseName = "hhbbgg.mH"+str(mass)[0:3]+"_13TeV"
     theFitter.MakeSigWS( fileBaseName)
-    procLog.debug("\t SIGNAL'S WORKSPACE DONE. Node=%r, GridPoint=%r, type=%r", NRnode,NRgridPoint,t)
+    procLog.info("\t SIGNAL'S WORKSPACE DONE. Node=%r, GridPoint=%r, type=%r", NRnode,NRgridPoint,t)
     if opt.verb>0: p3 = printTime(p2,start,procLog)
 
     theFitter.MakePlots( mass)
-    procLog.debug("\t SIGNAL'S PLOT DONE. Node=%r, GridPoint=%r, type=%r", NRnode,NRgridPoint,t)
+    procLog.info("\t SIGNAL'S PLOT DONE. Node=%r, GridPoint=%r, type=%r", NRnode,NRgridPoint,t)
     if opt.verb>0: p4 = printTime(p3,start,procLog)
 
     if addHiggs:
-      procLog.info('Here will add SM Higgs contributions')
+      procLog.debug('Here will add SM Higgs contributions')
       # theFitter.AddHigData( mass,direc,1)
 
     ddata = str(LTDir + '/LT_'+dataName+'.root')
 
     theFitter.AddBkgData(ddata)
-    procLog.debug("\t BKG ADDED. Node=%r, GridPoint=%r, type=%r", NRnode,NRgridPoint,t)
+    procLog.info("\t BKG ADDED. Node=%r, GridPoint=%r, type=%r", NRnode,NRgridPoint,t)
     if opt.verb>0: p4 = printTime(p3,start, procLog)
 
     if opt.verb>1:
       TheFitter.PrintWorkspace();
 
     fitresults = theFitter.BkgModelFit( doBands, addHiggs)
-    procLog.debug("\t BKG FITTED. Node=%r, GridPoint=%r, type=%r", NRnode,NRgridPoint,t)
+    procLog.info("\t BKG FITTED. Node=%r, GridPoint=%r, type=%r", NRnode,NRgridPoint,t)
     if opt.verb>0: p5 = printTime(p4,start,procLog)
     if fitresults==None:
       procLog.error("PROBLEM with fitresults !!")
       return __BAD__
 
-    procLog.info(pformat(fitresults.Print()))
+    if opt.verb>1:
+      fitresults.Print()
 
     wsFileBkgName = "hhbbgg.inputbkg_13TeV"
     theFitter.MakeBkgWS( wsFileBkgName);
-    procLog.debug("\t BKG'S WORKSPACE DONE. Node=%r, GridPoint=%r, type=%r", NRnode,NRgridPoint,t)
+    procLog.info("\t BKG'S WORKSPACE DONE. Node=%r, GridPoint=%r, type=%r", NRnode,NRgridPoint,t)
     if opt.verb>0: p6 = printTime(p5,start,procLog)
 
     # This is making cards ala 8 TeV. We don't need this for now
@@ -351,7 +351,7 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
     DCcommand = "python LimitSetting/scripts/DataCardMaker.py -f " + str(newFolder) + str(" -n %d " % NCAT) + "-s " + sigExpStr + " -o " + bkgObsStr;
     procLog.debug(DCcommand)
     os.system(DCcommand)
-    procLog.debug("\t DATACARD DONE. Node=%r, GridPoint=%r, type=%r", NRnode,NRgridPoint,t)
+    procLog.info("\t DATACARD DONE. Node=%r, GridPoint=%r, type=%r", NRnode,NRgridPoint,t)
     if opt.verb>0: p7 = printTime(p6,start,procLog)
 
     # End of loop over Types
@@ -378,13 +378,13 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
     for method in [1,2,3]:
       # If options 1,2,3 are provided - run the corresponding limits:
       # 1 - asymptotic, 2 - asymptotoc with adaptive azimov option; 3 - hybridnew
-      # If combineOpt==4: run all of them at once 
+      # If combineOpt==4: run all of them at once
       if combineOpt!=4 and method!=combineOpt: continue
       try:
         combStatus = runCombine(newDir, doBlinding, procLog, method, Label=Label)
       except:
         return __BAD__
-      procLog.debug("\t COMBINE with Option=%r is DONE. Node=%r, GridPoint=%r, type=%r \n \t Status = %r",
+      procLog.info("\t COMBINE with Option=%r is DONE. Node=%r, GridPoint=%r, type=%r \n \t Status = %r",
                     method, NRnode,NRgridPoint,t, combStatus)
       if combStatus!=0:
         procLog.error('Combine failed...')
@@ -438,7 +438,7 @@ if __name__ == "__main__":
   mainLog.info('Main Log started')
 
   mainLog.info(pformat(opt))
-  
+
   createDir('/tmp/PIDs/',mainLog,True)
   createDir('/tmp/logs/',mainLog,True)
 
@@ -464,7 +464,7 @@ if __name__ == "__main__":
   if opt.points!=None:
     listOfPoints = list(set([item for sublist in opt.points for item in sublist]))
 
-    mainLog.info('Running over 5D space points:\n'+pformat(opt.points))
+    mainLog.debug('Running over 5D space points:\n'+pformat(opt.points))
     for p in listOfPoints:
       res_Points.append((str(p), pool.apply_async(runFullChain, args = (Params, None,p,))))
 
@@ -490,22 +490,22 @@ if __name__ == "__main__":
     badJobs.append([])
 
     #mainLog.debug('Type of r: %r,  length of r: %r', i, len(r))
-    
+
     while r:
       sys.stdout.write("\r Progress: %.1f%%\n" % (float(pCount)*100/totJobs))
       sys.stdout.flush()
       pCount+=1
-      
+
       try:
         j, res = r.pop(0)
         procCheckT = time.time()
         procRes = res.get(opt.timeout)
         mainLog.info('%d Job %s has been finished. Was waiting only for %f Seconds.' % (procRes, j, time.time()-procCheckT))
-        
+
       except Exception as e:
-        print str(e)
-        mainLog.debug("%s is timed out! It's been %f sec that you're running, dear %s" % (j, time.time()-procCheckT, j))
-        mainLog.debug("That is too long. Because of that we've gotta kill you. Sorry.")
+        mainLog.warning(str(e))
+        mainLog.warning("%s is timed out! It's been %f sec that you're running, dear %s" % (j, time.time()-procCheckT, j))
+        mainLog.warning("That is too long... Because of that we've gotta kill you. Sorry.")
 
         # We know which process gave us an exception: it is "j" in "i", so let's kill it!
         # First, let's get the PID of that process:
@@ -541,8 +541,8 @@ if __name__ == "__main__":
 
     mainLog.debug('Broke out of the while loop.. for '+pformat(r))
   mainLog.debug('Broke out of the enumerate loop...')
-    
-    
+
+
   pool.terminate()
   pool.join()
 
