@@ -9,6 +9,10 @@ __author__ = 'Andrey Pozdnyakov'
 
 import argparse
 parser =  argparse.ArgumentParser(description='Limit Tree maker')
+parser.add_argument('-b','--blind', dest="blind", action="store_true", default=False,
+                    help="Do not try to get observed limits.")
+parser.add_argument("-c", dest="combineOpt", type=int, default=1,
+                    help="Pick which limits to plot. 1-Asymptotic; 2 - Asymptotic with adaptive asimov; 3 - HybridNew")
 parser.add_argument('-d', '--dir', dest="inDir", type=str, default=None, required=True,
                     help="Input directory")
 parser.add_argument('-x', choices=['res', 'nodes', 'grid', 'lambda'], required=True, default=None,
@@ -21,6 +25,9 @@ opt = parser.parse_args()
 
 if opt.verb>0:
   print opt
+#if opt.verb < 1:
+#  gROOT.ProcessLine("gErrorIgnoreLevel = 1001;")
+#  RooMsgService.instance().setSilentMode(True)
 
 
 def getValuesFromFile(fname):
@@ -67,6 +74,18 @@ if __name__ == "__main__":
   
   missedPoints = []
 
+  if opt.combineOpt==0:
+    fTail = '.Asymptotic.mH125.root'
+  elif opt.combineOpt==1:
+    fTail = '.Asymptotic.mH125_1.root'
+  elif opt.combineOpt==2:
+    fTail = '.Asymptotic.mH125_2.root'
+  elif opt.combineOpt==3:
+    fTail = '.HybridNew.mH125_3.root'
+  else:
+    print 'Sorry this option is not supported:', opt.combineOpt
+    sys.exit(0)
+    
   if opt.x == 'res':
     print 'This option is not implemented yet:', opt.x
 
@@ -76,7 +95,7 @@ if __name__ == "__main__":
     myNodes=['SM','box','2','3','4','5','6','7','8','9','10','11','12','13']
 
     for i,n in enumerate(myNodes):
-      l = getValuesFromFile(opt.inDir+'/CombinedCard_Node_'+n+'/higgsCombine_Node_'+n+'.Asymptotic.mH125.root')
+      l = getValuesFromFile(opt.inDir+'/CombinedCard_Node_'+n+'/higgsCombine_Node_'+n+fTail)
       if l==None:
         missedPoints.append(n)
         continue
@@ -86,7 +105,8 @@ if __name__ == "__main__":
       expMean.append(l[2])
       exp1SigHi.append(l[3])
       exp2SigHi.append(l[4])
-      obs.append(l[5])
+      if not opt.blind:
+        obs.append(l[5])
 
       if opt.verb>0:
         print n,l
@@ -97,9 +117,11 @@ if __name__ == "__main__":
   elif opt.x=='grid':
     print 'Making limit plot for 0-1507 grid points'
     
-    for n in xrange(0,1507):
-      l = getValuesFromFile(opt.inDir+'/CombinedCard_gridPoint_'+str(n)+'/higgsCombine_gridPoint_'+str(n)+'.Asymptotic.mH125.root')
-      if l==None or len(l)!=6:
+    for n in xrange(0,1506):
+      l = getValuesFromFile(opt.inDir+'/CombinedCard_gridPoint_'+str(n)+'/higgsCombine_gridPoint_'+str(n)+fTail)
+      if opt.verb>0:
+        print n,l
+      if l==None or len(l)<5:
         missedPoints.append(n)
         continue
 
@@ -108,10 +130,9 @@ if __name__ == "__main__":
       expMean.append(l[2])
       exp1SigHi.append(l[3])
       exp2SigHi.append(l[4])
-      obs.append(l[5])
+      if not opt.blind:
+        obs.append(l[5])
 
-      if opt.verb>0:
-        print n,l
 
       xAxis.append(float(n))
       xErr.append(0.5)
@@ -131,7 +152,10 @@ if __name__ == "__main__":
   if opt.x=='grid':
     xErr_Array = np.array(xErr)
 
-  obs_Array = np.array(obs)
+  if not opt.blind:
+    obs_Array = np.array(obs)
+  else:
+    obs_Array = zeros_Array
   exp_Array = np.array(expMean)
   exp2SigLowErr_Array = np.array([a-b for a,b in zip(expMean,exp2SigLow)])
   exp1SigLowErr_Array = np.array([a-b for a,b in zip(expMean,exp1SigLow)])
@@ -146,7 +170,6 @@ if __name__ == "__main__":
   oneSigma = TGraphAsymmErrors(nPoints,xAxis_Array,exp_Array,xErr_Array,xErr_Array,exp1SigLowErr_Array,exp1SigHiErr_Array)
   twoSigma = TGraphAsymmErrors(nPoints,xAxis_Array,exp_Array,xErr_Array,xErr_Array,exp2SigLowErr_Array,exp2SigHiErr_Array)
   observed = TGraphAsymmErrors(nPoints,xAxis_Array,obs_Array,zeros_Array,zeros_Array,zeros_Array,zeros_Array)
-
 
 
   if opt.x=='nodes':
@@ -189,7 +212,8 @@ if __name__ == "__main__":
     mg.Add(oneSigma)
     mg.Add(expected,'L')
 
-    #mg.Add(observed,'L')
+    if not opt.blind:
+      mg.Add(observed,'L')
 
     mg.Draw('A')
 
@@ -229,4 +253,4 @@ if __name__ == "__main__":
 
   CMS_lumi(c1, 4, 11, "")
   for e in ['.png']:
-    c1.SaveAs(opt.inDir+'/limitPlot_'+opt.x+e)  
+    c1.SaveAs(opt.inDir+'/limitPlot_'+opt.x+'_'+str(opt.combineOpt)+e)  

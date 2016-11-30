@@ -178,7 +178,7 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
     print 'I got excepted!'
     return __BAD__
 
-  procLog = logging.getLogger('Process.Log')
+  procLog = logging.getLogger('Process.Log.'+str(Label))
   procLog.info("This log filename="+logging.getLoggerClass().root.handlers[0].baseFilename)
   procLog.info('Process Log started. PID = %d', PID)
   procLog.info('Node=%r  gridPoint=%r PID=%r \n Options: %s',NRnode, NRgridPoint, PID, pformat(opt))
