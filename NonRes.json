@@ -18,7 +18,7 @@
         "useSigTheoryUnc" : 0,
 	"doBrazilianFlag" : false,
 	"runCombine" : true,
-	"combineOption" : 4,
+	"combineOption" : 1,
 	"minMggMassFit" : 100,
 	"maxMggMassFit" : 180,
 	"minMjjMassFit"	: 80,

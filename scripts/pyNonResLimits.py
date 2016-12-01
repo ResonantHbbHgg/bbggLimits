@@ -5,7 +5,9 @@ import os,sys,json,time,re
 import logging
 from shutil import copy
 from pprint import pformat
-#from sets import Set
+# import pebble as pb
+from multiprocessing import Pool, TimeoutError, current_process
+
 gROOT.SetBatch()
 
 __author__ = 'Andrey Pozdnyakov'
@@ -168,19 +170,21 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
   pidfile = "/tmp/PIDs/PoolWorker"+Label+".pid"
   file(pidfile, 'w').write(str(PID))
 
+  procName = current_process().name
   try:
     logging.basicConfig(level=logLvl,
                         format='%(asctime)s PID:%(process)d %(name)-12s %(levelname)-8s %(message)s',
                         datefmt='%m-%d %H:%M',
-                        filename='/tmp/logs/processLog'+str(Label)+'.log',
+                        filename='/tmp/logs/processLog_'+str(procName)+'.log',
                         filemode='w')
   except:
     print 'I got excepted!'
     return __BAD__
 
-  procLog = logging.getLogger('Process.Log.'+str(Label))
-  procLog.info("This log filename="+logging.getLoggerClass().root.handlers[0].baseFilename)
-  procLog.info('Process Log started. PID = %d', PID)
+  procLog = logging.getLogger('Process.Log')
+
+  procLog.info('\n\n New process Log started. PID = %d,  job label: %r\n', PID, Label)
+  procLog.info("This log filename = "+logging.getLoggerClass().root.handlers[0].baseFilename)
   procLog.info('Node=%r  gridPoint=%r PID=%r \n Options: %s',NRnode, NRgridPoint, PID, pformat(opt))
 
   start = time.time()
@@ -393,6 +397,10 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
   if opt.verb>0: p8 = printTime(p7,start,procLog)
 
   os.remove(pidfile)
+
+  # procLog.handlers = []
+
+  procLog.info('This process has ended. Label=%r', Label)
   return 42
 
 if __name__ == "__main__":
@@ -422,9 +430,6 @@ if __name__ == "__main__":
   createDir(baseFolder, over=opt.overwrite)
 
   copy(opt.fname, baseFolder)
-
-  # import pebble as pb
-  from multiprocessing import Pool, TimeoutError
 
   pool = Pool(processes=opt.ncpu)
 
