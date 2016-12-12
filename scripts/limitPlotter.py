@@ -193,7 +193,27 @@ if __name__ == "__main__":
 
 
   if opt.x=='grid':
+
+    limDict = {}
+    for i in xrange(0,nPoints):
+      if opt.verb > 0:
+        print i, expMean[i], exp1SigLow[i], exp1SigHi[i], exp2SigLow[i], exp2SigHi[i]
+
+      limDict[str(i)] = {"expected": expMean[i], 
+                         "one_sigma": [exp1SigLow[i], exp1SigHi[i]],
+                         "two_sigma": [exp2SigLow[i], exp2SigHi[i]] }
+      if not opt.blind:
+        if opt.verb>0: 
+          print obs[i]
+        limDict[str(i)]['observed'] = obs[i]
     
+    if opt.verb > 0:
+      print limDict
+
+    import json
+    with open('limits_grid.json', 'w') as fp:
+      json.dump(limDict, fp, sort_keys=True, indent=4)
+  
     twoSigma.SetLineColor(kYellow)
     twoSigma.SetLineWidth(1)
     twoSigma.SetFillColor(kYellow)

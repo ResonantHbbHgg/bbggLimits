@@ -59,7 +59,7 @@ parser.add_argument("-v", dest="verb", type=int, default=0,
                     help="Verbosity level: 0 - Minimal or no messages; 1 - INFO; 2 - DEBUG; 3 - Go crazy")
 parser.add_argument('-j', '--ncpu',dest="ncpu", type=int, default=2,
                     help="Number of cores to run on.")
-parser.add_argument('-t', '--timeout',dest="timeout", type=int, default=800,
+parser.add_argument('-t', '--timeout',dest="timeout", type=int, default=None,
                     help="Per job timeout (in seconds) for multiprocessing. Jobs will be killed if run longer than this.")
 
 opt = parser.parse_args()
@@ -229,7 +229,7 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
 
 
   if opt.outDir:
-    baseFolder=outDir+"_v"+str(Params['other']["version"])
+    baseFolder="./"+opt.outDir+"_v"+str(Params['other']["version"])
   else:
     baseFolder="./bbggToolsResults_v"+str(Params['other']["version"])
 
@@ -311,7 +311,7 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
     if opt.verb>0: p4 = printTime(p3,start, procLog)
 
     if opt.verb>1:
-      TheFitter.PrintWorkspace();
+      theFitter.PrintWorkspace();
 
     fitresults = theFitter.BkgModelFit( doBands, addHiggs)
     procLog.info("\t BKG FITTED. Node=%r, GridPoint=%r, type=%r", NRnode,NRgridPoint,t)
@@ -423,7 +423,7 @@ if __name__ == "__main__":
   nodes = Params['signal']['nodes']
 
   if opt.outDir:
-    baseFolder=outDir+"_v"+str(Params['other']["version"])
+    baseFolder=opt.outDir+"_v"+str(Params['other']["version"])
   else:
     baseFolder="./bbggToolsResults_v"+str(Params['other']["version"])
 
