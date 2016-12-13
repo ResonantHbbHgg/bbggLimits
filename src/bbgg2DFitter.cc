@@ -137,6 +137,12 @@ void bbgg2DFitter::Initialize(RooWorkspace* workspace, Int_t SigMass, float Lumi
     std::cout.rdbuf(newCout.rdbuf());
   }
 
+  std::cout<<"\t Initialized the fitter"<<std::endl;
+  std::cout<<"SigMass: "<<SigMass
+	   <<"\n NR_MassRegion: "<<_NR_MassRegion
+	   <<"\n doNRW: "<< doNRW
+	   <<"\n wName:"<<_wName
+	   <<"\n "<<std::endl;
 }
 
 RooArgSet* bbgg2DFitter::defineVariables()

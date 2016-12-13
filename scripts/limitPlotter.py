@@ -22,6 +22,25 @@ parser.add_argument("-v", dest="verb", type=int, default=0,
 
 opt = parser.parse_args()
 
+import ParametersGrid as pg
+
+
+default_values = {
+  "lambda": 1,
+  "yt": 1,
+  "c2": 0,
+  "cg": 0,
+  "c2g": 0
+}
+
+def filterLambdaPoints(x):
+  fixed = ['yt', 'c2', 'cg', 'c2g']
+
+  for p in fixed:
+    if x[p] != default_values[p]:
+      return False
+  return True
+
 
 if opt.verb>0:
   print opt
@@ -36,7 +55,7 @@ def getValuesFromFile(fname):
     print "This file does not exist.. Just skip this point!"
     return None
 
-  if opt.verb>0: 
+  if opt.verb>0:
     f.Print()
 
   res = []
@@ -56,7 +75,10 @@ def getValuesFromFile(fname):
 
 if __name__ == "__main__":
   print "This is the __main__ part"
-  
+
+  lambdaPoints = pg.getPoints(filterLambdaPoints)
+  print 'Lambda points:\n', lambdaPoints
+
   #gROOT.ProcessLine(".L ./tdrstyle.C")
   gROOT.LoadMacro("./CMS_lumi.C")
   #setTDRStyle()
@@ -71,7 +93,7 @@ if __name__ == "__main__":
   exp1SigLow = []
   exp2SigHi  = []
   exp2SigLow = []
-  
+
   missedPoints = []
 
   if opt.combineOpt==0:
@@ -85,7 +107,7 @@ if __name__ == "__main__":
   else:
     print 'Sorry this option is not supported:', opt.combineOpt
     sys.exit(0)
-    
+
   if opt.x == 'res':
     print 'This option is not implemented yet:', opt.x
 
@@ -114,10 +136,14 @@ if __name__ == "__main__":
       xAxis.append(float(i))
       xErr.append(0.5)
 
-  elif opt.x=='grid':
+  elif opt.x in ['grid','lambda']:
     print 'Making limit plot for 0-1507 grid points'
-    
+
     for n in xrange(0,1506):
+
+      if opt.x=='lambda' and n not in lambdaPoints:
+        continue
+
       l = getValuesFromFile(opt.inDir+'/CombinedCard_gridPoint_'+str(n)+'/higgsCombine_gridPoint_'+str(n)+fTail)
       if opt.verb>0:
         print n,l
@@ -133,9 +159,13 @@ if __name__ == "__main__":
       if not opt.blind:
         obs.append(l[5])
 
+      if opt.x=='grid':
+        xAxis.append(float(n))
+      if opt.x=='lambda':
+        xAxis.append(float(pg.getParametersFromPoint(n,True)['lambda']))
 
-      xAxis.append(float(n))
       xErr.append(0.5)
+
 
 
   if len(xAxis) == 0:
@@ -171,8 +201,31 @@ if __name__ == "__main__":
   twoSigma = TGraphAsymmErrors(nPoints,xAxis_Array,exp_Array,xErr_Array,xErr_Array,exp2SigLowErr_Array,exp2SigHiErr_Array)
   observed = TGraphAsymmErrors(nPoints,xAxis_Array,obs_Array,zeros_Array,zeros_Array,zeros_Array,zeros_Array)
 
+  if opt.x=='grid':
+    # Make a JSON file
+    limDict = {}
+    for i in xrange(0,nPoints):
+      if opt.verb > 0:
+        print i, expMean[i], exp1SigLow[i], exp1SigHi[i], exp2SigLow[i], exp2SigHi[i]
 
-  if opt.x=='nodes':
+      limDict[str(i)] = {"expected": expMean[i],
+                         "one_sigma": [exp1SigLow[i], exp1SigHi[i]],
+                         "two_sigma": [exp2SigLow[i], exp2SigHi[i]] }
+      if not opt.blind:
+        if opt.verb>0:
+          print obs[i]
+        limDict[str(i)]['observed'] = obs[i]
+
+    if opt.verb > 0:
+      print limDict
+
+    import json
+    with open('limits_grid.json', 'w') as fp:
+      json.dump(limDict, fp, sort_keys=True, indent=4)
+
+
+
+  if opt.x in ['nodes','lambda']:
 
     twoSigma.SetLineWidth(8)
     twoSigma.SetLineColor(kYellow)
@@ -186,34 +239,17 @@ if __name__ == "__main__":
 
     mg.Add(twoSigma,'PZ')
     mg.Add(oneSigma, 'EPZ')
-    
+
     #mg.Add(observed)
 
     mg.Draw('APZ')
+    if opt.x == 'lambda':
+      mg.GetXaxis().SetTitle('Lambda')
+    if opt.x == 'nodes':
+      mg.GetXaxis().SetTitle('Node Number')
 
 
-  if opt.x=='grid':
-
-    limDict = {}
-    for i in xrange(0,nPoints):
-      if opt.verb > 0:
-        print i, expMean[i], exp1SigLow[i], exp1SigHi[i], exp2SigLow[i], exp2SigHi[i]
-
-      limDict[str(i)] = {"expected": expMean[i], 
-                         "one_sigma": [exp1SigLow[i], exp1SigHi[i]],
-                         "two_sigma": [exp2SigLow[i], exp2SigHi[i]] }
-      if not opt.blind:
-        if opt.verb>0: 
-          print obs[i]
-        limDict[str(i)]['observed'] = obs[i]
-    
-    if opt.verb > 0:
-      print limDict
-
-    import json
-    with open('limits_grid.json', 'w') as fp:
-      json.dump(limDict, fp, sort_keys=True, indent=4)
-  
+  if opt.x in ['grid']:
     twoSigma.SetLineColor(kYellow)
     twoSigma.SetLineWidth(1)
     twoSigma.SetFillColor(kYellow)
@@ -237,14 +273,16 @@ if __name__ == "__main__":
 
     mg.Draw('A')
 
+    mg.GetXaxis().SetTitle('Node Number')
 
   mg.SetMinimum(0)
 
-  mg.GetXaxis().SetTitle('Node Number')
   if opt.x=='nodes':
     mg.GetXaxis().SetLimits(-1, 14)
   if opt.x=='grid':
     mg.GetXaxis().SetLimits(-10, 1520)
+  if opt.x=='lambda':
+    mg.GetXaxis().SetLimits(-16, 16)
   mg.GetYaxis().SetTitle('#sigma(pp #rightarrow HH) #times B(HH #rightarrow bb#gamma#gamma)_{95% CL} (fb)')
   mg.SetMaximum(50)
 
@@ -273,4 +311,4 @@ if __name__ == "__main__":
 
   CMS_lumi(c1, 4, 11, "")
   for e in ['.png']:
-    c1.SaveAs(opt.inDir+'/limitPlot_'+opt.x+'_'+str(opt.combineOpt)+e)  
+    c1.SaveAs(opt.inDir+'/limitPlot_'+opt.x+'_'+str(opt.combineOpt)+e)
