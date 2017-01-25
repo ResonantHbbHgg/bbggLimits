@@ -201,13 +201,11 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
   doBands = Params['other']["doBands"]
   NCAT    = Params['other']["ncat"]
   doBrazilianFlag = Params['other']["doBrazilianFlag"]
-  Combinelxbatch = Params['other']['Combinelxbatch']
 
   if NCAT > 3:
     procLog.error("Error NCAT>3!")
     return __BAD__
 
-  drawSignalFit = Params['other']['drawSignalFit']
   doCombine       = Params['other']["runCombine"]
   useSigTheoryUnc = Params['other']["useSigTheoryUnc"]
   analysisType = Params['other']["analysisType"]
@@ -298,7 +296,7 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
     procLog.info("\t SIGNAL'S WORKSPACE DONE. Node=%r, GridPoint=%r, type=%r", NRnode,NRgridPoint,t)
     if opt.verb>0: p3 = printTime(p2,start,procLog)
 
-    if drawSignalFit: theFitter.MakePlots( mass)
+    theFitter.MakePlots( mass)
     procLog.info("\t SIGNAL'S PLOT DONE. Node=%r, GridPoint=%r, type=%r", NRnode,NRgridPoint,t)
     if opt.verb>0: p4 = printTime(p3,start,procLog)
 
@@ -363,7 +361,7 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
     # End of loop over Types
   ## <-- indent
 
-  # Here we merge datacars of all categories (in this case two)
+  # Here we shall merge datacars of all categories (in this case two)
   cardsToMerge = ''
   for t in signalTypes:
     cardsToMerge += baseFolder+'/'+t+Label+'/datacards/hhbbgg_13TeV_DataCard.txt '
@@ -387,7 +385,7 @@ def runFullChain(Params, NRnode=None, NRgridPoint=-1):
       # If combineOpt==4: run all of them at once
       if combineOpt!=4 and method!=combineOpt: continue
       try:
-        combStatus = runCombine(newDir, doBlinding, procLog, method, Combinelxbatch, Label=Label)
+        combStatus = runCombine(newDir, doBlinding, procLog, method, Label=Label)
       except:
         return __BAD__
       procLog.info("\t COMBINE with Option=%r is DONE. Node=%r, GridPoint=%r, type=%r \n \t Status = %r",
