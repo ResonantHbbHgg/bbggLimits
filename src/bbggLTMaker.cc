@@ -59,6 +59,9 @@ void bbggLTMaker::Loop()
   outTree->Branch("evt", &o_evt, "o_evt/l");
   outTree->Branch("run", &o_run, "o_run/i");
 
+  outTree->Branch("gen_mHH", &gen_mHH, "gen_mHH/D");
+  outTree->Branch("gen_cosTheta", &gen_cosTheta, "gen_cosTheta/D");
+
   if (doNonResWeights){
     //outTree->Branch("NRWeights", o_NRWeights, "o_NRWeights[1507]/F");
     for (UInt_t n=0; n<NRWTOT; n++)
