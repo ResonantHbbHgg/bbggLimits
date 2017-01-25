@@ -39,11 +39,11 @@ parser.add_argument('--doCatLowMass', dest="doCatLowMass", action="store_true", 
                     help="Low mass resonant categorization scheme")
 parser.add_argument('--doCatHighMass', dest="doCatHighMass", action="store_true", default=False,
                     help="High mass resonant categorization scheme")
-parser.add_argument('--btagTight', dest="btagTight", type=float, default=0.9,
+parser.add_argument('--btagTight', dest="btagTight", type=float, default=0.935,
                     help="Tight b-tagging WP")
 parser.add_argument('--btagMedium', dest="btagMedium", type=float, default=0.8,
                     help="Medium b-tagging WP")
-parser.add_argument('--btagLoose', dest="btagLoose", type=float, default=0.435,
+parser.add_argument('--btagLoose', dest="btagLoose", type=float, default=0.46,
                     help="Loose b-tagging WP")
 
 #corrections

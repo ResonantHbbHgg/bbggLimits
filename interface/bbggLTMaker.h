@@ -56,6 +56,8 @@ public :
    Double_t        o_ggMass;
    Double_t        o_bbggMass;
    Double_t        o_phoevWeight;
+   Double_t        o_ljet_bdis;
+   Double_t        o_sjet_bdis;
    Double_t        jet1PT;
    Double_t	   jet2PT;
    Double_t	   jet1ETA;
@@ -81,6 +83,7 @@ public :
    int bVariation;
    int phoVariation;
    int doNonResWeights;
+   int photonCRNormToSig;
    double tiltWindow;
    typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > LorentzVector;
 
@@ -108,6 +111,7 @@ public :
    LorentzVector    *diHiggsCandidate;
    LorentzVector    *diHiggsCandidate_KF;
    Float_t	    CosThetaStar;
+   Float_t	    CosThetaStar_CS;
    Int_t	isSignal;
    Int_t	isPhotonCR;
    Int_t	leadingJet_flavour;
@@ -157,6 +161,7 @@ public :
    TBranch	  *b_leadingJet_hadFlavour;
    TBranch	  *b_subleadingJet_hadFlavour;
    TBranch	  *b_CosThetaStar;
+   TBranch	  *b_CosThetaStar_CS;
 
    //Photon ID SF stuff
    TFile* photonidFile;
@@ -255,25 +260,27 @@ public :
 #ifdef bbggLTMaker_cxx
 bbggLTMaker::bbggLTMaker(TTree *tree) : fChain(0)
 {
-   mtotMax = 1200.;
-   mtotMin = 230.;
+   mtotMax = 12000.;
+   mtotMin = 200.;
    normalization = 1.;
    normalizationNR = 1.;
    photonCR = 0;
    doMX = 1;
    doKinFit = 0;
    outFileName = "LT_output.root";
-   btagWP = 0.8;
-   btagWP_low = 0.8;
-   btagWP_high = 0.8;
    doNoCat = 0;
-   doCatMixed = 0;
-   doSingleCat = 0;
+   doCatNonRes = 0;
+   doCatLowMass = 0;
+   doCatHighMass = 0;
+   btagWP_loose = 0.46;
+   btagWP_medium = 0.8;
+   btagWP_tight = 0.935;
+   cosThetaStarCutLow = -100;
+   cosThetaStarCutHigh = 100;
    bVariation = -999;
    phoVariation = -999;
-   cosThetaStarCut = 10;
-   cosThetaStarCutCats = 0;
    doNonResWeights = 0;
+   photonCRNormToSig = 0;
    Init(tree);
 }
 
@@ -333,6 +340,7 @@ void bbggLTMaker::Init(TTree *tree)
    subleadingPhotonID = 0;
    subleadingPhotonISO = 0;
    CosThetaStar = 0;
+   CosThetaStar_CS = 0;
    // Set branch addresses and branch pointers
    if (!tree) return;
    fChain = tree;
@@ -371,6 +379,7 @@ void bbggLTMaker::Init(TTree *tree)
    fChain->SetBranchAddress("leadingJet_hadFlavour", &leadingJet_hadFlavour, &b_leadingJet_hadFlavour);
    fChain->SetBranchAddress("subleadingJet_hadFlavour", &subleadingJet_hadFlavour, &b_subleadingJet_hadFlavour);
    fChain->SetBranchAddress("CosThetaStar", &CosThetaStar, &b_CosThetaStar);
+   fChain->SetBranchAddress("CosThetaStar_CS", &CosThetaStar_CS, &b_CosThetaStar_CS);
    Notify();
 }
 
