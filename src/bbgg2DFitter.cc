@@ -44,6 +44,7 @@ std::vector<float> bbgg2DFitter::EffectiveSigma(RooRealVar* mass, RooAbsPdf* bin
   outVec.push_back(width);
   outVec.push_back(low);
   outVec.push_back(high);
+  outVec.push_back(width/2.);
 
   return outVec;
 }
@@ -550,7 +551,7 @@ void bbgg2DFitter::MakePlots(float mass)
       mjjBkg[c]      = (RooAbsPdf*) _w->pdf(TString::Format("mjjBkg_cat%d",c));
 
       std::vector<float> effSigmaVecMgg = EffectiveSigma( _w->var("mgg"), mggSig[c], _minSigFitMgg, _maxSigFitMgg);
-      sigma_mgg.push_back(effSigmaVecMgg[0]);
+      sigma_mgg.push_back(effSigmaVecMgg[3]);
 
       double mgg_sigmaSTD = (mggSig[c]->sigma(*_w->var("mgg")))->getVal();
       sigma_mgg_std.push_back(mgg_sigmaSTD);
@@ -559,7 +560,7 @@ void bbgg2DFitter::MakePlots(float mass)
       sigma_mjj_std.push_back(mjj_sigmaSTD);
 
       std::vector<float> effSigmaVecMjj = EffectiveSigma( _w->var("mjj"), mjjSig[c], _minSigFitMjj, _maxSigFitMjj);
-      sigma_mjj.push_back(effSigmaVecMjj[0]);
+      sigma_mjj.push_back(effSigmaVecMjj[3]);
 
       double mgg_mean = (mggSig[c]->mean(*_w->var("mgg")))->getVal();
       mean_mgg.push_back(mgg_mean);

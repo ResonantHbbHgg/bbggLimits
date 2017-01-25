@@ -6,6 +6,7 @@
 	"signalModelCard" : "/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D_sig.rs"
     },
     "other" : {
+        "Combinelxbatch" : 1,
         "version" : 66,
 	"integratedLumi" : 2.7,
         "energy" : "13TeV",
@@ -15,6 +16,8 @@
         "doBands" : 1,
         "ncat" : 2,
         "analysisType" : "fitTo2D_resSearch_withRegKinFit",
+        "drawSignalFit" : 0,
+        "drawBackgroundFit" : 0,
         "useSigTheoryUnc" : 0,
 	"doBrazilianFlag" : false,
 	"runCombine" : true,
