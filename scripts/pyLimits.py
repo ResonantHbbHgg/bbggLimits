@@ -129,17 +129,17 @@ if __name__ == "__main__":
   createDir('/tmp/PIDs/',mainLog,True)
   createDir('/tmp/logs/',mainLog,True)
 
-  res_Nodes = []
-
+  res_Masses = []
   if opt.mass!=None:
-    mainLog.info('Running over masses:\n'+pformat(opt.nodes))
-    if 'all' in opt.nodes:
+    mainLog.info('Running over masses:\n'+pformat(opt.mass))
+    if 'all' in opt.mass:
       myNodes=['250','260','270','280','300','320','340','350','400','450','500','550','600','650','700', '750', '800', '900']
     else:
       myNodes = opt.mass
     for n in myNodes:
-      res_Nodes.append((n,pool.apply_async(runFullChain, args = (Params, n,))))
+      res_Masses.append((n,pool.apply_async(runFullChain, args = (opt, Params, n,))))
 
+  res_Nodes = []
   if opt.nodes!=None:
     mainLog.info('Running over nodes:\n'+pformat(opt.nodes))
     if 'all' in opt.nodes:
@@ -150,7 +150,7 @@ if __name__ == "__main__":
     for n in myNodes:
       #for n in ['2','SM']:
       # Run on multiple cores:
-      res_Nodes.append((n,pool.apply_async(runFullChain, args = (Params, n,))))
+      res_Nodes.append((n,pool.apply_async(runFullChain, args = (opt, Params, n,))))
 
       # Use signle core:
       #runFullChain(Params, NRnode=n)
@@ -161,7 +161,7 @@ if __name__ == "__main__":
 
     mainLog.debug('Running over 5D space points:\n'+pformat(opt.points))
     for p in listOfPoints:
-      res_Points.append((str(p), pool.apply_async(runFullChain, args = (Params, None,p,))))
+      res_Points.append((str(p), pool.apply_async(runFullChain, args = (opt, Params, None,p,))))
 
   pool.close()
 
@@ -177,16 +177,19 @@ if __name__ == "__main__":
 
   # Using a modified implementation of [1]:
 
+  print "Running over:", myNodes
+
   pCount=0
-  totJobs = len(res_Nodes)+len(res_Points)
+  totJobs = len(res_Nodes)+len(res_Points)+len(res_Masses)
 
   badJobs = []
-  for i, r in enumerate([res_Nodes, res_Points]):
+  for i, r in enumerate([res_Masses, res_Nodes, res_Points]):
     badJobs.append([])
 
     #mainLog.debug('Type of r: %r,  length of r: %r', i, len(r))
 
     while r:
+      print r
       sys.stdout.write("\r Progress: %.1f%%\n" % (float(pCount)*100/totJobs))
       sys.stdout.flush()
       pCount+=1
@@ -198,7 +201,7 @@ if __name__ == "__main__":
         mainLog.info('%d Job %s has been finished. Was waiting only for %f Seconds.' % (procRes, j, time.time()-procCheckT))
 
       except Exception as e:
-        mainLog.warning(str(e))
+        mainLog.warning("We have reached an exception related to %s" % (str(e)))
         mainLog.warning("%s is timed out! It's been %f sec that you're running, dear %s" % (j, time.time()-procCheckT, j))
         mainLog.warning("That is too long... Because of that we've gotta kill you. Sorry.")
 
