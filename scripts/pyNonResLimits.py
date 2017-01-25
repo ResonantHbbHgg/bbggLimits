@@ -120,7 +120,8 @@ def runCombine(inDir, doBlind, log, combineOpt = 1, Label = None):
 
 
   if combineOpt==1:
-    combineMethod = 'Asymptotic'
+    combineMethod = 'Asymptotic --X-rtd ADDNLL_CBNLL=0'
+    # combineMethod = 'Asymptotic'
   elif combineOpt==2:
     combineMethod = 'Asymptotic --X-rtd TMCSO_AdaptivePseudoAsimov=50'
   elif combineOpt==3:
