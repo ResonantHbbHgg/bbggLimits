@@ -65,18 +65,19 @@ public :
    double mtotMax;
    double normalization;
    double normalizationNR;
-   double btagWP;
-   double btagWP_low;
-   double btagWP_high;
-   double cosThetaStarCut;
-   int cosThetaStarCutCats;
+   double btagWP_loose;
+   double btagWP_medium;
+   double btagWP_tight;
+   double cosThetaStarCutLow;
+   double cosThetaStarCutHigh;
    int photonCR;
    int doKinFit;
    int doMX;
    int tilt;
    int doNoCat;
-   int doCatMixed;
-   int doSingleCat;
+   int doCatNonRes;
+   int doCatLowMass;
+   int doCatHighMass;
    int bVariation;
    int phoVariation;
    int doNonResWeights;
@@ -213,28 +214,38 @@ public :
    virtual void     Loop();
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
-   void SetMax( double max ){ mtotMax = max; }
-   void SetMin( double min ){ mtotMin = min; }
+
+//mx usage
+   void SetMax( double par ) { mtotMax = par; }
+   void SetMin( double par ) { mtotMin = par; }
+   void IsMX( int par ) { doMX = par; }
+   void IsKinFit( int par ) { doKinFit = par; }
+   void SetTilt( int par ) { tilt = par;}
+//normalization
    void SetNormalization(double norm, double norm2=1) { normalization = norm; normalizationNR = norm2;}
-   void IsPhotonCR( int pcr ) { photonCR = pcr; }
-   void IsMX( int mx ) { doMX = mx; }
-   void IsKinFit( int kf ) { doKinFit = kf; }
-   void SetOutFileName( std::string fname ) { outFileName = fname; }
-   void SetBTagWP( double wp ) { btagWP = wp; }
-   void SetBTagWP_High( double wp ) { btagWP_high= wp; }
-   void SetBTagWP_Low( double wp ) { btagWP_low = wp; }
+//categorization
    void DoNoCat( int cat ) { doNoCat = cat; }
-   void DoCatMixed( int cat ) { doCatMixed = cat; }
-   void DoSingleCat( int cat ) { doSingleCat = cat; }
-//   void SetTilt( int tt, double ttWind) { tilt = tt; tiltWindow = ttWind; }
-   void SetTilt( int tt) { tilt = tt;}
+   void DoCatNonRes( int cat ) { doCatNonRes = cat; }
+   void DoCatLowMass( int cat ) { doCatLowMass = cat; }
+   void DoCatHighMass( int cat ) { doCatHighMass = cat; }
+   void SetBTagWP_Tight( double par ) { btagWP_tight = par; }
+   void SetBTagWP_Medium( double par ) { btagWP_medium = par; }
+   void SetBTagWP_Loose( double par ) { btagWP_loose = par; }
+//corrections
    void DoBVariation( int tt) { bVariation = tt; }
+   void DoPhoVariation(int tt) { phoVariation = tt;}
+//other
+   void IsPhotonCR( int pcr ) { photonCR = pcr; }
+   void IsPhotonCRNormToSig( int pcr ) { photonCRNormToSig = pcr; }
+   void SetCosThetaStarLow(float cut) { cosThetaStarCutLow = cut; }
+   void SetCosThetaStarHigh(float cut) { cosThetaStarCutHigh = cut; }
+
+//setup
+   void SetOutFileName( std::string fname ) { outFileName = fname; }
    void BTagSetup(TString btagfile, TString effsfile);
    std::vector<std::pair<float,float>> BTagWeight(bbggLTMaker::LorentzVector jet1, int flavour1, bbggLTMaker::LorentzVector jet2, int flavour2, int variation=0);
    void SetupPhotonSF(TString idfile, TString evfile);
    float PhotonSF(LorentzVector pho, int phovar = 0);
-   void DoPhoVariation(int tt) { phoVariation = tt;}
-   void SetCosThetaStar(float cut, int cat) { cosThetaStarCut = cut; cosThetaStarCutCats = cat;}
    
    void DoNRWeights(int doNRW) { doNonResWeights = doNRW; }
 };

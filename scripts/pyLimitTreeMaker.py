@@ -3,63 +3,77 @@
 from ROOT import *
 import os,sys
 
-__author__ = 'Andrey Pozdnyakov'
+__author__ = 'Andrey Pozdnyakov & Rafael Teixeira de Lima'
 import argparse
 parser =  argparse.ArgumentParser(description='Limit Tree maker')
 inputs = parser.add_mutually_exclusive_group(required=True)
+#i/o
 inputs.add_argument('-f', '--inputFile', dest="fname", type=str, default=None,
                     help="Filename with Flat Tree")
 inputs.add_argument('-i', '--fList', dest="fList", type=str, default=None,
                     help="Text file containing the list of input ROOT files.")
-
 parser.add_argument('-o', '--outDir', dest="outDir", type=str, default=None,
                     required=True, help="Output directory (will be created).")
+#mx usage
 parser.add_argument('--min', dest="mtotMin", type=float, default=0,
                     help="Mtot minimum cut")
 parser.add_argument('--max', dest="mtotMax", type=float, default=10000,
                     help="Mtot maximum cut")
-parser.add_argument('-s', '--scale', dest="scale", type=float, default=1,
-                    help="Scale Factor")
-parser.add_argument('--NRscale', dest="NRscale", type=float, default=1,
-                    help="Scale Factor for NonRes weights")
-parser.add_argument('--photonCR', dest="photonCR", action="store_true", default=False,
-                    help="Do photon control region")
 parser.add_argument('--KF', dest="KF", action="store_true", default=False,
                     help="Use Mtot_KF to cut on mass window")
 parser.add_argument('--MX', dest="MX", action="store_true", default=False,
                     help="Use MX to cut on mass window")
 parser.add_argument('-t', '--tilt', dest="tilt", action="store_true", default=False,
                     help="Select tilted mass window")
+#normalization
+parser.add_argument('-s', '--scale', dest="scale", type=float, default=1,
+                    help="Normalization (lumi*xsec/totEvs), 1 for data")
+parser.add_argument('--NRscale', dest="NRscale", type=float, default=1,
+                    help="Scale Factor for NonRes weights")
+#categorization
 parser.add_argument('--doNoCat', dest="doNoCat", action="store_true", default=False,
                     help="Don't cut on categories")
-parser.add_argument('--btagWP', dest="btagWP", type=float, default=0.8,
-                    help="Set btagging working point for categories")
-parser.add_argument('--doCatMixed', dest="doCatMixed", action="store_true", default=False,
-                    help="Do categories with mixed btagging. Cat0: 2>low, Cat1: 1<low+1>high")
-parser.add_argument('--btagHigh', dest="btagHigh", type=float, default=0.8,
-                    help="for mixed cat, highest value")
-parser.add_argument('--btagLow', dest="btagLow", type=float, default=0.435,
-                    help="for mixed cat, lowest value")
-parser.add_argument('--singleCat', dest="singleCat", action="store_true", default=False,
-                    help="only one category")
+parser.add_argument('--doCatNonRes', dest="doCatNonRes", action="store_true", default=False,
+                    help="Non-resonant categorization scheme")
+parser.add_argument('--doCatLowMass', dest="doCatLowMass", action="store_true", default=False,
+                    help="Low mass resonant categorization scheme")
+parser.add_argument('--doCatHighMass', dest="doCatHighMass", action="store_true", default=False,
+                    help="High mass resonant categorization scheme")
+parser.add_argument('--btagTight', dest="btagTight", type=float, default=0.9,
+                    help="Tight b-tagging WP")
+parser.add_argument('--btagMedium', dest="btagMedium", type=float, default=0.8,
+                    help="Medium b-tagging WP")
+parser.add_argument('--btagLoose', dest="btagLoose", type=float, default=0.435,
+                    help="Loose b-tagging WP")
+
+#corrections
 parser.add_argument('--bVariation', dest="bVariation", type=int, default=-999,
                     help="Apply b-tagging SF factors: 1 or -1")
 parser.add_argument('--phoVariation', dest="phoVariation", type=int, default=-999,
                     help="Photon varioation (whatever that means)")
-parser.add_argument('--cosThetaStar', dest="cosThetaStar", type=float, default=100,
-                    help="Cut on cosThetaStar")
 
+#nonres weights
 parser.add_argument('--NRW', dest="NRW", action="store_true", default=False,
                     help="add non-resonant weights")
+
+#other
 parser.add_argument("-v", "--verbosity",  dest="verb", action="store_true", default=False,
                     help="Print out more stuff")
+parser.add_argument('--photonCR', dest="photonCR", action="store_true", default=False,
+                    help="Do photon control region")
+parser.add_argument('--photonCRNormToSig', dest="photonCRNormToSig", action="store_true", default=False,
+                    help="Do photon control region normalized to signal region")
+parser.add_argument('--cosThetaStarLow', dest="cosThetaStarLow", type=float, default=100,
+                    help="Lower Cut on cosThetaStar")
+parser.add_argument('--cosThetaStarHigh', dest="cosThetaStarHigh", type=float, default=100,
+                    help="Upper Cut on cosThetaStar")
+parser.add_argument('-H', '--Help', dest="HELP", action="store_true", default=False, help="Display help message")
 
 opt = parser.parse_args()
-#opt.func()
 
-#if opt.hhelp:
-#  parser.print_help()
-#  sys.exit(1)
+if opt.HELP:
+  parser.print_help()
+  sys.exit(1)
 
 if opt.KF and opt.MX:
   print "Sorry, you can't use both --KF and --MX options, choose only one"
@@ -97,25 +111,33 @@ def setAndLoop(fname, options, outFile):
     sys.exit(1)
 
   LTM = bbggLTMaker(tr)
- 
+
+#mx usage 
   LTM.SetMax( options.mtotMax )
   LTM.SetMin( options.mtotMin )
-  LTM.SetNormalization( options.scale, options.NRscale )
-  LTM.IsPhotonCR( options.photonCR )
   LTM.IsMX( options.MX )
   LTM.IsKinFit( options.KF )
   LTM.SetTilt( options.tilt )
+#normalization
+  LTM.SetNormalization( options.scale, options.NRscale )
+#categorization
   LTM.DoNoCat( options.doNoCat )
-  LTM.SetBTagWP( options.btagWP )
-  LTM.DoCatMixed( options.doCatMixed )
-  LTM.SetBTagWP_High( options.btagHigh )
-  LTM.SetBTagWP_Low( options.btagLow )
-  LTM.DoSingleCat( options.singleCat )
+  LTM.DoCatNonRes( options.doCatNonRes )
+  LTM.DoCatHighMass( options.doCatHighMass )
+  LTM.DoCatLowMass( options.doCatLowMass )
+  LTM.SetBTagWP_Tight( options.btagTight )
+  LTM.SetBTagWP_Medium( options.btagMedium )
+  LTM.SetBTagWP_Loose( options.btagLoose )
+#corrections
   LTM.DoBVariation( options.bVariation )
   LTM.DoPhoVariation( options.phoVariation )
   LTM.DoNRWeights( options.NRW )
+#other
+  LTM.IsPhotonCR( options.photonCR )
+  LTM.IsPhotonCRNormToSig( options.photonCRNormToSig )
+  LTM.SetCosThetaStarLow(options.cosThetaStarLow)
+  LTM.SetCosThetaStarHigh(options.cosThetaStarHigh)
 
-  LTM.SetCosThetaStar(options.cosThetaStar, 0 )
   LTM.SetOutFileName( outFile )
 
   LTM.Loop()

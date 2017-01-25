@@ -465,10 +465,11 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1):
 
     # Limits by type:
     if doSingleLimit or isRes:
-      if Combinelxbatch:
-        runCombineOnLXBatch(newFolder+"/datacards/", doBlinding, procLog, combineOpt, t+Label)
-      else:
-        runCombine(newFolder+"/datacards/", doBlinding, procLog, combineOpt, t+Label)
+      if doCombine:
+        if Combinelxbatch:
+          runCombineOnLXBatch(newFolder+"/datacards/", doBlinding, procLog, combineOpt, t+Label)
+        else:
+          runCombine(newFolder+"/datacards/", doBlinding, procLog, combineOpt, t+Label)
 
     
 
