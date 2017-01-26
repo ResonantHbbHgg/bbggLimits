@@ -274,6 +274,8 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1):
   twotag=Params['other']["twotag"]
   dataName = Params['data']['name']
   combineOpt = Params['other']['combineOption']
+  doBias = Params['other']['doBias']
+  biasConfig = Params['other']['biasConfig']
 
   massCuts = [Params['other']["minMggMassFit"], Params['other']["maxMggMassFit"],
               Params['other']["minMjjMassFit"], Params['other']["maxMjjMassFit"],
@@ -434,6 +436,11 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1):
     theFitter.MakeBkgWS( wsFileBkgName);
     procLog.info("\t BKG'S WORKSPACE DONE. Node=%r, GridPoint=%r, type=%r", point,NRgridPoint,t)
     if opt.verb>0: p6 = printTime(p5,start,procLog)
+
+    ##do fits for bias study, if needed
+    if doBias:
+      createDir(newFolder+'/bias',procLog)
+      theFitter.MakeFitsForBias(biasConfig, newFolder+'/bias/biasWorkspace.root')
 
     # This is making cards ala 8 TeV. We don't need this for now
     #theFitter.MakeDataCard( fileBaseName, wsFileBkgName, useSigTheoryUnc)
