@@ -2390,7 +2390,7 @@ void bbgg2DFitter::MakeFitsForBias(std::string biasConfig, std::string outputFil
       std::vector<bbggFittingTools::FitRes> bkgresults = bbggFittingTools::FitFunctions(wBias, functionsToFit, dataBias);
       for( unsigned int i = 0; i < vars.size(); i++){
           std::string sVar = ( (TObjString *) ( (TObjArray *) (TString(vars[i]).Tokenize("[")) )->At(0) )->String().Data();
-          bbggFittingTools::PlotCurves(plotTitle, wBias, functionsToPlot, legends, bkgresults, dataBias, sVar, nbins[i], plotsDir+"/BIASplot_bkg_"+sVar+ TString(plotTitle).ReplaceAll(" ", "_").Data(), 0, 1);
+          bbggFittingTools::PlotCurves(plotTitle, wBias, functionsToPlot, legends, bkgresults, dataBias, sVar, nbins[i], plotsDir+"/BIASplot_bkg_"+sVar+ TString(plotTitle).ReplaceAll(" ", "_").Data()+TString::Format("_cat%d",cat).Data(), 0, 1);
       }
 
       //Do bias study business: create multipdf, etc

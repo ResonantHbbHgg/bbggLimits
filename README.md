@@ -51,6 +51,13 @@ More options for the `pyLimitTreeMaker.py` can be specified:
 * `--doPhoVariation <VAR>`  - Apply photon SF factors: 0, 1 or -1.
 * `--cosThetaStar <VAR>`  - cut on CosTheta Star variable
 
+Example to make all resonant limit trees:   
+```
+makeAllTrees.py -x res \   
+-d /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/DataJan20/Hadd \   
+-s /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/SignalJan20/Hadd \   
+-f LT_Jan26_Res_
+```   
 
 ### Using C++ script to make Limit Trees (will be depricated soon):
 The script is located in *bin/LimitTreeMaker.C*

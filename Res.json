@@ -1,5 +1,5 @@
 {
-    "LTDIR" : "/src/HiggsAnalysis/bbggLimits/LowMassAnalysis2016_DEF2W50_280",
+    "LTDIR" : "/src/HiggsAnalysis/bbggLimits/LT_Jan26_Res_Radion",
     "signal" : {
         "types" : ["Radion"],
 	"signalModelCard" : "/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D_sig.rs"
@@ -20,7 +20,7 @@
         "drawBackgroundFit" : 0,
         "useSigTheoryUnc" : 0,
 	"doBrazilianFlag" : false,
-	"runCombine" : true,
+	"runCombine" : false,
 	"combineOption" : 1,
 	"minMggMassFit" : 100,
 	"maxMggMassFit" : 180,
@@ -38,11 +38,13 @@
 	"base":true,
 	"low":false,
 	"obs":false,
-	"twotag":false
+	"twotag":false,
+        "doBias":true,
+        "biasConfig": "BiasStudies/ForBias.json"
 	
     },
     "data" : {
-        "name" :"DoubleEG"
+        "name" :"DoubleEG_M-MASS"
     },
     "higgs" : {
 	"type" : ["ggh_m125_powheg_8TeV","tth_m125_8TeV"]

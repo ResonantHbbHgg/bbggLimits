@@ -414,9 +414,10 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1):
       # theFitter.AddHigData( mass,direc,1)
 
     ddata = str(LTDir + '/LT_'+dataName+'.root')
+    ddata = ddata.replace("MASS", str(point))
 
     theFitter.AddBkgData(ddata)
-    procLog.info("\t BKG ADDED. Node=%r, GridPoint=%r, type=%r", point,NRgridPoint,t)
+    procLog.info("\t BKG ADDED. Node=%r, GridPoint=%r, type=%r, data file=%s", point,NRgridPoint,t,ddata)
     if opt.verb>0: p4 = printTime(p3,start, procLog)
 
     if opt.verb>1:
@@ -440,7 +441,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1):
     ##do fits for bias study, if needed
     if doBias:
       createDir(newFolder+'/bias',procLog)
-      theFitter.MakeFitsForBias(biasConfig, newFolder+'/bias/biasWorkspace.root')
+      theFitter.MakeFitsForBias(str(os.getenv("CMSSW_BASE")+'/src/HiggsAnalysis/bbggLimits/'+biasConfig), str(newFolder+'/bias/biasWorkspace.root'))
 
     # This is making cards ala 8 TeV. We don't need this for now
     #theFitter.MakeDataCard( fileBaseName, wsFileBkgName, useSigTheoryUnc)

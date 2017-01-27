@@ -43,6 +43,7 @@ void bbggLTMaker::Loop()
   outFile = new TFile(outFileName.c_str(), "RECREATE");
   outTree = new TTree("TCVARS", "Limit tree for HH->bbgg analyses");
   outTree->Branch("cut_based_ct", &o_category, "o_category/I"); //0: 2btag, 1: 1btag
+  outTree->Branch("isSignal", &o_isSignal, "o_isSignal/I"); //0: 2btag, 1: 1btag
   outTree->Branch("evWeight", &o_weight, "o_weight/D");
   outTree->Branch("preWeight", &o_preweight, "o_preweight/D");
   outTree->Branch("btagevWeight", &o_btagweight, "o_btagweight/D");
@@ -127,10 +128,21 @@ void bbggLTMaker::Loop()
 
   Long64_t toRun = nentries;
   if (photonCRNormToSig) {
-    toRun = Long64_t(nentries*0.145);
+    std::cout << "Doing normalized photon control region!" << std::endl;
+    Long64_t nentries_isSignal = fChain->GetEntries("isSignal==0");
+    toRun = nentries_isSignal*0.14;
   }
 
-  for (Long64_t jentry=0; jentry<toRun;jentry++) {
+  Long64_t pcrCounter = 0;
+  for (Long64_t jentry=0; jentry<nentries;jentry++) {
+
+    if ( photonCRNormToSig ) {
+      if (isSignal == 0) {
+        pcrCounter++;
+      }
+      if (pcrCounter > toRun) break;
+    }
+
     o_weight = 0;
     o_preweight = 0;
     o_btagweight = 0;
@@ -141,6 +153,7 @@ void bbggLTMaker::Loop()
     o_phoevWeight = 1;
     o_ljet_bdis = 0;
     o_sjet_bdis = 0;
+    o_isSignal = -10;
 
       
     Long64_t ientry = LoadTree(jentry);
@@ -158,6 +171,7 @@ void bbggLTMaker::Loop()
     o_bbggMass = diHiggsCandidate->M();
     o_ljet_bdis = leadingJet_bDis;
     o_sjet_bdis = subleadingJet_bDis;
+    o_isSignal = isSignal;
 
     if(doKinFit)
       o_bbggMass = diHiggsCandidate_KF->M();
@@ -182,8 +196,13 @@ void bbggLTMaker::Loop()
       continue;
 
     bool isInterestingRegion = 1;
-    if(!isSignal && photonCR==0) isInterestingRegion = 0;
-    if(!isSignal && photonCRNormToSig==0) isInterestingRegion = 0;
+    if(isSignal){
+      if(photonCR==0 && photonCRNormToSig==0) isInterestingRegion = 1;
+      else if(photonCR==1 || photonCRNormToSig==1) isInterestingRegion = 0;
+    } else if (!isSignal){
+      if(photonCR==0 && photonCRNormToSig==0) isInterestingRegion = 0;
+      else if(photonCR==1 || photonCRNormToSig==1) isInterestingRegion = 1;
+    }
     if(!isInterestingRegion) continue;
 
     o_category = 2;

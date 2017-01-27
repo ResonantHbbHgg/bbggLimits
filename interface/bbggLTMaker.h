@@ -48,6 +48,7 @@ public :
    TH2F * NR_Wei_Hists[1507];
    
    Int_t           o_category;
+   Int_t           o_isSignal;
    Double_t        o_normalization;
    Double_t	   o_preweight;
    Double_t        o_btagweight;
