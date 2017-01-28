@@ -2386,11 +2386,20 @@ void bbgg2DFitter::MakeFitsForBias(std::string biasConfig, std::string outputFil
         std::cout << "Function added: " << thisFunction << std::endl;
         wBias->factory( thisFunction.Data() );
       }
-
+      //Fit all functions
       std::vector<bbggFittingTools::FitRes> bkgresults = bbggFittingTools::FitFunctions(wBias, functionsToFit, dataBias);
+      std::ofstream myFitResults(std::string(TString::Format("%s/bias/biasFitsResults_cat%d.txt", plotsDir.c_str(),cat).Data() ), std::ofstream::out);
+      myFitResults << std::string(TString::Format("#Tot events: %d\n",dataBias->numEntries()));
+      myFitResults << "#Name \t chi2 \t minNLL\n";
+      for(unsigned int i = 0; i < bkgresults.size(); i++){
+          myFitResults << std::string(TString::Format("%s\t%f\t%f\n", bkgresults[i].function.c_str(), bkgresults[i].chi2, bkgresults[i].minNLL)).c_str();
+      }
+      myFitResults.close();
+
+      //plot fitted functions
       for( unsigned int i = 0; i < vars.size(); i++){
           std::string sVar = ( (TObjString *) ( (TObjArray *) (TString(vars[i]).Tokenize("[")) )->At(0) )->String().Data();
-          bbggFittingTools::PlotCurves(plotTitle, wBias, functionsToPlot, legends, bkgresults, dataBias, sVar, nbins[i], plotsDir+"/BIASplot_bkg_"+sVar+ TString(plotTitle).ReplaceAll(" ", "_").Data()+TString::Format("_cat%d",cat).Data(), 0, 1);
+          bbggFittingTools::PlotCurves(plotTitle, wBias, functionsToPlot, legends, bkgresults, dataBias, sVar, nbins[i], plotsDir+"/bias/BIASplot_bkg_"+sVar+ TString(plotTitle).ReplaceAll(" ", "_").Data()+TString::Format("_cat%d",cat).Data(), 0, 1);
       }
 
       //Do bias study business: create multipdf, etc
@@ -2413,5 +2422,6 @@ void bbgg2DFitter::MakeFitsForBias(std::string biasConfig, std::string outputFil
       tFile->cd();
       bW->Write();
   }
+  tFile->Close();
 
 }

@@ -1,5 +1,5 @@
 {
-    "LTDIR" : "/src/HiggsAnalysis/bbggLimits/LT_Jan26_Res_Radion",
+    "LTDIR" : "/src/HiggsAnalysis/bbggLimits/LT_Jan26_ResRadion",
     "signal" : {
         "types" : ["Radion"],
 	"signalModelCard" : "/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D_sig.rs"
