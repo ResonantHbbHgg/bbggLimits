@@ -23,16 +23,15 @@ if 'nonres' in opt.x:
             [7, 50000], [8, 50000], [9, 49600], [10, 49800], [11, 50000], [12, 50000], [13, 50000] ]
   
 
+  dirPrefix = "LT-Jan30-APZ"
+
   # APZ trees:
-  Signals = "/afs/cern.ch/user/a/andrey/work/hh/CMSSW_8_0_8_patch1/src/APZ/fgg-ana/NotATestNov12/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph.root" 
+  #Signals = "/afs/cern.ch/user/a/andrey/work/hh/CMSSW_8_0_8_patch1/src/APZ/fgg-ana/NotATestNov12/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph.root" 
   # bbggTools trees:
-  #Signals = "/afs/cern.ch/user/a/andrey/work/hh/CMSSW_8_0_8_patch1/src/flashgg/bbggTools/test/RunJobs/NonResAll/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph_0.root" 
-  #Signals = "root://eoscms//eos/cms/store/user/rateixei/HHbbgg/FlatTrees/ICHEP_Regressed4b/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph.root"
-  #Signals = "root://eoscms//eos/cms/store/user/rateixei/HHbbgg/FlatTrees/ICHEP_Regressed4b/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph.root"
+  Signals = "root://eoscms//eos/cms/store/user/rateixei/HHbbgg/2016_FlatTrees/Moriond_Jan30_350Training/Signal/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph.root"
 
-  Data = "root://eoscms//eos/cms/store/user/rateixei/HHbbgg/FlatTrees/ICHEP_Regressed4b/DoubleEG.root"
+  Data = "root://eoscms//eos/cms/store/user/rateixei/HHbbgg/2016_FlatTrees/Moriond_Jan30_350Training/Data/DoubleEG.root"
 
-  dirPrefix = "LT-Jan25-APZ"
 
   postFix = " --MX --btagWP 0.8 "
   SFs = " --bVariation 0 --phoVariation 0"
@@ -47,11 +46,11 @@ if 'nonres' in opt.x:
   
   for MM in nodes:
     i = MM[0]
-    sigScale = 2.7/float(MM[1])
+    sigScale = 36.4/float(MM[1])
     print "DOING LowMassCat Signal, node ", i
 
     if opt.NRW:
-      NRW = ' --NRW --NRscale '+ str(2.7/float(N0))
+      NRW = ' --NRW --NRscale '+ str(36.4/float(N0))
     else:
       NRW = ''
     command = "pyLimitTreeMaker.py -f " + Signals.replace("THENODE", str(i)) + " -o " + directory+"_LowMass" + " --min 0 --max 350 --scale " + str(sigScale) + postFix + SFs + NRW
