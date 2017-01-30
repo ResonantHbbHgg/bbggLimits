@@ -35,6 +35,9 @@ void bbggLTMaker::Loop()
   o_phoevWeight = 1;
   o_normalization = normalization;
   o_HHTagger = -10;
+  o_ljet_bdis = -10;
+  o_sjet_bdis = -10;
+  o_isSignal = -10;
   //   btmap = 0;
 
   std::cout << "Output file name: " << outFileName << std::endl;
@@ -58,6 +61,9 @@ void bbggLTMaker::Loop()
   outTree->Branch("jet1ETA", &jet1ETA, "jet1ETA/D");
   outTree->Branch("jet2ETA", &jet2ETA, "jet2ETA/D");
   outTree->Branch("HHTagger", &o_HHTagger, "o_HHTagger/D");
+  outTree->Branch("ljet_bdis", &o_ljet_bdis, "o_ljet_bdis/D");
+  outTree->Branch("sjet_bdis", &o_sjet_bdis, "o_sjet_bdis/D");
+  outTree->Branch("isSignal", &o_isSignal, "o_isSignal/I");
 
   outTree->Branch("evt", &o_evt, "o_evt/l");
   outTree->Branch("run", &o_run, "o_run/i");
@@ -157,6 +163,8 @@ void bbggLTMaker::Loop()
     o_sjet_bdis = 0;
     o_isSignal = -10;
     o_HHTagger = -10;
+    o_ljet_bdis = -10;
+    o_sjet_bdis = -10;
 
       
     Long64_t ientry = LoadTree(jentry);

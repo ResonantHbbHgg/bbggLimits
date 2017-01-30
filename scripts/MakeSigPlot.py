@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from ROOT import *
-from HiggsAnalysis.bbggLimits.BkgPlotter import *
+from HiggsAnalysis.bbggLimits.SigPlotter import *
 import sys, getopt, os
 
 def main(argv):
@@ -14,8 +14,8 @@ def main(argv):
 	doBands = 1
 	analysis = ""
 	bins = []
-	xmax = {'mgg':150, 'mjj': 200}
-        xmin = {'mgg':115, 'mjj': 80}
+	xmax = {'mgg':140, 'mjj': 200}
+        xmin = {'mgg':118, 'mjj': 80}
 	try:
 		opts, args = getopt.getopt(argv,"w:c:o:l:a:b:",["workspace=", "cat=", "observable=","lumi=","analysis=","bins="])
 	except getopt.GetoptError:
@@ -62,7 +62,7 @@ def main(argv):
 		if 'mgg' in ob:
 			label = "M(#gamma#gamma) [GeV]"	
 
-		MakeBkgPlot(data, pdf, var, label, lumi, cat, analysis, doBands, "signal_fit_"+ob+"_cat"+str(CAT), bins[i], xmin[ob], xmax[ob], 1)
+		MakeSigPlot(data, pdf, var, label, lumi, cat, analysis, doBands, "signal_fit_"+ob+"_cat"+str(CAT), bins[i], xmin[ob], xmax[ob], 1)
 
 if __name__ == "__main__":
 	main(sys.argv[1:])
