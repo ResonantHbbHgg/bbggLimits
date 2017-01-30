@@ -34,6 +34,7 @@ void bbggLTMaker::Loop()
   o_category = -1;
   o_phoevWeight = 1;
   o_normalization = normalization;
+  o_HHTagger = -10;
   //   btmap = 0;
 
   std::cout << "Output file name: " << outFileName << std::endl;
@@ -56,6 +57,7 @@ void bbggLTMaker::Loop()
   outTree->Branch("jet2PT", &jet2PT, "jet2PT/D");
   outTree->Branch("jet1ETA", &jet1ETA, "jet1ETA/D");
   outTree->Branch("jet2ETA", &jet2ETA, "jet2ETA/D");
+  outTree->Branch("HHTagger", &o_HHTagger, "o_HHTagger/D");
 
   outTree->Branch("evt", &o_evt, "o_evt/l");
   outTree->Branch("run", &o_run, "o_run/i");
@@ -154,6 +156,7 @@ void bbggLTMaker::Loop()
     o_ljet_bdis = 0;
     o_sjet_bdis = 0;
     o_isSignal = -10;
+    o_HHTagger = -10;
 
       
     Long64_t ientry = LoadTree(jentry);
@@ -172,6 +175,7 @@ void bbggLTMaker::Loop()
     o_ljet_bdis = leadingJet_bDis;
     o_sjet_bdis = subleadingJet_bDis;
     o_isSignal = isSignal;
+    o_HHTagger = HHTagger;
 
     if(doKinFit)
       o_bbggMass = diHiggsCandidate_KF->M();
@@ -250,6 +254,18 @@ void bbggLTMaker::Loop()
        if (o_category == 2 && (leadingJet_bDis > btagWP_medium && leadingJet_bDis < btagWP_tight && subleadingJet_bDis < btagWP_tight)) o_category = 1;
        if (o_category == 2 && (subleadingJet_bDis > btagWP_medium && subleadingJet_bDis < btagWP_tight && leadingJet_bDis < btagWP_tight)) o_category = 1;
        if ( o_category == 2 ) o_category = -1;
+    } 
+    else if (doCatMVA)
+    {
+       if (o_bbggMass > 350) {
+         if(o_category == 2 && HHTagger > mvaCat0_hm) o_category = 0;
+         if(o_category == 2 && HHTagger > mvaCat1_hm && HHTagger < mvaCat0_hm) o_category = 1;
+         if(o_category == 2 && HHTagger < mvaCat1_hm) o_category = -1;
+       } else {
+         if(o_category == 2 && HHTagger > mvaCat0_lm) o_category = 0;
+         if(o_category == 2 && HHTagger > mvaCat1_lm && HHTagger < mvaCat0_lm) o_category = 1;
+         if(o_category == 2 && HHTagger < mvaCat1_lm) o_category = -1;
+       }
     }
 
     if ( o_category == 2 ) std::cout << "ERROR ERROR ERROR ERROR ERROR ERROR ERROR" << std::endl;

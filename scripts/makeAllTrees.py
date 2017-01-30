@@ -30,8 +30,14 @@ parser.add_argument("--doPhotonCR", dest="isPhotonCR", action="store_true", defa
                                        help="Use photon control region")
 parser.add_argument("--doPhotonCRSignalNorm", dest="isPhotonCRSignalNorm", action="store_true", default=False,
                                        help="Pick events from photon control region to match event yield of signal region")
+parser.add_argument("--ctsCut", dest="ctsCut", default=-10)
 parser.add_argument("--resMass", dest="resMass", default=-100, help="Do one specific mass")
-
+parser.add_argument('--doCatMVA', dest="doCatMVA", action="store_true", default=False,
+                    help="Do MVA categorization")
+parser.add_argument('--MVAHMC0', dest='MVAHMC0', type=float, default=0.982, help="MVAHMC0")
+parser.add_argument('--MVAHMC1', dest='MVAHMC1', type=float, default=0.875, help="MVAHMC1")
+parser.add_argument('--MVALMC0', dest='MVALMC0', type=float, default=0.982, help="MVALMC0")
+parser.add_argument('--MVALMC1', dest='MVALMC1', type=float, default=0.875, help="MVALMC1")
 
 opt = parser.parse_args()
 
@@ -66,9 +72,13 @@ if 'nonres' in opt.x:
   else:
     Data = opt.dataDir + DataFiles
 
-  dirPrefix = "LT-Jan25-APZ"
+  dirPrefix = opt.folder
 
-  postFix = " --MX --doCatNonRes --btagTight 0.935 --btagMedium 0.8 --btagLoose 0.46 "
+  massOpt = " --MX "
+  catscheme = " --doCatNonRes --btagTight 0.9535 --btagMedium 0.8484 --btagLoose 0.5426 "
+  if opt.doCatMVA:
+    catscheme = " --doCatMVA --MVAHMC0 " + str(opt.MVAHMC0) + " --MVAHMC1 " + str(opt.MVAHMC1) + " --MVALMC0 " + str(opt.MVALMC0)+ " --MVALMC1 " + str(opt.MVALMC1)+ " "
+  postFix = massOpt + catscheme + " --cosThetaStarHigh " + str(opt.ctsCut) + " "
   SFs = " --bVariation 0 --phoVariation 0"
 
   directory = dirPrefix
@@ -139,7 +149,7 @@ elif 'res' in opt.x:
   if opt.isHighMassRes:
     catScheme = " --doCatHighMass "
 
-  postFix = " --MX --tilt " + catScheme+ " --btagTight 0.935 --btagMedium 0.8 --btagLoose 0.46 " 
+  postFix = " --MX --tilt " + catScheme+ " --btagTight 0.9535 --btagMedium 0.8484 --btagLoose 0.5426 " 
   SFs = " --bVariation 0 --phoVariation 0"
 
   directory = dirPrefix + opt.resType

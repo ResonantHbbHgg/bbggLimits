@@ -59,6 +59,7 @@ public :
    Double_t        o_phoevWeight;
    Double_t        o_ljet_bdis;
    Double_t        o_sjet_bdis;
+   Double_t        o_HHTagger;
    Double_t        jet1PT;
    Double_t	   jet2PT;
    Double_t	   jet1ETA;
@@ -73,6 +74,10 @@ public :
    double btagWP_tight;
    double cosThetaStarCutLow;
    double cosThetaStarCutHigh;
+   double mvaCat0_lm;
+   double mvaCat1_lm;
+   double mvaCat0_hm;
+   double mvaCat1_hm;
    int photonCR;
    int doKinFit;
    int doMX;
@@ -81,6 +86,7 @@ public :
    int doCatNonRes;
    int doCatLowMass;
    int doCatHighMass;
+   int doCatMVA;
    int bVariation;
    int phoVariation;
    int doNonResWeights;
@@ -113,6 +119,7 @@ public :
    LorentzVector    *diHiggsCandidate_KF;
    Float_t	    CosThetaStar;
    Float_t	    CosThetaStar_CS;
+   Float_t          HHTagger;
    Int_t	isSignal;
    Int_t	isPhotonCR;
    Int_t	leadingJet_flavour;
@@ -163,6 +170,7 @@ public :
    TBranch	  *b_subleadingJet_hadFlavour;
    TBranch	  *b_CosThetaStar;
    TBranch	  *b_CosThetaStar_CS;
+   TBranch        *b_HHTagger;
 
    //Photon ID SF stuff
    TFile* photonidFile;
@@ -234,6 +242,7 @@ public :
    void DoCatNonRes( int cat ) { doCatNonRes = cat; }
    void DoCatLowMass( int cat ) { doCatLowMass = cat; }
    void DoCatHighMass( int cat ) { doCatHighMass = cat; }
+   void DoCatMVA( int cat , float cat0_lm, float cat1_lm, float cat0_hm, float cat1_hm) { doCatMVA = cat; mvaCat0_lm = cat0_lm; mvaCat1_lm = cat1_lm; mvaCat0_hm = cat0_hm; mvaCat1_hm = cat1_hm;}
    void SetBTagWP_Tight( double par ) { btagWP_tight = par; }
    void SetBTagWP_Medium( double par ) { btagWP_medium = par; }
    void SetBTagWP_Loose( double par ) { btagWP_loose = par; }
@@ -273,6 +282,11 @@ bbggLTMaker::bbggLTMaker(TTree *tree) : fChain(0)
    doCatNonRes = 0;
    doCatLowMass = 0;
    doCatHighMass = 0;
+   doCatMVA = 0;
+   mvaCat0_lm = -10;
+   mvaCat1_lm = -10;
+   mvaCat0_hm = -10;
+   mvaCat1_hm = -10;
    btagWP_loose = 0.46;
    btagWP_medium = 0.8;
    btagWP_tight = 0.935;
@@ -342,6 +356,7 @@ void bbggLTMaker::Init(TTree *tree)
    subleadingPhotonISO = 0;
    CosThetaStar = 0;
    CosThetaStar_CS = 0;
+   HHTagger = 0;
    // Set branch addresses and branch pointers
    if (!tree) return;
    fChain = tree;
@@ -381,6 +396,7 @@ void bbggLTMaker::Init(TTree *tree)
    fChain->SetBranchAddress("subleadingJet_hadFlavour", &subleadingJet_hadFlavour, &b_subleadingJet_hadFlavour);
    fChain->SetBranchAddress("CosThetaStar", &CosThetaStar, &b_CosThetaStar);
    fChain->SetBranchAddress("CosThetaStar_CS", &CosThetaStar_CS, &b_CosThetaStar_CS);
+   fChain->SetBranchAddress("HHTagger", &HHTagger, &b_HHTagger);
    Notify();
 }
 

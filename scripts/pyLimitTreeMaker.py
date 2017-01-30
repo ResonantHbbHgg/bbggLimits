@@ -39,12 +39,18 @@ parser.add_argument('--doCatLowMass', dest="doCatLowMass", action="store_true", 
                     help="Low mass resonant categorization scheme")
 parser.add_argument('--doCatHighMass', dest="doCatHighMass", action="store_true", default=False,
                     help="High mass resonant categorization scheme")
-parser.add_argument('--btagTight', dest="btagTight", type=float, default=0.935,
+parser.add_argument('--btagTight', dest="btagTight", type=float, default=0.9535,
                     help="Tight b-tagging WP")
-parser.add_argument('--btagMedium', dest="btagMedium", type=float, default=0.8,
+parser.add_argument('--btagMedium', dest="btagMedium", type=float, default=0.8484,
                     help="Medium b-tagging WP")
-parser.add_argument('--btagLoose', dest="btagLoose", type=float, default=0.46,
+parser.add_argument('--btagLoose', dest="btagLoose", type=float, default=0.5426,
                     help="Loose b-tagging WP")
+parser.add_argument('--doCatMVA', dest="doCatMVA", action="store_true", default=False,
+                    help="Do MVA categorization")
+parser.add_argument('--MVAHMC0', dest='MVAHMC0', type=float, default=0.95, help="MVAHMC0")
+parser.add_argument('--MVAHMC1', dest='MVAHMC1', type=float, default=0.80, help="MVAHMC1")
+parser.add_argument('--MVALMC0', dest='MVALMC0', type=float, default=0.95, help="MVALMC0")
+parser.add_argument('--MVALMC1', dest='MVALMC1', type=float, default=0.80, help="MVALMC1")
 
 #corrections
 parser.add_argument('--bVariation', dest="bVariation", type=int, default=-999,
@@ -128,6 +134,7 @@ def setAndLoop(fname, options, outFile):
   LTM.SetBTagWP_Tight( options.btagTight )
   LTM.SetBTagWP_Medium( options.btagMedium )
   LTM.SetBTagWP_Loose( options.btagLoose )
+  LTM.DoCatMVA( options.doCatMVA , options.MVALMC0, options.MVALMC1, options.MVAHMC0, options.MVAHMC1)
 #corrections
   LTM.DoBVariation( options.bVariation )
   LTM.DoPhoVariation( options.phoVariation )

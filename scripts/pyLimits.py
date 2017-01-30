@@ -65,6 +65,8 @@ parser.add_argument('-j', '--ncpu',dest="ncpu", type=int, default=2,
                     help="Number of cores to run on.")
 parser.add_argument('-t', '--timeout',dest="timeout", type=int, default=None,
                     help="Per job timeout (in seconds) for multiprocessing. Jobs will be killed if run longer than this.")
+parser.add_argument('--extraLabel', dest='extraLabel', default='',
+                    help='Extra label')
 
 opt = parser.parse_args()
 print opt
@@ -137,7 +139,7 @@ if __name__ == "__main__":
     else:
       myNodes = opt.mass
     for n in myNodes:
-      res_Masses.append((n,pool.apply_async(runFullChain, args = (opt, Params, n,))))
+      res_Masses.append((n,pool.apply_async(runFullChain, args = (opt, Params, n,-1,str(opt.extraLabel)))))
 
   res_Nodes = []
   if opt.nodes!=None:
@@ -150,7 +152,7 @@ if __name__ == "__main__":
     for n in myNodes:
       #for n in ['2','SM']:
       # Run on multiple cores:
-      res_Nodes.append((n,pool.apply_async(runFullChain, args = (opt, Params, n,))))
+      res_Nodes.append((n,pool.apply_async(runFullChain, args = (opt, Params, n,-1,str(opt.extraLabel)))))
 
       # Use signle core:
       #runFullChain(Params, NRnode=n)
@@ -161,7 +163,7 @@ if __name__ == "__main__":
 
     mainLog.debug('Running over 5D space points:\n'+pformat(opt.points))
     for p in listOfPoints:
-      res_Points.append((str(p), pool.apply_async(runFullChain, args = (opt, Params, None,p,))))
+      res_Points.append((str(p), pool.apply_async(runFullChain, args = (opt, Params, None,p,opt.extraLabel))))
 
   pool.close()
 

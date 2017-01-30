@@ -131,19 +131,19 @@ def runCombineOnLXBatch(inDir, doBlind, log, combineOpt=1, Label=None):
 
 cd CMSSWBASE/src/HiggsAnalysis/bbggLimits/
 eval `scramv1 runtime -sh`
-combine -M COMBINEMETHOD -m 125 LABEL BLINDED CARDNAME > RESFILE 
+combine -M COMBINEMETHOD -m 125 LABEL BLINDED --datacard CARDNAME > RESFILE 2>&1
 
 mv OUTFILE OUTDIR
 
 '''
 
+  outputFileStringTmp0 = outputFileStringTmp0.replace("BLINDED", blinded)
   outputFileStringTmp1 = outputFileStringTmp0.replace("CMSSWBASE", cmssw_base)
   outputFileStringTmp2 = outputFileStringTmp1.replace("CARDNAME", cardName)
   outputFileStringTmp4 = outputFileStringTmp2.replace("OUTDIR", inDir)
 
   if combineOpt < 3:
     outputFileStringTmp5 = outputFileStringTmp4.replace("LABEL", thisLabel)
-    outputFileStringTmp6 = outputFileStringTmp5.replace("BLINDED", blinded)
     outputFileStringTmp7 = outputFileStringTmp6.replace("COMBINEMETHOD", combineMethod)
     outputFileStringTmp8 = outputFileStringTmp7.replace("RESFILE", resFile)
     outCombineFileName = 'higgsCombine'+thisLabel.replace("-n ", "") +'.Asymptotic.mH125.root'
@@ -153,51 +153,57 @@ mv OUTFILE OUTDIR
     batchFile.write(outputFileStringTmp9)
     batchFile.close()
     os.system("chmod a+rwx " + batchFileName)
-    os.system("bsub -q 1nh < " + batchFileName)
+    os.system("bsub -q 8nh -o "+ resFile.replace(".log", "_batch.out") + " < " + batchFileName)
 
   if combineOpt == 3:
     #do expected bands
-    quantiles = [0.025,0.16,0.5,0.84,0.975]
+    quantiles = ["0.025","0.160","0.500","0.840","0.975"]
     qNames = ['m2s', 'm1s', 'central', 'p1s', 'p2s']
     for iqt,qt in enumerate(quantiles):
-      thisLabel += "_qt_"+str(qNames[iqt])
-      combineMethod += " --expectedFromGrid " + str(qt)
-      batchFileName.replace(".sh", "_qt_"+str(qNames[iqt])+".sh")
-      resFile.replace(".log", "_qt_"+str(qNames[iqt])+".log")
-      outputFileStringTmp5 = outputFileStringTmp4.replace("LABEL", thisLabel)
-      outputFileStringTmp6 = outputFileStringTmp5.replace("COMBINEMETHOD", combineMethod)
-      outputFileStringTmp7 = outputFileStringTmp6.replace("RESFILE", resFile)
-      outCombineFileName = 'higgsCombine'+thisLabel.replace("-n ", "")+'.HybridNew.mH125.root'
+      myLabel = thisLabel + "_qt_"+str(qNames[iqt])
+      if thisLabel == '':
+        myLabel = "-n " + "_qt_"+str(qNames[iqt])
+      myMethod = combineMethod + " --expectedFromGrid " + str(qt)
+      myName = batchFileName.replace(".sh", "_qt_"+str(qNames[iqt])+".sh")
+      myresFile = resFile.replace(".log", "_qt_"+str(qNames[iqt])+".log")
+      outputFileStringTmp5 = outputFileStringTmp4.replace("LABEL", myLabel)
+      outputFileStringTmp6 = outputFileStringTmp5.replace("COMBINEMETHOD", myMethod)
+      outputFileStringTmp7 = outputFileStringTmp6.replace("RESFILE", myresFile)
+      outCombineFileName = 'higgsCombine'+myLabel.replace("-n ", "")+".HybridNew.mH125.quant"+str(qt)+".root"
       outputFileStringTmp8 = outputFileStringTmp7.replace("OUTFILE", outCombineFileName)
 
-      batchFile = open(batchFileName, "w+")
+      batchFile = open(myName, "w+")
       batchFile.write(outputFileStringTmp8)
       batchFile.close()
-      os.system("chmod a+rwx " + batchFileName)
-      os.system("bsub -q 1nh < " + batchFileName)
+      os.system("chmod a+rwx " + myName)
+      os.system("bsub -q 8nh -o "+ myresFile.replace(".log", "_batch.out") + " < " + myName)
     #if not blinded, do observed
     if not doBlind:
-      batchFileName.replace(".sh", "_qt_observed.sh")
-      resFile.replace(".log", "_qt_observed.log")
-      thisLabel += "_observed"
-      outputFileStringTmp5 = outputFileStringTmp4.replace("LABEL", thisLabel)
+      myName = batchFileName.replace(".sh", "_qt_observed.sh")
+      myresFile = resFile.replace(".log", "_qt_observed.log")
+      myLabel = thisLabel + "_observed"
+      if thisLabel == '':
+        myLabel = "-n _observed"
+      outputFileStringTmp5 = outputFileStringTmp4.replace("LABEL", myLabel)
       outputFileStringTmp6 = outputFileStringTmp5.replace("COMBINEMETHOD", combineMethod)
-      outputFileStringTmp7 = outputFileStringTmp6.replace("RESFILE", resFile)
-      outCombineFileName = 'higgsCombine'+thisLabel.replace("-n ", "")+'.HybridNew.mH125.root'
+      outputFileStringTmp7 = outputFileStringTmp6.replace("RESFILE", myresFile)
+      outCombineFileName = 'higgsCombine'+myLabel.replace("-n ", "")+'.HybridNew.mH125.root'
       outputFileStringTmp8 = outputFileStringTmp7.replace("OUTFILE", outCombineFileName)
 
-      batchFile = open(batchFileName, "w+")
+      batchFile = open(myName, "w+")
       batchFile.write(outputFileStringTmp8)
       batchFile.close()
-      os.system("chmod a+rwx " + batchFileName)
-      os.system("bsub -q 1nh < " + batchFileName)
+      os.system("chmod a+rwx " + myName)
+      os.system("bsub -q 8nh -o "+ myresFile.replace(".log", "_batch.out") + " < " + myName)
       
 ######
 ######
-
-def runCombine(inDir, doBlind, log, combineOpt = 1, Label = None):
+def runCombine(inDir, doBlind, log, combineOpt = 1, Combinelxbatch = 0, Label = None):
   log.info('Running combine tool.  Dir: %s Blinded: %r', inDir, doBlind)
   log.debug('inDir should be the immediate directory where the card is located')
+  if Combinelxbatch:
+    runCombineOnLXBatch(inDir, doBlind, log, combineOpt, Label)
+    return 
 
   if doBlind and combineOpt!=3:
     # In HybridNew this option does not work
@@ -239,7 +245,7 @@ def runCombine(inDir, doBlind, log, combineOpt = 1, Label = None):
 ######
 
 
-def runFullChain(opt, Params, point=None, NRgridPoint=-1):
+def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
   #print 'Running: ', sys._getframe().f_code.co_name, " Node=",point
   # print sys._getframe().f_code
   PID = os.getpid()
@@ -302,6 +308,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1):
     return __BAD__
 
   sigCat = 0
+  isRes = 0
   if point==None:
     sigCat = -1
   elif point == 'SM':
@@ -314,6 +321,8 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1):
     Label.replace("Node", "Mass")
   else:
     sigCat = int(point)
+
+  Label +=  extraLabel
 
 
   if opt.outDir:
@@ -509,7 +518,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1):
         # If combineOpt==4: run all of them at once
         if combineOpt!=4 and method!=combineOpt: continue
         try:
-          combStatus = runCombine(newDir, doBlinding, procLog, method, Combinelxbatch, Label=Label)
+          combStatus = runCombine(newDir, doBlinding, procLog, method, Combinelxbatch, Label)
         except:
           return __BAD__
         procLog.info("\t COMBINE with Option=%r is DONE. Node=%r, GridPoint=%r, type=%r \n \t Status = %r",

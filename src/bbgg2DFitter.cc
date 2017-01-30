@@ -570,10 +570,12 @@ void bbgg2DFitter::MakePlots(float mass)
       std::vector<float> effSigmaVecMjj = EffectiveSigma( _w->var("mjj"), mjjSig[c], _minSigFitMjj, _maxSigFitMjj);
       sigma_mjj.push_back(effSigmaVecMjj[3]);
 
-      double mgg_mean = (mggSig[c]->mean(*_w->var("mgg")))->getVal();
+//      double mgg_mean = (mggSig[c]->mean(*_w->var("mgg")))->getVal();
+      double mgg_mean = ((RooRealVar*) _w->var(TString::Format("mgg_sig_m0_cat%d",c)))->getVal();//(mggSig[c]->getParameters(*_w->var("mgg")))->find(
       mean_mgg.push_back(mgg_mean);
 
-      double mjj_mean = (mjjSig[c]->mean(*_w->var("mjj")))->getVal();
+//      double mjj_mean = (mjjSig[c]->mean(*_w->var("mjj")))->getVal();
+      double mjj_mean = ((RooRealVar*) _w->var(TString::Format("mjj_sig_m0_cat%d",c)))->getVal();
       mean_mjj.push_back(mjj_mean);
 
     } // close categories
@@ -1113,6 +1115,8 @@ void bbgg2DFitter::MakeSigWS(std::string fileBaseName)
     {
       SigPdf[c] = (RooAbsPdf*) _w->pdf(TString::Format("SigPdf_cat%d",c));
       wAll->import(*_w->pdf(TString::Format("SigPdf_cat%d",c)));
+      wAll->import(*_w->data(TString::Format("Sig_cat%d",c)));
+      //IMPORTHERE
     }
   // (2) Systematics on energy scale and resolution
   // 1,1,1 statistical to be treated on the datacard
