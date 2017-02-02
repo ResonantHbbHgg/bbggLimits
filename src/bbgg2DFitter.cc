@@ -118,7 +118,7 @@ void bbgg2DFitter::Initialize(RooWorkspace* workspace, Int_t SigMass, float Lumi
   // Some defaults here are:
   // -2: do Resonant limits
   // -1: Non-resonant limits from Nodes
-  // 0-1507: Non-resonant limits with re-weighting
+  // 0-1506 && 1507-1518: Non-resonant limits with re-weighting
   if (_nonResWeightIndex>=0)
     _wName = Form("evWeight_NRW_%d",doNRW);
   else
@@ -713,7 +713,7 @@ void bbgg2DFitter::MakePlots(float mass)
 	  else if (_sigMass==1)	str_desc=TString::Format(" Nonresonant HH, Box Diagram Only");
 	  else str_desc=TString::Format(" Nonresonant HH, Node %d", _sigMass);
 	}
-	else if (_nonResWeightIndex<1507){
+	else if (_nonResWeightIndex<1519){
 	  // This is the points
 	  str_desc=TString::Format(" Nonresonant HH, Weight No.%d", _nonResWeightIndex);
 	}

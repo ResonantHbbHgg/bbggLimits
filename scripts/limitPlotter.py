@@ -15,14 +15,14 @@ parser.add_argument("-c", dest="combineOpt", type=int, default=1,
                     help="Pick which limits to plot. 1-Asymptotic; 2 - Asymptotic with adaptive asimov; 3 - HybridNew")
 parser.add_argument('-d', '--dir', dest="inDir", type=str, default=None, required=True,
                     help="Input directory")
-parser.add_argument('-x', choices=['res', 'nodes', 'grid', 'lambda'], required=True, default=None,
+parser.add_argument('-x', choices=['res', 'nodes', 'grid', 'lambda', 'bench'], required=True, default=None,
                     help = "Choose which Limit plot to make.")
 parser.add_argument("-v", dest="verb", type=int, default=0,
                     help="Verbosity level: 0 is minimal")
 
 opt = parser.parse_args()
 
-import ParametersGrid as pg
+import HiggsAnalysis.bbggLimits.ParametersGrid as pg
 
 
 default_values = {
@@ -136,14 +136,12 @@ if __name__ == "__main__":
       xAxis.append(float(i))
       xErr.append(0.5)
 
-  elif opt.x in ['grid','lambda']:
-    print 'Making limit plot for 0-1507 grid points'
 
-    for n in xrange(0,1506):
+  elif opt.x=='bench':
+    print 'Making limit plot for benchmarks'
 
-      if opt.x=='lambda' and n not in lambdaPoints:
-        continue
-
+    for i,n in enumerate(xrange(1507,1519)):
+      print i,n 
       l = getValuesFromFile(opt.inDir+'/CombinedCard_gridPoint_'+str(n)+'/higgsCombine_gridPoint_'+str(n)+fTail)
       if opt.verb>0:
         print n,l
@@ -159,10 +157,51 @@ if __name__ == "__main__":
       if not opt.blind:
         obs.append(l[5])
 
+      if opt.verb>0:
+        print n,l
+
+      xAxis.append(float(n-1506))
+      xErr.append(0.5)
+
+  elif opt.x in ['grid','lambda']:
+    print 'Making limit plot for 0-1507 grid points'
+
+    for n in xrange(0,1519):
+
+      if opt.x=='lambda' and n not in lambdaPoints:
+        continue
+
+      if n==324:
+        print " This is SM point. It does not exist in the weights."
+        print " Take it from the Nodes"
+        l = getValuesFromFile(opt.inDir+'/CombinedCard_Node_SM/higgsCombine_Node_SM'+fTail)
+        if l==None:
+          missedPoints.append(n)
+          continue
+      elif n in [910, 985, 990]:
+        continue
+      else:
+        l = getValuesFromFile(opt.inDir+'/CombinedCard_gridPoint_'+str(n)+'/higgsCombine_gridPoint_'+str(n)+fTail)
+        if l==None or len(l)<5:
+          missedPoints.append(n)
+          continue
+        
+      if opt.verb>0:
+        print n,l
+
+      exp2SigLow.append(l[0])
+      exp1SigLow.append(l[1])
+      expMean.append(l[2])
+      exp1SigHi.append(l[3])
+      exp2SigHi.append(l[4])
+      if not opt.blind:
+        obs.append(l[5])
+
       if opt.x=='grid':
         xAxis.append(float(n))
       if opt.x=='lambda':
         xAxis.append(float(pg.getParametersFromPoint(n,True)['lambda']))
+        # print n, float(pg.getParametersFromPoint(n,True)['lambda'])
 
       xErr.append(0.5)
 
@@ -202,30 +241,34 @@ if __name__ == "__main__":
   observed = TGraphAsymmErrors(nPoints,xAxis_Array,obs_Array,zeros_Array,zeros_Array,zeros_Array,zeros_Array)
 
   if opt.x=='grid':
-    # Make a JSON file
+    # Make a JSON file 
     limDict = {}
     for i in xrange(0,nPoints):
       if opt.verb > 0:
-        print i, expMean[i], exp1SigLow[i], exp1SigHi[i], exp2SigLow[i], exp2SigHi[i]
+        print i, xAxis[i], expMean[i], exp1SigLow[i], exp1SigHi[i], exp2SigLow[i], exp2SigHi[i]
 
-      limDict[str(i)] = {"expected": expMean[i],
-                         "one_sigma": [exp1SigLow[i], exp1SigHi[i]],
-                         "two_sigma": [exp2SigLow[i], exp2SigHi[i]] }
+      p = int(xAxis[i])
+      limDict[p] = {"expected": expMean[i],
+                                "one_sigma": [exp1SigLow[i], exp1SigHi[i]],
+                                "two_sigma": [exp2SigLow[i], exp2SigHi[i]] }
       if not opt.blind:
         if opt.verb>0:
           print obs[i]
-        limDict[str(i)]['observed'] = obs[i]
+          limDict[p]['observed'] = obs[i]
 
     if opt.verb > 0:
       print limDict
 
     import json
+    from json import encoder
+    encoder.FLOAT_REPR = lambda o: format(o, '.4f')
+
     with open('limits_grid.json', 'w') as fp:
       json.dump(limDict, fp, sort_keys=True, indent=4)
 
 
 
-  if opt.x in ['nodes','lambda']:
+  if opt.x in ['nodes','bench','lambda']:
 
     twoSigma.SetLineWidth(8)
     twoSigma.SetLineColor(kYellow)
@@ -247,6 +290,8 @@ if __name__ == "__main__":
       mg.GetXaxis().SetTitle('Lambda')
     if opt.x == 'nodes':
       mg.GetXaxis().SetTitle('Node Number')
+    if opt.x == 'bench':
+      mg.GetXaxis().SetTitle('Benchmark Number')
 
 
   if opt.x in ['grid']:
@@ -279,12 +324,15 @@ if __name__ == "__main__":
 
   if opt.x=='nodes':
     mg.GetXaxis().SetLimits(-1, 14)
+  if opt.x=='bench':
+    mg.GetXaxis().SetLimits(0, 13)
   if opt.x=='grid':
     mg.GetXaxis().SetLimits(-10, 1520)
   if opt.x=='lambda':
     mg.GetXaxis().SetLimits(-16, 16)
   mg.GetYaxis().SetTitle('#sigma(pp #rightarrow HH) #times B(HH #rightarrow bb#gamma#gamma)_{95% CL} (fb)')
-  mg.SetMaximum(50)
+
+  mg.SetMaximum(12)
 
   gPad.RedrawAxis()
 
@@ -295,7 +343,7 @@ if __name__ == "__main__":
   leg.SetFillStyle(0)
   leg.SetBorderSize(0)
 
-  if opt.x=='nodes':
+  if opt.x in ['nodes','bench','lambda']:
     leg.AddEntry(observed,"Observed", "p")
     leg.AddEntry(oneSigma,"Expected", "p")
     leg.AddEntry(oneSigma,"Expected #pm 1#sigma", "l")
