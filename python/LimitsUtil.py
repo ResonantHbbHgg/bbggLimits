@@ -150,7 +150,7 @@ mv OUTFILE OUTDIR
   if combineOpt < 3:
     print "im here11"
     outputFileStringTmp5 = outputFileStringTmp4.replace("LABEL", thisLabel)
-    outputFileStringTmp7 = outputFileStringTmp6.replace("COMBINEMETHOD", combineMethod)
+    outputFileStringTmp7 = outputFileStringTmp5.replace("COMBINEMETHOD", combineMethod)
     outputFileStringTmp8 = outputFileStringTmp7.replace("RESFILE", resFile)
     outCombineFileName = 'higgsCombine'+thisLabel.replace("-n ", "") +'.Asymptotic.mH125.root'
     outputFileStringTmp9 = outputFileStringTmp8.replace("OUTFILE", outCombineFileName)
@@ -501,7 +501,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
           runCombineOnLXBatch(newFolder+"/datacards/", doBlinding, procLog, combineOpt, t+Label)
         else:
           print "IM HERE7"
-          runCombine(newFolder+"/datacards/", doBlinding, procLog, combineOpt, t+Label)
+          runCombine(newFolder+"/datacards/", doBlinding, procLog, combineOpt, Combinelxbatch, t+Label)
 
     
 

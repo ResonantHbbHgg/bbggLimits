@@ -1,6 +1,138 @@
 from ROOT import *
 from math import sqrt
 
+def MakeBkgPlot(data, pdf, var, label, lumi, cat, analysis, doBands, fname, binning, Blinded):
+
+	gROOT.SetBatch(kTRUE)
+
+#	pdf.fitTo(data)
+
+	frame = var.frame(RooFit.Title(" "),RooFit.Bins(binning))
+
+	if Blinded:
+        	blindedRegions = {}
+	        blindedRegions['mgg'] = [100, 115, 135, 180]
+	        blindedRegions['mjj'] = [80, 80, 130, 200]
+		var.setRange("unblindReg_1",blindedRegions[var.GetName()][0],blindedRegions[var.GetName()][1])
+		var.setRange("unblindReg_2",blindedRegions[var.GetName()][2],blindedRegions[var.GetName()][3])
+		data.plotOn(frame,RooFit.DataError(RooAbsData.SumW2),RooFit.XErrorSize(0), RooFit.CutRange("unblindReg_1"))
+		data.plotOn(frame,RooFit.DataError(RooAbsData.SumW2),RooFit.XErrorSize(0), RooFit.CutRange("unblindReg_2"))
+		data.plotOn(frame,RooFit.DataError(RooAbsData.SumW2),RooFit.XErrorSize(0), RooFit.Invisible())
+	else:
+		data.plotOn(frame,RooFit.DataError(RooAbsData.SumW2),RooFit.XErrorSize(0))
+
+	pdf.plotOn(frame,RooFit.LineColor(kRed+1),RooFit.Precision(1E-10))
+
+	curve = frame.getObject( int(frame.numItems()-1) )
+	datah = frame.getObject( int(frame.numItems()-2) )
+	if Blinded:
+		datah_1 = frame.getObject( int(frame.numItems()-3) )
+		datah_2 = frame.getObject( int(frame.numItems()-4) )
+		datah_1.SetLineWidth(1)
+		datah_2.SetLineWidth(1)
+	datah.SetLineWidth(1)
+#	datah.SetMarkerStyle(20)
+
+#	sigmas = MakeBands(data, pdf, var, frame, curve)
+#	sigmas[0].SetFillColor(kBlue-5)
+#	sigmas[1].SetFillColor(kCyan)
+
+	Max = frame.GetMaximum()
+	c = TCanvas("c", "c", 800, 600)
+#	c.SetLogy()
+	frame.Draw()
+	xmax = frame.GetXaxis().GetXmax()
+	xmin = frame.GetXaxis().GetXmin()
+
+	deltabin = (xmax - xmin)/binning
+	sigmas = MakeBands(data, pdf, var, frame, curve, xmin, xmax, deltabin,0)
+	print xmax, xmin
+	sigmas[0].SetFillColor(kAzure-4)
+	sigmas[0].SetLineColor(kAzure-4)
+	sigmas[1].SetFillColor(kCyan)
+	sigmas[1].SetLineColor(kCyan)
+
+	sigmas[1].Draw("AE3")
+	sigmas[1].SetMaximum(Max*1.75)
+	sigmas[1].SetMinimum(0.00001)
+	sigmas[1].GetXaxis().SetTitle(label)
+	sigmas[1].GetXaxis().SetTitleSize(0.045)
+	sigmas[1].GetYaxis().SetTitleSize(0.045)
+	sigmas[1].GetXaxis().SetRangeUser(xmin*1.0001, xmax*0.9999)
+	sigmas[1].GetYaxis().SetTitle("Events/("+str(int(deltabin))+" GeV)")
+	if deltabin < 1:
+		sigmas[1].GetYaxis().SetTitle("Events/("+"%.01f"%deltabin+" GeV)")
+
+	c.Update()
+	sigmas[0].Draw("E3same")
+	frame.Draw("same")
+
+	if Blinded:
+		datah_1.Draw("EPsame")
+		datah_2.Draw("EPsame")
+	else:
+		datah.Draw("EPsame")
+
+	tlatex = TLatex()
+	tlatex.SetNDC()
+	tlatex.SetTextAngle(0)
+	tlatex.SetTextColor(kBlack)
+	tlatex.SetTextFont(63)
+	tlatex.SetTextAlign(11)
+	tlatex.SetTextSize(25)
+	tlatex.DrawLatex(0.11, 0.91, "CMS")
+	tlatex.SetTextFont(53)
+	tlatex.DrawLatex(0.18, 0.91, "Preliminary")
+	tlatex.SetTextFont(43)
+	tlatex.SetTextSize(20)
+	tlatex.SetTextAlign(31)
+	tlatex.DrawLatex(0.9, 0.91, "L = " + str(lumi) + " fb^{-1} (13 TeV)")
+	tlatex.SetTextAlign(11)
+	tlatex.SetTextSize(25)
+	Cat = "High Purity Category"
+	if int(cat) == 1:
+		Cat = "Medium Purity Category"
+	if int(cat) == -1:
+		Cat = "High Mass (Single Cat.)"
+	print cat, Cat
+	if "|" in analysis:
+		an = analysis.split("|")
+#		tlatex.SetTextFont(63)
+		tlatex.DrawLatex(0.14, 0.85, an[0])
+#		tlatex.SetTextFont(43)
+		tlatex.DrawLatex(0.14, 0.79, an[1])
+		tlatex.DrawLatex(0.14, 0.73, Cat)
+	else:
+#		tlatex.SetTextFont(63)
+		tlatex.DrawLatex(0.14, 0.85, analysis)
+#		tlatex.SetTextFont(43)
+		tlatex.DrawLatex(0.14, 0.79, Cat)
+
+	leg = TLegend(0.50, 0.60, 0.89, 0.9)
+
+	leg.SetFillStyle(0)
+	leg.SetLineWidth(0)
+	leg.SetBorderSize(0)
+
+	nBkgParams = pdf.getParameters(data).getSize()
+	print "Number of background parameters:", nBkgParams
+
+	bkgModel = "#splitline{Background model}{"
+	if nBkgParams == 2:
+		bkgModel += "(1st Order Bernstein Pol.)}"
+	if nBkgParams == 3:
+		bkgModel += "(2nd Order Bernstein Pol.)}"
+
+	leg.AddEntry(datah, "Data", "pe")
+	leg.AddEntry(curve, bkgModel, "l")
+	leg.AddEntry(sigmas[0], "Fit #pm 1#sigma", "f")
+	leg.AddEntry(sigmas[1], "Fit #pm 2#sigma", "f")
+	leg.Draw()
+
+	c.SaveAs(fname+"cat"+str(cat)+".pdf")
+	c.SaveAs(fname+"cat"+str(cat)+".png")
+
+'''
 def MakeBkgPlot(data, pdf, var, label, lumi, cat, analysis, doBands, fname, binning, Xmin = -1, Xmax = -1, isSig=0):
 
 	gROOT.SetBatch(kTRUE)
@@ -118,6 +250,7 @@ def MakeBkgPlot(data, pdf, var, label, lumi, cat, analysis, doBands, fname, binn
 
 	c.SaveAs(fname+".pdf")
 	c.SaveAs(fname+".png")
+'''
 
 def MakeBands(data, pdf, var, frame, curve, xmin, xmax, deltabin, isSig):
 

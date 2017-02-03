@@ -265,14 +265,15 @@ void bbggLTMaker::Loop()
     } 
     else if (doCatMVA)
     {
-       if (o_bbggMass > 350) {
-         if(o_category == 2 && HHTagger > mvaCat0_hm) o_category = 0;
-         if(o_category == 2 && HHTagger > mvaCat1_hm && HHTagger < mvaCat0_hm) o_category = 1;
-         if(o_category == 2 && HHTagger < mvaCat1_hm) o_category = -1;
+       if (o_bbggMass > massThreshold ) {
+         if(o_category == 2 && HHTagger_HM > mvaCat0_hm) o_category = 0;
+         if(o_category == 2 && HHTagger_HM > mvaCat1_hm && HHTagger_HM < mvaCat0_hm) o_category = 1;
+         if(o_category == 2 && HHTagger_HM < mvaCat1_hm) o_category = -1;
        } else {
-         if(o_category == 2 && HHTagger > mvaCat0_lm) o_category = 0;
-         if(o_category == 2 && HHTagger > mvaCat1_lm && HHTagger < mvaCat0_lm) o_category = 1;
-         if(o_category == 2 && HHTagger < mvaCat1_lm) o_category = -1;
+         if(leadingJet->Pt() < 50) o_category = -1;
+         if(o_category == 2 && HHTagger_LM > mvaCat0_lm) o_category = 0;
+         if(o_category == 2 && HHTagger_LM > mvaCat1_lm && HHTagger_LM < mvaCat0_lm) o_category = 1;
+         if(o_category == 2 && HHTagger_LM < mvaCat1_lm) o_category = -1;
        }
     }
 

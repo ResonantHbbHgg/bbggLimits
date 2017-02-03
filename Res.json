@@ -1,17 +1,17 @@
 {
-    "LTDIR" : "/src/HiggsAnalysis/bbggLimits/LT_Jan29_NewBTagWPRadion",
+    "LTDIR" : "/src/HiggsAnalysis/bbggLimits/LT_ResLMRegRadion",
     "signal" : {
         "types" : ["Radion"],
 	"signalModelCard" : "/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D_sig.rs"
     },
     "other" : {
-        "Combinelxbatch" : 0,
+        "Combinelxbatch" : 1,
         "version" : 66,
 	"integratedLumi" : 36.5,
         "energy" : "13TeV",
         "higgsMass" : 125.0,
         "addHiggs" : 0,
-        "doBlinding" : 1,
+        "doBlinding" : 0,
         "doBands" : 0,
         "ncat" : 2,
         "analysisType" : "fitTo2D_resSearch_withRegKinFit",
