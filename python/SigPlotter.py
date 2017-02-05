@@ -135,9 +135,9 @@ def MakeSigPlot(data, pdf, var, label, lumi, cat, analysis, doBands, fname, binn
 #		tlatex.SetTextFont(43)
 		tlatex.DrawLatex(xbegin, ybegin-0.06, Cat)
 
-	leg = TLegend(xbegin, ybegin-0.6, 0.935, ybegin-0.15)
+	leg = TLegend(xbegin, ybegin-0.55, 0.935, ybegin-0.15)
 	if '|' not in analysis:
-		leg =  TLegend(xbegin, ybegin-0.66, 0.935, ybegin-0.21)
+		leg =  TLegend(xbegin, ybegin-0.61, 0.935, ybegin-0.21)
 
 	leg.SetFillStyle(0)
 	leg.SetLineWidth(0)
@@ -154,8 +154,8 @@ def MakeSigPlot(data, pdf, var, label, lumi, cat, analysis, doBands, fname, binn
 	leg.AddEntry(cbs, "Crystal Ball component", "l")
 	meanName = str(var.GetName()) + "_sig_m0_cat"+str(cat)
 	thisMean = pdf.getParameters(data).getRealValue(meanName)
-	leg.AddEntry(sigmas[0], "#mu = "+ str("%.2f" % thisMean)+ " GeV", "f")
-	leg.AddEntry(sigmas[1], "#sigma_{Eff} = "+str("%.2f" % getEffSigma(var, pdf, Xmin, Xmax)) + " GeV", "f")
+	leg.AddEntry(sigmas[0], "#mu = "+ str("%.2f" % thisMean)+ " GeV", "l")
+	leg.AddEntry(sigmas[1], "#sigma_{Eff} = "+str("%.2f" % getEffSigma(var, pdf, Xmin, Xmax)) + " GeV", "l")
 	leg.Draw()
 
 	c.SaveAs(fname+".pdf")
