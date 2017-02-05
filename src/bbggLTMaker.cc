@@ -270,7 +270,7 @@ void bbggLTMaker::Loop()
          if(o_category == 2 && HHTagger_HM > mvaCat1_hm && HHTagger_HM < mvaCat0_hm) o_category = 1;
          if(o_category == 2 && HHTagger_HM < mvaCat1_hm) o_category = -1;
        } else {
-         if(leadingJet->Pt() < 50) o_category = -1;
+//         if(leadingJet->Pt() < 50) o_category = -1;
          if(o_category == 2 && HHTagger_LM > mvaCat0_lm) o_category = 0;
          if(o_category == 2 && HHTagger_LM > mvaCat1_lm && HHTagger_LM < mvaCat0_lm) o_category = 1;
          if(o_category == 2 && HHTagger_LM < mvaCat1_lm) o_category = -1;
