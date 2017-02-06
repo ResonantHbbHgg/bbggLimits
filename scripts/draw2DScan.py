@@ -27,6 +27,8 @@ import HiggsAnalysis.bbggLimits.ParametersGrid as pg
 # To Do: incorparate style file in here
 # import cp3_llbb.CommonTools.CMSStyle as CMSStyle
 
+#os.system('source setup_for_2Dlimits.sh')
+
 class EmptyHandle(object):
     """
     A dummy class representing a empty Handle in the legend
@@ -197,6 +199,8 @@ parser.add_argument('--yt', action='store', type=float, dest='yt', default=1, he
 parser.add_argument('--c2', action='store', type=float, dest='c2', default=0, help='default value for c2')
 parser.add_argument('--cg', action='store', type=float, dest='cg', default=0, help='default value for cg')
 parser.add_argument('--c2g', action='store', type=float, dest='c2g', default=0, help='default value for c2g')
+
+parser.add_argument('--pdf', action='store_true', dest='pdf', default=False, help='Make PDF images as well')
 
 options = parser.parse_args()
 
@@ -372,8 +376,8 @@ fig = plt.figure(1, figsize=(7, 7), dpi=80)
 # Create an axes instance
 ax = fig.add_subplot(111)
 
-ax.set_ylabel('$%s$' % parameter_legend[options.y], fontsize='large', y=0.85)
-ax.set_xlabel('$%s$' % parameter_legend[options.x], fontsize='large', x=0.85, labelpad=-2)
+ax.set_ylabel('$%s$' % parameter_legend[options.y], fontsize='x-large', y=0.85)
+ax.set_xlabel('$%s$' % parameter_legend[options.x], fontsize='x-large', x=0.85, labelpad=-2)
 ax.margins(0.1, 0.1)
 
 fig.tight_layout()
@@ -475,10 +479,10 @@ theory_text = ', '.join(parameters_formatted_text)
 
 #ax.text(0.080, 0.955, r"$pp \rightarrow hh \rightarrow b\bar{b}VV \rightarrow b\bar{b}l\nu l\bar{\nu}$", transform=ax.transAxes, ha='left', va='baseline')
 ax.text(0.00, 1.03, r"CMS", transform=ax.transAxes, ha='left', va='baseline', size='xx-large')
-ax.text(0.10, 1.03, r"$pp \rightarrow HH \rightarrow b\bar{b}\gamma\gamma$", 
-        transform=ax.transAxes, ha='left', va='baseline', size='large')
-ax.text(0.70, 1.03, theory_text, transform=ax.transAxes, ha='right', va='baseline')
-ax.text(1.00, 1.03, '36.5fb^{-1} (13 TeV)', transform=ax.transAxes, ha='right', va='baseline', size='large')
+ax.text(0.15, 1.03, r"$pp \rightarrow HH \rightarrow b\bar{b}\gamma\gamma$    "+theory_text, 
+        transform=ax.transAxes, ha='left', va='center')
+#ax.text(0.70, 1.03, theory_text, transform=ax.transAxes, ha='right', va='baseline')
+ax.text(1.00, 1.03, '$36.5\,fb^{-1}$ (13 TeV)', transform=ax.transAxes, ha='right', va='baseline', size='large')
 
 # Legend
 
@@ -534,8 +538,9 @@ if options.rescale_to_hh:
     plot_name += '_rescaled_to_hh'
 
 
-#fig.savefig(os.path.join(options.output, plot_name + '.pdf'))
-#print("Plot saved as %r") % os.path.join(options.output, plot_name + '.pdf')
 fig.savefig(os.path.join(options.output, plot_name + '.png'))
 print("Plot saved as %r") % os.path.join(options.output, plot_name + '.png')
+if options.pdf:
+  fig.savefig(os.path.join(options.output, plot_name + '.pdf'))
+  print("Plot saved as %r") % os.path.join(options.output, plot_name + '.pdf')
 

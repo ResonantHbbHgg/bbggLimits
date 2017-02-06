@@ -6,8 +6,8 @@
     },
     "other" : {
         "Combinelxbatch" : 1,
-        "version" : 66,
-	"integratedLumi" : 2.7,
+        "version" : 73,
+	"integratedLumi" : 36.5,
         "energy" : "13TeV",
         "higgsMass" : 125.0,
         "addHiggs" : 0,
