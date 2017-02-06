@@ -1,6 +1,42 @@
 # bbggLimits
 Package for computing limits for the Run II analyses
 
+## Working examples
+
+Make non-res shape benchmark points trees (MVA based with 400 Mhh threshold):
+```
+makeAllTrees.py -x nonres \   
+-d /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/Regression_Data/Hadd \   
+-s /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/Regression_Signal/Hadd/ \   
+-f LT_NonRes_MVABased400Reg_ \   
+--doCatMVA --MVAHMC0 0.960 --MVAHMC1 0.6 --MVALMC0 0.96 --MVALMC1 0.750 --massNR 400   
+```   
+   
+Make non-res shape benchmark points trees (cut based with 400 Mhh threshold and cut on cos theta star):   
+```
+makeAllTrees.py -x nonres \   
+-d /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/newData_HHTagger/Hadd \   
+-s /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/Signal_HHTagger400/Hadd/ \   
+-f LT_NonRes_CatBased400CTS_ --massNR 400 --ctsCut 0.8   
+```   
+   
+Make resonant limit trees with low mass categorization:   
+```
+makeAllTrees.py -x res \   
+-d /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/newData_HHTagger/Hadd \   
+-s /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/Signal_HHTagger400/Hadd/ \   
+-f LT_ResLMnW   
+```   
+   
+Make resonant limit trees with high mass categorization:   
+```
+makeAllTrees.py -x res \   
+-d /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/newData_HHTagger/Hadd \   
+-s /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/Signal_HHTagger400/Hadd/ \   
+-f LT_ResHM --highMassRes     
+```    
+
+
 ### Instalation
 First, setup the environment with the Higgs Combine tools: https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideHiggsAnalysisCombinedLimit#For_end_users_that_don_t_need_to   
 Currently working with 74X (check latest on HiggsCombine twiki).   

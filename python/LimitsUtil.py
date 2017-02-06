@@ -94,6 +94,7 @@ def printTime(t1, t2, log):
 def runCombineOnLXBatch(inDir, doBlind, log, combineOpt=1, Label=None):
   log.info('Running combine tool.  Dir: %s Blinded: %r', inDir, doBlind)
   log.debug('inDir should be the immediate directory where the card is located')
+  print "im here8"
 
   if doBlind and combineOpt!=3:
     # In HybridNew this option does not work
@@ -110,6 +111,8 @@ def runCombineOnLXBatch(inDir, doBlind, log, combineOpt=1, Label=None):
   else:
     log.error('This option is not supported: %r', combineOpt)
     return __BAD__
+
+  print "im here9"
 
   cardName = inDir+"/hhbbgg_13TeV_DataCard.txt"
   resFile  = inDir+"/result_"+str(combineOpt)
@@ -137,25 +140,29 @@ mv OUTFILE OUTDIR
 
 '''
 
+  print "im here10"
+
   outputFileStringTmp0 = outputFileStringTmp0.replace("BLINDED", blinded)
   outputFileStringTmp1 = outputFileStringTmp0.replace("CMSSWBASE", cmssw_base)
   outputFileStringTmp2 = outputFileStringTmp1.replace("CARDNAME", cardName)
   outputFileStringTmp4 = outputFileStringTmp2.replace("OUTDIR", inDir)
 
   if combineOpt < 3:
+    print "im here11"
     outputFileStringTmp5 = outputFileStringTmp4.replace("LABEL", thisLabel)
-    outputFileStringTmp7 = outputFileStringTmp6.replace("COMBINEMETHOD", combineMethod)
+    outputFileStringTmp7 = outputFileStringTmp5.replace("COMBINEMETHOD", combineMethod)
     outputFileStringTmp8 = outputFileStringTmp7.replace("RESFILE", resFile)
     outCombineFileName = 'higgsCombine'+thisLabel.replace("-n ", "") +'.Asymptotic.mH125.root'
     outputFileStringTmp9 = outputFileStringTmp8.replace("OUTFILE", outCombineFileName)
-
+    print "im here 19"
     batchFile = open(batchFileName, "w+")
     batchFile.write(outputFileStringTmp9)
     batchFile.close()
     os.system("chmod a+rwx " + batchFileName)
-    os.system("bsub -q 8nh -o "+ resFile.replace(".log", "_batch.out") + " < " + batchFileName)
+    os.system("bsub -q 1nd -o "+ resFile.replace(".log", "_batch.out") + " < " + batchFileName)
 
   if combineOpt == 3:
+    print "im here12"
     #do expected bands
     quantiles = ["0.025","0.160","0.500","0.840","0.975"]
     qNames = ['m2s', 'm1s', 'central', 'p1s', 'p2s']
@@ -171,14 +178,15 @@ mv OUTFILE OUTDIR
       outputFileStringTmp7 = outputFileStringTmp6.replace("RESFILE", myresFile)
       outCombineFileName = 'higgsCombine'+myLabel.replace("-n ", "")+".HybridNew.mH125.quant"+str(qt)+".root"
       outputFileStringTmp8 = outputFileStringTmp7.replace("OUTFILE", outCombineFileName)
-
+      print "im here13"
       batchFile = open(myName, "w+")
       batchFile.write(outputFileStringTmp8)
       batchFile.close()
       os.system("chmod a+rwx " + myName)
-      os.system("bsub -q 8nh -o "+ myresFile.replace(".log", "_batch.out") + " < " + myName)
+      os.system("bsub -q 1nd -o "+ myresFile.replace(".log", "_batch.out") + " < " + myName)
     #if not blinded, do observed
     if not doBlind:
+      print "im here14"
       myName = batchFileName.replace(".sh", "_qt_observed.sh")
       myresFile = resFile.replace(".log", "_qt_observed.log")
       myLabel = thisLabel + "_observed"
@@ -189,12 +197,12 @@ mv OUTFILE OUTDIR
       outputFileStringTmp7 = outputFileStringTmp6.replace("RESFILE", myresFile)
       outCombineFileName = 'higgsCombine'+myLabel.replace("-n ", "")+'.HybridNew.mH125.root'
       outputFileStringTmp8 = outputFileStringTmp7.replace("OUTFILE", outCombineFileName)
-
+      print "im here 15"
       batchFile = open(myName, "w+")
       batchFile.write(outputFileStringTmp8)
       batchFile.close()
       os.system("chmod a+rwx " + myName)
-      os.system("bsub -q 8nh -o "+ myresFile.replace(".log", "_batch.out") + " < " + myName)
+      os.system("bsub -q 1nd -o "+ myresFile.replace(".log", "_batch.out") + " < " + myName)
       
 ######
 ######
@@ -455,6 +463,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     # This is making cards ala 8 TeV. We don't need this for now
     #theFitter.MakeDataCard( fileBaseName, wsFileBkgName, useSigTheoryUnc)
     #print "\t 8TeV DATACARD DONE"
+    print "IM HERE"
 
     sigExp = []
     bkgObs = []
@@ -475,18 +484,24 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
         sigExpStr += ","
         bkgObsStr += ","
 
+    print "IM HERE2"
     # Make datacards:
     DataCardMaker(str(newFolder), NCAT, sigExpStr, bkgObsStr, isRes)
     procLog.info("\t DATACARD DONE. Node/Mass=%r, GridPoint=%r, type=%r", point,NRgridPoint,t)
     if opt.verb>0: p7 = printTime(p6,start,procLog)
 
+    print "IM HERE3"
     # Limits by type:
     if doSingleLimit or isRes:
+      print "IM HERE4"
       if doCombine:
+        print "IM HERE5"
         if Combinelxbatch:
+          print "IM HERE6"
           runCombineOnLXBatch(newFolder+"/datacards/", doBlinding, procLog, combineOpt, t+Label)
         else:
-          runCombine(newFolder+"/datacards/", doBlinding, procLog, combineOpt, t+Label)
+          print "IM HERE7"
+          runCombine(newFolder+"/datacards/", doBlinding, procLog, combineOpt, Combinelxbatch, t+Label)
 
     
 

@@ -13,11 +13,13 @@ def main(argv):
 	lumi = ""
 	doBands = 1
 	analysis = ""
+	Blinded = 0
+	myLabel = ""
 	bins = []
 	try:
-		opts, args = getopt.getopt(argv,"w:c:o:l:a:b:",["workspace=", "cat=", "observable=","lumi=","analysis=","bins="])
+		opts, args = getopt.getopt(argv,"w:c:o:l:a:b:BL:",["workspace=", "cat=", "observable=","lumi=","analysis=","bins=", "Blind", "Label"])
 	except getopt.GetoptError:
-		print 'MakeBkgPlot.py -w <workspace file> -c <cat> -o <obs1,obs2,obs3> -l <lumi> -a <analysis title> -b <binobs1,binobs2>'
+		print 'MakeBkgPlot.py -w <workspace file> -c <cat> -o <obs1,obs2,obs3> -l <lumi> -a <analysis title> -b <binobs1,binobs2> -B (blinded)'
 		sys.exit(2)
 	for opt, arg in opts:
 		if opt == "-w":
@@ -36,6 +38,10 @@ def main(argv):
 			lumi = arg
 		if opt == "-a":
 			analysis = arg
+		if opt == "-B":
+			Blinded = 1
+		if opt == "-L":
+			myLabel = arg
 	if wfile == "" or cat == -1 or obs == "" or lumi == "" or analysis == "":
 		print 'MakeBkgPlot.py -w <workspace file> -c <cat> -o <observable> -l <lumi> -a <analysis title>'
 		sys.exit(2)
@@ -43,6 +49,10 @@ def main(argv):
 
 	wroot = TFile(wfile, "READ")
 	workspace = wroot.Get("w_all")
+
+	blindedRegions = {}
+	blindedRegions['mgg'] = [120, 130]
+	blindedRegions['mjj'] = [80, 130]
 
 	CAT = cat
 	print CAT
@@ -58,9 +68,9 @@ def main(argv):
 
 		label = "M(jj) [GeV]"
 		if 'mgg' in ob:
-			label = "M(#gamma#gamma) [GeV]"	
+			label = "M(#gamma#gamma) [GeV]"
 
-		MakeBkgPlot(data, pdf, var, label, lumi, cat, analysis, doBands, "background_fit_"+ob, bins[i])
+		MakeBkgPlot(data, pdf, var, label, lumi, cat, analysis, doBands, myLabel+"background_fit_"+ob, bins[i], Blinded)
 
 if __name__ == "__main__":
 	main(sys.argv[1:])

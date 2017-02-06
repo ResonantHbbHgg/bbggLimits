@@ -16,7 +16,7 @@ parser.add_argument("-d", "--dataDir", dest="dataDir", default=None,
                                        help="Input data directory location")
 parser.add_argument("-s", "--signalDir", dest="signalDir", default=None,
                                        help="Input signal directory location")
-parser.add_argument("--massNR", dest="massNR", default="350",
+parser.add_argument("--massNR", dest="massNR", default="400",
                                        help="Non resonant M(4body) mass categorization threshold")
 parser.add_argument("-l", "--lumi", dest="lumi", default=36.5,
                                        help="Integrated lumi to scale signal")
@@ -69,7 +69,7 @@ if 'nonres' in opt.x:
 
   dirPrefix = opt.folder
 
-  massOpt = " --MX "
+  massOpt = " --MX --massThreshold " + str(opt.massNR) + " "
   catscheme = " --doCatNonRes --btagTight 0.9535 --btagMedium 0.8484 --btagLoose 0.5426 "
   if opt.doCatMVA:
     catscheme = " --doCatMVA --MVAHMC0 " + str(opt.MVAHMC0) + " --MVAHMC1 " + str(opt.MVAHMC1) + " --MVALMC0 " + str(opt.MVALMC0)+ " --MVALMC1 " + str(opt.MVALMC1)+ " "
@@ -147,8 +147,10 @@ elif 'res' in opt.x:
   catScheme = " --doCatLowMass "
   if opt.isHighMassRes:
     catScheme = " --doCatHighMass "
+  if opt.doCatMVA:
+    catScheme = " --doCatMVA --MVAHMC0 " + str(opt.MVAHMC0) + " --MVAHMC1 " + str(opt.MVAHMC1) + " --MVALMC0 " + str(opt.MVALMC0)+ " --MVALMC1 " + str(opt.MVALMC1)+ " "
 
-  postFix = " --MX --tilt " + catScheme+ " --btagTight 0.9535 --btagMedium 0.8484 --btagLoose 0.5426 " 
+  postFix = " --MX --tilt " + catScheme+ " --btagTight 0.9535 --btagMedium 0.8484 --btagLoose 0.5426 --massThreshold " + str(opt.massNR) + " "
   SFs = " --bVariation 0 --phoVariation 0"
 
   directory = dirPrefix + opt.resType

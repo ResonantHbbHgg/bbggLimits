@@ -95,6 +95,7 @@ public :
    int doNonResWeights;
    int photonCRNormToSig;
    double tiltWindow;
+   double massThreshold;
    typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > LorentzVector;
 
    // Declaration of leaf types
@@ -123,6 +124,8 @@ public :
    Float_t	    CosThetaStar;
    Float_t	    CosThetaStar_CS;
    Float_t          HHTagger;
+   Float_t          HHTagger_HM;
+   Float_t          HHTagger_LM;
    Int_t	isSignal;
    Int_t	isPhotonCR;
    Int_t	leadingJet_flavour;
@@ -174,6 +177,8 @@ public :
    TBranch	  *b_CosThetaStar;
    TBranch	  *b_CosThetaStar_CS;
    TBranch        *b_HHTagger;
+   TBranch        *b_HHTagger_LM;
+   TBranch        *b_HHTagger_HM;
 
    //Photon ID SF stuff
    TFile* photonidFile;
@@ -264,6 +269,7 @@ public :
    std::vector<std::pair<float,float>> BTagWeight(bbggLTMaker::LorentzVector jet1, int flavour1, bbggLTMaker::LorentzVector jet2, int flavour2, int variation=0);
    void SetupPhotonSF(TString idfile, TString evfile);
    float PhotonSF(LorentzVector pho, int phovar = 0);
+   void SetMassThreshold(float par){ massThreshold = par;}
    
    void DoNRWeights(int doNRW) { doNonResWeights = doNRW; }
 };
@@ -299,6 +305,7 @@ bbggLTMaker::bbggLTMaker(TTree *tree) : fChain(0)
    phoVariation = -999;
    doNonResWeights = 0;
    photonCRNormToSig = 0;
+   massThreshold = 350;
    Init(tree);
 }
 
@@ -360,6 +367,8 @@ void bbggLTMaker::Init(TTree *tree)
    CosThetaStar = 0;
    CosThetaStar_CS = 0;
    HHTagger = 0;
+   HHTagger_LM = 0;
+   HHTagger_HM = 0;
    // Set branch addresses and branch pointers
    if (!tree) return;
    fChain = tree;
@@ -400,6 +409,8 @@ void bbggLTMaker::Init(TTree *tree)
    fChain->SetBranchAddress("CosThetaStar", &CosThetaStar, &b_CosThetaStar);
    fChain->SetBranchAddress("CosThetaStar_CS", &CosThetaStar_CS, &b_CosThetaStar_CS);
    fChain->SetBranchAddress("HHTagger", &HHTagger, &b_HHTagger);
+   fChain->SetBranchAddress("HHTagger_LM", &HHTagger_LM, &b_HHTagger_LM);
+   fChain->SetBranchAddress("HHTagger_HM", &HHTagger_HM, &b_HHTagger_HM);
    Notify();
 }
 

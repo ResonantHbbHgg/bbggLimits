@@ -1,12 +1,12 @@
 {
-    "LTDIR" : "/src/HiggsAnalysis/bbggLimits/LT_ResLMRegRadion",
+    "LTDIR" : "/src/HiggsAnalysis/bbggLimits/work/LT_NonRes_CatBased400CTS__TYPE",
     "signal" : {
-        "types" : ["Radion"],
+        "types" : ["HighMass", "LowMass"],
 	"signalModelCard" : "/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D_sig.rs"
     },
     "other" : {
         "Combinelxbatch" : 1,
-        "version" : 73,
+        "version" : 66,
 	"integratedLumi" : 36.5,
         "energy" : "13TeV",
         "higgsMass" : 125.0,
@@ -44,7 +44,7 @@
 	
     },
     "data" : {
-        "name" :"DoubleEG_M-MASS"
+        "name" :"DoubleEG"
     },
     "higgs" : {
 	"type" : ["ggh_m125_powheg_8TeV","tth_m125_8TeV"]

@@ -34,6 +34,9 @@ void bbggLTMaker::Loop()
   o_phoevWeight = 1;
   o_normalization = normalization;
   o_HHTagger = -10;
+  o_ljet_bdis = -10;
+  o_sjet_bdis = -10;
+  o_isSignal = -10;
   //   btmap = 0;
 
   std::cout << "Output file name: " << outFileName << std::endl;
@@ -57,6 +60,9 @@ void bbggLTMaker::Loop()
   outTree->Branch("jet1ETA", &jet1ETA, "jet1ETA/D");
   outTree->Branch("jet2ETA", &jet2ETA, "jet2ETA/D");
   outTree->Branch("HHTagger", &o_HHTagger, "o_HHTagger/D");
+  outTree->Branch("ljet_bdis", &o_ljet_bdis, "o_ljet_bdis/D");
+  outTree->Branch("sjet_bdis", &o_sjet_bdis, "o_sjet_bdis/D");
+  outTree->Branch("isSignal", &o_isSignal, "o_isSignal/I");
 
   outTree->Branch("evt", &o_evt, "o_evt/l");
   outTree->Branch("run", &o_run, "o_run/i");
@@ -171,6 +177,8 @@ void bbggLTMaker::Loop()
     o_sjet_bdis = 0;
     o_isSignal = -10;
     o_HHTagger = -10;
+    o_ljet_bdis = -10;
+    o_sjet_bdis = -10;
 
       
     Long64_t ientry = LoadTree(jentry);
@@ -271,14 +279,15 @@ void bbggLTMaker::Loop()
     } 
     else if (doCatMVA)
     {
-       if (o_bbggMass > 350) {
-         if(o_category == 2 && HHTagger > mvaCat0_hm) o_category = 0;
-         if(o_category == 2 && HHTagger > mvaCat1_hm && HHTagger < mvaCat0_hm) o_category = 1;
-         if(o_category == 2 && HHTagger < mvaCat1_hm) o_category = -1;
+       if (o_bbggMass > massThreshold ) {
+         if(o_category == 2 && HHTagger_HM > mvaCat0_hm) o_category = 0;
+         if(o_category == 2 && HHTagger_HM > mvaCat1_hm && HHTagger_HM < mvaCat0_hm) o_category = 1;
+         if(o_category == 2 && HHTagger_HM < mvaCat1_hm) o_category = -1;
        } else {
-         if(o_category == 2 && HHTagger > mvaCat0_lm) o_category = 0;
-         if(o_category == 2 && HHTagger > mvaCat1_lm && HHTagger < mvaCat0_lm) o_category = 1;
-         if(o_category == 2 && HHTagger < mvaCat1_lm) o_category = -1;
+//         if(leadingJet->Pt() < 50) o_category = -1;
+         if(o_category == 2 && HHTagger_LM > mvaCat0_lm) o_category = 0;
+         if(o_category == 2 && HHTagger_LM > mvaCat1_lm && HHTagger_LM < mvaCat0_lm) o_category = 1;
+         if(o_category == 2 && HHTagger_LM < mvaCat1_lm) o_category = -1;
        }
     }
 
