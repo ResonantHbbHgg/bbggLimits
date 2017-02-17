@@ -23,8 +23,9 @@ parser.add_argument("-v", dest="verb", type=int, default=0,
 opt = parser.parse_args()
 
 import HiggsAnalysis.bbggLimits.ParametersGrid as pg
+import HiggsAnalysis.bbggLimits.TdrStyle as tdr
 
-
+br = 0.26 / 100.
 default_values = {
   "lambda": 1,
   "yt": 1,
@@ -79,10 +80,11 @@ if __name__ == "__main__":
   lambdaPoints = pg.getPoints(filterLambdaPoints)
   print 'Lambda points:\n', lambdaPoints
 
-  #gROOT.ProcessLine(".L ./tdrstyle.C")
   gROOT.LoadMacro("./CMS_lumi.C")
-  #setTDRStyle()
-  #gROOT.ForceStyle()
+  tdr.setTDRStyle()
+  tdrStyle.SetTitleSize(0.054, "Y")
+  tdrStyle.SetTitleYOffset(1.1)
+
   TH1.SetDefaultSumw2(kTRUE)
 
   xAxis = []
@@ -93,6 +95,7 @@ if __name__ == "__main__":
   exp1SigLow = []
   exp2SigHi  = []
   exp2SigLow = []
+  theo = []
 
   missedPoints = []
 
@@ -203,6 +206,9 @@ if __name__ == "__main__":
         xAxis.append(float(pg.getParametersFromPoint(n,True)['lambda']))
         # print n, float(pg.getParametersFromPoint(n,True)['lambda'])
 
+
+      theo.append(pg.getCrossSectionForPoint(n)[0]*br)
+
       xErr.append(0.5)
 
 
@@ -218,6 +224,7 @@ if __name__ == "__main__":
   xAxis_Array = np.array(xAxis)
   xErr_Array  = zeros_Array
 
+  theo_Array = np.array(theo)
   if opt.x=='grid':
     xErr_Array = np.array(xErr)
 
@@ -240,6 +247,8 @@ if __name__ == "__main__":
   twoSigma = TGraphAsymmErrors(nPoints,xAxis_Array,exp_Array,xErr_Array,xErr_Array,exp2SigLowErr_Array,exp2SigHiErr_Array)
   observed = TGraphAsymmErrors(nPoints,xAxis_Array,obs_Array,zeros_Array,zeros_Array,zeros_Array,zeros_Array)
 
+  theory = TGraphAsymmErrors(nPoints,xAxis_Array,theo_Array,zeros_Array,zeros_Array,zeros_Array,zeros_Array)
+
   if opt.x=='grid':
     # Make a JSON file 
     limDict = {}
@@ -249,8 +258,8 @@ if __name__ == "__main__":
 
       p = int(xAxis[i])
       limDict[p] = {"expected": expMean[i],
-                                "one_sigma": [exp1SigLow[i], exp1SigHi[i]],
-                                "two_sigma": [exp2SigLow[i], exp2SigHi[i]] }
+                    "one_sigma": [exp1SigLow[i], exp1SigHi[i]],
+                    "two_sigma": [exp2SigLow[i], exp2SigHi[i]] }
       if not opt.blind:
         if opt.verb>0:
           print obs[i]
@@ -283,11 +292,18 @@ if __name__ == "__main__":
     mg.Add(twoSigma,'PZ')
     mg.Add(oneSigma, 'EPZ')
 
-    #mg.Add(observed)
+    if not opt.blind:
+      mg.Add(observed)
 
+    if opt.x == 'lambda':
+      theory.SetMarkerStyle(22)
+      theory.SetMarkerSize(1.2)
+      theory.SetMarkerColor(kRed+2)
+      mg.Add(theory,'P')
+      
     mg.Draw('APZ')
     if opt.x == 'lambda':
-      mg.GetXaxis().SetTitle('Lambda')
+      mg.GetXaxis().SetTitle('#kappa_{#lambda}')
     if opt.x == 'nodes':
       mg.GetXaxis().SetTitle('Node Number')
     if opt.x == 'bench':
@@ -313,6 +329,8 @@ if __name__ == "__main__":
     mg.Add(oneSigma)
     mg.Add(expected,'L')
 
+    mg.Add(theory,'L')
+
     if not opt.blind:
       mg.Add(observed,'L')
 
@@ -337,7 +355,7 @@ if __name__ == "__main__":
   gPad.RedrawAxis()
 
 
-  leg = TLegend(0.60,0.66,0.85,0.89)
+  leg = TLegend(0.60,0.68,0.85,0.91)
   leg.SetTextFont(42)
   leg.SetTextSize(0.04)
   leg.SetFillStyle(0)
@@ -348,6 +366,8 @@ if __name__ == "__main__":
     leg.AddEntry(oneSigma,"Expected", "p")
     leg.AddEntry(oneSigma,"Expected #pm 1#sigma", "l")
     leg.AddEntry(twoSigma,"Expected #pm 2#sigma", "l")
+    if opt.x=='lambda':
+      leg.AddEntry(theory,"Theory", "p")
   if opt.x=='grid':
     leg.AddEntry(observed,"Observed", "p")
     leg.AddEntry(expected,"Expected", "l")

@@ -2307,6 +2307,10 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs)
 
 void bbgg2DFitter::MakeFitsForBias(std::string biasConfig, std::string outputFile)
 {
+  std::cout<<"\n ** Doing fits for Bias study** \n\n"
+	   <<"biasConfig="<<biasConfig
+	   <<"outputFile="<<outputFile<<std::endl;
+
   //Parameters
   std::string plotsDir=_folder_name;
   std::vector<std::string> vars;
@@ -2427,5 +2431,7 @@ void bbgg2DFitter::MakeFitsForBias(std::string biasConfig, std::string outputFil
       bW->Write();
   }
   tFile->Close();
+
+  std::cout<<"\n \t* Finished with Bias study fits *\n"<<endl;
 
 }

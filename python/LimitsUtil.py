@@ -70,11 +70,11 @@ def createDir(myDir, log=None, over=True):
     if over:
       # Overwrite it...
       if log!=None:
-        log.warning("But we will continue anyway (I will --overwrite it!)")
+        log.warning("But we will continue anyway. * This will overwrite some files inside this directory! *")
     else:
       if log!=None:
         log.error(' And so I exit this place...')
-      print 'The directory exist and we exit. Dir = ', myDir
+      print 'The directory exists and we exit. Dir = ', myDir
       sys.exit(1)
   else:
     try: os.makedirs(myDir)
@@ -456,9 +456,14 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     if opt.verb>0: p6 = printTime(p5,start,procLog)
 
     ##do fits for bias study, if needed
+
+    procLog.info("\t Making Fits and WS for Bias Study? * %r *  Node=%r, GridPoint=%r, type=%r", doBias, point,NRgridPoint,t)
     if doBias:
       createDir(newFolder+'/bias',procLog)
       theFitter.MakeFitsForBias(str(os.getenv("CMSSW_BASE")+'/src/HiggsAnalysis/bbggLimits/'+biasConfig), str(newFolder+'/bias/biasWorkspace.root'))
+      
+    procLog.info("\t BIAS FITS DONE. Node=%r, GridPoint=%r, type=%r", point,NRgridPoint,t)
+    if opt.verb>0: p7 = printTime(p6,start,procLog)
 
     # This is making cards ala 8 TeV. We don't need this for now
     #theFitter.MakeDataCard( fileBaseName, wsFileBkgName, useSigTheoryUnc)
@@ -488,7 +493,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     # Make datacards:
     DataCardMaker(str(newFolder), NCAT, sigExpStr, bkgObsStr, isRes)
     procLog.info("\t DATACARD DONE. Node/Mass=%r, GridPoint=%r, type=%r", point,NRgridPoint,t)
-    if opt.verb>0: p7 = printTime(p6,start,procLog)
+    if opt.verb>0: p8 = printTime(p7,start,procLog)
 
     print "IM HERE3"
     # Limits by type:
@@ -543,7 +548,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
           # return __BAD__
 
 
-  if opt.verb>0: p8 = printTime(p7,start,procLog)
+  if opt.verb>0: p9 = printTime(p8,start,procLog)
   os.remove(pidfile)
     # procLog.handlers = []
   procLog.info('This process has ended. Label=%r', Label)
