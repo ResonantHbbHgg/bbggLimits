@@ -287,7 +287,7 @@ mjj[80,200];
 
 mjj_sig_m0_cat0[110.0, 99, 140];
 mjj_sig_sigma_cat0[10.0, 1.0, 60.0];
-mjj_sig_alpha_cat0[0.5, 0.0001, 5.0]; 
+mjj_sig_alpha_cat0[1.0, 0.0001, 5.0]; 
 mjj_sig_n_cat0[15.0, 1.0, 20.0]; 
 mjj_sig_gsigma_cat0[60.0, 40.0, 150.0];
 mjj_sig_frac_cat0[0.3, 0.01, 0.5];
@@ -298,7 +298,7 @@ mjjSig_cat0      = AddPdf(mjjGaussSig_cat0, mjjCBSig_cat0, mjj_sig_frac_cat0);
 
 mjj_sig_m0_cat1[110.0, 99, 140];
 mjj_sig_sigma_cat1[10.0, 1.0, 60.0];
-mjj_sig_alpha_cat1[0.3, 0.001, 5.0]; 
+mjj_sig_alpha_cat1[10.0, 0.001, 5.0]; 
 mjj_sig_n_cat1[15.0, 1.0, 20]; 
 mjj_sig_gsigma_cat1[60.0, 40.0, 150.0];
 mjj_sig_frac_cat1[0.3, 0.01, 0.5];

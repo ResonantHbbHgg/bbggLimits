@@ -1,6 +1,14 @@
 #define bbgg2DFitter_cxx
 #include "HiggsAnalysis/bbggLimits/interface/bbgg2DFitter.h"
+#include "HiggsAnalysis/bbggLimits/interface/bbggFittingTools.h"
 #include "HiggsAnalysis/bbggLimits/interface/Colors.h"
+#include "HiggsAnalysis/CombinedLimit/interface/RooMultiPdf.h"
+//Boost
+#include <boost/program_options.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/foreach.hpp>
 
 std::ofstream newCout;
 
@@ -562,10 +570,12 @@ void bbgg2DFitter::MakePlots(float mass)
       std::vector<float> effSigmaVecMjj = EffectiveSigma( _w->var("mjj"), mjjSig[c], _minSigFitMjj, _maxSigFitMjj);
       sigma_mjj.push_back(effSigmaVecMjj[3]);
 
-      double mgg_mean = (mggSig[c]->mean(*_w->var("mgg")))->getVal();
+//      double mgg_mean = (mggSig[c]->mean(*_w->var("mgg")))->getVal();
+      double mgg_mean = ((RooRealVar*) _w->var(TString::Format("mgg_sig_m0_cat%d",c)))->getVal();//(mggSig[c]->getParameters(*_w->var("mgg")))->find(
       mean_mgg.push_back(mgg_mean);
 
-      double mjj_mean = (mjjSig[c]->mean(*_w->var("mjj")))->getVal();
+//      double mjj_mean = (mjjSig[c]->mean(*_w->var("mjj")))->getVal();
+      double mjj_mean = ((RooRealVar*) _w->var(TString::Format("mjj_sig_m0_cat%d",c)))->getVal();
       mean_mjj.push_back(mjj_mean);
 
     } // close categories
@@ -1105,6 +1115,8 @@ void bbgg2DFitter::MakeSigWS(std::string fileBaseName)
     {
       SigPdf[c] = (RooAbsPdf*) _w->pdf(TString::Format("SigPdf_cat%d",c));
       wAll->import(*_w->pdf(TString::Format("SigPdf_cat%d",c)));
+      wAll->import(*_w->data(TString::Format("Sig_cat%d",c)));
+      //IMPORTHERE
     }
   // (2) Systematics on energy scale and resolution
   // 1,1,1 statistical to be treated on the datacard
@@ -2292,3 +2304,128 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs)
   } // close to each category
   return fitresults;
 } // close berestein 3
+
+void bbgg2DFitter::MakeFitsForBias(std::string biasConfig, std::string outputFile)
+{
+  //Parameters
+  std::string plotsDir=_folder_name;
+  std::vector<std::string> vars;
+  std::vector<std::string> varNames;
+  std::vector<std::string> nbins;
+  std::vector<std::string> functions;
+  std::vector<std::string> functionsToFit;
+  std::vector<std::string> functionsToPlot;
+  std::vector<std::string> biasFunctions;
+  std::string plotTitle="";
+  std::vector<std::string> legends;
+  double bkgNorm_up, bkgNorm_down, bkgNorm; 
+
+  //Read json
+  boost::property_tree::ptree pt;
+  boost::property_tree::read_json( biasConfig, pt );
+  bkgNorm_up = TString( pt.get_child("bkgNorm_up").data().c_str()).Atof();
+  bkgNorm_down = TString( pt.get_child("bkgNorm_down").data().c_str()).Atof();
+  bkgNorm = TString( pt.get_child("bkgNorm").data().c_str()).Atof();
+
+
+  BOOST_FOREACH( boost::property_tree::ptree::value_type const& rowPair, pt.get_child( "vars" ) ){
+    std::cout << rowPair.first << "\t" << rowPair.second.data() << std::endl;
+    vars.push_back(rowPair.first);
+    varNames.push_back(rowPair.second.data());
+  }
+
+  BOOST_FOREACH( boost::property_tree::ptree::value_type const& rowPair, pt.get_child( "nbins" ) ){
+    nbins.push_back(rowPair.second.data());
+  }
+
+  if(nbins.size() != vars.size()){
+    std::cout << "Size of nbins vector must be the same as variables vector..." << std::endl;
+    return ;
+  }
+
+  BOOST_FOREACH( boost::property_tree::ptree::value_type const& rowPair, pt.get_child( "functions" ) ){
+    functions.push_back(rowPair.second.data());
+  }
+
+  BOOST_FOREACH( boost::property_tree::ptree::value_type const& rowPair, pt.get_child( "functionsToFit" ) ){
+    functionsToFit.push_back(rowPair.second.data());
+  }
+
+  BOOST_FOREACH( boost::property_tree::ptree::value_type const& rowPair, pt.get_child( "functionsToPlot" ) ){
+    functionsToPlot.push_back(rowPair.second.data());
+  }
+
+  BOOST_FOREACH( boost::property_tree::ptree::value_type const& rowPair, pt.get_child( "functionLegends" ) ){
+    legends.push_back(rowPair.second.data());
+  }
+
+  BOOST_FOREACH( boost::property_tree::ptree::value_type const& rowPair, pt.get_child( "biasFunctions" ) ){
+    biasFunctions.push_back(rowPair.second.data());
+  }
+
+  TFile * tFile = new TFile(outputFile.data(), "RECREATE");
+
+  RooArgSet* TreeVars = new RooArgSet();
+  const Int_t ncat = _NCAT;
+  for ( int cat = 0; cat < ncat; cat++) {
+      RooWorkspace* wBias = new RooWorkspace(TString::Format("wBias_cat%d", cat));
+
+      for( unsigned int i = 0; i < vars.size(); i++){
+          // Initialize fit variable
+          wBias->factory( vars[i].c_str() );
+          std::string sVar = ( (TObjString *) ( (TObjArray *) (TString(vars[i]).Tokenize("[")) )->At(0) )->String().Data();
+          std::cout << "Variable to be fit: " << sVar << std::endl;
+          wBias->var( sVar.c_str() )->SetTitle(varNames[i].c_str());
+          wBias->var( sVar.c_str() )->setUnit("GeV");
+          TreeVars->add( *wBias->var( sVar.c_str() ) );
+      }
+
+      //Get data Distribution from main Workspace
+      RooDataSet* dataBias = (RooDataSet*) _w->data(TString::Format("Data_cat%d",cat));
+      wBias->import(*dataBias);
+
+      //Initialize all needed PDFs for background
+      for ( unsigned int f = 0; f < functions.size(); f++){
+        TString thisFunction(functions[f]);
+        std::cout << "Function added: " << thisFunction << std::endl;
+        wBias->factory( thisFunction.Data() );
+      }
+      //Fit all functions
+      std::vector<bbggFittingTools::FitRes> bkgresults = bbggFittingTools::FitFunctions(wBias, functionsToFit, dataBias);
+      std::ofstream myFitResults(std::string(TString::Format("%s/bias/biasFitsResults_cat%d.txt", plotsDir.c_str(),cat).Data() ), std::ofstream::out);
+      myFitResults << std::string(TString::Format("#Tot events: %d\n",dataBias->numEntries()));
+      myFitResults << "#Name \t chi2 \t minNLL\n";
+      for(unsigned int i = 0; i < bkgresults.size(); i++){
+          myFitResults << std::string(TString::Format("%s\t%f\t%f\n", bkgresults[i].function.c_str(), bkgresults[i].chi2, bkgresults[i].minNLL)).c_str();
+      }
+      myFitResults.close();
+
+      //plot fitted functions
+      for( unsigned int i = 0; i < vars.size(); i++){
+          std::string sVar = ( (TObjString *) ( (TObjArray *) (TString(vars[i]).Tokenize("[")) )->At(0) )->String().Data();
+          bbggFittingTools::PlotCurves(plotTitle, wBias, functionsToPlot, legends, bkgresults, dataBias, sVar, nbins[i], plotsDir+"/bias/BIASplot_bkg_"+sVar+ TString(plotTitle).ReplaceAll(" ", "_").Data()+TString::Format("_cat%d",cat).Data(), 0, 1);
+      }
+
+      //Do bias study business: create multipdf, etc
+      RooCategory pdf_index("pdf_index","Index of Pdf which is active");
+      RooArgList mypdfs;
+      for( unsigned int bias = 0; bias < biasFunctions.size(); bias++){
+          std::cout << "Adding functions to multipdf! " << biasFunctions[bias].c_str() << std::endl;
+          const char* modelName = biasFunctions[bias].c_str();
+          mypdfs.add(* wBias->pdf( modelName ) );
+      }
+      RooMultiPdf multipdf("roomultipdf", "All Pdfs", pdf_index, mypdfs);
+      RooRealVar norm("roomultipdf_norm", "Number of background events", bkgNorm, bkgNorm_down, bkgNorm_up);
+//      RooRealVar norm("roomultipdf_norm", "Number of background events", 0.000001, 5000000);
+
+      //Create bias workspace
+      RooWorkspace * bW = new RooWorkspace(TString::Format("BiasWorkspace_cat%d",cat));
+      bW->import(pdf_index);
+      bW->import(norm);
+      bW->import(multipdf);
+      tFile->cd();
+      bW->Write();
+  }
+  tFile->Close();
+
+}

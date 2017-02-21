@@ -48,6 +48,7 @@ public :
    TH2F * NR_Wei_Hists[1507];
    
    Int_t           o_category;
+   Int_t           o_isSignal;
    Double_t        o_normalization;
    Double_t	   o_preweight;
    Double_t        o_btagweight;
@@ -56,6 +57,9 @@ public :
    Double_t        o_ggMass;
    Double_t        o_bbggMass;
    Double_t        o_phoevWeight;
+   Double_t        o_ljet_bdis;
+   Double_t        o_sjet_bdis;
+   Double_t        o_HHTagger;
    Double_t        jet1PT;
    Double_t	   jet2PT;
    Double_t	   jet1ETA;
@@ -65,22 +69,30 @@ public :
    double mtotMax;
    double normalization;
    double normalizationNR;
-   double btagWP;
-   double btagWP_low;
-   double btagWP_high;
-   double cosThetaStarCut;
-   int cosThetaStarCutCats;
+   double btagWP_loose;
+   double btagWP_medium;
+   double btagWP_tight;
+   double cosThetaStarCutLow;
+   double cosThetaStarCutHigh;
+   double mvaCat0_lm;
+   double mvaCat1_lm;
+   double mvaCat0_hm;
+   double mvaCat1_hm;
    int photonCR;
    int doKinFit;
    int doMX;
    int tilt;
    int doNoCat;
-   int doCatMixed;
-   int doSingleCat;
+   int doCatNonRes;
+   int doCatLowMass;
+   int doCatHighMass;
+   int doCatMVA;
    int bVariation;
    int phoVariation;
    int doNonResWeights;
+   int photonCRNormToSig;
    double tiltWindow;
+   double massThreshold;
    typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > LorentzVector;
 
    // Declaration of leaf types
@@ -107,6 +119,10 @@ public :
    LorentzVector    *diHiggsCandidate;
    LorentzVector    *diHiggsCandidate_KF;
    Float_t	    CosThetaStar;
+   Float_t	    CosThetaStar_CS;
+   Float_t          HHTagger;
+   Float_t          HHTagger_HM;
+   Float_t          HHTagger_LM;
    Int_t	isSignal;
    Int_t	isPhotonCR;
    Int_t	leadingJet_flavour;
@@ -156,6 +172,10 @@ public :
    TBranch	  *b_leadingJet_hadFlavour;
    TBranch	  *b_subleadingJet_hadFlavour;
    TBranch	  *b_CosThetaStar;
+   TBranch	  *b_CosThetaStar_CS;
+   TBranch        *b_HHTagger;
+   TBranch        *b_HHTagger_LM;
+   TBranch        *b_HHTagger_HM;
 
    //Photon ID SF stuff
    TFile* photonidFile;
@@ -213,28 +233,40 @@ public :
    virtual void     Loop();
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
-   void SetMax( double max ){ mtotMax = max; }
-   void SetMin( double min ){ mtotMin = min; }
+
+//mx usage
+   void SetMax( double par ) { mtotMax = par; }
+   void SetMin( double par ) { mtotMin = par; }
+   void IsMX( int par ) { doMX = par; }
+   void IsKinFit( int par ) { doKinFit = par; }
+   void SetTilt( int par ) { tilt = par;}
+//normalization
    void SetNormalization(double norm, double norm2=1) { normalization = norm; normalizationNR = norm2;}
-   void IsPhotonCR( int pcr ) { photonCR = pcr; }
-   void IsMX( int mx ) { doMX = mx; }
-   void IsKinFit( int kf ) { doKinFit = kf; }
-   void SetOutFileName( std::string fname ) { outFileName = fname; }
-   void SetBTagWP( double wp ) { btagWP = wp; }
-   void SetBTagWP_High( double wp ) { btagWP_high= wp; }
-   void SetBTagWP_Low( double wp ) { btagWP_low = wp; }
+//categorization
    void DoNoCat( int cat ) { doNoCat = cat; }
-   void DoCatMixed( int cat ) { doCatMixed = cat; }
-   void DoSingleCat( int cat ) { doSingleCat = cat; }
-//   void SetTilt( int tt, double ttWind) { tilt = tt; tiltWindow = ttWind; }
-   void SetTilt( int tt) { tilt = tt;}
+   void DoCatNonRes( int cat ) { doCatNonRes = cat; }
+   void DoCatLowMass( int cat ) { doCatLowMass = cat; }
+   void DoCatHighMass( int cat ) { doCatHighMass = cat; }
+   void DoCatMVA( int cat , float cat0_lm, float cat1_lm, float cat0_hm, float cat1_hm) { doCatMVA = cat; mvaCat0_lm = cat0_lm; mvaCat1_lm = cat1_lm; mvaCat0_hm = cat0_hm; mvaCat1_hm = cat1_hm;}
+   void SetBTagWP_Tight( double par ) { btagWP_tight = par; }
+   void SetBTagWP_Medium( double par ) { btagWP_medium = par; }
+   void SetBTagWP_Loose( double par ) { btagWP_loose = par; }
+//corrections
    void DoBVariation( int tt) { bVariation = tt; }
+   void DoPhoVariation(int tt) { phoVariation = tt;}
+//other
+   void IsPhotonCR( int pcr ) { photonCR = pcr; }
+   void IsPhotonCRNormToSig( int pcr ) { photonCRNormToSig = pcr; }
+   void SetCosThetaStarLow(float cut) { cosThetaStarCutLow = cut; }
+   void SetCosThetaStarHigh(float cut) { cosThetaStarCutHigh = cut; }
+
+//setup
+   void SetOutFileName( std::string fname ) { outFileName = fname; }
    void BTagSetup(TString btagfile, TString effsfile);
    std::vector<std::pair<float,float>> BTagWeight(bbggLTMaker::LorentzVector jet1, int flavour1, bbggLTMaker::LorentzVector jet2, int flavour2, int variation=0);
    void SetupPhotonSF(TString idfile, TString evfile);
    float PhotonSF(LorentzVector pho, int phovar = 0);
-   void DoPhoVariation(int tt) { phoVariation = tt;}
-   void SetCosThetaStar(float cut, int cat) { cosThetaStarCut = cut; cosThetaStarCutCats = cat;}
+   void SetMassThreshold(float par){ massThreshold = par;}
    
    void DoNRWeights(int doNRW) { doNonResWeights = doNRW; }
 };
@@ -244,25 +276,33 @@ public :
 #ifdef bbggLTMaker_cxx
 bbggLTMaker::bbggLTMaker(TTree *tree) : fChain(0)
 {
-   mtotMax = 1200.;
-   mtotMin = 230.;
+   mtotMax = 12000.;
+   mtotMin = 200.;
    normalization = 1.;
    normalizationNR = 1.;
    photonCR = 0;
    doMX = 1;
    doKinFit = 0;
    outFileName = "LT_output.root";
-   btagWP = 0.8;
-   btagWP_low = 0.8;
-   btagWP_high = 0.8;
    doNoCat = 0;
-   doCatMixed = 0;
-   doSingleCat = 0;
+   doCatNonRes = 0;
+   doCatLowMass = 0;
+   doCatHighMass = 0;
+   doCatMVA = 0;
+   mvaCat0_lm = -10;
+   mvaCat1_lm = -10;
+   mvaCat0_hm = -10;
+   mvaCat1_hm = -10;
+   btagWP_loose = 0.46;
+   btagWP_medium = 0.8;
+   btagWP_tight = 0.935;
+   cosThetaStarCutLow = -100;
+   cosThetaStarCutHigh = 100;
    bVariation = -999;
    phoVariation = -999;
-   cosThetaStarCut = 10;
-   cosThetaStarCutCats = 0;
    doNonResWeights = 0;
+   photonCRNormToSig = 0;
+   massThreshold = 350;
    Init(tree);
 }
 
@@ -322,6 +362,10 @@ void bbggLTMaker::Init(TTree *tree)
    subleadingPhotonID = 0;
    subleadingPhotonISO = 0;
    CosThetaStar = 0;
+   CosThetaStar_CS = 0;
+   HHTagger = 0;
+   HHTagger_LM = 0;
+   HHTagger_HM = 0;
    // Set branch addresses and branch pointers
    if (!tree) return;
    fChain = tree;
@@ -360,6 +404,10 @@ void bbggLTMaker::Init(TTree *tree)
    fChain->SetBranchAddress("leadingJet_hadFlavour", &leadingJet_hadFlavour, &b_leadingJet_hadFlavour);
    fChain->SetBranchAddress("subleadingJet_hadFlavour", &subleadingJet_hadFlavour, &b_subleadingJet_hadFlavour);
    fChain->SetBranchAddress("CosThetaStar", &CosThetaStar, &b_CosThetaStar);
+   fChain->SetBranchAddress("CosThetaStar_CS", &CosThetaStar_CS, &b_CosThetaStar_CS);
+   fChain->SetBranchAddress("HHTagger", &HHTagger, &b_HHTagger);
+   fChain->SetBranchAddress("HHTagger_LM", &HHTagger_LM, &b_HHTagger_LM);
+   fChain->SetBranchAddress("HHTagger_HM", &HHTagger_HM, &b_HHTagger_HM);
    Notify();
 }
 

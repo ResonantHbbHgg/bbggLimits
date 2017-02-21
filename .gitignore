@@ -35,3 +35,6 @@ LimitSetting/*.root
 test/*json
 *lumi.json
 *fggRunJob*
+
+#work directory
+work/*

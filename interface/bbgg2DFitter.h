@@ -140,6 +140,7 @@ class bbgg2DFitter {
    void MakeSigWS(std::string filename); //DONE
    void MakeHigWS(std::string filename, int higgschannel); //DONE
    void MakeBkgWS(std::string filename); //DONE
+   void MakeFitsForBias(std::string biasConfig, std::string outputFile);
    // const char* filenameh0, const char* filenameh1, const char* filenameh2, const char* filenameh4);
    void MakeDataCard(std::string filename, std::string filename1, Bool_t ); //DONE
    void MakeDataCard(std::string filename, std::string filename1,std::map<std::string,std::string>higgsfilename, Bool_t bb,std::vector<std::string>,std::map<std::string,int>higgsNumber) {

@@ -1,8 +1,8 @@
-<bin name="LimitTreeMaker" file="LimitTreeMaker.C">
+<!--<bin name="LimitTreeMaker" file="LimitTreeMaker.C">
 	<use name="boost_program_options"/>
 	<use name="root"/>
 	<use name="HiggsAnalysis/bbggLimits"/>
-</bin>
+</bin>-->
 <bin name="bbgg2DFit" file="bbgg2DFit.C">
 	<use name="boost_program_options"/>
 	<use name="boost"/>
