@@ -54,21 +54,16 @@ if 'nonres' in opt.x:
             [7, 50000], [8, 50000], [9, 49600], [10, 49800], [11, 50000], [12, 50000], [13, 50000] ]
   
 
-  # APZ trees:
+  TreeDir = '/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/FlatTrees-Jan31/'
   SignalFiles = "/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph.root"
   if opt.signalDir is None:
-    Signals = "/afs/cern.ch/user/a/andrey/work/hh/CMSSW_8_0_8_patch1/src/APZ/fgg-ana/NotATestNov12/" + SignalFiles
+    Signals = TreeDir + '/SignalGenInfo/'+SignalFiles
   else:
     Signals = opt.signalDir + SignalFiles
 
-  # bbggTools trees:
-  #Signals = "/afs/cern.ch/user/a/andrey/work/hh/CMSSW_8_0_8_patch1/src/flashgg/bbggTools/test/RunJobs/NonResAll/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph_0.root" 
-  #Signals = "root://eoscms//eos/cms/store/user/rateixei/HHbbgg/FlatTrees/ICHEP_Regressed4b/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph.root"
-  #Signals = "root://eoscms//eos/cms/store/user/rateixei/HHbbgg/FlatTrees/ICHEP_Regressed4b/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph.root"
-
   DataFiles = "/DoubleEG.root"
   if opt.dataDir is None:
-    Data = "root://eoscms//eos/cms/store/user/rateixei/HHbbgg/FlatTrees/ICHEP_Regressed4b/DoubleEG.root"
+    Data = TreeDir+"/Data/DoubleEG.root"
   else:
     Data = opt.dataDir + DataFiles
 
@@ -125,8 +120,12 @@ if 'nonres' in opt.x:
 
 elif 'res' in opt.x:
   masses = {
-  'Radion' : [[250,49800],[260,50000],[270,48400],[280,50000],[300,49200],[320,50000],[340,50000],[350,50000],[400,50000],[450,50000],[500,49200],[550,50000],[600,50000],[650,50000],[700,50000],[750,50000],[800,50000],[900,50000]],
-  'BulkGraviton' : [[250,50000], [260,50000], [270,50000], [280,49600], [300,50000], [320,50000], [340,50000], [350,50000], [400,50000], [450,50000], [500,50000], [550,50000], [600,50000], [650,50000], [700,49200], [750,50000], [800,49800], [900,50000], [1000,50000]]
+    'Radion' : [[250,49800],[260,50000],[270,48400],[280,50000],[300,49200],[320,50000],[340,50000],
+                [350,50000],[400,50000],[450,50000],[500,49200],[550,50000],[600,50000],[650,50000],
+                [700,50000],[750,50000],[800,50000],[900,50000]],
+    'BulkGraviton' : [[250,50000], [260,50000], [270,50000], [280,49600], [300,50000], [320,50000], [340,50000],
+                      [350,50000], [400,50000], [450,50000], [500,50000], [550,50000], [600,50000], [650,50000], 
+                      [700,49200], [750,50000], [800,49800], [900,50000], [1000,50000]]
   }
 
   # APZ trees:
@@ -139,7 +138,7 @@ elif 'res' in opt.x:
 
   DataFiles = "/DoubleEG.root"
   if opt.dataDir is None:
-    Data = "root://eoscms//eos/cms/store/user/rateixei/HHbbgg/FlatTrees/ICHEP_Regressed4b/DoubleEG.root"
+    Data = "root://eoscms//eos/cms/store/user/rateixei/HHbbgg/2016_FlatTrees/Moriond_Jan30_350Training/Data/DoubleEG.root"
   else:
     Data = opt.dataDir + DataFiles
 

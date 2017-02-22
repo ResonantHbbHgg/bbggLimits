@@ -7,7 +7,6 @@
 #include "CondFormats/BTauObjects/interface/BTagCalibrationReader.h"
 
 bool DEBUG = 0;
-#define NRWTOT 1507 // Total points for the Non-resonant re-weighting
 
 void bbggLTMaker::Loop()
 {
@@ -94,23 +93,38 @@ void bbggLTMaker::Loop()
     // Note that the following file is not committed to git (it's too large).
     // Get it from /afs/cern.ch/user/a/andrey/public/HH/weights_v1_1507_points.root
     // and copy in your working directory:
-    TString fileNameWei = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/weights_v1_1507_points.root");
+    TString fileNameWei = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/data/weights_v1_1507_points.root");
     NRwFile = new TFile(fileNameWei, "OPEN");
+
+    // This file includes 12 benchmark v3 weights.
+    // Get it from /afs/cern.ch/user/a/andrey/public/HH/ and copy in your working directory:
+    TString fileNameWei2 = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/data/weights_v3_bench12_points.root");
+    NRwFile2 = new TFile(fileNameWei2, "OPEN");
      
-    if (NRwFile->IsZombie()){
-      cout<<" Input file does not exist!"<<endl;
+    if (NRwFile->IsZombie() || NRwFile2->IsZombie()){
+      cout<<" Input file for Non-Res weihts does not exist!"<<endl;
       exit(1);
     }
     NRwFile->Print();
+    NRwFile2->Print();
 
     TList *histList = NRwFile->GetListOfKeys();
-    for (UInt_t n=0; n<NRWTOT; n++)
+    for (UInt_t n=0; n<1507; n++){
       if (histList->Contains(Form("point_%i_weights",n)))
 	NR_Wei_Hists[n] = (TH2F*)NRwFile->Get(Form("point_%i_weights",n));
       else
 	cout<<"This one does not existe pas: "<<n<<endl;
+    }
 
+    TList *histList2 = NRwFile2->GetListOfKeys();
+    for (UInt_t n=0; n<12; n++){
+      if (histList2->Contains(Form("point_%i_weights",n)))
+	NR_Wei_Hists[1507+n] = (TH2F*)NRwFile2->Get(Form("point_%i_weights",n));
+      else
+	cout<<"This one does not existe pas: "<<1507+n<<endl;
+    }
   }
+
 
   Long64_t nentries = fChain->GetEntriesFast();
 

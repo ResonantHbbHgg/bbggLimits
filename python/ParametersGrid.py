@@ -8,10 +8,7 @@ def loadMapping_():
     """
     Load the mapping file
     """
-
-    #mapping_file = os.path.join('../list_all_translation_1507.txt')
-    mapping_file = os.path.join(os.environ['CMSSW_BASE'], 'src', 'HiggsAnalysis/bbggLimits', 'list_all_translation_1507.txt')
-    # mapping_file = os.path.join(os.environ['CMSSW_BASE'], 'src', 'HHStatAnalysis', 'Tools', 'data', 'list_all_translation_1507.txt')
+    mapping_file = os.path.join(os.environ['CMSSW_BASE'], 'src', 'HiggsAnalysis/bbggLimits/data', 'list_all_translation_1507.txt')
 
     # 324 is dummy but it's the SM => we replace with results from BM we have
     dummy_points = [910, 985, 990]
@@ -56,6 +53,7 @@ def getPointFromParameters(l, yt, c2, cg, c2g):
     """
     Returns the point matching the 5 parameters, or None if there's none
     """
+    mapping = loadMapping_()
 
     point = [x['point'] for x in mapping if x['lambda'] == l and x['yt'] == yt and x['c2'] == c2 and x['cg'] == cg and x['c2g'] == c2g]
 
@@ -70,7 +68,8 @@ def getParametersFromPoint(point, dict=False):
     """
     Returns a tuple of lambda, yt, c2, cg and c2g for a given point
     """
-    
+    mapping = loadMapping_()
+
     if point < 0:
         return None
 
@@ -99,6 +98,8 @@ def getYtScanPoints(klambda=1, c2=0, cg=0, c2g=0):
     """
     Return a list of point suitable for the yt scan
     """
+    mapping = loadMapping_()
+
 
     points = [x for x in mapping if x['lambda'] == klambda and x['c2'] == c2 and x['cg'] == cg and x['c2g'] == c2g]
 
@@ -108,6 +109,7 @@ def getC2ScanPoints(klambda=1, yt=1, cg=0, c2g=0):
     """
     Return a list of point suitable for the c2 scan
     """
+    mapping = loadMapping_()
 
     points = [x for x in mapping if x['lambda'] == klambda and x['yt'] == yt and x['cg'] == cg and x['c2g'] == c2g]
 
@@ -117,6 +119,7 @@ def getCgScanPoints(klambda=1, yt=1, c2=0, c2g=0):
     """
     Return a list of point suitable for the cg scan
     """
+    mapping = loadMapping_()
 
     points = [x for x in mapping if x['lambda'] == klambda and x['yt'] == yt and x['c2'] == c2 and x['c2g'] == c2g]
 
@@ -126,6 +129,7 @@ def getC2gScanPoints(klambda=1, yt=1, c2=0, cg=0):
     """
     Return a list of point suitable for the c2g scan
     """
+    mapping = loadMapping_()
 
     points = [x for x in mapping if x['lambda'] == klambda and x['yt'] == yt and x['c2'] == c2 and x['cg'] == cg]
 
@@ -135,6 +139,7 @@ def getPoints(f):
     """
     Returns a list of points passing the filter f
     """
+    mapping = loadMapping_()
 
     points = [x['point'] for x in mapping if f(x)]
 
@@ -147,11 +152,14 @@ def getCrossSectionForParameters(l, yt, c2, cg, c2g):
 
     params = (l, yt, c2, cg, c2g)
 
-    A = [2.09078, 10.1517, 0.282307, 0.101205, 1.33191, -8.51168, -1.37309, 2.82636, 1.45767, -4.91761, -0.675197, 1.86189, 0.321422, -0.836276, -0.568156]
+    A = [2.09078, 10.1517, 0.282307, 0.101205, 1.33191, -8.51168, -1.37309, 2.82636, 
+         1.45767, -4.91761, -0.675197, 1.86189, 0.321422, -0.836276, -0.568156]
     
     # From https://github.com/cms-hh/Plotting/blob/nonResonant/nonResonant/5Dfunction.py#L38
     def f(kl, kt, c2, cg, c2g):
-        return A[0]*kt**4 + A[1]*c2**2 + (A[2]*kt**2 + A[3]*cg**2)*kl**2 + A[4]*c2g**2 + ( A[5]*c2 + A[6]*kt*kl )*kt**2 + (A[7]*kt*kl + A[8]*cg*kl )*c2 + A[9]*c2*c2g + (A[10]*cg*kl + A[11]*c2g)*kt**2+ (A[12]*kl*cg + A[13]*c2g )*kt*kl + A[14]*cg*c2g*kl
+      return A[0]*kt**4 + A[1]*c2**2 + (A[2]*kt**2 + A[3]*cg**2)*kl**2 + A[4]*c2g**2 + \
+          (A[5]*c2 + A[6]*kt*kl)*kt**2 + (A[7]*kt*kl + A[8]*cg*kl)*c2 + A[9]*c2*c2g + \
+          (A[10]*cg*kl + A[11]*c2g)*kt**2+ (A[12]*kl*cg + A[13]*c2g)*kt*kl + A[14]*cg*c2g*kl
 
     # From https://twiki.cern.ch/twiki/bin/view/LHCPhysics/LHCHXSWGHH#Current_recommendations_for_di_H
     hh_sm_xs = 33.45
@@ -170,5 +178,7 @@ def getCrossSectionForPoint(point):
 
     return getCrossSectionForParameters(*getParametersFromPoint(point))
 
-# Load the mapping file from the `data` folder
-mapping = loadMapping_()
+if __name__ == "__main__":
+  
+  # Load the mapping file from the `data` folder
+  mapping = loadMapping_()

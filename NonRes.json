@@ -1,14 +1,15 @@
 {
-    "LTDIR" : "/src/HiggsAnalysis/bbggLimits/LT-Nov18-APZ_TYPE/",
+    "LTDIR" : "/src/HiggsAnalysis/bbggLimits/LT-Feb02-NonResCatBased400_TYPE/",
+
     "signal" : {
 	"nodes" : ["SM","box","2","3","4","5","6","7","8","9","10","11","12","13"],
         "types" : ["HighMass", "LowMass"],
 	"signalModelCard" : "/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D_sig.rs"
     },
     "other" : {
-        "Combinelxbatch" : 1,
-        "version" : 68,
-	      "integratedLumi" : 36.4,
+        "Combinelxbatch" : 0,
+        "version" : 72,
+        "integratedLumi" : 36.5,
         "energy" : "13TeV",
         "higgsMass" : 125.0,
         "addHiggs" : 0,

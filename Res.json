@@ -1,12 +1,12 @@
 {
-    "LTDIR" : "/src/HiggsAnalysis/bbggLimits/LT_ResLMRegRadion",
+    "LTDIR" : "/src/HiggsAnalysis/bbggLimits/LT-Feb06-ResLMnWRadion",
     "signal" : {
         "types" : ["Radion"],
 	"signalModelCard" : "/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D_sig.rs"
     },
     "other" : {
-        "Combinelxbatch" : 1,
-        "version" : 66,
+        "Combinelxbatch" : 0,
+        "version" : 73,
 	"integratedLumi" : 36.5,
         "energy" : "13TeV",
         "higgsMass" : 125.0,
@@ -20,8 +20,8 @@
         "drawBackgroundFit" : 0,
         "useSigTheoryUnc" : 0,
 	"doBrazilianFlag" : false,
-	"runCombine" : true,
-	"combineOption" : 2,
+	"runCombine" : 1,
+	"combineOption" : 1,
 	"minMggMassFit" : 100,
 	"maxMggMassFit" : 180,
 	"minMjjMassFit"	: 80,
@@ -39,7 +39,7 @@
 	"low":false,
 	"obs":false,
 	"twotag":false,
-        "doBias":false,
+        "doBias":1,
         "biasConfig": "BiasStudies/ForBias.json"
 	
     },
