@@ -38,6 +38,9 @@ void bbggLTMaker::Loop()
   o_ljet_bdis = -10;
   o_sjet_bdis = -10;
   o_isSignal = -10;
+  o_jt1diffweight = -99;
+  o_jt2diffweight = -99;
+  o_diffweight = -99;
   //   btmap = 0;
 
   std::cout << "Output file name: " << outFileName << std::endl;
@@ -64,6 +67,9 @@ void bbggLTMaker::Loop()
   outTree->Branch("ljet_bdis", &o_ljet_bdis, "o_ljet_bdis/D");
   outTree->Branch("sjet_bdis", &o_sjet_bdis, "o_sjet_bdis/D");
   outTree->Branch("isSignal", &o_isSignal, "o_isSignal/I");
+  outTree->Branch("jt1diffweight", &o_jt1diffweight, "o_jt1diffweight/D");
+  outTree->Branch("jt2diffweight", &o_jt2diffweight, "o_jt2diffweight/D");
+  outTree->Branch("diffweight", &o_diffweight, "o_diffweight/D");
 
   outTree->Branch("evt", &o_evt, "o_evt/l");
   outTree->Branch("run", &o_run, "o_run/i");
@@ -124,6 +130,7 @@ void bbggLTMaker::Loop()
     TString bEffs_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/BTag/btagEffs.root");
     cout << "bEffs file: " << bEffs_file << endl;
     bbggLTMaker::BTagSetup(bSF_file, bEffs_file);
+    bbggLTMaker::BTagDiffSetup(bSF_file, bEffs_file, myDiffOpt);
   }
 
   if(phoVariation > -100){
@@ -165,6 +172,9 @@ void bbggLTMaker::Loop()
     o_HHTagger = -10;
     o_ljet_bdis = -10;
     o_sjet_bdis = -10;
+    o_jt1diffweight = -99;
+    o_jt2diffweight = -99;
+    o_diffweight = -99;
 
       
     Long64_t ientry = LoadTree(jentry);
@@ -221,7 +231,7 @@ void bbggLTMaker::Loop()
 
     //Calculate b-tagging scale factors
     if(bVariation > -100) btmap = bbggLTMaker::BTagWeight(*leadingJet, leadingJet_hadFlavour, *subleadingJet, subleadingJet_hadFlavour, bVariation);
-    float btagweight = -99;
+    double btagweight = -99;
     if(bVariation < -100) btagweight = 1;
     if(bVariation > -100) {
        double bt1 = 1, bt2 = 1;
@@ -236,7 +246,17 @@ void bbggLTMaker::Loop()
        if( subleadingJet_bDis > 0.92) bt2 = btmap[5].first;
 
        btagweight = bt1*bt2;
+       o_jt1diffweight = bbggLTMaker::BTagDiffWeight(*leadingJet, leadingJet_hadFlavour, leadingJet_bDis);
+       o_jt2diffweight = bbggLTMaker::BTagDiffWeight(*subleadingJet, subleadingJet_hadFlavour, subleadingJet_bDis);
+       o_diffweight =  o_jt1diffweight*o_jt2diffweight;
 
+//       std::cout << o_jt1diffweight << "\t" << o_jt2diffweight << std::endl;
+       if(o_jt1diffweight < 0 || o_jt1diffweight > 10) {
+         std::cout << "o_jt1diffweight: " << o_jt1diffweight << " jet pt: " << leadingJet->Pt() << " jet eta: " << leadingJet->Eta() << " jet flavor: " << leadingJet_hadFlavour << std::endl;
+       }
+       if(o_jt2diffweight < 0 || o_jt2diffweight > 10) {
+         std::cout << "o_jt2diffweight: " << o_jt2diffweight << " jet pt: " << subleadingJet->Pt() << " jet eta: " << subleadingJet->Eta() << " jet flavor: " << subleadingJet_hadFlavour << std::endl;
+       }
     }
 
     if(doCatNonRes)
@@ -288,6 +308,11 @@ void bbggLTMaker::Loop()
     }
 
     o_weight = o_preweight*o_btagweight*pho1_sf*pho2_sf;
+    //doing differential btagging sfs if using MVA based categorization
+    if (doCatMVA) {
+      o_weight = o_preweight*o_diffweight*pho1_sf*pho2_sf;
+    }
+
     if( o_preweight == 1) o_weight = 1; //if o_preweight == 1, this is data, no SF
     o_phoevWeight = pho1_sf*pho2_sf;
     jet1PT = leadingJet->pt();
@@ -418,10 +443,34 @@ void bbggLTMaker::BTagSetup(TString btagfile, TString effsfile)
   l_eff_loose = (TH2F*) effsFile->Get("l_eff_loose");
 }
 
-std::vector<std::pair<float,float>> bbggLTMaker::BTagWeight(bbggLTMaker::LorentzVector jet1, int flavour1, bbggLTMaker::LorentzVector jet2, int flavour2, int variation)
+void bbggLTMaker::BTagDiffSetup(TString btagfile, TString effsfile, TString diffOpt)
 {
-  float tight1=-99, medium1=-99, loose1=-99, tightup1=-99, tightdown1=-99, mediumup1=-99, mediumdown1=-99, looseup1=-99, loosedown1=-99;
-  float tight2=-99, medium2=-99, loose2=-99, tightup2=-99, tightdown2=-99, mediumup2=-99, mediumdown2=-99, looseup2=-99, loosedown2=-99;
+//  calibdiff = new BTagCalibration("CSVv2", btagfile.Data());
+  b_diffreader_tight = new BTagCalibrationReader(calib, BTagEntry::OP_RESHAPING, "iterativefit", std::string(diffOpt.Data()));
+  c_diffreader_tight = new BTagCalibrationReader(calib, BTagEntry::OP_RESHAPING, "iterativefit", std::string(diffOpt.Data()));
+  l_diffreader_tight = new BTagCalibrationReader(calib, BTagEntry::OP_RESHAPING, "iterativefit", std::string(diffOpt.Data()));
+
+}
+
+double bbggLTMaker::BTagDiffWeight(bbggLTMaker::LorentzVector jet1, int flavour1, float bdis)
+{
+  float myWeight = -99;
+  if(flavour1 == 5){
+    myWeight = b_diffreader_tight->eval(BTagEntry::FLAV_B, jet1.Eta(), jet1.Pt(), bdis);
+  } else if (flavour1==4) {
+    myWeight = c_diffreader_tight->eval(BTagEntry::FLAV_C, jet1.Eta(), jet1.Pt(), bdis);
+  } else {
+    myWeight = l_diffreader_tight->eval(BTagEntry::FLAV_UDSG, jet1.Eta(), jet1.Pt(), bdis);
+  }
+//  std::cout << "FLAVOUR " << flavour1 << "\t" << myWeight << std::endl;
+  return myWeight;
+} 
+
+
+std::vector<std::pair<double,float>> bbggLTMaker::BTagWeight(bbggLTMaker::LorentzVector jet1, int flavour1, bbggLTMaker::LorentzVector jet2, int flavour2, int variation)
+{
+  double tight1=-99, medium1=-99, loose1=-99, tightup1=-99, tightdown1=-99, mediumup1=-99, mediumdown1=-99, looseup1=-99, loosedown1=-99;
+  double tight2=-99, medium2=-99, loose2=-99, tightup2=-99, tightdown2=-99, mediumup2=-99, mediumdown2=-99, looseup2=-99, loosedown2=-99;
   float jet1eff_medium=-99, jet1eff_tight=-99, jet1eff_loose=-99, jet2eff_medium=-99, jet2eff_tight=-99, jet2eff_loose=-99;
 
   if(flavour1==5){
@@ -557,7 +606,7 @@ std::vector<std::pair<float,float>> bbggLTMaker::BTagWeight(bbggLTMaker::Lorentz
     jet2eff_loose = l_eff_loose->GetBinContent( l_eff_loose->FindBin(fabs(jet2.Eta()), jet2pt) );
   }
 
-  std::vector<std::pair<float, float>> outMap;
+  std::vector<std::pair<double, float>> outMap;
   if(variation == 0){
     outMap.push_back( make_pair( loose1, jet1eff_loose ) );
     outMap.push_back( make_pair( medium1, jet1eff_medium ) );

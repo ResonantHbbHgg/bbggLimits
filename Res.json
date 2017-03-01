@@ -1,5 +1,5 @@
 {
-    "LTDIR" : "/src/HiggsAnalysis/bbggLimits/LT_ResLMRegRadion",
+    "LTDIR" : "/src/HiggsAnalysis/bbggLimits/work/LT_RegressionLowMassMVA2Radion",
     "signal" : {
         "types" : ["Radion"],
 	"signalModelCard" : "/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D_sig.rs"
@@ -16,7 +16,7 @@
         "ncat" : 2,
         "analysisType" : "fitTo2D_resSearch_withRegKinFit",
         "doSingleLimit" : 1,
-        "drawSignalFit" : 1,
+        "drawSignalFit" : 0,
         "drawBackgroundFit" : 0,
         "useSigTheoryUnc" : 0,
 	"doBrazilianFlag" : false,

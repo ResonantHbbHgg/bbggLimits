@@ -3,6 +3,7 @@
 from ROOT import *
 import os,sys
 import HiggsAnalysis.bbggLimits.MassWindows as MW
+import HiggsAnalysis.bbggLimits.SMHiggsSamples as SMHiggsSamples
 
 import argparse
 parser =  argparse.ArgumentParser(description='Limit Tree maker')
@@ -30,6 +31,7 @@ parser.add_argument("--doPhotonCR", dest="isPhotonCR", action="store_true", defa
                                        help="Use photon control region")
 parser.add_argument("--doPhotonCRSignalNorm", dest="isPhotonCRSignalNorm", action="store_true", default=False,
                                        help="Pick events from photon control region to match event yield of signal region")
+parser.add_argument("--doSMHiggs", dest=doSMHiggs, action="store_true", default=False, help="Make SM single H trees")
 parser.add_argument("--ctsCut", dest="ctsCut", default=-10)
 parser.add_argument("--resMass", dest="resMass", default=-100, help="Do one specific mass")
 parser.add_argument('--doCatMVA', dest="doCatMVA", action="store_true", default=False,
@@ -53,13 +55,16 @@ if 'nonres' in opt.x:
   nodes = [ ["box", 50000], ["SM", 50000], [2, 49600], [3, 50000], [4, 50000], [5, 50000], [6, 50000],
             [7, 50000], [8, 50000], [9, 49600], [10, 49800], [11, 50000], [12, 50000], [13, 50000] ]
   
-
   # APZ trees:
   SignalFiles = "/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph.root"
   if opt.signalDir is None:
     Signals = "/afs/cern.ch/user/a/andrey/work/hh/CMSSW_8_0_8_patch1/src/APZ/fgg-ana/NotATestNov12/" + SignalFiles
   else:
     Signals = opt.signalDir + SignalFiles
+
+  if opt.doSMHiggs:
+    nodes = SMHiggsSamples.SMHiggsNodes
+    Signals = opt.signalDir + '/THENODE'
 
   # bbggTools trees:
   #Signals = "/afs/cern.ch/user/a/andrey/work/hh/CMSSW_8_0_8_patch1/src/flashgg/bbggTools/test/RunJobs/NonResAll/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph_0.root" 
@@ -92,6 +97,9 @@ if 'nonres' in opt.x:
   for MM in nodes:
     i = MM[0]
     sigScale = float(opt.lumi)/float(MM[1])
+    if opt.doSMHiggs:
+      sigScale = float(opt.lumi)*float(MM[2])/float(MM[1])
+
     print "DOING LowMassCat Signal, node ", i
 
     if opt.NRW:

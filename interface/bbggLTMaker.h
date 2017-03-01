@@ -60,6 +60,9 @@ public :
    Double_t        o_ljet_bdis;
    Double_t        o_sjet_bdis;
    Double_t        o_HHTagger;
+   Double_t        o_jt1diffweight;
+   Double_t        o_jt2diffweight;
+   Double_t        o_diffweight;
    Double_t        jet1PT;
    Double_t	   jet2PT;
    Double_t	   jet1ETA;
@@ -129,7 +132,8 @@ public :
    Int_t	subleadingJet_flavour;
    Int_t	leadingJet_hadFlavour;
    Int_t	subleadingJet_hadFlavour;
-   std::vector<std::pair<float,float>> btmap;
+   std::vector<std::pair<double,float>> btmap;
+   TString myDiffOpt;
 
    Double_t gen_mHH, gen_cosTheta;
    ULong64_t event;
@@ -223,6 +227,10 @@ public :
    BTagCalibrationReader* l_reader_loose_up;
    BTagCalibrationReader* l_reader_loose_down;
 
+   BTagCalibrationReader* b_diffreader_tight;
+   BTagCalibrationReader* c_diffreader_tight;
+   BTagCalibrationReader* l_diffreader_tight;
+
 
    bbggLTMaker(TTree *tree=0);
    virtual ~bbggLTMaker();
@@ -261,12 +269,16 @@ public :
    void SetCosThetaStarHigh(float cut) { cosThetaStarCutHigh = cut; }
 
 //setup
+   void BTagDiffWeightOpt( TString thisOpt) { myDiffOpt = thisOpt; }
    void SetOutFileName( std::string fname ) { outFileName = fname; }
    void BTagSetup(TString btagfile, TString effsfile);
-   std::vector<std::pair<float,float>> BTagWeight(bbggLTMaker::LorentzVector jet1, int flavour1, bbggLTMaker::LorentzVector jet2, int flavour2, int variation=0);
+   std::vector<std::pair<double,float>> BTagWeight(bbggLTMaker::LorentzVector jet1, int flavour1, bbggLTMaker::LorentzVector jet2, int flavour2, int variation=0);
    void SetupPhotonSF(TString idfile, TString evfile);
    float PhotonSF(LorentzVector pho, int phovar = 0);
    void SetMassThreshold(float par){ massThreshold = par;}
+
+   void BTagDiffSetup(TString btagfile, TString effsfile, TString diffOpt);
+   double BTagDiffWeight(bbggLTMaker::LorentzVector jet1, int flavour1, float bdis);
    
    void DoNRWeights(int doNRW) { doNonResWeights = doNRW; }
 };
@@ -303,6 +315,7 @@ bbggLTMaker::bbggLTMaker(TTree *tree) : fChain(0)
    doNonResWeights = 0;
    photonCRNormToSig = 0;
    massThreshold = 350;
+   myDiffOpt = "central";
    Init(tree);
 }
 

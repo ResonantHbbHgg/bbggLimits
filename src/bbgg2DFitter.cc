@@ -3,6 +3,7 @@
 #include "HiggsAnalysis/bbggLimits/interface/bbggFittingTools.h"
 #include "HiggsAnalysis/bbggLimits/interface/Colors.h"
 #include "HiggsAnalysis/CombinedLimit/interface/RooMultiPdf.h"
+#include "HiggsAnalysis/CombinedLimit/interface/HZZ2L2QRooPdfs.h"
 //Boost
 #include <boost/program_options.hpp>
 #include <boost/property_tree/xml_parser.hpp>

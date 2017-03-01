@@ -159,7 +159,10 @@ mv OUTFILE OUTDIR
     batchFile.write(outputFileStringTmp9)
     batchFile.close()
     os.system("chmod a+rwx " + batchFileName)
-    os.system("bsub -q 1nd -o "+ resFile.replace(".log", "_batch.out") + " < " + batchFileName)
+#    os.system("bsub -q 1nd -o "+ resFile.replace(".log", "_batch.out") + " < " + batchFileName)
+    command = "bsub -q 1nd  -J " + batchFileName.split('/')[len(batchFileName.split('/'))-1].replace('.sh', '')  + " < " + batchFileName
+    print command
+    os.system(command)
 
   if combineOpt == 3:
     print "im here12"

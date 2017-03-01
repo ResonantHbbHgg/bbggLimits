@@ -45,9 +45,9 @@ def MakeSigPlot(data, pdf, var, label, lumi, cat, analysis, doBands, fname, binn
 	if not isSig: data.plotOn(frame,RooFit.DataError(RooAbsData.SumW2),RooFit.XErrorSize(0))
 	if isSig: data.plotOn(frame,RooFit.MarkerStyle(kOpenSquare), RooFit.DataError(RooAbsData.SumW2),RooFit.XErrorSize(0))
 
-	pdf.plotOn(frame,RooFit.LineColor(kAzure),RooFit.Precision(1E-10))
-	pdf.plotOn(frame,RooFit.LineColor(kAzure-4),RooFit.LineStyle(kDashDotted),RooFit.Components(str(var.GetName())+"GaussSig_cat"+str(cat)), RooFit.Precision(1E-10))
-	pdf.plotOn(frame,RooFit.LineColor(kAzure-9),RooFit.LineStyle(kDashed),RooFit.Components(str(var.GetName())+"CBSig_cat"+str(cat)),RooFit.Precision(1E-10))
+	pdf.plotOn(frame,RooFit.LineColor(kAzure),RooFit.Precision(1E-5))
+	pdf.plotOn(frame,RooFit.LineColor(kAzure-4),RooFit.LineStyle(kDashDotted),RooFit.Components(str(var.GetName())+"GaussSig_cat"+str(cat)), RooFit.Precision(1E-5))
+	pdf.plotOn(frame,RooFit.LineColor(kAzure-9),RooFit.LineStyle(kDashed),RooFit.Components(str(var.GetName())+"CBSig_cat"+str(cat)),RooFit.Precision(1E-5))
         
 
 	curve = frame.getObject( int(1) )

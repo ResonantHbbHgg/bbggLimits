@@ -1,11 +1,11 @@
 {
-    "LTDIR" : "/src/HiggsAnalysis/bbggLimits/work/LT_NonRes_CUT400Reg__TYPE",
+    "LTDIR" : "/src/HiggsAnalysis/bbggLimits/work/LT_NonRes_MVA400Reg__TYPE",
     "signal" : {
         "types" : ["HighMass", "LowMass"],
-	"signalModelCard" : "/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D_sig.rs"
+	"signalModelCard" : "/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D_dcb.rs"
     },
     "other" : {
-        "Combinelxbatch" : 1,
+        "Combinelxbatch" : 0,
         "version" : 66,
 	"integratedLumi" : 36.5,
         "energy" : "13TeV",
@@ -15,12 +15,12 @@
         "doBands" : 0,
         "ncat" : 2,
         "analysisType" : "fitTo2D_resSearch_withRegKinFit",
-        "doSingleLimit" : 1,
+        "doSingleLimit" : 0,
         "drawSignalFit" : 1,
         "drawBackgroundFit" : 0,
         "useSigTheoryUnc" : 0,
 	"doBrazilianFlag" : false,
-	"runCombine" : true,
+	"runCombine" :false,
 	"combineOption" : 2,
 	"minMggMassFit" : 100,
 	"maxMggMassFit" : 180,
