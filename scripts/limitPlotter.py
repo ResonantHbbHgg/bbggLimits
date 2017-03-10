@@ -17,6 +17,8 @@ parser.add_argument('-d', '--dir', dest="inDir", type=str, default=None, require
                     help="Input directory")
 parser.add_argument('-x', choices=['res', 'nodes', 'grid', 'lambda', 'bench'], required=True, default=None,
                     help = "Choose which Limit plot to make.")
+parser.add_argument("--log", dest="log", action="store_true", default=False,
+                    help="Make log scale (in y)")
 parser.add_argument("-v", dest="verb", type=int, default=0,
                     help="Verbosity level: 0 is minimal")
 
@@ -74,6 +76,14 @@ def getValuesFromFile(fname):
   return res
 
 
+def LambdaCurve(x, par):
+  yt  = par[0]
+  c2  = par[1]
+  cg  = par[2]
+  c2g = par[3]
+  
+  return br*pg.getCrossSectionForParameters(x[0], yt, c2, cg, c2g)[0]
+  
 if __name__ == "__main__":
   print "This is the __main__ part"
 
@@ -86,7 +96,12 @@ if __name__ == "__main__":
   tdrStyle.SetTitleYOffset(1.1)
 
   TH1.SetDefaultSumw2(kTRUE)
-
+  
+  latex = TLatex()
+  latex.SetNDC()
+  latex.SetTextAngle(0)
+  latex.SetTextColor(kBlack)
+    
   xAxis = []
   xErr  = []
   obs   = []
@@ -281,6 +296,7 @@ if __name__ == "__main__":
 
     twoSigma.SetLineWidth(8)
     twoSigma.SetLineColor(kYellow)
+    twoSigma.SetMarkerStyle(1)
 
     oneSigma.SetMarkerColor(kBlue+1)
     oneSigma.SetMarkerStyle(21)
@@ -299,11 +315,20 @@ if __name__ == "__main__":
       theory.SetMarkerStyle(22)
       theory.SetMarkerSize(1.2)
       theory.SetMarkerColor(kRed+2)
-      mg.Add(theory,'P')
-      
+      #mg.Add(theory,'PC')
+
     mg.Draw('APZ')
     if opt.x == 'lambda':
       mg.GetXaxis().SetTitle('#kappa_{#lambda}')
+      
+      lambdaFunc = TF1('Lambda', LambdaCurve, -16, 16, 4)
+      lambdaFunc.SetParameters(1,0,0,0)
+
+      lambdaFunc.SetLineWidth(2)
+      lambdaFunc.SetLineColor(kRed+2)
+      lambdaFunc.Draw('L same')
+      
+      
     if opt.x == 'nodes':
       mg.GetXaxis().SetTitle('Node Number')
     if opt.x == 'bench':
@@ -367,16 +392,26 @@ if __name__ == "__main__":
     leg.AddEntry(oneSigma,"Expected #pm 1#sigma", "l")
     leg.AddEntry(twoSigma,"Expected #pm 2#sigma", "l")
     if opt.x=='lambda':
-      leg.AddEntry(theory,"Theory", "p")
+      #leg.AddEntry(theory,"Theory", "p")
+      leg.AddEntry(lambdaFunc,"Theory prediction", "l")
+      latex.SetTextFont(42)
+      latex.SetTextSize(0.03)
+      latex.DrawLatex(0.2,0.8, 'c_{2}=c_{2}^{SM}, c_{g}=c_{g}^{SM}, c_{2g}=c_{2g}^{SM}')
+
   if opt.x=='grid':
     leg.AddEntry(observed,"Observed", "p")
     leg.AddEntry(expected,"Expected", "l")
     leg.AddEntry(oneSigma,"Expected #pm 1#sigma", "f")
     leg.AddEntry(twoSigma,"Expected #pm 2#sigma", "f")
 
-
   leg.Draw()
 
+  if opt.log:
+    mg.SetMinimum(0.03)
+    mg.SetMaximum(170)
+    gPad.SetLogy()
+
+  
   CMS_lumi(c1, 4, 11, "")
   for e in ['.png']:
     c1.SaveAs(opt.inDir+'/limitPlot_'+opt.x+'_'+str(opt.combineOpt)+e)
