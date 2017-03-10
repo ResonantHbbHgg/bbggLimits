@@ -1,23 +1,27 @@
 {
+    "LTDIR" : "/src/HiggsAnalysis/bbggLimits/LT_NonRes_MVABased400Reg__TYPE",
     "signal" : {
-        "dir" : "/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LimitSetting/NonResAnalysis_ICHEP_TYPE/",
-	"nodes" : [2],
-        "types" : ["LowMass","HighMass"],
-	"signalModelCard" : "/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D_sig.rs"
+        "types" : ["HighMass", "LowMass"],
+	"signalModelCard" : "/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D_sig.rs"
     },
     "other" : {
-        "version" : 56,
-	"integratedLumi" : 2.7,
+        "Combinelxbatch" : 1,
+        "version" : 66,
+	"integratedLumi" : 36.5,
         "energy" : "13TeV",
         "higgsMass" : 125.0,
         "addHiggs" : 0,
         "doBlinding" : 0,
-        "doBands" : 1,
+        "doBands" : 0,
         "ncat" : 2,
         "analysisType" : "fitTo2D_resSearch_withRegKinFit",
+        "doSingleLimit" : 1,
+        "drawSignalFit" : 1,
+        "drawBackgroundFit" : 0,
         "useSigTheoryUnc" : 0,
 	"doBrazilianFlag" : false,
 	"runCombine" : true,
+	"combineOption" : 2,
 	"minMggMassFit" : 100,
 	"maxMggMassFit" : 180,
 	"minMjjMassFit"	: 80,
@@ -34,15 +38,15 @@
 	"base":true,
 	"low":false,
 	"obs":false,
-	"twotag":false
+	"twotag":false,
+        "doBias":false,
+        "biasConfig": "BiasStudies/ForBias.json"
 	
     },
     "data" : {
-        "dir" : "/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LimitSetting/NonResAnalysis_ICHEP_TYPE/",
         "name" :"DoubleEG"
     },
     "higgs" : {
-        "dir" : "/afs/cern.ch/work/o/obondu/public/forRadion/limitTrees",
 	"type" : ["ggh_m125_powheg_8TeV","tth_m125_8TeV"]
     }
 }

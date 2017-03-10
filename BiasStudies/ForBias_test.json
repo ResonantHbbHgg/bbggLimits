@@ -1,0 +1,46 @@
+{
+  "vars" : { 
+		"mjj[80,200]" : "M(jj)",
+        	"mgg[100, 180]" : "M(#gamma#gamma)"
+	   },
+  "nbins" : ["40", "80"],
+  "selection" : "mgg > 100 && mgg < 180 && mjj > 80 && mjj < 200",
+  "plotTitle" : "",
+  "functions" : [
+
+"RooFormulaVar:m_e2_p0_mgg('e2_p0_mgg', {e2_p0_mgg[1]})",
+"RooFormulaVar:m_e2_p1_mgg('e2_p1_mgg', {e2_p1_mgg[0.01, -100000, 100000]})",
+"RooFormulaVar:m_e2_p2_mgg('e2_p2_mgg', {e2_p2_mgg[-0.01, -100000, 100000]})",
+"RooFormulaVar:m_e2_p3_mgg('e2_p3_mgg', {e2_p3_mgg[0.01, -100000, 100000]})",
+"RooFormulaVar:m_e2_p4_mgg('e2_p4_mgg', {e2_p4_mgg[-0.01, -100000, 100000]})",
+"EXPR::Exp2_mgg( ' m_e2_p0_mgg + m_e2_p1_mgg*exp(m_e2_p2_mgg*mgg) + m_e2_p3_mgg*exp(m_e2_p4_mgg*mgg)', {mgg, m_e2_p0_mgg, m_e2_p1_mgg, m_e2_p2_mgg, m_e2_p3_mgg, m_e2_p4_mgg} )",
+"RooFormulaVar:m_e2_p0_mjj('e2_p0_mjj', {e2_p0_mjj[1]})",
+"RooFormulaVar:m_e2_p1_mjj('e2_p1_mjj', {e2_p1_mjj[0.01, -100000, 100000]})",
+"RooFormulaVar:m_e2_p2_mjj('e2_p2_mjj', {e2_p2_mjj[-0.01, -100000, 100000]})",
+"RooFormulaVar:m_e2_p3_mjj('e2_p3_mjj', {e2_p3_mjj[0.01, -100000, 100000]})",
+"RooFormulaVar:m_e2_p4_mjj('e2_p4_mjj', {e2_p4_mjj[-0.01, -100000, 100000]})",
+"EXPR::Exp2_mjj( ' m_e2_p0_mjj + m_e2_p1_mjj*exp(m_e2_p2_mjj*mjj) + m_e2_p3_mjj*exp(m_e2_p4_mjj*mjj)', {mjj, m_e2_p0_mjj, m_e2_p1_mjj, m_e2_p2_mjj, m_e2_p3_mjj, m_e2_p4_mjj} )",
+"PROD:BackgroundModel_Exp2Exp2( Exp2_mgg, Exp2_mjj)"
+
+	],
+  "functionsToFit" :  [ 
+"BackgroundModel_Exp2Exp2"
+
+],
+  "functionsToPlot" : [
+"Exp2_mgg",
+"Exp2_mjj"
+],
+  "biasFunctions" :   [
+"BackgroundModel_Exp2Exp2"
+],
+  "functionLegends" : [
+"2 Exponentials",
+"2 Exponentials"
+],
+  "error" : "1",
+  "bkgNorm" : 10,
+  "bkgNorm_up" : 500,
+  "bkgNorm_down" : 0.000001
+}
+

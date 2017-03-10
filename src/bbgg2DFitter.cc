@@ -1,6 +1,14 @@
 #define bbgg2DFitter_cxx
 #include "HiggsAnalysis/bbggLimits/interface/bbgg2DFitter.h"
+#include "HiggsAnalysis/bbggLimits/interface/bbggFittingTools.h"
 #include "HiggsAnalysis/bbggLimits/interface/Colors.h"
+#include "HiggsAnalysis/CombinedLimit/interface/RooMultiPdf.h"
+//Boost
+#include <boost/program_options.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/foreach.hpp>
 
 std::ofstream newCout;
 
@@ -110,7 +118,7 @@ void bbgg2DFitter::Initialize(RooWorkspace* workspace, Int_t SigMass, float Lumi
   // Some defaults here are:
   // -2: do Resonant limits
   // -1: Non-resonant limits from Nodes
-  // 0-1507: Non-resonant limits with re-weighting
+  // 0-1506 && 1507-1518: Non-resonant limits with re-weighting
   if (_nonResWeightIndex>=0)
     _wName = Form("evWeight_NRW_%d",doNRW);
   else
@@ -562,10 +570,12 @@ void bbgg2DFitter::MakePlots(float mass)
       std::vector<float> effSigmaVecMjj = EffectiveSigma( _w->var("mjj"), mjjSig[c], _minSigFitMjj, _maxSigFitMjj);
       sigma_mjj.push_back(effSigmaVecMjj[3]);
 
-      double mgg_mean = (mggSig[c]->mean(*_w->var("mgg")))->getVal();
+//      double mgg_mean = (mggSig[c]->mean(*_w->var("mgg")))->getVal();
+      double mgg_mean = ((RooRealVar*) _w->var(TString::Format("mgg_sig_m0_cat%d",c)))->getVal();//(mggSig[c]->getParameters(*_w->var("mgg")))->find(
       mean_mgg.push_back(mgg_mean);
 
-      double mjj_mean = (mjjSig[c]->mean(*_w->var("mjj")))->getVal();
+//      double mjj_mean = (mjjSig[c]->mean(*_w->var("mjj")))->getVal();
+      double mjj_mean = ((RooRealVar*) _w->var(TString::Format("mjj_sig_m0_cat%d",c)))->getVal();
       mean_mjj.push_back(mjj_mean);
 
     } // close categories
@@ -703,7 +713,7 @@ void bbgg2DFitter::MakePlots(float mass)
 	  else if (_sigMass==1)	str_desc=TString::Format(" Nonresonant HH, Box Diagram Only");
 	  else str_desc=TString::Format(" Nonresonant HH, Node %d", _sigMass);
 	}
-	else if (_nonResWeightIndex<1507){
+	else if (_nonResWeightIndex<1519){
 	  // This is the points
 	  str_desc=TString::Format(" Nonresonant HH, Weight No.%d", _nonResWeightIndex);
 	}
@@ -1105,6 +1115,8 @@ void bbgg2DFitter::MakeSigWS(std::string fileBaseName)
     {
       SigPdf[c] = (RooAbsPdf*) _w->pdf(TString::Format("SigPdf_cat%d",c));
       wAll->import(*_w->pdf(TString::Format("SigPdf_cat%d",c)));
+      wAll->import(*_w->data(TString::Format("Sig_cat%d",c)));
+      //IMPORTHERE
     }
   // (2) Systematics on energy scale and resolution
   // 1,1,1 statistical to be treated on the datacard
@@ -1388,301 +1400,6 @@ void bbgg2DFitter::MakeBkgWS(std::string fileBaseName)
   return;
 } // close make BKG workspace
 
-void bbgg2DFitter::MakeDataCard(std::string fileBaseName, std::string fileBkgName ,Bool_t useSigTheoryUnc)
-{
-  if (_verbLvl>0){
-    std::cout<<" DBG.  Making Data card"<<std::endl;
-    std::cout<<" fileBaseName ="<<fileBaseName<<"\n   fileBkgName="<<fileBkgName<<std::endl;
-  }
-
-
-  TString cardDir = TString::Format("%s/datacards/",_folder_name.data());
-  TString wsDir   = TString::Format("%s/workspaces/",_folder_name.data());
-  std::vector<RooDataSet*>vec(_NCAT,nullptr);
-  std::map<std::string,std::vector<RooDataSet*>>higToFits{{"ggh_m125_powheg_13TeV",vec},{"tth_m125_13TeV",vec},{"vbf_m125_13TeV",vec},{"wzh_m125_13TeV_zh",vec},{"bbh_m125_13TeV",vec}};
-  std::vector<RooDataSet*> data(_NCAT,nullptr);
-  std::vector<RooDataSet*> sigToFit(_NCAT,nullptr);
-  for (int c = 0; c < _NCAT; ++c)
-    {
-      data[c] = (RooDataSet*) _w->data(TString::Format("Data_cat%d",c));
-      sigToFit[c] = (RooDataSet*) _w->data(TString::Format("Sig_cat%d",c));
-      //
-      if(_addHiggs){
-	for(std::vector<std::string>::iterator it=_singleHiggsNames.begin();it!=_singleHiggsNames.end();++it)
-	  {
-	    higToFits[*it][c]=(RooDataSet*) _w->data(TString::Format("Hig_%d_cat%d",_singleHiggsMap[*it],c));
-	    if (_verbLvl>1) std::cout<<*it<<" found "<<std::endl;
-	  }
-      }
-    } // close cat
-  ////////////////////////////////////////////////////////////////////////////////////
-  //RooRealVar* lumi = w->var("lumi");
-  if (_verbLvl>1) {
-
-    std::cout << "======== Expected Events Number =====================" <<std::endl;
-    std::cout << ".........Measured Data for L = " << _lumi << " pb-1 ............................" <<std::endl;
-    if(!_doblinding){ std::cout << "#Events data: " << _w->data("Data")->sumEntries() << std::endl;}
-    else std::cout << "#Events data: -1 " << std::endl;
-    if(!_doblinding)
-      for (int c = 0; c < _NCAT; ++c) std::cout << TString::Format("#Events data cat%d: ",c) << data[c]->sumEntries() <<std::endl;
-    else
-      for (int c = 0; c < _NCAT; ++c) std::cout << TString::Format("#Events data cat%d: ",c) << -1 << std::endl;
-    std::cout << ".........Expected Signal for L = " << _lumi << " pb-1 ............................" << std::endl;
-    if(!_doblinding) std::cout << "#Events Signal: " << _w->data("Data")->sumEntries() << std::endl;
-    else  std::cout << "#Events Signal: -1 " << std::endl;
-    //std::vector<Float_t>siglikeErr(_NCAT,0.0);
-
-    for (int c = 0; c < _NCAT; ++c) {
-      std::cout << TString::Format("#Events Signal cat%d: ",c) << sigToFit[c]->sumEntries() <<std::endl;
-      //siglikeErr[c]=0.6*sigToFit[c]->sumEntries();
-    }
-    std::cout << "====================================================" <<std::endl;
-  }
-
-  TString filename(cardDir+fileBaseName+".txt");
-  std::ofstream outFile(filename);
-  // outFile << "#CMS-HGG DataCard for Unbinned Limit Setting, " << lumi->getVal() << " pb-1 " << std::endl;
-  outFile << "#Run with: combine -d hgg.mH350.0.shapes-Unbinned.txt -U -m 130 -H ProfileLikelihood -M MarkovChainMC --rMin=0 --rMax=20.0 -b 3500 -i 50000 --optimizeSim=1 --tries 30" << std::endl;
-  outFile << "# Lumi = " << _lumi << " pb-1" << std::endl;
-  outFile << "imax "<<_NCAT << std::endl;
-  outFile << "jmax "<<_singleHiggsNames.size()+1<< std::endl; // number of BKG
-  outFile << "kmax *" << std::endl;
-  outFile << "---------------" << std::endl;
-  outFile << "shapes data_obs cat0 " << wsDir+fileBkgName+".root" << " w_all:data_obs_cat0" << std::endl;
-  if ( _NCAT > 1 ) outFile << "shapes data_obs cat1 "<< wsDir+fileBkgName+".root" << " w_all:data_obs_cat1" << std::endl;
-  if ( _NCAT > 2 )
-    {
-      outFile << "shapes data_obs cat2 " << wsDir+fileBkgName+".root" << " w_all:data_obs_cat2" << std::endl;
-      outFile << "shapes data_obs cat3 "<< wsDir+fileBkgName+".root" << " w_all:data_obs_cat3" << std::endl;
-    }
-  outFile << "############## shape with reparametrization" << std::endl;
-  outFile << "shapes Bkg cat0 " << wsDir+fileBkgName+".root" << " w_all:CMS_bkg_13TeV_cat0" << std::endl;
-  if ( _NCAT > 1 ) outFile << "shapes Bkg cat1 "<< wsDir+fileBkgName+".root" << " w_all:CMS_bkg_13TeV_cat1" << std::endl;
-  if ( _NCAT > 2 )
-    {
-      outFile << "shapes Bkg cat2 " << wsDir+fileBkgName+".root" << " w_all:CMS_bkg_13TeV_cat2" << std::endl;
-      outFile << "shapes Bkg cat3 "<< wsDir+fileBkgName+".root" << " w_all:CMS_bkg_13TeV_cat3" << std::endl;
-    }
-  outFile << "# signal" << std::endl;
-  outFile << "shapes Sig cat0 " << wsDir+fileBaseName+".inputsig.root" << " w_all:CMS_sig_cat0" << std::endl;
-  if ( _NCAT > 1 ) outFile << "shapes Sig cat1 " << wsDir+fileBaseName+".inputsig.root" << " w_all:CMS_sig_cat1" << std::endl;
-  if ( _NCAT > 2 )
-    {
-      outFile << "shapes Sig cat2 " << wsDir+fileBaseName+".inputsig.root" << " w_all:CMS_sig_cat2" << std::endl;
-      outFile << "shapes Sig cat3 " << wsDir+fileBaseName+".inputsig.root" << " w_all:CMS_sig_cat3" << std::endl;
-    }
-  for(std::map<std::string,std::vector<RooDataSet*>>::iterator it=higToFits.begin();it!=higToFits.end();++it)
-    {
-      std::map<std::string,std::string>name{{"ggh_m125_powheg_13TeV","#ggh"},{"tth_m125_13TeV","#tth"},{"vbf_m125_13TeV","#vbf"},{"wzh_m125_13TeV_zh","#vh"},{"bbh_m125_13TeV","#bbh"}};
-      std::map<std::string,std::string>name2{{"ggh_m125_powheg_13TeV","Higggh"},{"tth_m125_13TeV","Higtth"},{"vbf_m125_13TeV","Higvbf"},{"wzh_m125_13TeV_zh","Higvh"},
-																       {"bbh_m125_13TeV","Higbbh"}};
-      std::vector<std::string>::iterator itt=find(_singleHiggsNames.begin(),_singleHiggsNames.end(),it->first);
-      if(itt!=_singleHiggsNames.end())
-  	{outFile << name[it->first] << std::endl;
-	  for(int hh=0;hh<_NCAT;++hh)
-	    {
-	      std::string catn="cat"+std::to_string(hh);
-	      outFile << "shapes "<<name2[it->first]<<" "<<catn<<" "<< wsDir+_singleHiggsWSfileNames[it->first]<<".inputhig.root"<<" w_all:CMS_hig_"<<_singleHiggsMap[it->first]<<"_"<<catn << std::endl;
-	    }
-	}
-    }
-  outFile << "---------------" <<std::endl;
-  /////////////////////////////////////
-  if(1)
-    { //
-      outFile << "bin cat0 ";
-      if ( _NCAT > 1 ) outFile << "cat1 ";
-      if ( _NCAT > 2 ) outFile << "cat2 cat3 ";
-      if(!_doblinding)
-	{
-	  outFile << "\nobservation "<< data[0]->sumEntries() <<" " ;
-	  //this->SetObservedCats(0, data[0]->sumEntries());
-	  if ( _NCAT > 1 ) {
-	    outFile << data[1]->sumEntries() <<" ";
-	    //this->SetObservedCats(1, data[1]->sumEntries());
-	  }
-	  if ( _NCAT > 2 ) {
-	    outFile << data[2]->sumEntries() <<" " << data[3]->sumEntries() <<" ";
-	    //this->SetObservedCats(2, data[2]->sumEntries());
-	  }
-	}
-      else
-	{
-	  outFile << "\nobservation -1 ";
-	  if ( _NCAT > 1 ) outFile << " -1 ";
-	  if ( _NCAT > 2 ) outFile << "-1 -1 ";
-	}
-      outFile << "\n------------------------------" << std::endl;
-      std::map<std::string,std::string>Name{{"ggh_m125_powheg_13TeV","Higggh"},{"tth_m125_13TeV","Higtth"},{"vbf_m125_13TeV","Higvbf"},{"wzh_m125_13TeV_zh","Higvh"},
-																      {"bbh_m125_13TeV","Higbbh"}};
-      outFile << "bin ";
-      for(int f=0;f<_NCAT;++f)
-	{
-	  std::string catn="cat"+std::to_string(f)+" ";
-
-	  for(unsigned int l=0;l!=_singleHiggsNames.size()+2;++l) outFile<<catn;
-	}
-      outFile << "\nprocess";
-      for(int f=0;f<_NCAT;++f)
-	{
-	  outFile<<" Sig Bkg ";
-	  for(unsigned int l=0;l!=_singleHiggsNames.size();++l) outFile<<Name[_singleHiggsNames[l]]<<" ";
-	}
-      outFile<< "\nprocess ";
-      for(int f=0;f<_NCAT;++f)
-	{
-	  outFile<< "0 1 ";
-	  for(unsigned int l=0;l!=_singleHiggsNames.size();++l) outFile<<std::to_string(l+2)+" ";
-	}
-      outFile << "\nrate ";
-      for(int f=0;f<_NCAT;++f)
-	{
-	  outFile<<" "<<sigToFit[f]->sumEntries()<<" "<<1<<" ";
-	  //this->SetSigExpectedCats(f, sigToFit[f]->sumEntries());
-	  for(std::map<std::string,std::vector<RooDataSet*>>::iterator it=higToFits.begin();it!=higToFits.end();++it)
-	    {
-	      std::vector<std::string>::iterator itt=find(_singleHiggsNames.begin(),_singleHiggsNames.end(),it->first);
-	      if(itt!=_singleHiggsNames.end())outFile<<(it->second)[f]->sumEntries()<<" ";
-	    }
-
-	}
-      outFile << " " << std::endl;
-      outFile << "############## Total normalisation" <<std::endl;
-      std::vector<std::string>lumi{"1.026","-","1.026","1.026","1.026","1.026","1.026"};
-      std::vector<std::string>DiphoTrigger{"1.010","-","1.010","1.010","1.010","1.010","1.010"};
-      std::vector<std::string>CMS_hgg_eff_g{"1.010","-","1.010","1.010","1.010","1.010","1.010"};
-      std::vector<std::string>pTj_cut_acceptance{"1.010","-","1.010","1.010","1.010","1.010","1.010"};
-      std::vector<std::string>btag_eff{"1.050","-","1.0508","1.050","1.050","1.050","1.050"};
-      std::vector<std::string>btag_eff2{"0.979","-","0.979","0.979","0.979","0.979","0.979"};
-      std::vector<std::string>maajj_cut_acceptance{"1.015","-","1.015","1.015","1.015","1.015","1.015"};
-      std::vector<std::string>maajj_cut_acceptance2{"0.995","-","0.995","0.995","0.995","0.995","0.995"};
-      std::vector<std::string>PDF{"-","-","0.931/1.075","0.919/1.081","0.972/1.026","0.976/1.024","0.976/1.024"};
-      std::vector<std::string>QCD_scale{"-","-","0.922/1.072","0.907/1.038","0.998/1.002","0.980/1.020","0.980/1.020"};
-      std::vector<std::string>gg_migration{"-","-","1.25","1.25","1.08","1.08","1.08"};
-      std::vector<std::string>gluonSplitting{"-","-","1.40","1.40","1.40","1.40","1.40"};
-      std::vector<std::pair<std::string,std::vector<std::vector<std::string>>>>MAP
-	{
-	  {"lumi_"+_energy,{lumi}},
-	    {"DiphoTrigger",{DiphoTrigger}},
-	      {"CMS_hgg_eff_g",{CMS_hgg_eff_g}},
-		{"pTj_cut_acceptance",{pTj_cut_acceptance}},
-		  {"btag_eff",{btag_eff,btag_eff2}},
-		    {"maajj_cut_acceptance",{maajj_cut_acceptance,maajj_cut_acceptance2}},
-		      {"PDF",{PDF}},
-			{"QCD_scale",{QCD_scale}},
-			  {"gg_migration",{gg_migration}},
-			    {"gluonSplitting",{gluonSplitting}}
-	};
-      std::map<std::string,std::string>Comments
-      {
-	{"DiphoTrigger","############## Photon selection normalisation uncertainties "},
-	  {"CMS_hgg_eff_g","# Trigger efficiency"},
-	    {"pTj_cut_acceptance","# photon selection accep.\n\n############## Jet selection and phase space cuts normalisation uncertainties "},
-	      {"btag_eff","# JER and JES "},
-		{"maajj_cut_acceptance","# b tag efficiency uncertainty"},
-		  {"PDF","# uncertainty on mggjj cut acceptance \n\n ############## Theory uncertainties on SM Higgs production "},
-		    };
-
-
-      for(std::vector<std::pair<std::string,std::vector<std::vector<std::string>>>>::iterator it=MAP.begin();it!=MAP.end();++it)
-	{
-	  if(Comments.find(it->first)!=Comments.end())outFile<<Comments[it->first]<<std::endl;
-	  outFile<<it->first<<" lnN ";
-	  bool manycase=false;
-	  if((it->second).size()==2)manycase=true;
-	  for(int f=0;f<_NCAT;++f)
-	    {
-	      if(manycase==false)outFile<<(it->second)[0][0]<<"  ";
-	      else outFile<<(it->second)[f%2][0]<<"  ";
-	      if(manycase==false)outFile<<(it->second)[0][1]<<"  ";
-	      else outFile<<(it->second)[f%2][1]<<"  ";
-	      for(unsigned int l=0;l!=_singleHiggsNames.size();++l)
-		{
-		  if(manycase==false)outFile<<(it->second)[0][_singleHiggsMap[_singleHiggsNames[l]]+2]<<"  ";
-		  else outFile<<(it->second)[f%2][_singleHiggsMap[_singleHiggsNames[l]]+2]<<"  ";
-		}
-	    }
-	  outFile<<std::endl;
-	}
-      /*outFile << "lumi_13TeV lnN "<< "1.026 - 1.026 1.026 1.026 1.026 1.026 "<< "1.026 - 1.026 1.026 1.026 1.026 1.026 ";
-	if ( _NCAT > 2 )outFile << "1.026 - 1.026 1.026 1.026 1.026 1.026 "<< "1.026 - 1.026 1.026 1.026 1.026 1.026 ";
-	outFile << " " << std::endl << std::endl;
-	outFile << "############## Photon selection normalisation uncertainties " << std::endl;
-	outFile << "DiphoTrigger lnN "<< "1.01 - 1.010 1.010 1.010 1.010 1.010 "<< "1.01 - 1.010 1.010 1.010 1.010 1.010 ";
-	if ( _NCAT > 2 )outFile << "1.01 - 1.010 1.010 1.010 1.010 1.010 "<< "1.01 - 1.010 1.010 1.010 1.010 1.010 ";
-	outFile << "# Trigger efficiency" << std::endl;
-	outFile << "CMS_hgg_eff_g lnN "<< "1.010 - 1.010 1.010 1.010 1.010 1.010 "<< "1.010 - 1.010 1.010 1.010 1.010 1.010 ";
-	if ( _NCAT > 2 )outFile << "1.010 - 1.010 1.010 1.010 1.010 1.010 "<< "1.010 - 1.010 1.010 1.010 1.010 1.010 ";
-	outFile << "# photon selection accep." << std::endl;
-	outFile << " " << std::endl;
-	outFile << "############## Jet selection and phase space cuts normalisation uncertainties " <<std::endl;
-	outFile << "pTj_cut_acceptance lnN "<< "1.010 - 1.010 1.010 1.010 1.010 1.010 "<< "1.010 - 1.010 1.010 1.010 1.010 1.010 ";
-	if ( _NCAT > 2 )outFile << "1.010 - 1.010 1.010 1.010 1.010 1.010 "<< "1.010 - 1.010 1.010 1.010 1.010 1.010 ";
-	outFile <<"# JER and JES " << std::endl;
-	if ( _NCAT == 2)outFile << "btag_eff lnN "<< "1.050 - 1.0508 1.050 1.050 1.050 1.050 "<< "0.979 - 0.979 0.979 0.979 0.979 0.979 ";
-	else if ( _NCAT > 2 )outFile << "btag_eff lnN "<< "1.050 - 1.050 1.050 1.050 1.050 1.050 "<< "0.979 - 0.979 0.979 0.979 0.979 0.979 "<< "1.050 - 1.050 1.050 1.050 1.050 1.050 "<< "0.979 - 0.979 0.979 0.979 0.979 0.979 ";
-	outFile <<"# b tag efficiency uncertainty" << std::endl;
-	if (_NCAT == 2)outFile << "maajj_cut_acceptance lnN "<< "1.015 - 1.015 1.015 1.015 1.015 1.015 "<< "1.015 - 1.015 1.015 1.015 1.015 1.015 ";
-	else if (_NCAT > 2)outFile << "maajj_cut_acceptance lnN "<< "0.995 - 0.995 0.995 0.995 0.995 0.995 "<< "0.995 - 0.995 0.995 0.995 0.995 0.995 "<< "1.015 - 1.015 1.015 1.015 1.015 1.015 "<< "1.015 - 1.015 1.015 1.015 1.015 1.015 ";
-	outFile << "# uncertainty on mggjj cut acceptance" <<std::endl;
-	outFile << " " <<std::endl <<std::endl;
-	outFile << "############## Theory uncertainties on SM Higgs production " << std::endl;
-	outFile << "PDF lnN "<< " - - 0.931/1.075 0.919/1.081 0.972/1.026 0.976/1.024 0.976/1.024 "<< " - - 0.931/1.075 0.919/1.081 0.972/1.026 0.976/1.024 0.976/1.024 ";
-	if ( _NCAT > 2 )outFile << " - - 0.931/1.075 0.919/1.081 0.972/1.026 0.976/1.024 0.976/1.024 "<< " - - 0.931/1.075 0.919/1.081 0.972/1.026 0.976/1.024 0.976/1.024 ";
-	outFile << "\nQCD_scale lnN "<< " - - 0.922/1.072 0.907/1.038 0.998/1.002 0.980/1.020 0.980/1.020 "<< " - - 0.922/1.072 0.907/1.038 0.998/1.002 0.980/1.020 0.980/1.020 ";
-	if ( _NCAT > 2 )outFile << " - - 0.922/1.072 0.907/1.038 0.998/1.002 0.980/1.020 0.980/1.020 "<< " - - 0.922/1.072 0.907/1.038 0.998/1.002 0.980/1.020 0.980/1.020 ";
-	outFile << "\ngg_migration lnN "<< " - - 1.25 1.25 1.08 1.08 1.08 "<< " - - 1.25 1.25 1.08 1.08 1.08 ";
-	if ( _NCAT > 2 )outFile << " - - 1.25 1.25 1.08 1.08 1.08 "<< " - - 1.25 1.25 1.08 1.08 1.08 ";
-	outFile << "# UEPS" << std::endl;
-	outFile << "gluonSplitting lnN "<< " - - 1.40 1.40 1.40 1.40 1.40 "<< " - - 1.40 1.40 1.40 1.40 1.40 ";
-	if ( _NCAT > 2 )outFile << " - - 1.40 1.40 1.40 1.40 1.40 "<< " - - 1.40 1.40 1.40 1.40 1.40 ";
-	outFile << " " << std::endl<<endl;*/
-      if(useSigTheoryUnc)
-	{
-	  outFile << "############## Theory uncertainty on SM diHiggs production " << std::endl;
-	  outFile << "SM_diHiggs_Theory lnN "<< " 0.857/1.136 - - - - - - ";
-	  if ( _NCAT > 1 ) outFile << " 0.857/1.136 - - - - - - ";
-	  if ( _NCAT > 2 ) outFile << " 0.857/1.136 - - - - - - "<< " 0.857/1.136 - - - - - - ";
-	  outFile << " # from 9.96 + 1.35 - 1.42 fb " << std::endl << std::endl;
-	}
-      outFile << "############## Signal parametric shape uncertainties " << std::endl;
-      if ( _sigMass > 0)outFile << "CMS_hgg_sig_m0_absShift param 1 0.0045 # displacement of the dipho mean error = sqrt(0.4^ 2 + 0.2^ 2) " << std::endl;
-      else outFile << "CMS_hgg_sig_m0_absShift param 1 0.0054 # displacement of the dipho mean error = sqrt(0.5^ 2 + 0.2^ 2) " << std::endl;
-      outFile << "CMS_hgg_sig_sigmaScale param 1 0.05 # optimistic estimate of resolution uncertainty " << std::endl;
-      //
-      outFile << "CMS_hbb_sig_m0_absShift param 1 0.026 # displacement of the dijet mean error " << std::endl;
-      outFile << "CMS_hbb_sig_sigmaScale param 1 0.10 # optimistic estimate of resolution uncertainty " << std::endl;
-      //
-      outFile << "############## for mggxmjj fit - slopes" << std::endl;
-      outFile << "CMS_bkg_13TeV_cat0_norm flatParam # Normalization uncertainty on background slope" << std::endl;
-      if ( _NCAT > 1 ) outFile << "CMS_bkg_13TeV_cat1_norm flatParam # Normalization uncertainty on background slope" << std::endl;
-      if ( _NCAT > 2 )
-	{
-	  outFile << "CMS_bkg_13TeV_cat2_norm flatParam # Normalization uncertainty on background slope" << std::endl;
-	  outFile << "CMS_bkg_13TeV_cat3_norm flatParam # Normalization uncertainty on background slope" << std::endl;
-	  outFile << "CMS_hgg_bkg_13TeV_slope1_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
-	  outFile << "CMS_hgg_bkg_13TeV_slope1_cat1 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
-	  outFile << "CMS_hgg_bkg_13TeV_slope1_cat2 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
-	  outFile << "CMS_hgg_bkg_13TeV_slope1_cat3 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
-	  outFile << "CMS_hbb_bkg_13TeV_slope1_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
-	  outFile << "CMS_hbb_bkg_13TeV_slope1_cat1 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
-	  outFile << "CMS_hbb_bkg_13TeV_slope1_cat2 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
-	  outFile << "CMS_hbb_bkg_13TeV_slope1_cat3 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
-	}
-      else
-	{
-	  outFile << "CMS_hgg_bkg_13TeV_slope2_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
-	  outFile << "CMS_hgg_bkg_13TeV_slope3_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
-	  if ( _NCAT > 1 ) outFile << "CMS_hgg_bkg_13TeV_slope1_cat1 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
-	  outFile << "CMS_hbb_bkg_13TeV_slope2_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
-	  outFile << "CMS_hbb_bkg_13TeV_slope3_cat0 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
-	  if ( _NCAT > 1 ) outFile << "CMS_hbb_bkg_13TeV_slope1_cat1 flatParam # Mean and absolute uncertainty on background slope" << std::endl;
-	}
-    } // if ncat == 2 or 4
-  /////////////////////////////////////
-  outFile.close();
-  if (_verbLvl>1) std::cout << "Write data card in: " << filename << " file" << std::endl;
-} // close write full datacard
 
 void bbgg2DFitter::SetConstantParams(const RooArgSet* params)
 {
@@ -2292,3 +2009,134 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs)
   } // close to each category
   return fitresults;
 } // close berestein 3
+
+void bbgg2DFitter::MakeFitsForBias(std::string biasConfig, std::string outputFile)
+{
+  std::cout<<"\n ** Doing fits for Bias study** \n\n"
+	   <<"biasConfig="<<biasConfig
+	   <<"outputFile="<<outputFile<<std::endl;
+
+  //Parameters
+  std::string plotsDir=_folder_name;
+  std::vector<std::string> vars;
+  std::vector<std::string> varNames;
+  std::vector<std::string> nbins;
+  std::vector<std::string> functions;
+  std::vector<std::string> functionsToFit;
+  std::vector<std::string> functionsToPlot;
+  std::vector<std::string> biasFunctions;
+  std::string plotTitle="";
+  std::vector<std::string> legends;
+  double bkgNorm_up, bkgNorm_down, bkgNorm; 
+
+  //Read json
+  boost::property_tree::ptree pt;
+  boost::property_tree::read_json( biasConfig, pt );
+  bkgNorm_up = TString( pt.get_child("bkgNorm_up").data().c_str()).Atof();
+  bkgNorm_down = TString( pt.get_child("bkgNorm_down").data().c_str()).Atof();
+  bkgNorm = TString( pt.get_child("bkgNorm").data().c_str()).Atof();
+
+
+  BOOST_FOREACH( boost::property_tree::ptree::value_type const& rowPair, pt.get_child( "vars" ) ){
+    std::cout << rowPair.first << "\t" << rowPair.second.data() << std::endl;
+    vars.push_back(rowPair.first);
+    varNames.push_back(rowPair.second.data());
+  }
+
+  BOOST_FOREACH( boost::property_tree::ptree::value_type const& rowPair, pt.get_child( "nbins" ) ){
+    nbins.push_back(rowPair.second.data());
+  }
+
+  if(nbins.size() != vars.size()){
+    std::cout << "Size of nbins vector must be the same as variables vector..." << std::endl;
+    return ;
+  }
+
+  BOOST_FOREACH( boost::property_tree::ptree::value_type const& rowPair, pt.get_child( "functions" ) ){
+    functions.push_back(rowPair.second.data());
+  }
+
+  BOOST_FOREACH( boost::property_tree::ptree::value_type const& rowPair, pt.get_child( "functionsToFit" ) ){
+    functionsToFit.push_back(rowPair.second.data());
+  }
+
+  BOOST_FOREACH( boost::property_tree::ptree::value_type const& rowPair, pt.get_child( "functionsToPlot" ) ){
+    functionsToPlot.push_back(rowPair.second.data());
+  }
+
+  BOOST_FOREACH( boost::property_tree::ptree::value_type const& rowPair, pt.get_child( "functionLegends" ) ){
+    legends.push_back(rowPair.second.data());
+  }
+
+  BOOST_FOREACH( boost::property_tree::ptree::value_type const& rowPair, pt.get_child( "biasFunctions" ) ){
+    biasFunctions.push_back(rowPair.second.data());
+  }
+
+  TFile * tFile = new TFile(outputFile.data(), "RECREATE");
+
+  RooArgSet* TreeVars = new RooArgSet();
+  const Int_t ncat = _NCAT;
+  for ( int cat = 0; cat < ncat; cat++) {
+      RooWorkspace* wBias = new RooWorkspace(TString::Format("wBias_cat%d", cat));
+
+      for( unsigned int i = 0; i < vars.size(); i++){
+          // Initialize fit variable
+          wBias->factory( vars[i].c_str() );
+          std::string sVar = ( (TObjString *) ( (TObjArray *) (TString(vars[i]).Tokenize("[")) )->At(0) )->String().Data();
+          std::cout << "Variable to be fit: " << sVar << std::endl;
+          wBias->var( sVar.c_str() )->SetTitle(varNames[i].c_str());
+          wBias->var( sVar.c_str() )->setUnit("GeV");
+          TreeVars->add( *wBias->var( sVar.c_str() ) );
+      }
+
+      //Get data Distribution from main Workspace
+      RooDataSet* dataBias = (RooDataSet*) _w->data(TString::Format("Data_cat%d",cat));
+      wBias->import(*dataBias);
+
+      //Initialize all needed PDFs for background
+      for ( unsigned int f = 0; f < functions.size(); f++){
+        TString thisFunction(functions[f]);
+        std::cout << "Function added: " << thisFunction << std::endl;
+        wBias->factory( thisFunction.Data() );
+      }
+      //Fit all functions
+      std::vector<bbggFittingTools::FitRes> bkgresults = bbggFittingTools::FitFunctions(wBias, functionsToFit, dataBias);
+      std::ofstream myFitResults(std::string(TString::Format("%s/bias/biasFitsResults_cat%d.txt", plotsDir.c_str(),cat).Data() ), std::ofstream::out);
+      myFitResults << std::string(TString::Format("#Tot events: %d\n",dataBias->numEntries()));
+      myFitResults << "#Name \t chi2 \t minNLL\n";
+      for(unsigned int i = 0; i < bkgresults.size(); i++){
+          myFitResults << std::string(TString::Format("%s\t%f\t%f\n", bkgresults[i].function.c_str(), bkgresults[i].chi2, bkgresults[i].minNLL)).c_str();
+      }
+      myFitResults.close();
+
+      //plot fitted functions
+      for( unsigned int i = 0; i < vars.size(); i++){
+          std::string sVar = ( (TObjString *) ( (TObjArray *) (TString(vars[i]).Tokenize("[")) )->At(0) )->String().Data();
+          bbggFittingTools::PlotCurves(plotTitle, wBias, functionsToPlot, legends, bkgresults, dataBias, sVar, nbins[i], plotsDir+"/bias/BIASplot_bkg_"+sVar+ TString(plotTitle).ReplaceAll(" ", "_").Data()+TString::Format("_cat%d",cat).Data(), 0, 1);
+      }
+
+      //Do bias study business: create multipdf, etc
+      RooCategory pdf_index("pdf_index","Index of Pdf which is active");
+      RooArgList mypdfs;
+      for( unsigned int bias = 0; bias < biasFunctions.size(); bias++){
+          std::cout << "Adding functions to multipdf! " << biasFunctions[bias].c_str() << std::endl;
+          const char* modelName = biasFunctions[bias].c_str();
+          mypdfs.add(* wBias->pdf( modelName ) );
+      }
+      RooMultiPdf multipdf("roomultipdf", "All Pdfs", pdf_index, mypdfs);
+      RooRealVar norm("roomultipdf_norm", "Number of background events", bkgNorm, bkgNorm_down, bkgNorm_up);
+//      RooRealVar norm("roomultipdf_norm", "Number of background events", 0.000001, 5000000);
+
+      //Create bias workspace
+      RooWorkspace * bW = new RooWorkspace(TString::Format("BiasWorkspace_cat%d",cat));
+      bW->import(pdf_index);
+      bW->import(norm);
+      bW->import(multipdf);
+      tFile->cd();
+      bW->Write();
+  }
+  tFile->Close();
+
+  std::cout<<"\n \t* Finished with Bias study fits *\n"<<endl;
+
+}

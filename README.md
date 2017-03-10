@@ -1,7 +1,6 @@
-# bbggLimits
-Package for computing limits for the Run II analyses
+# Package for computing limits for the Run II analyses
 
-### Instalation
+## Instalation
 First, setup the environment with the Higgs Combine tools: https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideHiggsAnalysisCombinedLimit#For_end_users_that_don_t_need_to   
 Currently working with 74X (check latest on HiggsCombine twiki).   
 
@@ -13,13 +12,50 @@ cd bbggLimits
 scramv1 b -j 10
 ```
 
-### Making Limit Trees
+## Making Limit Trees
 
 In order to make limit trees from all samples use these script:
 ```
 makeAllTrees.py -x nonres [--NRW]
 ```
 
+### Working examples
+
+Make non-res shape benchmark points trees (MVA based with 400 Mhh threshold):
+```
+makeAllTrees.py -x nonres \   
+-d /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/Regression_Data/Hadd \   
+-s /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/Regression_Signal/Hadd/ \   
+-f LT_NonRes_MVABased400Reg_ \   
+--doCatMVA --MVAHMC0 0.960 --MVAHMC1 0.6 --MVALMC0 0.96 --MVALMC1 0.750 --massNR 400   
+```   
+   
+Make non-res shape benchmark points trees (cut based with 400 Mhh threshold and cut on cos theta star):   
+```
+makeAllTrees.py -x nonres \   
+-d /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/newData_HHTagger/Hadd \   
+-s /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/Signal_HHTagger400/Hadd/ \   
+-f LT_NonRes_CatBased400CTS_ --massNR 400 --ctsCut 0.8   
+```   
+   
+Make resonant limit trees with low mass categorization:   
+```
+makeAllTrees.py -x res \   
+-d /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/newData_HHTagger/Hadd \   
+-s /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/Signal_HHTagger400/Hadd/ \   
+-f LT_ResLMnW   
+```   
+   
+Make resonant limit trees with high mass categorization:   
+```
+makeAllTrees.py -x res \   
+-d /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/newData_HHTagger/Hadd \   
+-s /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/Signal_HHTagger400/Hadd/ \   
+-f LT_ResHM --highMassRes     
+```    
+
+
+### Details 
 The *C++ Loop* code to produce the Limit Trees is located at
 *src/bbggLTMaker.cc*. In order to run it over a single tree use the
 python script *scripts/pyLimitTreeMaker.py*, which exists in the
@@ -51,36 +87,16 @@ More options for the `pyLimitTreeMaker.py` can be specified:
 * `--doPhoVariation <VAR>`  - Apply photon SF factors: 0, 1 or -1.
 * `--cosThetaStar <VAR>`  - cut on CosTheta Star variable
 
-
-### Using C++ script to make Limit Trees (will be depricated soon):
-The script is located in *bin/LimitTreeMaker.C*
+Example to make all resonant limit trees:   
 ```
-LimitTreeMaker OPTIONS
+makeAllTrees.py -x res \   
+-d /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/DataJan20/Hadd \   
+-s /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/SignalJan20/Hadd \   
+-f LT_Jan26_Res_
 ```   
 
-##### LimitTreeMaker Options:   
-* -i <input list of files, text file with root files full paths> ( or -inputFile <single root file> )   
-* -o <output location>   
-* -min <min mtot> -max <max mtot>   
-* -scale <Lumi*CrossSection*SF/NEvts, 1 for data>   
-* -photonCR (do photon control region)   
-* -KF (use Mtot_KF to cut on mass window)   
-* -MX (use MX to cut on mass window) (choose either -MX or -KF!)   
-* -tilt (select tilted mass window)   
-* -doNoCat (no categorization, all is cat0)   
-* -btagWP <WP> (set btagging working point for categories   
-* -doCatMixed (do categories with mixed btagging - cat0: 2>low, cat1: 1<low+1>high)   
-* -singleCat (only one category, High Mass analysis)   
-* -doBVariation <VAR> (Apply b-tagging SF factors: 0, 1 or -1)
-* -doPhoVariation <VAR> (Apply photon SF factors: 0, 1 or -1)
-* -cosThetaStar <VAR> (Cut on CosTheta Star)
-                                
-
-
-
 ### Set the Limits
-
-For setting the Resonant limits, follow instructions in *LimitSetting* sub-directory.
+For setting the Resonant limits, the instructions will come soon.
 
 For Non-Resonant limit, stay here and run:
 ```

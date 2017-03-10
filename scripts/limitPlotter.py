@@ -15,16 +15,19 @@ parser.add_argument("-c", dest="combineOpt", type=int, default=1,
                     help="Pick which limits to plot. 1-Asymptotic; 2 - Asymptotic with adaptive asimov; 3 - HybridNew")
 parser.add_argument('-d', '--dir', dest="inDir", type=str, default=None, required=True,
                     help="Input directory")
-parser.add_argument('-x', choices=['res', 'nodes', 'grid', 'lambda'], required=True, default=None,
+parser.add_argument('-x', choices=['res', 'nodes', 'grid', 'lambda', 'bench'], required=True, default=None,
                     help = "Choose which Limit plot to make.")
+parser.add_argument("--log", dest="log", action="store_true", default=False,
+                    help="Make log scale (in y)")
 parser.add_argument("-v", dest="verb", type=int, default=0,
                     help="Verbosity level: 0 is minimal")
 
 opt = parser.parse_args()
 
-import ParametersGrid as pg
+import HiggsAnalysis.bbggLimits.ParametersGrid as pg
+import HiggsAnalysis.bbggLimits.TdrStyle as tdr
 
-
+br = 0.26 / 100.
 default_values = {
   "lambda": 1,
   "yt": 1,
@@ -73,18 +76,32 @@ def getValuesFromFile(fname):
   return res
 
 
+def LambdaCurve(x, par):
+  yt  = par[0]
+  c2  = par[1]
+  cg  = par[2]
+  c2g = par[3]
+  
+  return br*pg.getCrossSectionForParameters(x[0], yt, c2, cg, c2g)[0]
+  
 if __name__ == "__main__":
   print "This is the __main__ part"
 
   lambdaPoints = pg.getPoints(filterLambdaPoints)
   print 'Lambda points:\n', lambdaPoints
 
-  #gROOT.ProcessLine(".L ./tdrstyle.C")
   gROOT.LoadMacro("./CMS_lumi.C")
-  #setTDRStyle()
-  #gROOT.ForceStyle()
-  TH1.SetDefaultSumw2(kTRUE)
+  tdr.setTDRStyle()
+  tdrStyle.SetTitleSize(0.054, "Y")
+  tdrStyle.SetTitleYOffset(1.1)
 
+  TH1.SetDefaultSumw2(kTRUE)
+  
+  latex = TLatex()
+  latex.SetNDC()
+  latex.SetTextAngle(0)
+  latex.SetTextColor(kBlack)
+    
   xAxis = []
   xErr  = []
   obs   = []
@@ -93,6 +110,7 @@ if __name__ == "__main__":
   exp1SigLow = []
   exp2SigHi  = []
   exp2SigLow = []
+  theo = []
 
   missedPoints = []
 
@@ -136,14 +154,12 @@ if __name__ == "__main__":
       xAxis.append(float(i))
       xErr.append(0.5)
 
-  elif opt.x in ['grid','lambda']:
-    print 'Making limit plot for 0-1507 grid points'
 
-    for n in xrange(0,1506):
+  elif opt.x=='bench':
+    print 'Making limit plot for benchmarks'
 
-      if opt.x=='lambda' and n not in lambdaPoints:
-        continue
-
+    for i,n in enumerate(xrange(1507,1519)):
+      print i,n 
       l = getValuesFromFile(opt.inDir+'/CombinedCard_gridPoint_'+str(n)+'/higgsCombine_gridPoint_'+str(n)+fTail)
       if opt.verb>0:
         print n,l
@@ -159,10 +175,54 @@ if __name__ == "__main__":
       if not opt.blind:
         obs.append(l[5])
 
+      if opt.verb>0:
+        print n,l
+
+      xAxis.append(float(n-1506))
+      xErr.append(0.5)
+
+  elif opt.x in ['grid','lambda']:
+    print 'Making limit plot for 0-1507 grid points'
+
+    for n in xrange(0,1519):
+
+      if opt.x=='lambda' and n not in lambdaPoints:
+        continue
+
+      if n==324:
+        print " This is SM point. It does not exist in the weights."
+        print " Take it from the Nodes"
+        l = getValuesFromFile(opt.inDir+'/CombinedCard_Node_SM/higgsCombine_Node_SM'+fTail)
+        if l==None:
+          missedPoints.append(n)
+          continue
+      elif n in [910, 985, 990]:
+        continue
+      else:
+        l = getValuesFromFile(opt.inDir+'/CombinedCard_gridPoint_'+str(n)+'/higgsCombine_gridPoint_'+str(n)+fTail)
+        if l==None or len(l)<5:
+          missedPoints.append(n)
+          continue
+        
+      if opt.verb>0:
+        print n,l
+
+      exp2SigLow.append(l[0])
+      exp1SigLow.append(l[1])
+      expMean.append(l[2])
+      exp1SigHi.append(l[3])
+      exp2SigHi.append(l[4])
+      if not opt.blind:
+        obs.append(l[5])
+
       if opt.x=='grid':
         xAxis.append(float(n))
       if opt.x=='lambda':
         xAxis.append(float(pg.getParametersFromPoint(n,True)['lambda']))
+        # print n, float(pg.getParametersFromPoint(n,True)['lambda'])
+
+
+      theo.append(pg.getCrossSectionForPoint(n)[0]*br)
 
       xErr.append(0.5)
 
@@ -179,6 +239,7 @@ if __name__ == "__main__":
   xAxis_Array = np.array(xAxis)
   xErr_Array  = zeros_Array
 
+  theo_Array = np.array(theo)
   if opt.x=='grid':
     xErr_Array = np.array(xErr)
 
@@ -201,34 +262,41 @@ if __name__ == "__main__":
   twoSigma = TGraphAsymmErrors(nPoints,xAxis_Array,exp_Array,xErr_Array,xErr_Array,exp2SigLowErr_Array,exp2SigHiErr_Array)
   observed = TGraphAsymmErrors(nPoints,xAxis_Array,obs_Array,zeros_Array,zeros_Array,zeros_Array,zeros_Array)
 
+  theory = TGraphAsymmErrors(nPoints,xAxis_Array,theo_Array,zeros_Array,zeros_Array,zeros_Array,zeros_Array)
+
   if opt.x=='grid':
-    # Make a JSON file
+    # Make a JSON file 
     limDict = {}
     for i in xrange(0,nPoints):
       if opt.verb > 0:
-        print i, expMean[i], exp1SigLow[i], exp1SigHi[i], exp2SigLow[i], exp2SigHi[i]
+        print i, xAxis[i], expMean[i], exp1SigLow[i], exp1SigHi[i], exp2SigLow[i], exp2SigHi[i]
 
-      limDict[str(i)] = {"expected": expMean[i],
-                         "one_sigma": [exp1SigLow[i], exp1SigHi[i]],
-                         "two_sigma": [exp2SigLow[i], exp2SigHi[i]] }
+      p = int(xAxis[i])
+      limDict[p] = {"expected": expMean[i],
+                    "one_sigma": [exp1SigLow[i], exp1SigHi[i]],
+                    "two_sigma": [exp2SigLow[i], exp2SigHi[i]] }
       if not opt.blind:
         if opt.verb>0:
           print obs[i]
-        limDict[str(i)]['observed'] = obs[i]
+          limDict[p]['observed'] = obs[i]
 
     if opt.verb > 0:
       print limDict
 
     import json
+    from json import encoder
+    encoder.FLOAT_REPR = lambda o: format(o, '.4f')
+
     with open('limits_grid.json', 'w') as fp:
       json.dump(limDict, fp, sort_keys=True, indent=4)
 
 
 
-  if opt.x in ['nodes','lambda']:
+  if opt.x in ['nodes','bench','lambda']:
 
     twoSigma.SetLineWidth(8)
     twoSigma.SetLineColor(kYellow)
+    twoSigma.SetMarkerStyle(1)
 
     oneSigma.SetMarkerColor(kBlue+1)
     oneSigma.SetMarkerStyle(21)
@@ -240,13 +308,31 @@ if __name__ == "__main__":
     mg.Add(twoSigma,'PZ')
     mg.Add(oneSigma, 'EPZ')
 
-    #mg.Add(observed)
+    if not opt.blind:
+      mg.Add(observed)
+
+    if opt.x == 'lambda':
+      theory.SetMarkerStyle(22)
+      theory.SetMarkerSize(1.2)
+      theory.SetMarkerColor(kRed+2)
+      #mg.Add(theory,'PC')
 
     mg.Draw('APZ')
     if opt.x == 'lambda':
-      mg.GetXaxis().SetTitle('Lambda')
+      mg.GetXaxis().SetTitle('#kappa_{#lambda}')
+      
+      lambdaFunc = TF1('Lambda', LambdaCurve, -16, 16, 4)
+      lambdaFunc.SetParameters(1,0,0,0)
+
+      lambdaFunc.SetLineWidth(2)
+      lambdaFunc.SetLineColor(kRed+2)
+      lambdaFunc.Draw('L same')
+      
+      
     if opt.x == 'nodes':
       mg.GetXaxis().SetTitle('Node Number')
+    if opt.x == 'bench':
+      mg.GetXaxis().SetTitle('Benchmark Number')
 
 
   if opt.x in ['grid']:
@@ -268,6 +354,8 @@ if __name__ == "__main__":
     mg.Add(oneSigma)
     mg.Add(expected,'L')
 
+    mg.Add(theory,'L')
+
     if not opt.blind:
       mg.Add(observed,'L')
 
@@ -279,36 +367,51 @@ if __name__ == "__main__":
 
   if opt.x=='nodes':
     mg.GetXaxis().SetLimits(-1, 14)
+  if opt.x=='bench':
+    mg.GetXaxis().SetLimits(0, 13)
   if opt.x=='grid':
     mg.GetXaxis().SetLimits(-10, 1520)
   if opt.x=='lambda':
     mg.GetXaxis().SetLimits(-16, 16)
   mg.GetYaxis().SetTitle('#sigma(pp #rightarrow HH) #times B(HH #rightarrow bb#gamma#gamma)_{95% CL} (fb)')
-  mg.SetMaximum(50)
+
+  mg.SetMaximum(12)
 
   gPad.RedrawAxis()
 
 
-  leg = TLegend(0.60,0.66,0.85,0.89)
+  leg = TLegend(0.60,0.68,0.85,0.91)
   leg.SetTextFont(42)
   leg.SetTextSize(0.04)
   leg.SetFillStyle(0)
   leg.SetBorderSize(0)
 
-  if opt.x=='nodes':
+  if opt.x in ['nodes','bench','lambda']:
     leg.AddEntry(observed,"Observed", "p")
     leg.AddEntry(oneSigma,"Expected", "p")
     leg.AddEntry(oneSigma,"Expected #pm 1#sigma", "l")
     leg.AddEntry(twoSigma,"Expected #pm 2#sigma", "l")
+    if opt.x=='lambda':
+      #leg.AddEntry(theory,"Theory", "p")
+      leg.AddEntry(lambdaFunc,"Theory prediction", "l")
+      latex.SetTextFont(42)
+      latex.SetTextSize(0.03)
+      latex.DrawLatex(0.2,0.8, 'c_{2}=c_{2}^{SM}, c_{g}=c_{g}^{SM}, c_{2g}=c_{2g}^{SM}')
+
   if opt.x=='grid':
     leg.AddEntry(observed,"Observed", "p")
     leg.AddEntry(expected,"Expected", "l")
     leg.AddEntry(oneSigma,"Expected #pm 1#sigma", "f")
     leg.AddEntry(twoSigma,"Expected #pm 2#sigma", "f")
 
-
   leg.Draw()
 
+  if opt.log:
+    mg.SetMinimum(0.03)
+    mg.SetMaximum(170)
+    gPad.SetLogy()
+
+  
   CMS_lumi(c1, 4, 11, "")
   for e in ['.png']:
     c1.SaveAs(opt.inDir+'/limitPlot_'+opt.x+'_'+str(opt.combineOpt)+e)

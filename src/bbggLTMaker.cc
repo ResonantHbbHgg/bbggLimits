@@ -7,7 +7,6 @@
 #include "CondFormats/BTauObjects/interface/BTagCalibrationReader.h"
 
 bool DEBUG = 0;
-#define NRWTOT 1507 // Total points for the Non-resonant re-weighting
 
 void bbggLTMaker::Loop()
 {
@@ -34,6 +33,10 @@ void bbggLTMaker::Loop()
   o_category = -1;
   o_phoevWeight = 1;
   o_normalization = normalization;
+  o_HHTagger = -10;
+  o_ljet_bdis = -10;
+  o_sjet_bdis = -10;
+  o_isSignal = -10;
   //   btmap = 0;
 
   std::cout << "Output file name: " << outFileName << std::endl;
@@ -43,6 +46,7 @@ void bbggLTMaker::Loop()
   outFile = new TFile(outFileName.c_str(), "RECREATE");
   outTree = new TTree("TCVARS", "Limit tree for HH->bbgg analyses");
   outTree->Branch("cut_based_ct", &o_category, "o_category/I"); //0: 2btag, 1: 1btag
+  outTree->Branch("isSignal", &o_isSignal, "o_isSignal/I"); //0: 2btag, 1: 1btag
   outTree->Branch("evWeight", &o_weight, "o_weight/D");
   outTree->Branch("preWeight", &o_preweight, "o_preweight/D");
   outTree->Branch("btagevWeight", &o_btagweight, "o_btagweight/D");
@@ -55,6 +59,10 @@ void bbggLTMaker::Loop()
   outTree->Branch("jet2PT", &jet2PT, "jet2PT/D");
   outTree->Branch("jet1ETA", &jet1ETA, "jet1ETA/D");
   outTree->Branch("jet2ETA", &jet2ETA, "jet2ETA/D");
+  outTree->Branch("HHTagger", &o_HHTagger, "o_HHTagger/D");
+  outTree->Branch("ljet_bdis", &o_ljet_bdis, "o_ljet_bdis/D");
+  outTree->Branch("sjet_bdis", &o_sjet_bdis, "o_sjet_bdis/D");
+  outTree->Branch("isSignal", &o_isSignal, "o_isSignal/I");
 
   outTree->Branch("evt", &o_evt, "o_evt/l");
   outTree->Branch("run", &o_run, "o_run/i");
@@ -85,23 +93,38 @@ void bbggLTMaker::Loop()
     // Note that the following file is not committed to git (it's too large).
     // Get it from /afs/cern.ch/user/a/andrey/public/HH/weights_v1_1507_points.root
     // and copy in your working directory:
-    TString fileNameWei = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/weights_v1_1507_points.root");
+    TString fileNameWei = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/data/weights_v1_1507_points.root");
     NRwFile = new TFile(fileNameWei, "OPEN");
+
+    // This file includes 12 benchmark v3 weights.
+    // Get it from /afs/cern.ch/user/a/andrey/public/HH/ and copy in your working directory:
+    TString fileNameWei2 = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/data/weights_v3_bench12_points.root");
+    NRwFile2 = new TFile(fileNameWei2, "OPEN");
      
-    if (NRwFile->IsZombie()){
-      cout<<" Input file does not exist!"<<endl;
+    if (NRwFile->IsZombie() || NRwFile2->IsZombie()){
+      cout<<" Input file for Non-Res weihts does not exist!"<<endl;
       exit(1);
     }
     NRwFile->Print();
+    NRwFile2->Print();
 
     TList *histList = NRwFile->GetListOfKeys();
-    for (UInt_t n=0; n<NRWTOT; n++)
+    for (UInt_t n=0; n<1507; n++){
       if (histList->Contains(Form("point_%i_weights",n)))
 	NR_Wei_Hists[n] = (TH2F*)NRwFile->Get(Form("point_%i_weights",n));
       else
 	cout<<"This one does not existe pas: "<<n<<endl;
+    }
 
+    TList *histList2 = NRwFile2->GetListOfKeys();
+    for (UInt_t n=0; n<12; n++){
+      if (histList2->Contains(Form("point_%i_weights",n)))
+	NR_Wei_Hists[1507+n] = (TH2F*)NRwFile2->Get(Form("point_%i_weights",n));
+      else
+	cout<<"This one does not existe pas: "<<1507+n<<endl;
+    }
   }
+
 
   Long64_t nentries = fChain->GetEntriesFast();
 
@@ -125,7 +148,23 @@ void bbggLTMaker::Loop()
     bbggLTMaker::SetupPhotonSF( phoSFID_file, phoSFeveto_file);
   }
 
+  Long64_t toRun = nentries;
+  if (photonCRNormToSig) {
+    std::cout << "Doing normalized photon control region!" << std::endl;
+    Long64_t nentries_isSignal = fChain->GetEntries("isSignal==0");
+    toRun = nentries_isSignal*0.14;
+  }
+
+  Long64_t pcrCounter = 0;
   for (Long64_t jentry=0; jentry<nentries;jentry++) {
+
+    if ( photonCRNormToSig ) {
+      if (isSignal == 0) {
+        pcrCounter++;
+      }
+      if (pcrCounter > toRun) break;
+    }
+
     o_weight = 0;
     o_preweight = 0;
     o_btagweight = 0;
@@ -134,6 +173,12 @@ void bbggLTMaker::Loop()
     o_bbggMass = 0;
     o_category = -1;
     o_phoevWeight = 1;
+    o_ljet_bdis = 0;
+    o_sjet_bdis = 0;
+    o_isSignal = -10;
+    o_HHTagger = -10;
+    o_ljet_bdis = -10;
+    o_sjet_bdis = -10;
 
       
     Long64_t ientry = LoadTree(jentry);
@@ -149,6 +194,11 @@ void bbggLTMaker::Loop()
     o_bbMass = dijetCandidate->M();
     o_ggMass = diphotonCandidate->M();
     o_bbggMass = diHiggsCandidate->M();
+    o_ljet_bdis = leadingJet_bDis;
+    o_sjet_bdis = subleadingJet_bDis;
+    o_isSignal = isSignal;
+    o_HHTagger = HHTagger;
+
     if(doKinFit)
       o_bbggMass = diHiggsCandidate_KF->M();
     if(doMX)
@@ -162,90 +212,85 @@ void bbggLTMaker::Loop()
 
     if(tilt){
       passedMassCut = 1;
-      if( o_bbggMass > mtotMax + o_ggMass - 125.)
+      if( (o_bbggMass-o_ggMass) > mtotMax - 125.)
 	passedMassCut = 0;
-      if( o_bbggMass < mtotMin + o_ggMass - 125.)
+      if( (o_bbggMass-o_ggMass) < mtotMin - 125.)
 	passedMassCut = 0;
     }
 
     if(passedMassCut == 0)
       continue;
 
-    //     if(photonCR == 1 && isPhotonCR == 0)
-    //	continue;
-    if(!isSignal && photonCR==0)
-      continue;
+    bool isInterestingRegion = 1;
+    if(isSignal){
+      if(photonCR==0 && photonCRNormToSig==0) isInterestingRegion = 1;
+      else if(photonCR==1 || photonCRNormToSig==1) isInterestingRegion = 0;
+    } else if (!isSignal){
+      if(photonCR==0 && photonCRNormToSig==0) isInterestingRegion = 0;
+      else if(photonCR==1 || photonCRNormToSig==1) isInterestingRegion = 1;
+    }
+    if(!isInterestingRegion) continue;
 
     o_category = 2;
 
+    //Calculate b-tagging scale factors
     if(bVariation > -100) btmap = bbggLTMaker::BTagWeight(*leadingJet, leadingJet_hadFlavour, *subleadingJet, subleadingJet_hadFlavour, bVariation);
-
     float btagweight = -99;
     if(bVariation < -100) btagweight = 1;
-    if(doCatMixed == 1)
-      {
-	if (o_category == 2 && ( leadingJet_bDis > btagWP_high || subleadingJet_bDis > btagWP_high ) ) {
-	  o_category = 0;
-	  if(bVariation > -100) {
-	    if( leadingJet_bDis > btagWP_high && subleadingJet_bDis > btagWP_high ) btagweight = btmap[2].first*btmap[5].first;
-	    if( leadingJet_bDis > btagWP_high && subleadingJet_bDis < btagWP_high ) btagweight = btmap[2].first*((1-btmap[5].first*btmap[5].second)/(1-btmap[5].second));
-	    if( leadingJet_bDis < btagWP_high && subleadingJet_bDis > btagWP_high ) btagweight = btmap[5].first*((1-btmap[2].first*btmap[2].second)/(1-btmap[2].second));
-	  }
-	}
-	if (o_category == 2 && leadingJet_bDis < btagWP_high && subleadingJet_bDis < btagWP_high && subleadingJet_bDis > 0.8 ) {
-	  o_category = 1;
-	  if(bVariation > -100) btagweight = ((1 - btmap[2].first*btmap[2].second)/(1 - btmap[2].second)) * ((btmap[4].first*btmap[4].second - btmap[5].first*btmap[5].second)/(btmap[4].second - btmap[5].second));
-	}
-	if (o_category == 2 && leadingJet_bDis < btagWP_high && subleadingJet_bDis < btagWP_high && leadingJet_bDis >  0.8 ) {
-	  o_category = 1;
-	  if(bVariation > -100) btagweight = ((1 - btmap[5].first*btmap[5].second)/(1 - btmap[5].second)) * ((btmap[1].first*btmap[1].second - btmap[2].first*btmap[2].second)/(btmap[1].second - btmap[2].second));
-	}
-	if (o_category == 2 && leadingJet_bDis < 0.8 && subleadingJet_bDis < 0.8 ) {
-	  o_category = -1;
-	  if(bVariation > -100) btagweight = ((1 - btmap[1].first*btmap[1].second)/(1 - btmap[1].second)) * ((1 - btmap[4].first*btmap[4].second)/(1 - btmap[4].second));
-	}
-	//	  if (o_category == 2 && leadingJet_bDis < 0.8 && subleadingJet_bDis < btagWP_low ) {o_category = -1;}
-	//	  if (o_category == 2 && leadingJet_bDis < btagWP_low && subleadingJet_bDis < 0.8 ) {o_category = -1;}
-      }
+    if(bVariation > -100) {
+       double bt1 = 1, bt2 = 1;
+       if( leadingJet_bDis < 0.436) bt1 = (1 - btmap[0].first*btmap[0].second)/(1-btmap[0].second);
+       if( leadingJet_bDis > 0.436 && leadingJet_bDis < 0.8 ) bt1 = (btmap[0].first*btmap[0].second - btmap[1].first*btmap[1].second)/(btmap[0].second - btmap[1].second);
+       if( leadingJet_bDis > 0.8   && leadingJet_bDis < 0.92) bt1 = (btmap[1].first*btmap[1].second - btmap[2].first*btmap[2].second)/(btmap[1].second - btmap[2].second);
+       if( leadingJet_bDis > 0.92) bt1 = btmap[2].first;
 
-    if ( doSingleCat == 0 && doCatMixed == 0)
-      {
-	if ( leadingJet_bDis > btagWP && subleadingJet_bDis > btagWP ) {
-	  o_category = 0;
-	  if(bVariation > -100) btagweight = btmap[1].first*btmap[4].first;
-	}
-	else if ( leadingJet_bDis > btagWP && subleadingJet_bDis < btagWP ) {
-	  o_category = 1;
-	  if(bVariation > -100) btagweight = btmap[1].first*( (1 - btmap[4].first*btmap[4].second)/(1 - btmap[4].second) );
-	}
-	else if ( leadingJet_bDis < btagWP && subleadingJet_bDis > btagWP ) {
-	  o_category = 1;
-	  if(bVariation > -100) btagweight = btmap[4].first*( (1 - btmap[1].first*btmap[1].second)/(1 - btmap[1].second) );
-	}
-	else if ( leadingJet_bDis < btagWP && subleadingJet_bDis < btagWP ) {
-	  o_category = -1;
-	  if(bVariation > -100) btagweight = ( (1 - btmap[1].first*btmap[1].second)/(1 - btmap[1].second) )*( (1 - btmap[4].first*btmap[4].second)/(1 - btmap[4].second) );
-	}
-      }
-    else if ( doSingleCat == 1 && doCatMixed == 0)
-      {
-	if ( leadingJet_bDis > btagWP && subleadingJet_bDis > btagWP ) {
-	  o_category = 0;
-	  if(bVariation > -100) btagweight = btmap[0].first*btmap[3].first;
-	}
-	if ( leadingJet_bDis > btagWP && subleadingJet_bDis < btagWP ) {
-	  o_category = 0;
-	  if(bVariation > -100) btagweight = btmap[0].first*( (1 - btmap[3].first*btmap[3].second)/(1 - btmap[3].second) );
-	}
-	if ( leadingJet_bDis < btagWP && subleadingJet_bDis > btagWP ) {
-	  o_category = 0;
-	  if(bVariation > -100) btagweight = btmap[3].first*( (1 - btmap[0].first*btmap[0].second)/(1 - btmap[0].second) );
-	}
-	if ( leadingJet_bDis < btagWP && subleadingJet_bDis < btagWP ) {
-	  o_category = -1;
-	  if(bVariation > -100) btagweight = ( (1 - btmap[0].first*btmap[0].second)/(1 - btmap[0].second) )*( (1 - btmap[3].first*btmap[3].second)/(1 - btmap[3].second) );
-	}
-      }
+       if( subleadingJet_bDis < 0.436) bt2 = (1 - btmap[3].first*btmap[3].second)/(1-btmap[3].second);
+       if( subleadingJet_bDis > 0.436 && subleadingJet_bDis < 0.8 ) bt2 = (btmap[3].first*btmap[3].second - btmap[4].first*btmap[4].second)/(btmap[3].second - btmap[4].second);
+       if( subleadingJet_bDis > 0.8   && subleadingJet_bDis < 0.92) bt2 = (btmap[4].first*btmap[4].second - btmap[5].first*btmap[5].second)/(btmap[4].second - btmap[5].second);
+       if( subleadingJet_bDis > 0.92) bt2 = btmap[5].first;
+
+       btagweight = bt1*bt2;
+
+    }
+
+    if(doCatNonRes)
+    {
+       if ( o_category == 2 && leadingJet_bDis > btagWP_tight && subleadingJet_bDis > btagWP_tight) o_category = 0;
+       if ( o_category == 2 && leadingJet_bDis > btagWP_loose  && leadingJet_bDis < btagWP_tight && subleadingJet_bDis > btagWP_tight) o_category = 1;
+       if ( o_category == 2 && subleadingJet_bDis > btagWP_loose  && subleadingJet_bDis < btagWP_tight && leadingJet_bDis > btagWP_tight) o_category = 1;
+       if ( o_category == 2 ) o_category = -1;
+    }
+    else if (doCatLowMass)
+    {
+       if (o_category == 2 && (leadingJet_bDis > btagWP_tight && subleadingJet_bDis > btagWP_loose)) o_category = 0;
+       if (o_category == 2 && (subleadingJet_bDis > btagWP_tight && leadingJet_bDis > btagWP_loose)) o_category = 0;
+       if (o_category == 2 && (leadingJet_bDis > btagWP_tight && subleadingJet_bDis < btagWP_loose)) o_category = 1;
+       if (o_category == 2 && (subleadingJet_bDis > btagWP_tight && leadingJet_bDis < btagWP_loose)) o_category = 1;
+       if (o_category == 2 && (leadingJet_bDis > btagWP_medium && leadingJet_bDis < btagWP_tight && subleadingJet_bDis > btagWP_medium && subleadingJet_bDis < btagWP_tight )) o_category = 1;
+       if (o_category == 2 ) o_category = -1;
+    }
+    else if (doCatHighMass)
+    {
+       if (o_category == 2 && (leadingJet_bDis > btagWP_tight )) o_category = 0;
+       if (o_category == 2 && (subleadingJet_bDis > btagWP_tight )) o_category = 0;
+       if (o_category == 2 && (leadingJet_bDis > btagWP_medium && leadingJet_bDis < btagWP_tight && subleadingJet_bDis < btagWP_tight)) o_category = 1;
+       if (o_category == 2 && (subleadingJet_bDis > btagWP_medium && subleadingJet_bDis < btagWP_tight && leadingJet_bDis < btagWP_tight)) o_category = 1;
+       if ( o_category == 2 ) o_category = -1;
+    } 
+    else if (doCatMVA)
+    {
+       if (o_bbggMass > massThreshold ) {
+         if(o_category == 2 && HHTagger_HM > mvaCat0_hm) o_category = 0;
+         if(o_category == 2 && HHTagger_HM > mvaCat1_hm && HHTagger_HM < mvaCat0_hm) o_category = 1;
+         if(o_category == 2 && HHTagger_HM < mvaCat1_hm) o_category = -1;
+       } else {
+//         if(leadingJet->Pt() < 50) o_category = -1;
+         if(o_category == 2 && HHTagger_LM > mvaCat0_lm) o_category = 0;
+         if(o_category == 2 && HHTagger_LM > mvaCat1_lm && HHTagger_LM < mvaCat0_lm) o_category = 1;
+         if(o_category == 2 && HHTagger_LM < mvaCat1_lm) o_category = -1;
+       }
+    }
+
     if ( o_category == 2 ) std::cout << "ERROR ERROR ERROR ERROR ERROR ERROR ERROR" << std::endl;
 
     o_btagweight = btagweight;
@@ -304,8 +349,9 @@ void bbggLTMaker::Loop()
 
     
     //      std::cout << "cosThetaStarCutCats: " << cosThetaStarCutCats << " - - " << cosThetaStarCut << "  - -  " << o_category << std::endl;
-    if( o_category == 1  && cosThetaStarCutCats > 0 && fabs(CosThetaStar) > fabs(cosThetaStarCut)) continue;
-    if( o_category == 0  && cosThetaStarCutCats == 2 && fabs(CosThetaStar) > fabs(cosThetaStarCut)) continue;
+//    if( o_category == 1  && cosThetaStarCutCats > 0 && fabs(CosThetaStar) > fabs(cosThetaStarCut)) continue;
+//    if( o_category == 0  && cosThetaStarCutCats == 2 && fabs(CosThetaStar) > fabs(cosThetaStarCut)) continue;
+    if( fabs(CosThetaStar_CS) > fabs(cosThetaStarCutHigh) ) continue;
 
     outTree->Fill();
   }

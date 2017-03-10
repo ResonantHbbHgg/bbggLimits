@@ -112,6 +112,7 @@ void bbggFittingTools::PlotCurves(std::string plotTitle, RooWorkspace* w, std::v
     leg->Draw("same");
     c->SaveAs(TString(plotName) + ".pdf");
     c->SaveAs(TString(plotName) + ".png");
+    if (c) c->Close();
 }
 
 //std::vector<bbggFittingTools::FitRes> bbggFittingTools::FitFunctions(RooWorkspace* w, std::vector<std::string> functionsToFit, RooDataSet* data, std::string sVar, TH1F* dataHist)
