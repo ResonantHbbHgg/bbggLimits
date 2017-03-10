@@ -52,6 +52,7 @@ parser.add_argument('--MVAHMC1', dest='MVAHMC1', type=float, default=0.80, help=
 parser.add_argument('--MVALMC0', dest='MVALMC0', type=float, default=0.95, help="MVALMC0")
 parser.add_argument('--MVALMC1', dest='MVALMC1', type=float, default=0.80, help="MVALMC1")
 parser.add_argument('--massThreshold', dest='massThreshold', type=float, default=400, help='mass threshold')
+parser.add_argument('--isRes', dest='isres', action='store_true', default=False)
 
 #corrections
 parser.add_argument('--bVariation', dest="bVariation", type=int, default=-999,
@@ -146,6 +147,7 @@ def setAndLoop(fname, options, outFile):
   LTM.SetCosThetaStarLow(options.cosThetaStarLow)
   LTM.SetCosThetaStarHigh(options.cosThetaStarHigh)
   LTM.SetMassThreshold(options.massThreshold)
+  if (opt.isres): LTM.IsRes()
 
   LTM.SetOutFileName( outFile )
 

@@ -15,10 +15,11 @@ def main(argv):
 	analysis = ""
 	bins = []
 	Label = ""
-	xmax = {'mgg':140, 'mjj': 200}
-        xmin = {'mgg':118, 'mjj': 80}
+        DSCB = False
+	xmax = {'mgg':140, 'mjj': 220}
+        xmin = {'mgg':118, 'mjj': 60}
 	try:
-		opts, args = getopt.getopt(argv,"w:c:o:l:a:b:L:",["workspace=", "cat=", "observable=","lumi=","analysis=","bins=", "Label="])
+		opts, args = getopt.getopt(argv,"w:c:o:l:a:b:L:D",["workspace=", "cat=", "observable=","lumi=","analysis=","bins=", "Label=", "DSCB"])
 	except getopt.GetoptError:
 		print 'MakeBkgPlot.py -w <workspace file> -c <cat> -o <obs1,obs2,obs3> -l <lumi> -a <analysis title> -b <binobs1,binobs2>'
 		sys.exit(2)
@@ -41,6 +42,8 @@ def main(argv):
 			analysis = arg
 		if opt == "-L":
 			Label = arg
+		if opt == "--DSCB":
+			DSCB = True
 	if wfile == "" or cat == -1 or obs == "" or lumi == "" or analysis == "":
 		print 'MakeBkgPlot.py -w <workspace file> -c <cat> -o <observable> -l <lumi> -a <analysis title>'
 		sys.exit(2)
@@ -65,7 +68,7 @@ def main(argv):
 		if 'mgg' in ob:
 			label = "M(#gamma#gamma) [GeV]"	
 
-		MakeSigPlot(data, pdf, var, label, lumi, cat, analysis, doBands, Label+"_signal_fit_"+ob+"_cat"+str(CAT), bins[i], xmin[ob], xmax[ob], 1)
+		MakeSigPlot(data, pdf, var, label, lumi, cat, analysis, doBands, Label+"_signal_fit_"+ob+"_cat"+str(CAT), bins[i], xmin[ob], xmax[ob], 1, DSCB)
 
 if __name__ == "__main__":
 	main(sys.argv[1:])

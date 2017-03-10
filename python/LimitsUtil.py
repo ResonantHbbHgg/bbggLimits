@@ -293,6 +293,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
   combineOpt = Params['other']['combineOption']
   doBias = Params['other']['doBias']
   biasConfig = Params['other']['biasConfig']
+  doDoubleSidedCB = Params['other']['doDoubleSidedCB']
 
   massCuts = [Params['other']["minMggMassFit"], Params['other']["maxMggMassFit"],
               Params['other']["minMjjMassFit"], Params['other']["maxMjjMassFit"],
@@ -402,6 +403,10 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
                           logging.getLoggerClass().root.handlers[0].baseFilename+'.bbgg2D')
 
     theFitter.SetVerbosityLevel(opt.verb)
+
+    print 'Using Double Sided Crystal Ball as Signal Model:',doDoubleSidedCB
+    if doDoubleSidedCB: theFitter.UseDoubleSidedCB()
+
     LTDir = LTDir_type.replace('TYPE', t)
     mass = 125.0
 

@@ -96,6 +96,8 @@ public :
    int photonCRNormToSig;
    double tiltWindow;
    double massThreshold;
+   bool isCustMVA;
+   bool isRes;
    typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > LorentzVector;
 
    // Declaration of leaf types
@@ -281,6 +283,10 @@ public :
    double BTagDiffWeight(bbggLTMaker::LorentzVector jet1, int flavour1, float bdis);
    
    void DoNRWeights(int doNRW) { doNonResWeights = doNRW; }
+
+   void IsRes() {isRes=1;}
+
+   void isCustomCatMVA() {isCustMVA = 1;}
 };
 
 #endif
@@ -288,6 +294,7 @@ public :
 #ifdef bbggLTMaker_cxx
 bbggLTMaker::bbggLTMaker(TTree *tree) : fChain(0)
 {
+   isRes = 0;
    mtotMax = 12000.;
    mtotMin = 200.;
    normalization = 1.;
@@ -379,6 +386,7 @@ void bbggLTMaker::Init(TTree *tree)
    HHTagger = 0;
    HHTagger_LM = 0;
    HHTagger_HM = 0;
+   isCustMVA=0;
    // Set branch addresses and branch pointers
    if (!tree) return;
    fChain = tree;

@@ -31,7 +31,7 @@ parser.add_argument("--doPhotonCR", dest="isPhotonCR", action="store_true", defa
                                        help="Use photon control region")
 parser.add_argument("--doPhotonCRSignalNorm", dest="isPhotonCRSignalNorm", action="store_true", default=False,
                                        help="Pick events from photon control region to match event yield of signal region")
-parser.add_argument("--doSMHiggs", dest=doSMHiggs, action="store_true", default=False, help="Make SM single H trees")
+parser.add_argument("--doSMHiggs", dest='doSMHiggs', action="store_true", default=False, help="Make SM single H trees")
 parser.add_argument("--ctsCut", dest="ctsCut", default=-10)
 parser.add_argument("--resMass", dest="resMass", default=-100, help="Do one specific mass")
 parser.add_argument('--doCatMVA', dest="doCatMVA", action="store_true", default=False,
@@ -40,6 +40,7 @@ parser.add_argument('--MVAHMC0', dest='MVAHMC0', type=float, default=0.982, help
 parser.add_argument('--MVAHMC1', dest='MVAHMC1', type=float, default=0.875, help="MVAHMC1")
 parser.add_argument('--MVALMC0', dest='MVALMC0', type=float, default=0.982, help="MVALMC0")
 parser.add_argument('--MVALMC1', dest='MVALMC1', type=float, default=0.875, help="MVALMC1")
+parser.add_argument('--onlySMHH', dest='onlysmhh', action='store_true', default=False)
 
 opt = parser.parse_args()
 
@@ -96,6 +97,7 @@ if 'nonres' in opt.x:
   
   for MM in nodes:
     i = MM[0]
+    if opt.onlysmhh == True and 'SM' not in str(i): continue
     sigScale = float(opt.lumi)/float(MM[1])
     if opt.doSMHiggs:
       sigScale = float(opt.lumi)*float(MM[2])/float(MM[1])
@@ -159,7 +161,7 @@ elif 'res' in opt.x:
   if opt.doCatMVA:
     catScheme = " --doCatMVA --MVAHMC0 " + str(opt.MVAHMC0) + " --MVAHMC1 " + str(opt.MVAHMC1) + " --MVALMC0 " + str(opt.MVALMC0)+ " --MVALMC1 " + str(opt.MVALMC1)+ " "
 
-  postFix = " --MX --tilt " + catScheme+ " --btagTight 0.9535 --btagMedium 0.8484 --btagLoose 0.5426 --massThreshold " + str(opt.massNR) + " "
+  postFix = " --isRes --MX --tilt " + catScheme+ " --btagTight 0.9535 --btagMedium 0.8484 --btagLoose 0.5426 --massThreshold " + str(opt.massNR) + " "
   SFs = " --bVariation 0 --phoVariation 0"
 
   directory = dirPrefix + opt.resType

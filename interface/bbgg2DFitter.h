@@ -102,6 +102,7 @@ class bbgg2DFitter {
   float _minHigMjjFit;
   float _maxHigMjjFit;
   int _fitStrategy = 2;
+  bool _useDSCB = 0;
   std::map<int,float> sigExpec;
   std::map<int,float> bkgExpec;
   std::map<int,float> dataObs;
@@ -120,6 +121,7 @@ class bbgg2DFitter {
 		   float minSigFitMgg,float maxSigFitMgg,float minSigFitMjj,float maxSigFitMjj,
 		   float minHigMggFit,float maxHigMggFit,float minHigMjjFit,float maxHigMjjFit,
 		   Int_t doNRW=-2, std::string logFileName="");
+   void UseDoubleSidedCB() { _useDSCB = 1;}
    void SetVerbosityLevel(Int_t v) {_verbLvl=v;}
    void SetCut(TString cut) {_cut = cut;}
    void SetType(std::string tp) { _signalType = tp; }

@@ -404,31 +404,50 @@ void bbgg2DFitter::SigModelFit(float mass)
       if (_verbLvl>1) std::cout << "OK up to now... Mass point: " <<mass<<std::endl;
       if(_fitStrategy == 2) SigPdf[c]->fitTo(*sigToFit[c],Range("SigFitRange"),SumW2Error(kTRUE),PrintLevel(-1));
       if(_fitStrategy == 1) SigPdf1[c]->fitTo(*sigToFit[c],Range("SigFitRange"),SumW2Error(kTRUE),PrintLevel(-1));
-
+/*
       if (_verbLvl>1) std::cout << "old = " << ((RooRealVar*) _w->var(TString::Format("mgg_sig_m0_cat%d",c)))->getVal() <<std::endl;
       double mPeak = ((RooRealVar*) _w->var(TString::Format("mgg_sig_m0_cat%d",c)))->getVal()+(mass-125.0); // shift the peak //This should be an option
 
       ((RooRealVar*) _w->var(TString::Format("mgg_sig_m0_cat%d",c)))->setVal(mPeak); // shift the peak
       if (_verbLvl>1) std::cout << "mPeak = " << mPeak << std::endl;
       if (_verbLvl>1) std::cout << "new mPeak position = " << ((RooRealVar*) _w->var(TString::Format("mgg_sig_m0_cat%d",c)))->getVal() <<std::endl;
-
+*/
       // IMPORTANT: fix all pdf parameters to constant, why?
-      RooArgSet sigParams( *_w->var(TString::Format("mgg_sig_m0_cat%d",c)),
-			   *_w->var(TString::Format("mgg_sig_sigma_cat%d",c)),
+      RooArgSet sigParams( RooArgSet( *_w->var(TString::Format("mgg_sig_m0_cat%d",c)),
+                           *_w->var(TString::Format("mgg_sig_sigma_cat%d",c)) ) );
+      if(_fitStrategy==2) {
+        sigParams.add( RooArgSet( *_w->var(TString::Format("mjj_sig_m0_cat%d",c)),
+                                *_w->var(TString::Format("mjj_sig_sigma_cat%d",c)) ) );
+      }
+      if (!_useDSCB) {
+         sigParams.add(RooArgSet( 
 			   *_w->var(TString::Format("mgg_sig_alpha_cat%d",c)),
 			   *_w->var(TString::Format("mgg_sig_n_cat%d",c)),
 			   *_w->var(TString::Format("mgg_sig_gsigma_cat%d",c)),
-			   *_w->var(TString::Format("mgg_sig_frac_cat%d",c)));
-      if(_fitStrategy == 2) {
-	sigParams.add(RooArgSet(
-				*_w->var(TString::Format("mjj_sig_m0_cat%d",c)),
-				*_w->var(TString::Format("mjj_sig_sigma_cat%d",c)),
-				*_w->var(TString::Format("mjj_sig_alpha_cat%d",c)),
+			   *_w->var(TString::Format("mgg_sig_frac_cat%d",c))));
+         if(_fitStrategy == 2) {
+   	   sigParams.add(RooArgSet( *_w->var(TString::Format("mjj_sig_alpha_cat%d",c)),
 				*_w->var(TString::Format("mjj_sig_n_cat%d",c)),
 				*_w->var(TString::Format("mjj_sig_gsigma_cat%d",c)),
-				*_w->var(TString::Format("mjj_sig_frac_cat%d",c))) );
+				*_w->var(TString::Format("mjj_sig_frac_cat%d",c))));
+         }
+      }
+      if(_useDSCB) {
+         sigParams.add(RooArgSet(
+			   *_w->var(TString::Format("mgg_sig_alpha1_cat%d",c)),
+			   *_w->var(TString::Format("mgg_sig_n1_cat%d",c)),
+			   *_w->var(TString::Format("mgg_sig_alpha2_cat%d",c)),
+			   *_w->var(TString::Format("mgg_sig_n2_cat%d",c))));
+         if(_fitStrategy == 2) {
+   	   sigParams.add(RooArgSet(
+				*_w->var(TString::Format("mjj_sig_alpha1_cat%d",c)),
+				*_w->var(TString::Format("mjj_sig_n1_cat%d",c)),
+				*_w->var(TString::Format("mjj_sig_alpha2_cat%d",c)),
+				*_w->var(TString::Format("mjj_sig_n2_cat%d",c))));
+         }
       }
       _w->defineSet(TString::Format("SigPdfParam_cat%d",c), sigParams);
+      _w->set(TString::Format("SigPdfParam_cat%d",c))->Print("v");
       SetConstantParams(_w->set(TString::Format("SigPdfParam_cat%d",c)));
       if (_verbLvl>1) std::cout<<std::endl;
       if(_fitStrategy == 2) _w->import(*SigPdf[c]);
@@ -550,14 +569,17 @@ void bbgg2DFitter::MakePlots(float mass)
     {
       // data[c] = (RooDataSet*) w->data(TString::Format("Data_cat%d",c));
       sigToFit[c]    = (RooDataSet*) _w->data(TString::Format("Sig_cat%d",c));
-      mggGaussSig[c] = (RooAbsPdf*) _w->pdf(TString::Format("mggGaussSig_cat%d",c));
-      mggCBSig[c]    = (RooAbsPdf*) _w->pdf(TString::Format("mggCBSig_cat%d",c));
       mggSig[c]      = (RooAbsPdf*) _w->pdf(TString::Format("mggSig_cat%d",c));
       mggBkg[c]      = (RooAbsPdf*) _w->pdf(TString::Format("mggBkg_cat%d",c));
-      mjjGaussSig[c] = (RooAbsPdf*) _w->pdf(TString::Format("mjjGaussSig_cat%d",c));
-      mjjCBSig[c]    = (RooAbsPdf*) _w->pdf(TString::Format("mjjCBSig_cat%d",c));
       mjjSig[c]      = (RooAbsPdf*) _w->pdf(TString::Format("mjjSig_cat%d",c));
       mjjBkg[c]      = (RooAbsPdf*) _w->pdf(TString::Format("mjjBkg_cat%d",c));
+
+      if (!_useDSCB){
+        mggGaussSig[c] = (RooAbsPdf*) _w->pdf(TString::Format("mggGaussSig_cat%d",c));
+        mggCBSig[c]    = (RooAbsPdf*) _w->pdf(TString::Format("mggCBSig_cat%d",c));
+        mjjGaussSig[c] = (RooAbsPdf*) _w->pdf(TString::Format("mjjGaussSig_cat%d",c));
+        mjjCBSig[c]    = (RooAbsPdf*) _w->pdf(TString::Format("mjjCBSig_cat%d",c));
+      }
 
       std::vector<float> effSigmaVecMgg = EffectiveSigma( _w->var("mgg"), mggSig[c], _minSigFitMgg, _maxSigFitMgg);
       sigma_mgg.push_back(effSigmaVecMgg[3]);
@@ -600,8 +622,9 @@ void bbgg2DFitter::MakePlots(float mass)
   // Set P.D.F. parameter names
   // WARNING: Do not use it if Workspaces are created
   // SetParamNames(w);
+  //  _minSigFitMjj, _maxSigFitMjj
   Float_t minSigPlotMgg(115),maxSigPlotMgg(135);
-  Float_t minSigPlotMjj(80),maxSigPlotMjj(200);
+  Float_t minSigPlotMjj(_minSigFitMjj),maxSigPlotMjj(_maxSigFitMjj);
   mgg->setRange("SigPlotRange",minSigPlotMgg,maxSigPlotMgg);
   mjj->setRange("SigPlotRange",minSigPlotMjj,maxSigPlotMjj);
   Int_t nBinsMass(20); // just need to plot
@@ -641,8 +664,10 @@ void bbgg2DFitter::MakePlots(float mass)
       mggSig[c] ->plotOn(plotmgg[c]);
       //    double chi2n = plotmgg[c]->chiSquare(0) ;
       //    if (_verbLvl>1) std::cout << "------------------------- Experimental chi2 = " << chi2n <<std::endl;
-      mggSig[c] ->plotOn(plotmgg[c],Components(TString::Format("mggGaussSig_cat%d",c)),LineStyle(kDashed),LineColor(kGreen));
-      mggSig[c] ->plotOn(plotmgg[c],Components(TString::Format("mggCBSig_cat%d",c)),LineStyle(kDashed),LineColor(kRed));
+      if (!_useDSCB) {
+         mggSig[c] ->plotOn(plotmgg[c],Components(TString::Format("mggGaussSig_cat%d",c)),LineStyle(kDashed),LineColor(kGreen));
+         mggSig[c] ->plotOn(plotmgg[c],Components(TString::Format("mggCBSig_cat%d",c)),LineStyle(kDashed),LineColor(kRed));
+      }
       //    mggSig[c] ->paramOn(plotmgg[c]);
       sigToFit[c] ->plotOn(plotmgg[c]);
       // TCanvas* dummy = new TCanvas("dummy", "dummy",0, 0, 400, 400);
@@ -657,8 +682,10 @@ void bbgg2DFitter::MakePlots(float mass)
       TLegend *legmc = new TLegend(0.52,0.7,0.92,0.90);
       legmc->AddEntry(plotmgg[c]->getObject(4),"Simulation","LPE");
       legmc->AddEntry(plotmgg[c]->getObject(1),"Parametric Model","L");
-      legmc->AddEntry(plotmgg[c]->getObject(2),"Gaussian component","L");
-      legmc->AddEntry(plotmgg[c]->getObject(3),"Crystal Ball component","L");
+      if (!_useDSCB){
+         legmc->AddEntry(plotmgg[c]->getObject(2),"Gaussian component","L");
+         legmc->AddEntry(plotmgg[c]->getObject(3),"Crystal Ball component","L");
+      }
       legmc->SetBorderSize(0);
       legmc->SetFillStyle(0);
       legmc->Draw();
@@ -754,8 +781,10 @@ void bbgg2DFitter::MakePlots(float mass)
 	mjjSig[c] ->plotOn(plotmjj[c]);
 	double chi2n = plotmjj[c]->chiSquare(0) ;
 	if (_verbLvl>1) std::cout << "------------------------- Experimental chi2 = " << chi2n <<std::endl;
-	mjjSig[c] ->plotOn(plotmjj[c],Components(TString::Format("mjjGaussSig_cat%d",c)),LineStyle(kDashed),LineColor(kGreen));
-	mjjSig[c] ->plotOn(plotmjj[c],Components(TString::Format("mjjCBSig_cat%d",c)),LineStyle(kDashed),LineColor(kRed));
+        if (!_useDSCB) {
+   	   mjjSig[c] ->plotOn(plotmjj[c],Components(TString::Format("mjjGaussSig_cat%d",c)),LineStyle(kDashed),LineColor(kGreen));
+	   mjjSig[c] ->plotOn(plotmjj[c],Components(TString::Format("mjjCBSig_cat%d",c)),LineStyle(kDashed),LineColor(kRed));
+        }
 	//    mjjSig[c] ->paramOn(plotmjj[c]);
 	sigToFit[c] ->plotOn(plotmjj[c]);
 	plotmjj[c]->SetMinimum(0.0);
@@ -770,8 +799,10 @@ void bbgg2DFitter::MakePlots(float mass)
 	TLegend *legmc = new TLegend(0.52,0.7,0.92,0.90);
 	legmc->AddEntry(plotmgg[c]->getObject(5),"Simulation","LPE");
 	legmc->AddEntry(plotmgg[c]->getObject(1),"Parametric Model","L");
-	legmc->AddEntry(plotmgg[c]->getObject(2),"Gaussian component","L");
-	legmc->AddEntry(plotmgg[c]->getObject(3),"Crystal Ball component","L");
+        if (!_useDSCB) {
+	   legmc->AddEntry(plotmgg[c]->getObject(2),"Gaussian component","L");
+	   legmc->AddEntry(plotmgg[c]->getObject(3),"Crystal Ball component","L");
+        }
 	//    legmc->SetHeader(" ");
 	legmc->SetBorderSize(0);
 	legmc->SetFillStyle(0);
@@ -1138,6 +1169,7 @@ void bbgg2DFitter::MakeSigWS(std::string fileBaseName)
   }
   // (3) Systematics on resolution
   wAll->factory("CMS_hgg_sig_sigmaScale[1,1,1]");
+//  wAll->factory("CMS_hgg_sig_sigmaScale_cat1[1,-1000,1000]");
   wAll->factory("prod::CMS_hgg_sig_sigma_cat0(mgg_sig_sigma_cat0, CMS_hgg_sig_sigmaScale)");
   wAll->factory("prod::CMS_hgg_sig_sigma_cat1(mgg_sig_sigma_cat1, CMS_hgg_sig_sigmaScale)");
   if ( _NCAT > 2 )
@@ -1145,13 +1177,15 @@ void bbgg2DFitter::MakeSigWS(std::string fileBaseName)
       wAll->factory("prod::CMS_hgg_sig_sigma_cat2(mgg_sig_sigma_cat2, CMS_hgg_sig_sigmaScale)");
       wAll->factory("prod::CMS_hgg_sig_sigma_cat3(mgg_sig_sigma_cat3, CMS_hgg_sig_sigmaScale)");
     }
-  wAll->factory("prod::CMS_hgg_sig_gsigma_cat0(mgg_sig_gsigma_cat0, CMS_hgg_sig_sigmaScale)");
-  wAll->factory("prod::CMS_hgg_sig_gsigma_cat1(mgg_sig_gsigma_cat1, CMS_hgg_sig_sigmaScale)");
-  if ( _NCAT > 2 )
+  if(!_useDSCB){
+    wAll->factory("prod::CMS_hgg_sig_gsigma_cat0(mgg_sig_gsigma_cat0, CMS_hgg_sig_sigmaScale)");
+    wAll->factory("prod::CMS_hgg_sig_gsigma_cat1(mgg_sig_gsigma_cat1, CMS_hgg_sig_sigmaScale)");
+    if ( _NCAT > 2 )
     {
-      wAll->factory("prod::CMS_hgg_sig_gsigma_cat2(mgg_sig_gsigma_cat2, CMS_hgg_sig_sigmaScale)");
-      wAll->factory("prod::CMS_hgg_sig_gsigma_cat3(mgg_sig_gsigma_cat3, CMS_hgg_sig_sigmaScale)");
-    }
+        wAll->factory("prod::CMS_hgg_sig_gsigma_cat2(mgg_sig_gsigma_cat2, CMS_hgg_sig_sigmaScale)");
+        wAll->factory("prod::CMS_hgg_sig_gsigma_cat3(mgg_sig_gsigma_cat3, CMS_hgg_sig_sigmaScale)");
+      }
+  }
   wAll->factory("CMS_hbb_sig_sigmaScale[1,1,1]");
   wAll->factory("prod::CMS_hbb_sig_sigma_cat0(mjj_sig_sigma_cat0, CMS_hbb_sig_sigmaScale)");
   wAll->factory("prod::CMS_hbb_sig_sigma_cat1(mjj_sig_sigma_cat1, CMS_hbb_sig_sigmaScale)");
@@ -1160,18 +1194,21 @@ void bbgg2DFitter::MakeSigWS(std::string fileBaseName)
       wAll->factory("prod::CMS_hbb_sig_sigma_cat2(mjj_sig_sigma_cat2, CMS_hbb_sig_sigmaScale)");
       wAll->factory("prod::CMS_hbb_sig_sigma_cat3(mjj_sig_sigma_cat3, CMS_hbb_sig_sigmaScale)");
     }
-  wAll->factory("prod::CMS_hbb_sig_gsigma_cat0(mjj_sig_gsigma_cat0, CMS_hbb_sig_sigmaScale)");
-  wAll->factory("prod::CMS_hbb_sig_gsigma_cat1(mjj_sig_gsigma_cat1, CMS_hbb_sig_sigmaScale)");
-  if ( _NCAT > 2 )
+  if(!_useDSCB){
+    wAll->factory("prod::CMS_hbb_sig_gsigma_cat0(mjj_sig_gsigma_cat0, CMS_hbb_sig_sigmaScale)");
+    wAll->factory("prod::CMS_hbb_sig_gsigma_cat1(mjj_sig_gsigma_cat1, CMS_hbb_sig_sigmaScale)");
+    if ( _NCAT > 2 )
     {
-      wAll->factory("prod::CMS_hbb_sig_gsigma_cat2(mjj_sig_gsigma_cat2, CMS_hbb_sig_sigmaScale)");
-      wAll->factory("prod::CMS_hbb_sig_gsigma_cat3(mjj_sig_gsigma_cat3, CMS_hbb_sig_sigmaScale)");
+        wAll->factory("prod::CMS_hbb_sig_gsigma_cat2(mjj_sig_gsigma_cat2, CMS_hbb_sig_sigmaScale)");
+        wAll->factory("prod::CMS_hbb_sig_gsigma_cat3(mjj_sig_gsigma_cat3, CMS_hbb_sig_sigmaScale)");
     }
+  }
   // (4) do reparametrization of signal
   for (int c = 0; c < _NCAT; ++c) {
 
-    if(_fitStrategy == 2) {
-      wAll->factory(TString::Format("EDIT::CMS_sig_cat%d(SigPdf_cat%d,",c,c) +
+    if (!_useDSCB) {
+      if(_fitStrategy == 2) {
+        wAll->factory(TString::Format("EDIT::CMS_sig_cat%d(SigPdf_cat%d,",c,c) +
 		    TString::Format(" mgg_sig_m0_cat%d=CMS_hgg_sig_m0_cat%d,", c,c) +
 		    TString::Format(" mgg_sig_sigma_cat%d=CMS_hgg_sig_sigma_cat%d,", c,c) +
 		    TString::Format(" mgg_sig_gsigma_cat%d=CMS_hgg_sig_gsigma_cat%d,", c,c) +
@@ -1179,12 +1216,29 @@ void bbgg2DFitter::MakeSigWS(std::string fileBaseName)
 		    TString::Format(" mjj_sig_sigma_cat%d=CMS_hbb_sig_sigma_cat%d,", c,c) +
 		    TString::Format(" mjj_sig_gsigma_cat%d=CMS_hbb_sig_gsigma_cat%d)", c,c)
 		    );
-    } else {
-      wAll->factory(TString::Format("EDIT::CMS_sig_cat%d(SigPdf_cat%d,",c,c) +
+      } else {
+        wAll->factory(TString::Format("EDIT::CMS_sig_cat%d(SigPdf_cat%d,",c,c) +
 		    TString::Format(" mgg_sig_m0_cat%d=CMS_hgg_sig_m0_cat%d,", c,c) +
 		    TString::Format(" mgg_sig_sigma_cat%d=CMS_hgg_sig_sigma_cat%d,", c,c) +
 		    TString::Format(" mgg_sig_gsigma_cat%d=CMS_hgg_sig_gsigma_cat%d)", c,c)
 		    );
+      }
+    } 
+    if(_useDSCB) {
+      if(_fitStrategy == 2) {
+        wAll->factory(TString::Format("EDIT::CMS_sig_cat%d(SigPdf_cat%d,",c,c) +
+		    TString::Format(" mgg_sig_m0_cat%d=CMS_hgg_sig_m0_cat%d,", c,c) +
+		    TString::Format(" mgg_sig_sigma_cat%d=CMS_hgg_sig_sigma_cat%d,", c,c) +
+		    TString::Format(" mjj_sig_m0_cat%d=CMS_hbb_sig_m0_cat%d,", c,c) +
+		    TString::Format(" mjj_sig_sigma_cat%d=CMS_hbb_sig_sigma_cat%d)", c,c)
+		    );
+        std::cout << "[MAKESIGWS] im heeeeeeere " << _useDSCB << std::endl;
+      } else {
+        wAll->factory(TString::Format("EDIT::CMS_sig_cat%d(SigPdf_cat%d,",c,c) +
+		    TString::Format(" mgg_sig_m0_cat%d=CMS_hgg_sig_m0_cat%d,", c,c) +
+		    TString::Format(" mgg_sig_sigma_cat%d=CMS_hgg_sig_sigma_cat%d)", c,c)
+		    );
+      }
     }
   }
   TString filename(wsDir+TString(fileBaseName)+".inputsig.root");
@@ -1403,6 +1457,8 @@ void bbgg2DFitter::MakeBkgWS(std::string fileBaseName)
 
 void bbgg2DFitter::MakeDataCard(std::string fileBaseName, std::string fileBkgName ,Bool_t useSigTheoryUnc)
 {
+std::cout << "[bbgg2DFitter::MakeDataCard] THIS DOES NOTHING, WHY ARE YOU HERE?" << std::endl;
+/*
   if (_verbLvl>0){
     std::cout<<" DBG.  Making Data card"<<std::endl;
     std::cout<<" fileBaseName ="<<fileBaseName<<"\n   fileBkgName="<<fileBkgName<<std::endl;
@@ -1617,39 +1673,40 @@ void bbgg2DFitter::MakeDataCard(std::string fileBaseName, std::string fileBkgNam
 	    }
 	  outFile<<std::endl;
 	}
-      /*outFile << "lumi_13TeV lnN "<< "1.026 - 1.026 1.026 1.026 1.026 1.026 "<< "1.026 - 1.026 1.026 1.026 1.026 1.026 ";
-	if ( _NCAT > 2 )outFile << "1.026 - 1.026 1.026 1.026 1.026 1.026 "<< "1.026 - 1.026 1.026 1.026 1.026 1.026 ";
-	outFile << " " << std::endl << std::endl;
-	outFile << "############## Photon selection normalisation uncertainties " << std::endl;
-	outFile << "DiphoTrigger lnN "<< "1.01 - 1.010 1.010 1.010 1.010 1.010 "<< "1.01 - 1.010 1.010 1.010 1.010 1.010 ";
-	if ( _NCAT > 2 )outFile << "1.01 - 1.010 1.010 1.010 1.010 1.010 "<< "1.01 - 1.010 1.010 1.010 1.010 1.010 ";
-	outFile << "# Trigger efficiency" << std::endl;
-	outFile << "CMS_hgg_eff_g lnN "<< "1.010 - 1.010 1.010 1.010 1.010 1.010 "<< "1.010 - 1.010 1.010 1.010 1.010 1.010 ";
-	if ( _NCAT > 2 )outFile << "1.010 - 1.010 1.010 1.010 1.010 1.010 "<< "1.010 - 1.010 1.010 1.010 1.010 1.010 ";
-	outFile << "# photon selection accep." << std::endl;
-	outFile << " " << std::endl;
-	outFile << "############## Jet selection and phase space cuts normalisation uncertainties " <<std::endl;
-	outFile << "pTj_cut_acceptance lnN "<< "1.010 - 1.010 1.010 1.010 1.010 1.010 "<< "1.010 - 1.010 1.010 1.010 1.010 1.010 ";
-	if ( _NCAT > 2 )outFile << "1.010 - 1.010 1.010 1.010 1.010 1.010 "<< "1.010 - 1.010 1.010 1.010 1.010 1.010 ";
-	outFile <<"# JER and JES " << std::endl;
-	if ( _NCAT == 2)outFile << "btag_eff lnN "<< "1.050 - 1.0508 1.050 1.050 1.050 1.050 "<< "0.979 - 0.979 0.979 0.979 0.979 0.979 ";
-	else if ( _NCAT > 2 )outFile << "btag_eff lnN "<< "1.050 - 1.050 1.050 1.050 1.050 1.050 "<< "0.979 - 0.979 0.979 0.979 0.979 0.979 "<< "1.050 - 1.050 1.050 1.050 1.050 1.050 "<< "0.979 - 0.979 0.979 0.979 0.979 0.979 ";
-	outFile <<"# b tag efficiency uncertainty" << std::endl;
-	if (_NCAT == 2)outFile << "maajj_cut_acceptance lnN "<< "1.015 - 1.015 1.015 1.015 1.015 1.015 "<< "1.015 - 1.015 1.015 1.015 1.015 1.015 ";
-	else if (_NCAT > 2)outFile << "maajj_cut_acceptance lnN "<< "0.995 - 0.995 0.995 0.995 0.995 0.995 "<< "0.995 - 0.995 0.995 0.995 0.995 0.995 "<< "1.015 - 1.015 1.015 1.015 1.015 1.015 "<< "1.015 - 1.015 1.015 1.015 1.015 1.015 ";
-	outFile << "# uncertainty on mggjj cut acceptance" <<std::endl;
-	outFile << " " <<std::endl <<std::endl;
-	outFile << "############## Theory uncertainties on SM Higgs production " << std::endl;
-	outFile << "PDF lnN "<< " - - 0.931/1.075 0.919/1.081 0.972/1.026 0.976/1.024 0.976/1.024 "<< " - - 0.931/1.075 0.919/1.081 0.972/1.026 0.976/1.024 0.976/1.024 ";
-	if ( _NCAT > 2 )outFile << " - - 0.931/1.075 0.919/1.081 0.972/1.026 0.976/1.024 0.976/1.024 "<< " - - 0.931/1.075 0.919/1.081 0.972/1.026 0.976/1.024 0.976/1.024 ";
-	outFile << "\nQCD_scale lnN "<< " - - 0.922/1.072 0.907/1.038 0.998/1.002 0.980/1.020 0.980/1.020 "<< " - - 0.922/1.072 0.907/1.038 0.998/1.002 0.980/1.020 0.980/1.020 ";
-	if ( _NCAT > 2 )outFile << " - - 0.922/1.072 0.907/1.038 0.998/1.002 0.980/1.020 0.980/1.020 "<< " - - 0.922/1.072 0.907/1.038 0.998/1.002 0.980/1.020 0.980/1.020 ";
-	outFile << "\ngg_migration lnN "<< " - - 1.25 1.25 1.08 1.08 1.08 "<< " - - 1.25 1.25 1.08 1.08 1.08 ";
-	if ( _NCAT > 2 )outFile << " - - 1.25 1.25 1.08 1.08 1.08 "<< " - - 1.25 1.25 1.08 1.08 1.08 ";
-	outFile << "# UEPS" << std::endl;
-	outFile << "gluonSplitting lnN "<< " - - 1.40 1.40 1.40 1.40 1.40 "<< " - - 1.40 1.40 1.40 1.40 1.40 ";
-	if ( _NCAT > 2 )outFile << " - - 1.40 1.40 1.40 1.40 1.40 "<< " - - 1.40 1.40 1.40 1.40 1.40 ";
-	outFile << " " << std::endl<<endl;*/
+
+//       *outFile << "lumi_13TeV lnN "<< "1.026 - 1.026 1.026 1.026 1.026 1.026 "<< "1.026 - 1.026 1.026 1.026 1.026 1.026 ";
+//	if ( _NCAT > 2 )outFile << "1.026 - 1.026 1.026 1.026 1.026 1.026 "<< "1.026 - 1.026 1.026 1.026 1.026 1.026 ";
+//	outFile << " " << std::endl << std::endl;
+//	outFile << "############## Photon selection normalisation uncertainties " << std::endl;
+//	outFile << "DiphoTrigger lnN "<< "1.01 - 1.010 1.010 1.010 1.010 1.010 "<< "1.01 - 1.010 1.010 1.010 1.010 1.010 ";
+//	if ( _NCAT > 2 )outFile << "1.01 - 1.010 1.010 1.010 1.010 1.010 "<< "1.01 - 1.010 1.010 1.010 1.010 1.010 ";
+//	outFile << "# Trigger efficiency" << std::endl;
+//	outFile << "CMS_hgg_eff_g lnN "<< "1.010 - 1.010 1.010 1.010 1.010 1.010 "<< "1.010 - 1.010 1.010 1.010 1.010 1.010 ";
+//	if ( _NCAT > 2 )outFile << "1.010 - 1.010 1.010 1.010 1.010 1.010 "<< "1.010 - 1.010 1.010 1.010 1.010 1.010 ";
+//	outFile << "# photon selection accep." << std::endl;
+//	outFile << " " << std::endl;
+//	outFile << "############## Jet selection and phase space cuts normalisation uncertainties " <<std::endl;
+//	outFile << "pTj_cut_acceptance lnN "<< "1.010 - 1.010 1.010 1.010 1.010 1.010 "<< "1.010 - 1.010 1.010 1.010 1.010 1.010 ";
+//	if ( _NCAT > 2 )outFile << "1.010 - 1.010 1.010 1.010 1.010 1.010 "<< "1.010 - 1.010 1.010 1.010 1.010 1.010 ";
+//	outFile <<"# JER and JES " << std::endl;
+//	if ( _NCAT == 2)outFile << "btag_eff lnN "<< "1.050 - 1.0508 1.050 1.050 1.050 1.050 "<< "0.979 - 0.979 0.979 0.979 0.979 0.979 ";
+//	else if ( _NCAT > 2 )outFile << "btag_eff lnN "<< "1.050 - 1.050 1.050 1.050 1.050 1.050 "<< "0.979 - 0.979 0.979 0.979 0.979 0.979 "<< "1.050 - 1.050 1.050 1.050 1.050 1.050 "<< "0.979 - 0.979 0.979 0.979 0.979 0.979 ";
+//	outFile <<"# b tag efficiency uncertainty" << std::endl;
+//	if (_NCAT == 2)outFile << "maajj_cut_acceptance lnN "<< "1.015 - 1.015 1.015 1.015 1.015 1.015 "<< "1.015 - 1.015 1.015 1.015 1.015 1.015 ";
+//	else if (_NCAT > 2)outFile << "maajj_cut_acceptance lnN "<< "0.995 - 0.995 0.995 0.995 0.995 0.995 "<< "0.995 - 0.995 0.995 0.995 0.995 0.995 "<< "1.015 - 1.015 1.015 1.015 1.015 1.015 "<< "1.015 - 1.015 1.015 1.015 1.015 1.015 ";
+//	outFile << "# uncertainty on mggjj cut acceptance" <<std::endl;
+//	outFile << " " <<std::endl <<std::endl;
+//	outFile << "############## Theory uncertainties on SM Higgs production " << std::endl;
+//	outFile << "PDF lnN "<< " - - 0.931/1.075 0.919/1.081 0.972/1.026 0.976/1.024 0.976/1.024 "<< " - - 0.931/1.075 0.919/1.081 0.972/1.026 0.976/1.024 0.976/1.024 ";
+//	if ( _NCAT > 2 )outFile << " - - 0.931/1.075 0.919/1.081 0.972/1.026 0.976/1.024 0.976/1.024 "<< " - - 0.931/1.075 0.919/1.081 0.972/1.026 0.976/1.024 0.976/1.024 ";
+//	outFile << "\nQCD_scale lnN "<< " - - 0.922/1.072 0.907/1.038 0.998/1.002 0.980/1.020 0.980/1.020 "<< " - - 0.922/1.072 0.907/1.038 0.998/1.002 0.980/1.020 0.980/1.020 ";
+//	if ( _NCAT > 2 )outFile << " - - 0.922/1.072 0.907/1.038 0.998/1.002 0.980/1.020 0.980/1.020 "<< " - - 0.922/1.072 0.907/1.038 0.998/1.002 0.980/1.020 0.980/1.020 ";
+//	outFile << "\ngg_migration lnN "<< " - - 1.25 1.25 1.08 1.08 1.08 "<< " - - 1.25 1.25 1.08 1.08 1.08 ";
+//	if ( _NCAT > 2 )outFile << " - - 1.25 1.25 1.08 1.08 1.08 "<< " - - 1.25 1.25 1.08 1.08 1.08 ";
+//	outFile << "# UEPS" << std::endl;
+//	outFile << "gluonSplitting lnN "<< " - - 1.40 1.40 1.40 1.40 1.40 "<< " - - 1.40 1.40 1.40 1.40 1.40 ";
+//	if ( _NCAT > 2 )outFile << " - - 1.40 1.40 1.40 1.40 1.40 "<< " - - 1.40 1.40 1.40 1.40 1.40 ";
+//	outFile << " " << std::endl<<endl;
       if(useSigTheoryUnc)
 	{
 	  outFile << "############## Theory uncertainty on SM diHiggs production " << std::endl;
@@ -1695,6 +1752,7 @@ void bbgg2DFitter::MakeDataCard(std::string fileBaseName, std::string fileBkgNam
   /////////////////////////////////////
   outFile.close();
   if (_verbLvl>1) std::cout << "Write data card in: " << filename << " file" << std::endl;
+*/
 } // close write full datacard
 
 void bbgg2DFitter::SetConstantParams(const RooArgSet* params)
@@ -1887,7 +1945,7 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs)
     mggBkgTmpBer1 = new RooBernstein(TString::Format("mggBkgTmpBer1_cat%d",c),"",*mgg,RooArgList(*mgg_p0amp,*mgg_p1amp));
     mjjBkgTmpBer1 = new RooBernstein(TString::Format("mjjBkgTmpBer1_cat%d",c),"",*mjj,RooArgList(*mjj_p0amp,*mjj_p1amp));
 
-    if(nEvtsObs > 10) {
+    if(nEvtsObs > 15) {
       mggBkgTmpBer1 = new RooBernstein(TString::Format("mggBkgTmpBer1_cat%d",c),"",*mgg,RooArgList(*mgg_p0amp,*mgg_p1amp, *mgg_p2amp));
       mjjBkgTmpBer1 = new RooBernstein(TString::Format("mjjBkgTmpBer1_cat%d",c),"",*mjj,RooArgList(*mjj_p0amp,*mjj_p1amp, *mjj_p2amp));
     }

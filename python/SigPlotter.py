@@ -32,7 +32,7 @@ def getEffSigma(mass, pdf, wmin=110., wmax=130.,  step=0.01, epsilon=1.e-4):
   return width/2.
 
 
-def MakeSigPlot(data, pdf, var, label, lumi, cat, analysis, doBands, fname, binning, Xmin = -1, Xmax = -1, isSig=0):
+def MakeSigPlot(data, pdf, var, label, lumi, cat, analysis, doBands, fname, binning, Xmin = -1, Xmax = -1, isSig=0, DSCB=0):
 
 	gROOT.SetBatch(kTRUE)
 	tdr.cmsPrel(0,  "13",  1,  onLeft=True,  sp=0, textScale=1.)
@@ -46,16 +46,18 @@ def MakeSigPlot(data, pdf, var, label, lumi, cat, analysis, doBands, fname, binn
 	if isSig: data.plotOn(frame,RooFit.MarkerStyle(kOpenSquare), RooFit.DataError(RooAbsData.SumW2),RooFit.XErrorSize(0))
 
 	pdf.plotOn(frame,RooFit.LineColor(kAzure),RooFit.Precision(1E-5))
-	pdf.plotOn(frame,RooFit.LineColor(kAzure-4),RooFit.LineStyle(kDashDotted),RooFit.Components(str(var.GetName())+"GaussSig_cat"+str(cat)), RooFit.Precision(1E-5))
-	pdf.plotOn(frame,RooFit.LineColor(kAzure-9),RooFit.LineStyle(kDashed),RooFit.Components(str(var.GetName())+"CBSig_cat"+str(cat)),RooFit.Precision(1E-5))
+	if not DSCB:
+		pdf.plotOn(frame,RooFit.LineColor(kAzure-4),RooFit.LineStyle(kDashDotted),RooFit.Components(str(var.GetName())+"GaussSig_cat"+str(cat)), RooFit.Precision(1E-5))
+		pdf.plotOn(frame,RooFit.LineColor(kAzure-9),RooFit.LineStyle(kDashed),RooFit.Components(str(var.GetName())+"CBSig_cat"+str(cat)),RooFit.Precision(1E-5))
         
 
 	curve = frame.getObject( int(1) )
 	datah = frame.getObject( int(0) )
-        gauss = frame.getObject( int(2) )
-        cbs = frame.getObject( int(3) )
 	datah.SetLineWidth(1)
-	cbs.SetLineWidth(2)
+	if not DSCB:
+	        gauss = frame.getObject( int(2) )
+	        cbs = frame.getObject( int(3) )
+		cbs.SetLineWidth(2)
 #	gauss.SetLineWidth(2)
 #	datah.SetMarkerStyle(20)
 
@@ -145,13 +147,15 @@ def MakeSigPlot(data, pdf, var, label, lumi, cat, analysis, doBands, fname, binn
 
 	nBkgParams = pdf.getParameters(data).getSize()
 	print "Number of background parameters:", nBkgParams
+	pdf.getParameters(data).Print("v")
 
         bkgModel = "Signal model"
 	
 	leg.AddEntry(datah, "Signal Simulation", "pe")
 	leg.AddEntry(curve, bkgModel, "l")
-	leg.AddEntry(gauss, "Gaussian component", "l")
-	leg.AddEntry(cbs, "Crystal Ball component", "l")
+	if not DSCB:
+		leg.AddEntry(gauss, "Gaussian component", "l")
+		leg.AddEntry(cbs, "Crystal Ball component", "l")
 	meanName = str(var.GetName()) + "_sig_m0_cat"+str(cat)
 	thisMean = pdf.getParameters(data).getRealValue(meanName)
 	leg.AddEntry(sigmas[0], "#mu = "+ str("%.2f" % thisMean)+ " GeV", "l")
