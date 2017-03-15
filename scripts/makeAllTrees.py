@@ -19,7 +19,7 @@ parser.add_argument("-s", "--signalDir", dest="signalDir", default=None,
                                        help="Input signal directory location")
 parser.add_argument("--massNR", dest="massNR", default="400",
                                        help="Non resonant M(4body) mass categorization threshold")
-parser.add_argument("-l", "--lumi", dest="lumi", default=36.5,
+parser.add_argument("-l", "--lumi", dest="lumi", default=35.87,
                                        help="Integrated lumi to scale signal")
 parser.add_argument("-f", "--folder", dest="folder", default="LT_",
                                        help="Output folder name")

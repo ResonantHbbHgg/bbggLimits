@@ -32,7 +32,7 @@ def getEffSigma(mass, pdf, wmin=110., wmax=130.,  step=0.01, epsilon=1.e-4):
   return width/2.
 
 
-def MakeSigPlot(data, pdf, var, label, lumi, cat, analysis, doBands, fname, binning, Xmin = -1, Xmax = -1, isSig=0, DSCB=0):
+def MakeSigPlot(data, pdf, var, label, lumi, cat, analysis, doBands, fname, binning, Xmin = -1, Xmax = -1, isSig=0, DSCB=0, iHiggs="0"):
 
 	gROOT.SetBatch(kTRUE)
 	tdr.cmsPrel(0,  "13",  1,  onLeft=True,  sp=0, textScale=1.)
@@ -158,8 +158,12 @@ def MakeSigPlot(data, pdf, var, label, lumi, cat, analysis, doBands, fname, binn
 		leg.AddEntry(cbs, "Crystal Ball component", "l")
 	meanName = str(var.GetName()) + "_sig_m0_cat"+str(cat)
 	thisMean = pdf.getParameters(data).getRealValue(meanName)
-	leg.AddEntry(sigmas[0], "#mu = "+ str("%.2f" % thisMean)+ " GeV", "l")
-	leg.AddEntry(sigmas[1], "#sigma_{Eff} = "+str("%.2f" % getEffSigma(var, pdf, Xmin, Xmax)) + " GeV", "l")
+	if iHiggs  != "0":
+		meanName = str(var.GetName()) + "_hig_m0_"+iHiggs+"_cat"+str(cat)
+		thisMean = pdf.getParameters(data).getRealValue(meanName)
+	if thisMean != 0:
+		leg.AddEntry(sigmas[0], "#mu = "+ str("%.2f" % thisMean)+ " GeV", "l")
+		leg.AddEntry(sigmas[1], "#sigma_{Eff} = "+str("%.2f" % getEffSigma(var, pdf, Xmin, Xmax)) + " GeV", "l")
 	leg.Draw()
 
 	c.SaveAs(fname+".pdf")

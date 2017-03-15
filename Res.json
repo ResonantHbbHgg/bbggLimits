@@ -1,5 +1,5 @@
 {
-    "LTDIR" : "/src/HiggsAnalysis/bbggLimits/work/LT_RegressionLowMassMVA2Radion",
+    "LTDIR" : "/src/HiggsAnalysis/bbggLimits/LT_Res_MVA_Radion",
     "signal" : {
         "types" : ["Radion"],
 	"signalModelCard" : "/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D_dcb.rs"

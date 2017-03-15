@@ -1,39 +1,40 @@
 {
-    "LTDIR" : "/src/HiggsAnalysis/bbggLimits/LT_NonRes_MVAHMC0950Reg__TYPE",
+    "LTDIR" : "/src/HiggsAnalysis/bbggLimits/LT_NonRes_LClean_MVAHMC0985_HMC1750__TYPE",
     "signal" : {
         "types" : ["HighMass", "LowMass"],
-	"signalModelCard" : "/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D_dcb.rs"
+	"signalModelCard" : "/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D_higgs.rs"
     },
     "other" : {
-        "Combinelxbatch" : 1,
+        "doDoubleSidedCB": 1,
+        "Combinelxbatch" : 0,
         "version" : 66,
 	"integratedLumi" : 36.5,
         "energy" : "13TeV",
         "higgsMass" : 125.0,
-        "addHiggs" : 0,
+        "addHiggs" : 1,
         "doBlinding" : 0,
         "doBands" : 0,
         "ncat" : 2,
         "analysisType" : "fitTo2D_resSearch_withRegKinFit",
-        "doSingleLimit" : 1,
+        "doSingleLimit" : 0,
         "drawSignalFit" : 1,
         "drawBackgroundFit" : 0,
         "useSigTheoryUnc" : 0,
 	"doBrazilianFlag" : false,
-	"runCombine" :true,
+	"runCombine" :false,
 	"combineOption" : 2,
 	"minMggMassFit" : 100,
 	"maxMggMassFit" : 180,
-	"minMjjMassFit"	: 80,
-	"maxMjjMassFit"	: 200,
+	"minMjjMassFit"	: 60,
+	"maxMjjMassFit"	: 180,
 	"minSigFitMgg" :115,
 	"maxSigFitMgg" :135,
-	"minSigFitMjj" :80,
-	"maxSigFitMjj" :200,
+	"minSigFitMjj" :60,
+	"maxSigFitMjj" :180,
 	"minHigMggFit" :115,
 	"maxHigMggFit" :135,
-	"minHigMjjFit":80,
-	"maxHigMjjFit":200,
+	"minHigMjjFit":60,
+	"maxHigMjjFit":180,
 	"HH":false,
 	"base":true,
 	"low":false,
@@ -47,6 +48,12 @@
         "name" :"DoubleEG"
     },
     "higgs" : {
-	"type" : ["ggh_m125_powheg_8TeV","tth_m125_8TeV"]
+	"type" : { 
+		"vbf": "VBFHToGG_M-125_13TeV_powheg_pythia8",
+		"bbh": "bbHToGG_M-125_13TeV_amcatnlo",
+		"ggh": "GluGluHToGG_M-125_13TeV_powheg_pythia8",
+		"tth": "ttHToGG_M125_13TeV_powheg_pythia8_v2",
+		"vh" : "VHToGG_M125_13TeV_amcatnloFXFX_madspin_pythia8"
+		}
     }
 }

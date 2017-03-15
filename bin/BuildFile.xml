@@ -3,7 +3,7 @@
 	<use name="root"/>
 	<use name="HiggsAnalysis/bbggLimits"/>
 </bin>-->
-<bin name="bbgg2DFit" file="bbgg2DFit.C">
+<!--<bin name="bbgg2DFit" file="bbgg2DFit.C">
 	<use name="boost_program_options"/>
 	<use name="boost"/>
 	<use name="boost_system"/>
@@ -24,7 +24,7 @@
 	<use name="roofitcore"/>
 	<use name="roostats"/>
 	<use name="HiggsAnalysis/bbggLimits"/>
-</bin>
+</bin> -->
 <bin name="runCombine" file="RunCombine.C">
         <use name="boost_program_options"/>
         <use name="boost"/>
