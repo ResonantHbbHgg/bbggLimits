@@ -13,7 +13,7 @@ parser.add_argument('--NRW', dest="NRW", action="store_true", default=False,
                                         help="add non-resonant weights")
 parser.add_argument("-v", "--verbosity",  dest="verb", action="store_true", default=False,
                                         help="Print out more stuff")
-parser.add_argument("-d", "--dataDir", dest="dataDir", default=None,
+parser.add_argument("-d", "--dataDir", dest="dataDir", default=None, type=str,
                                        help="Input data directory location")
 parser.add_argument("-s", "--signalDir", dest="signalDir", default=None,
                                        help="Input signal directory location")
@@ -126,12 +126,13 @@ if 'nonres' in opt.x:
     os.system("hadd %s/LT_NR_Nodes_2to13_merged.root %s/LT_output_GluGluToHHTo2B2G_node_[1-9]*.root"%(directory+"_HighMass", directory+"_HighMass"))
     os.system("hadd %s/LT_NR_Nodes_2to13_merged.root %s/LT_output_GluGluToHHTo2B2G_node_[1-9]*.root"%(directory+"_LowMass",  directory+"_LowMass"))
   
-  print "DOING LowMassCat Data"
-  command = "pyLimitTreeMaker.py -f " + Data + " -o " +   directory+"_LowMass" + " --min 0 --max " + opt.massNR + " --scale 1." + postFix + doPhotonControlRegion
-  os.system(command)
-  print "DOING HighMassCat Data"
-  command = "pyLimitTreeMaker.py -f " + Data + " -o " +   directory+"_HighMass" + " --min " + opt.massNR + " --max 35000 --scale 1." + postFix + doPhotonControlRegion 
-  os.system(command)
+  if opt.dataDir != "0":
+    print "DOING LowMassCat Data"
+    command = "pyLimitTreeMaker.py -f " + Data + " -o " +   directory+"_LowMass" + " --min 0 --max " + opt.massNR + " --scale 1." + postFix + doPhotonControlRegion
+    os.system(command)
+    print "DOING HighMassCat Data"
+    command = "pyLimitTreeMaker.py -f " + Data + " -o " +   directory+"_HighMass" + " --min " + opt.massNR + " --max 35000 --scale 1." + postFix + doPhotonControlRegion 
+    os.system(command)
 
 elif 'res' in opt.x:
   masses = {
