@@ -45,7 +45,7 @@ def DataCardMaker(Folder, nCats, signalExp, observed, isRes = 0, HType=0):
     if isRes == 0 and HType=="HighMass":
       inputDatacardName = os.getenv("CMSSW_BASE")+'/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/NonResDatacardModel_HM.txt'
     if isRes == 0 and HType=="LowMass":
-      inputDatacardName = os.getenv("CMSSW_BASE")+'/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/NonResDatacardModel_HM.txt'
+      inputDatacardName = os.getenv("CMSSW_BASE")+'/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/NonResDatacardModel_LM.txt'
 
     inputDatacard = open(inputDatacardName, 'r')
     outputDatacard = open(Folder+'/datacards/hhbbgg_13TeV_DataCard.txt', 'w')

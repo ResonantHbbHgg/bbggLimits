@@ -41,6 +41,10 @@ parser.add_argument('--MVAHMC1', dest='MVAHMC1', type=float, default=0.875, help
 parser.add_argument('--MVALMC0', dest='MVALMC0', type=float, default=0.982, help="MVALMC0")
 parser.add_argument('--MVALMC1', dest='MVALMC1', type=float, default=0.875, help="MVALMC1")
 parser.add_argument('--onlySMHH', dest='onlysmhh', action='store_true', default=False)
+parser.add_argument('--LMLJBTC', dest='LMLJBTC', type=float, default=-10)
+parser.add_argument('--HMLJBTC', dest='HMLJBTC', type=float, default=-10)
+parser.add_argument('--LMSJBTC', dest='LMSJBTC', type=float, default=-10)
+parser.add_argument('--HMSJBTC', dest='HMSJBTC', type=float, default=-10)
 
 opt = parser.parse_args()
 
@@ -84,6 +88,7 @@ if 'nonres' in opt.x:
   catscheme = " --doCatNonRes --btagTight 0.9535 --btagMedium 0.8484 --btagLoose 0.5426 "
   if opt.doCatMVA:
     catscheme = " --doCatMVA --MVAHMC0 " + str(opt.MVAHMC0) + " --MVAHMC1 " + str(opt.MVAHMC1) + " --MVALMC0 " + str(opt.MVALMC0)+ " --MVALMC1 " + str(opt.MVALMC1)+ " "
+    catscheme += ' --LMLJBTC ' + str(opt.LMLJBTC) + ' --HMLJBTC ' + str(opt.HMLJBTC) + ' --LMSJBTC ' + str(opt.LMSJBTC) + ' --HMSJBTC ' + str(opt.HMSJBTC) + ' '
   postFix = massOpt + catscheme + " --cosThetaStarHigh " + str(opt.ctsCut) + " "
   SFs = " --bVariation 0 --phoVariation 0"
 

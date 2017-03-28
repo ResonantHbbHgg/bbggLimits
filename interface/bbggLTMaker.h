@@ -81,6 +81,10 @@ public :
    double mvaCat1_lm;
    double mvaCat0_hm;
    double mvaCat1_hm;
+   double LowMassLeadingJetBtagCut;
+   double HighMassLeadingJetBtagCut;
+   double LowMassSubLeadingJetBtagCut;
+   double HighMassSubLeadingJetBtagCut;
    int photonCR;
    int doKinFit;
    int doMX;
@@ -281,6 +285,12 @@ public :
 
    void BTagDiffSetup(TString btagfile, TString effsfile, TString diffOpt);
    double BTagDiffWeight(bbggLTMaker::LorentzVector jet1, int flavour1, float bdis);
+
+   void SetLowMassLeadingJetBtagCut ( double LMLJBTC ) { LowMassLeadingJetBtagCut = LMLJBTC;}
+   void SetHighMassLeadingJetBtagCut ( double HMLJBTC ) { HighMassLeadingJetBtagCut = HMLJBTC;}
+   void SetLowMassSubLeadingJetBtagCut ( double LMSJBTC ) { LowMassSubLeadingJetBtagCut = LMSJBTC;}
+   void SetHighMassSubLeadingJetBtagCut ( double HMSJBTC ) { HighMassSubLeadingJetBtagCut = HMSJBTC;}
+
    
    void DoNRWeights(int doNRW) { doNonResWeights = doNRW; }
 
@@ -323,6 +333,10 @@ bbggLTMaker::bbggLTMaker(TTree *tree) : fChain(0)
    photonCRNormToSig = 0;
    massThreshold = 350;
    myDiffOpt = "central";
+   LowMassLeadingJetBtagCut = -10;
+   HighMassLeadingJetBtagCut = -10;
+   LowMassSubLeadingJetBtagCut = -10;
+   HighMassSubLeadingJetBtagCut = -10;
    Init(tree);
 }
 

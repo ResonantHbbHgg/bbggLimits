@@ -59,6 +59,10 @@ def main(argv):
 	print CAT
 	if int(CAT) == -1:
 		CAT = "0"
+	ccat = CAT
+	if int(CAT) == 2: ccat = 0
+	if int(CAT) == 3: ccat = 1
+        
 	for i,ob in enumerate(obs):
 		print "Dataset name:", "Hig_"+iHiggs+"_cat"+str(CAT)
 		data2D = workspace.data("Hig_"+iHiggs+"_cat"+str(CAT))
@@ -66,8 +70,13 @@ def main(argv):
 		print "##############################################"
 		print "######## Number of weighted events:", "Hig_"+iHiggs+"_cat"+str(CAT), Label, data2D.sumEntries()
 		print "##############################################"
-		pdf = workspace.pdf(ob+"Hig_"+iHiggs+"_cat"+str(CAT))
-		print ob+"Hig_"+iHiggs+"_cat"+str(CAT)
+		print 'mggHig_ggh_cat0_CMS_hig_ggh_cat2'
+		pdfname = ob+"Hig_"+iHiggs+"_cat"+str(ccat)+"_CMS_hig_"+iHiggs+'_cat'+str(CAT)
+                print 'mjjHig_ggh_cat0_CMS_hig_ggh_cat2'
+		print pdfname
+#		workspace.Print()
+		pdf = workspace.pdf(pdfname)#ob+"Hig_"+iHiggs+"_cat"+str(ccat)+"_CMS_hig_"+iHiggs+'cat'+str(CAT))
+#		print ob+"Hig_"+iHiggs+"_cat"+str(CAT)
 		pdf.Print()
 #		pdf = workspace.pdf("BkgPdf_cat"+str(cat))
 		var = workspace.var(ob)

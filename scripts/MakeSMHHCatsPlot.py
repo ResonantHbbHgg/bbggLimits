@@ -18,6 +18,7 @@ parser.add_argument('--label', dest='label', default='', type=str, help='Label')
 parser.add_argument('--log', dest='log', action='store_true', default=False)
 parser.add_argument('--isAsymptotic', dest='asymp', action='store_true', default=False)
 parser.add_argument('--normSM', dest='normSM', action='store_true', default=False)
+parser.add_argument('--unblind', dest='unblind', action='store_true', default=False)
 
 opt = parser.parse_args()
 
@@ -32,8 +33,8 @@ def main(argv):
   print opt.folders, opt.names
   tdr.setTDRStyle()
 
-  quantiles = ['0.025', '0.160', '0.500', '0.840', '0.975']
-  qt_names = ['m2s', 'm1s', 'central', 'p1s', 'p2s']
+  quantiles = ['0.025', '0.160', '0.500', '0.840', '0.975', '-1']
+  qt_names = ['m2s', 'm1s', 'central', 'p1s', 'p2s', 'obs']
   gr_1s = TGraphAsymmErrors()
   gr_1s.SetFillColor(kGreen+1)
 #  gr_1s.SetLineColor(kBlack)
@@ -46,8 +47,12 @@ def main(argv):
   gr_ce.SetMarkerStyle(24)
   gr_ce.SetMarkerSize(0)
   gr_observed = TGraphErrors()
-  gr_observed.SetLineColor(kBlack)
-  gr_observed.SetMarkerColor(kBlack)
+  gr_observed.SetLineColor(kRed+3)
+  gr_observed.SetLineWidth(3)
+  gr_observed.SetLineStyle(kDashed)
+  gr_observed.SetMarkerColor(kRed+3)
+  gr_observed.SetMarkerStyle(20)
+  gr_observed.SetMarkerSize(1)
   thisMax = 0
 
   normalization = 1.
@@ -78,6 +83,8 @@ def main(argv):
     gr_1s.SetPointError(iff, 0.5,0.5, e1s, max(qts['0.840'] - qts['0.500'], 0) )
     gr_2s.SetPointError(iff, 0.5,0.5, e2s, max(qts['0.975'] - qts['0.500'], 0) )
     if qts['0.975'] > thisMax: thisMax = qts['0.975']
+    gr_observed.SetPoint(iff, iff+0.5, qts['-1'])
+    gr_observed.SetPointError(iff, 0.5, 0.)
 
   c0 = TCanvas('a', 'a', 800, 600)
   c0.SetGrid()
@@ -107,6 +114,7 @@ def main(argv):
   c0.Update()
   gr_1s.Draw("E2Z same")
   gr_ce.Draw("EZ same")
+  if opt.unblind: gr_observed.Draw("EPZ same")
 
   leg = TLegend(0.5, 0.51, 0.89, 0.95)
   headerTitle = "pp#rightarrowHH#rightarrowb#bar{b}#gamma#gamma (SM)"
@@ -116,7 +124,7 @@ def main(argv):
   leg.SetFillStyle(0)
   leg.SetLineWidth(0)
   leg.SetBorderSize(0)
-  leg.AddEntry(gr_observed, 'Observed 95% C.L. upper limit', 'l')
+  leg.AddEntry(gr_observed, 'Observed 95% C.L. upper limit', 'lp')
   leg.AddEntry(gr_ce, 'Expected 95% C.L. upper limit', 'l')
   leg.AddEntry(gr_1s, 'Expected #pm 1 std. dev.', 'f')
   leg.AddEntry(gr_2s, 'Expected #pm 2 std. dev.', 'f')

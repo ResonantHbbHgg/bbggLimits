@@ -134,9 +134,11 @@ void bbggLTMaker::Loop()
   }
 
   if(phoVariation > -100){
-    TString phoSFID_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/MVAID/mvaIDsf.root");
+//    TString phoSFID_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/MVAID/mvaIDsf.root");
+    TString phoSFID_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/MVAID/egammaEffi.txt_EGM2D.root");
     cout << "phoSFsID file: " << phoSFID_file << endl;
-    TString phoSFeveto_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/MVAID/csevsf.root");
+//    TString phoSFeveto_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/MVAID/csevsf.root");
+    TString phoSFeveto_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/MVAID/ScalingFactors_80X_Summer16.root");
     cout << "phoSFsEV file: " << phoSFeveto_file << endl;
     bbggLTMaker::SetupPhotonSF( phoSFID_file, phoSFeveto_file);
   }
@@ -286,12 +288,15 @@ void bbggLTMaker::Loop()
     else if (doCatMVA)
     {
        if (o_bbggMass > massThreshold ) {
+         if(!isRes && (leadingJet_bDis < HighMassLeadingJetBtagCut || subleadingJet_bDis < HighMassSubLeadingJetBtagCut)) o_category = -1;
          if(o_category == 2 && HHTagger_HM > mvaCat0_hm) o_category = 0;
          if(o_category == 2 && HHTagger_HM > mvaCat1_hm && HHTagger_HM < mvaCat0_hm) o_category = 1;
          if(o_category == 2 && HHTagger_HM < mvaCat1_hm) o_category = -1;
        } else {
 //         if(leadingJet->Pt() < 50) o_category = -1;
-         if(!isRes && (leadingJet_bDis < 0.57 || subleadingJet_bDis < 0.57)) o_category = -1;
+//         if(!isRes && (leadingJet_bDis < 0.57 || subleadingJet_bDis < 0.57)) o_category = -1;
+         if(!isRes && (leadingJet_bDis < LowMassLeadingJetBtagCut || subleadingJet_bDis < LowMassSubLeadingJetBtagCut)) o_category = -1;
+//         if(!isRes && (leadingJet_bDis < 0.8484 || subleadingJet_bDis < 0.8484)) o_category = -1;
          if(o_category == 2 && HHTagger_LM > mvaCat0_lm) o_category = 0;
          if(o_category == 2 && HHTagger_LM > mvaCat1_lm && HHTagger_LM < mvaCat0_lm) o_category = 1;
          if(o_category == 2 && HHTagger_LM < mvaCat1_lm) o_category = -1;
@@ -381,9 +386,11 @@ void bbggLTMaker::Loop()
 void bbggLTMaker::SetupPhotonSF(TString idfile, TString evfile)
 {
   photonidFile = new TFile(idfile, "READ");
-  photonIDhist = (TH2F*) photonidFile->Get("mva_id_sfs");
+//  photonIDhist = (TH2F*) photonidFile->Get("mva_id_sfs");
+  photonIDhist = (TH2F*) photonidFile->Get("EGamma_SF2D;1");
   csevFile = new TFile(evfile, "READ");
-  csevhist = (TH2F*) csevFile->Get("csev_sfs");
+//  csevhist = (TH2F*) csevFile->Get("csev_sfs");
+  csevhist = (TH2F*) csevFile->Get("Scaling_Factors_CSEV_R9 Inclusive");
 }
 
 float bbggLTMaker::PhotonSF(bbggLTMaker::LorentzVector pho, int phovar)
@@ -393,7 +400,8 @@ float bbggLTMaker::PhotonSF(bbggLTMaker::LorentzVector pho, int phovar)
   sf_id = photonIDhist->GetBinContent( photonIDhist->FindBin(pho.eta(), pho.pt()) ) + phovar*sf_id_err;
   sf_ev_err = csevhist->GetBinContent( csevhist->FindBin(pho.eta(), pho.pt()) );
   if(sf_ev_err==1) sf_ev_err=0;
-  sf_ev = csevhist->GetBinContent( csevhist->FindBin(pho.eta(), pho.pt()) ) + phovar*sf_ev_err;
+//  sf_ev = csevhist->GetBinContent( csevhist->FindBin(pho.eta(), pho.pt()) ) + phovar*sf_ev_err;
+  sf_ev = csevhist->GetBinContent( csevhist->FindBin(fabs(pho.eta()), pho.pt()) ) + phovar*sf_ev_err;
   float totSF = sf_id*sf_ev;
   if (totSF < 1E-1) return 1;
   else return totSF;

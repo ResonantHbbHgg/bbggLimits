@@ -137,7 +137,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     sigCat = 0
   elif point == 'box':
     sigCat = 1
-  elif point > 15:
+  elif int(point) > 15:
     sigCat = int(point)
     isRes = 1
     Label.replace("Node", "Mass")

@@ -16,7 +16,7 @@ def main(argv):
 	bins = []
 	Label = ""
         DSCB = False
-	xmax = {'mgg':140, 'mjj': 220}
+	xmax = {'mgg':140, 'mjj': 250}
         xmin = {'mgg':118, 'mjj': 60}
 	try:
 		opts, args = getopt.getopt(argv,"w:c:o:l:a:b:L:D",["workspace=", "cat=", "observable=","lumi=","analysis=","bins=", "Label=", "DSCB"])
@@ -56,10 +56,13 @@ def main(argv):
 	print CAT
 	if int(CAT) == -1:
 		CAT = "0"
+	ccat = CAT
+	if int(CAT) == 2: ccat = 0
+	if int(CAT) == 3: ccat = 1
 	for i,ob in enumerate(obs):
 		data2D = workspace.data("Sig_cat"+str(CAT))
 		data2D.Print()
-		pdf = workspace.pdf(ob+"Sig_cat"+str(CAT))
+		pdf = workspace.pdf(ob+"Sig_cat"+str(ccat)+"_CMS_sig_cat"+str(CAT))
 #		pdf = workspace.pdf("BkgPdf_cat"+str(cat))
 		var = workspace.var(ob)
 		data = data2D.reduce(RooArgSet(var))

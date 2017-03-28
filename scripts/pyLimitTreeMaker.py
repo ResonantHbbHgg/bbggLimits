@@ -51,6 +51,10 @@ parser.add_argument('--MVAHMC0', dest='MVAHMC0', type=float, default=0.95, help=
 parser.add_argument('--MVAHMC1', dest='MVAHMC1', type=float, default=0.80, help="MVAHMC1")
 parser.add_argument('--MVALMC0', dest='MVALMC0', type=float, default=0.95, help="MVALMC0")
 parser.add_argument('--MVALMC1', dest='MVALMC1', type=float, default=0.80, help="MVALMC1")
+parser.add_argument('--LMLJBTC', dest='LMLJBTC', type=float, default=-10)
+parser.add_argument('--HMLJBTC', dest='HMLJBTC', type=float, default=-10)
+parser.add_argument('--LMSJBTC', dest='LMSJBTC', type=float, default=-10)
+parser.add_argument('--HMSJBTC', dest='HMSJBTC', type=float, default=-10)
 parser.add_argument('--massThreshold', dest='massThreshold', type=float, default=400, help='mass threshold')
 parser.add_argument('--isRes', dest='isres', action='store_true', default=False)
 
@@ -148,6 +152,11 @@ def setAndLoop(fname, options, outFile):
   LTM.SetCosThetaStarHigh(options.cosThetaStarHigh)
   LTM.SetMassThreshold(options.massThreshold)
   if (opt.isres): LTM.IsRes()
+
+  LTM.SetLowMassLeadingJetBtagCut( options.LMLJBTC )
+  LTM.SetHighMassLeadingJetBtagCut( options.HMLJBTC )
+  LTM.SetLowMassSubLeadingJetBtagCut( options.LMSJBTC )
+  LTM.SetHighMassSubLeadingJetBtagCut( options.HMSJBTC )
 
   LTM.SetOutFileName( outFile )
 
