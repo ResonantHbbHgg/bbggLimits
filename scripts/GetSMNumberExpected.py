@@ -9,6 +9,7 @@ opt = parser.parse_args()
 onlyfiles = [f for f in listdir(opt.folder) if isfile(join(opt.folder, f))]
 
 mysamps = {
+'LT_DoubleEG.root':"Observed", 
 'LT_output_GluGluToHHTo2B2G_node_SM_13TeV-madgraph.root':"SM $HH\\rightarrow b\\bar{b}\gamma\gamma$", 
 'LT_output_GluGluHToGG_M-125_13TeV_powheg_pythia8.root':"SM $H\\rightarrow\gamma\gamma$ (Gluon fusion)", 
 'LT_output_VBFHToGG_M-125_13TeV_powheg_pythia8.root':"SM $H\\rightarrow\gamma\gamma$ (VBF)",

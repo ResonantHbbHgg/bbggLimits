@@ -185,6 +185,8 @@ void bbggLTMaker::Loop()
 
     if( jentry%1000 == 0 ) std::cout << "[bbggLTMaker::Process] Reading entry #" << jentry << endl;
 
+    if( GenDiPhotonFilter && nPromptInDiPhoton < 2 ) continue;
+
     o_evt = event;
     o_run = run;
 

@@ -98,6 +98,7 @@ public :
    int phoVariation;
    int doNonResWeights;
    int photonCRNormToSig;
+   int GenDiPhotonFilter;
    double tiltWindow;
    double massThreshold;
    bool isCustMVA;
@@ -291,6 +292,7 @@ public :
    void SetLowMassSubLeadingJetBtagCut ( double LMSJBTC ) { LowMassSubLeadingJetBtagCut = LMSJBTC;}
    void SetHighMassSubLeadingJetBtagCut ( double HMSJBTC ) { HighMassSubLeadingJetBtagCut = HMSJBTC;}
 
+   void FilterGenDiPhotons() { GenDiPhotonFilter = 1;}
    
    void DoNRWeights(int doNRW) { doNonResWeights = doNRW; }
 
@@ -304,6 +306,7 @@ public :
 #ifdef bbggLTMaker_cxx
 bbggLTMaker::bbggLTMaker(TTree *tree) : fChain(0)
 {
+   GenDiPhotonFilter = 0;
    isRes = 0;
    mtotMax = 12000.;
    mtotMin = 200.;

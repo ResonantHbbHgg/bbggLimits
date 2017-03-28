@@ -80,6 +80,7 @@ parser.add_argument('--cosThetaStarLow', dest="cosThetaStarLow", type=float, def
 parser.add_argument('--cosThetaStarHigh', dest="cosThetaStarHigh", type=float, default=100,
                     help="Upper Cut on cosThetaStar")
 parser.add_argument('-H', '--Help', dest="HELP", action="store_true", default=False, help="Display help message")
+parser.add_argument('--genDiPhotonFilter', dest='gendiphofilter', action='store_true', default=False)
 
 opt = parser.parse_args()
 
@@ -157,6 +158,8 @@ def setAndLoop(fname, options, outFile):
   LTM.SetHighMassLeadingJetBtagCut( options.HMLJBTC )
   LTM.SetLowMassSubLeadingJetBtagCut( options.LMSJBTC )
   LTM.SetHighMassSubLeadingJetBtagCut( options.HMSJBTC )
+
+  if (opt.gendiphofilter): LTM.FilterGenDiPhotons()
 
   LTM.SetOutFileName( outFile )
 

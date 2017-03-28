@@ -36,7 +36,7 @@ L_OUTDIR=LT_${MM}_HMHPC_${C0}_HMMPC_${M1}_LMHPC_${C1}_LMMPC_${M2}
 
 python scripts/makeAllTrees.py -x nonres -d ${L_DATA} -s ${L_SIGNAL} -f ${L_OUTDIR} --doCatMVA --MVAHMC0 0.${C0} --MVAHMC1 0.${M1} --MVALMC0 0.${C1} --MVALMC1 0.${M2} --massNR ${MM} --onlySMHH --LMLJBTC ${LMLJBTC} --LMSJBTC ${LMSJBTC};
 
-python scripts/makeAllTrees.py -x nonres -s ${L_BACKGROUND} -d 0 -f ${L_OUTDIR} --doCatMVA --MVAHMC0 0.${C0} --MVAHMC1 0.${M1} --MVALMC0 0.${C1} --MVALMC1 0.${M2} --massNR ${MM} --doSMHiggs --LMLJBTC ${LMLJBTC} --LMSJBTC ${LMSJBTC}  ;
+python scripts/makeAllTrees.py -x nonres -s ${L_BACKGROUND} -d 0 -f ${L_OUTDIR} --doCatMVA --MVAHMC0 0.${C0} --MVAHMC1 0.${M1} --MVALMC0 0.${C1} --MVALMC1 0.${M2} --massNR ${MM} --doSMHiggs --LMLJBTC ${LMLJBTC} --LMSJBTC ${LMSJBTC} --genDiPhotonFilter ;
 
 
 cd ${L_OUTDIR}_HighMass

@@ -45,6 +45,7 @@ parser.add_argument('--LMLJBTC', dest='LMLJBTC', type=float, default=-10)
 parser.add_argument('--HMLJBTC', dest='HMLJBTC', type=float, default=-10)
 parser.add_argument('--LMSJBTC', dest='LMSJBTC', type=float, default=-10)
 parser.add_argument('--HMSJBTC', dest='HMSJBTC', type=float, default=-10)
+parser.add_argument('--genDiPhotonFilter', dest='gendiphofilter', action='store_true', default=False)
 
 opt = parser.parse_args()
 
@@ -90,6 +91,9 @@ if 'nonres' in opt.x:
     catscheme = " --doCatMVA --MVAHMC0 " + str(opt.MVAHMC0) + " --MVAHMC1 " + str(opt.MVAHMC1) + " --MVALMC0 " + str(opt.MVALMC0)+ " --MVALMC1 " + str(opt.MVALMC1)+ " "
     catscheme += ' --LMLJBTC ' + str(opt.LMLJBTC) + ' --HMLJBTC ' + str(opt.HMLJBTC) + ' --LMSJBTC ' + str(opt.LMSJBTC) + ' --HMSJBTC ' + str(opt.HMSJBTC) + ' '
   postFix = massOpt + catscheme + " --cosThetaStarHigh " + str(opt.ctsCut) + " "
+
+  if (opt.gendiphofilter): postFix += " --genDiPhotonFilter "
+
   SFs = " --bVariation 0 --phoVariation 0"
 
   directory = dirPrefix
