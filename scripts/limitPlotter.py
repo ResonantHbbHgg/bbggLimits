@@ -15,7 +15,7 @@ parser.add_argument("-c", dest="combineOpt", type=int, default=1,
                     help="Pick which limits to plot. 1-Asymptotic; 2 - Asymptotic with adaptive asimov; 3 - HybridNew")
 parser.add_argument('-d', '--dir', dest="inDir", type=str, default=None, required=True,
                     help="Input directory")
-parser.add_argument('-x', choices=['res', 'nodes', 'grid', 'lambda', 'bench'], required=True, default=None,
+parser.add_argument('-x', choices=['res','nodes','grid','lambda','yt','c2_1','c2_2','bench'], required=True, default=None,
                     help = "Choose which Limit plot to make.")
 parser.add_argument("--log", dest="log", action="store_true", default=False,
                     help="Make log scale (in y)")
@@ -26,21 +26,16 @@ opt = parser.parse_args()
 
 import HiggsAnalysis.bbggLimits.ParametersGrid as pg
 import HiggsAnalysis.bbggLimits.TdrStyle as tdr
+gridMap = pg.loadMapping_()
 
 br = 0.26 / 100.
-default_values = {
-  "lambda": 1,
-  "yt": 1,
-  "c2": 0,
-  "cg": 0,
-  "c2g": 0
-}
 
-def filterLambdaPoints(x):
-  fixed = ['yt', 'c2', 'cg', 'c2g']
+def filterMyPoints(x, fixedVals=None):
+  if fixedVals==None:
+    fixedVals = {'yt':1, 'c2':0, 'cg':0, 'c2g':0}
 
-  for p in fixed:
-    if x[p] != default_values[p]:
+  for key, value in fixedVals.iteritems():
+    if x[key] != value:
       return False
   return True
 
@@ -81,14 +76,62 @@ def LambdaCurve(x, par):
   c2  = par[1]
   cg  = par[2]
   c2g = par[3]
-  
+
   return br*pg.getCrossSectionForParameters(x[0], yt, c2, cg, c2g)[0]
-  
+
+def ytCurve(x, par):
+  lamb  = par[0]
+  c2  = par[1]
+  cg  = par[2]
+  c2g = par[3]
+
+  return br*pg.getCrossSectionForParameters(lamb, x[0], c2, cg, c2g)[0]
+
+def c2Curve(x, par):
+  lamb  = par[0]
+  yt  = par[1]
+  cg  = par[2]
+  c2g = par[3]
+
+  return br*pg.getCrossSectionForParameters(lamb, yt, x[0], cg, c2g)[0]
+
+def cgCurve(x, par):
+  lamb  = par[0]
+  yt  = par[1]
+  c2  = par[2]
+  c2g = par[3]
+
+  return br*pg.getCrossSectionForParameters(lamb, yt, c2, x[0], c2g)[0]
+
+def c2gCurve(x, par):
+  lamb  = par[0]
+  yt  = par[1]
+  c2  = par[2]
+  cg  = par[3]
+
+  return br*pg.getCrossSectionForParameters(lamb, yt, c2, cg, x[0])[0]
+
 if __name__ == "__main__":
   print "This is the __main__ part"
 
-  lambdaPoints = pg.getPoints(filterLambdaPoints)
+  lambdaPoints = pg.getPoints(filterMyPoints, gridMap)
   print 'Lambda points:\n', lambdaPoints
+
+  filt = {'lambda':1, 'c2':0, 'cg':0, 'c2g':0}
+  ytPoints = pg.getPoints(filterMyPoints, gridMap, filt)
+  print 'Yt points:\n', ytPoints
+
+  filt = {'lambda':1, 'yt':1, 'cg':0, 'c2g':0}
+  c2Points_1 = pg.getPoints(filterMyPoints, gridMap, filt)
+  print 'C2_1 points:\n', c2Points_1
+
+  filt = {'lambda':1, 'yt':1, 'cg':0.2, 'c2g':-0.2}
+  c2Points_2 = pg.getPoints(filterMyPoints, gridMap, filt)
+  print 'C2_2 points:\n', c2Points_2
+
+  #filt = {'lambda':1, 'yt':0, 'c2':0, 'cg':0, 'c2g':0}
+  #cgPoints = pg.getPoints(filterMyPoints, gridMap, filt)
+  #print 'Cg points:\n', cgPoints
 
   gROOT.LoadMacro("./CMS_lumi.C")
   tdr.setTDRStyle()
@@ -96,12 +139,12 @@ if __name__ == "__main__":
   tdrStyle.SetTitleYOffset(1.1)
 
   TH1.SetDefaultSumw2(kTRUE)
-  
+
   latex = TLatex()
   latex.SetNDC()
   latex.SetTextAngle(0)
   latex.SetTextColor(kBlack)
-    
+
   xAxis = []
   xErr  = []
   obs   = []
@@ -159,7 +202,7 @@ if __name__ == "__main__":
     print 'Making limit plot for benchmarks'
 
     for i,n in enumerate(xrange(1507,1519)):
-      print i,n 
+      print i,n
       l = getValuesFromFile(opt.inDir+'/CombinedCard_gridPoint_'+str(n)+'/higgsCombine_gridPoint_'+str(n)+fTail)
       if opt.verb>0:
         print n,l
@@ -181,17 +224,25 @@ if __name__ == "__main__":
       xAxis.append(float(n-1506))
       xErr.append(0.5)
 
-  elif opt.x in ['grid','lambda']:
+  elif opt.x in ['grid','lambda','yt','c2_1','c2_2']:
     print 'Making limit plot for 0-1507 grid points'
 
     for n in xrange(0,1519):
 
       if opt.x=='lambda' and n not in lambdaPoints:
         continue
+      if opt.x=='yt' and n not in ytPoints:
+        continue
 
+      if opt.x=='c2_1' and n not in c2Points_1:
+        continue
+
+      if opt.x=='c2_2' and n not in c2Points_2:
+        continue
+      
       if n==324:
         print " This is SM point. It does not exist in the weights."
-        print " Take it from the Nodes"
+        print "\t We take it from the Nodes"
         l = getValuesFromFile(opt.inDir+'/CombinedCard_Node_SM/higgsCombine_Node_SM'+fTail)
         if l==None:
           missedPoints.append(n)
@@ -203,7 +254,7 @@ if __name__ == "__main__":
         if l==None or len(l)<5:
           missedPoints.append(n)
           continue
-        
+
       if opt.verb>0:
         print n,l
 
@@ -218,12 +269,19 @@ if __name__ == "__main__":
       if opt.x=='grid':
         xAxis.append(float(n))
       if opt.x=='lambda':
-        xAxis.append(float(pg.getParametersFromPoint(n,True)['lambda']))
+        xAxis.append(float(pg.getParametersFromPoint(n,gridMap,True)['lambda']))
         # print n, float(pg.getParametersFromPoint(n,True)['lambda'])
+      if opt.x=='yt':
+        xAxis.append(float(pg.getParametersFromPoint(n,gridMap,True)['yt']))
+      if opt.x in ['c2_1','c2_2']:
+        xAxis.append(float(pg.getParametersFromPoint(n,gridMap,True)['c2']))
 
-
-      theo.append(pg.getCrossSectionForPoint(n)[0]*br)
-
+      try:
+        theo.append(pg.getCrossSectionForPoint(n, gridMap)[0]*br)
+      except:
+        print 'Exception on getCrossSectionForPoint(). Point=', n
+        theo.append(0)
+        
       xErr.append(0.5)
 
 
@@ -265,7 +323,7 @@ if __name__ == "__main__":
   theory = TGraphAsymmErrors(nPoints,xAxis_Array,theo_Array,zeros_Array,zeros_Array,zeros_Array,zeros_Array)
 
   if opt.x=='grid':
-    # Make a JSON file 
+    # Make a JSON file
     limDict = {}
     for i in xrange(0,nPoints):
       if opt.verb > 0:
@@ -292,7 +350,7 @@ if __name__ == "__main__":
 
 
 
-  if opt.x in ['nodes','bench','lambda']:
+  if opt.x in ['nodes','bench','lambda', 'yt', 'c2_1', 'c2_2']:
 
     twoSigma.SetLineWidth(8)
     twoSigma.SetLineColor(kYellow)
@@ -311,24 +369,39 @@ if __name__ == "__main__":
     if not opt.blind:
       mg.Add(observed)
 
-    if opt.x == 'lambda':
+    if opt.x in ['lambda', 'yt', 'c2_1', 'c2_2']:
       theory.SetMarkerStyle(22)
       theory.SetMarkerSize(1.2)
       theory.SetMarkerColor(kRed+2)
       #mg.Add(theory,'PC')
 
     mg.Draw('APZ')
-    if opt.x == 'lambda':
-      mg.GetXaxis().SetTitle('#kappa_{#lambda}')
-      
-      lambdaFunc = TF1('Lambda', LambdaCurve, -16, 16, 4)
-      lambdaFunc.SetParameters(1,0,0,0)
+    if opt.x in ['lambda', 'yt','c2_1','c2_2']:
 
-      lambdaFunc.SetLineWidth(2)
-      lambdaFunc.SetLineColor(kRed+2)
-      lambdaFunc.Draw('L same')
-      
-      
+      if opt.x == 'lambda':
+        mg.GetXaxis().SetTitle('#kappa_{#lambda}')
+        thFunc = TF1('lambdaFunc', LambdaCurve, -16, 16, 4)
+        thFunc.SetParameters(1,0,0,0)
+
+      if opt.x == 'yt':
+        mg.GetXaxis().SetTitle('#kappa_{t}')
+        thFunc = TF1('ytFunc', ytCurve, 0.3, 2.6, 4)
+        thFunc.SetParameters(1,0,0,0)
+
+      if opt.x in ['c2_1', 'c2_2']:
+        mg.GetXaxis().SetTitle('c_{2}')
+
+        thFunc = TF1('c2Func', c2Curve, -2.5, 3, 4)
+        if opt.x=='c2_1':
+          thFunc.SetParameters(1,1,0,0)
+        if opt.x=='c2_2':
+          thFunc.SetParameters(1,1,0.2,-0.2)
+
+      thFunc.SetLineWidth(2)
+      thFunc.SetLineColor(kRed+2)
+      thFunc.Draw('L same')
+
+
     if opt.x == 'nodes':
       mg.GetXaxis().SetTitle('Node Number')
     if opt.x == 'bench':
@@ -354,7 +427,7 @@ if __name__ == "__main__":
     mg.Add(oneSigma)
     mg.Add(expected,'L')
 
-    mg.Add(theory,'L')
+    # mg.Add(theory,'L')
 
     if not opt.blind:
       mg.Add(observed,'L')
@@ -373,6 +446,10 @@ if __name__ == "__main__":
     mg.GetXaxis().SetLimits(-10, 1520)
   if opt.x=='lambda':
     mg.GetXaxis().SetLimits(-16, 16)
+  if opt.x=='yt':
+    mg.GetXaxis().SetLimits(0, 3)
+  if opt.x in ['c2_1','c2_2']:
+    mg.GetXaxis().SetLimits(-4, 4)
   mg.GetYaxis().SetTitle('#sigma(pp #rightarrow HH) #times B(HH #rightarrow bb#gamma#gamma)_{95% CL} (fb)')
 
   mg.SetMaximum(12)
@@ -386,17 +463,24 @@ if __name__ == "__main__":
   leg.SetFillStyle(0)
   leg.SetBorderSize(0)
 
-  if opt.x in ['nodes','bench','lambda']:
+  if opt.x in ['nodes','bench','lambda', 'yt', 'c2_1', 'c2_2']:
     leg.AddEntry(observed,"Observed", "p")
     leg.AddEntry(oneSigma,"Expected", "p")
     leg.AddEntry(oneSigma,"Expected #pm 1#sigma", "l")
     leg.AddEntry(twoSigma,"Expected #pm 2#sigma", "l")
-    if opt.x=='lambda':
+    if opt.x in ['lambda', 'yt', 'c2_1', 'c2_2']:
       #leg.AddEntry(theory,"Theory", "p")
-      leg.AddEntry(lambdaFunc,"Theory prediction", "l")
+      leg.AddEntry(thFunc,"Theory prediction", "l")
       latex.SetTextFont(42)
       latex.SetTextSize(0.03)
-      latex.DrawLatex(0.2,0.8, 'c_{2}=c_{2}^{SM}, c_{g}=c_{g}^{SM}, c_{2g}=c_{2g}^{SM}')
+      if opt.x=='lambda':
+        latex.DrawLatex(0.2,0.8, '#kappa_{t}=#kappa_{t}^{SM}, c_{2}=c_{2}^{SM}, c_{g}=c_{g}^{SM}, c_{2g}=c_{2g}^{SM}')
+      if opt.x=='yt':
+        latex.DrawLatex(0.2,0.8, '#kappa_{#lambda}=#kappa_{#lambda}^{SM}, c_{2}=c_{2}^{SM}, c_{g}=c_{g}^{SM}, c_{2g}=c_{2g}^{SM}')
+      if opt.x=='c2_1':
+        latex.DrawLatex(0.2,0.8, '#kappa_{#lambda}=#kappa_{#lambda}^{SM}, #kappa_{t}=#kappa_{t}^{SM}, c_{g}=c_{g}^{SM}, c_{2g}=c_{2g}^{SM}')
+      if opt.x=='c2_2':
+        latex.DrawLatex(0.2,0.8, '#kappa_{#lambda}=#kappa_{#lambda}^{SM}, #kappa_{t}=#kappa_{t}^{SM}, c_{g}=-c_{2g}=0.2')
 
   if opt.x=='grid':
     leg.AddEntry(observed,"Observed", "p")
@@ -411,7 +495,7 @@ if __name__ == "__main__":
     mg.SetMaximum(170)
     gPad.SetLogy()
 
-  
+
   CMS_lumi(c1, 4, 11, "")
   for e in ['.png']:
     c1.SaveAs(opt.inDir+'/limitPlot_'+opt.x+'_'+str(opt.combineOpt)+e)
