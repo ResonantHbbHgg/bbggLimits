@@ -1,7 +1,25 @@
-# bbggLimits
-Package for computing limits for the Run II analyses
+# Package for computing limits for the Run II analyses
 
-## Working examples
+## Instalation
+First, setup the environment with the Higgs Combine tools: https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideHiggsAnalysisCombinedLimit#For_end_users_that_don_t_need_to   
+Currently working with 74X (check latest on HiggsCombine twiki).   
+
+Get bbggLimits:   
+```
+cd ${CMSSW_BASE}/src/HiggsAnalysis/
+git clone git@github.com:ResonantHbbHgg/bbggLimits.git
+cd bbggLimits
+scramv1 b -j 10
+```
+
+## Making Limit Trees
+
+In order to make limit trees from all samples use these script:
+```
+makeAllTrees.py -x nonres [--NRW]
+```
+
+### Working examples
 
 Make non-res shape benchmark points trees (MVA based with 400 Mhh threshold):
 ```
@@ -37,25 +55,7 @@ makeAllTrees.py -x res \
 ```    
 
 
-### Instalation
-First, setup the environment with the Higgs Combine tools: https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideHiggsAnalysisCombinedLimit#For_end_users_that_don_t_need_to   
-Currently working with 74X (check latest on HiggsCombine twiki).   
-
-Get bbggLimits:   
-```
-cd ${CMSSW_BASE}/src/HiggsAnalysis/
-git clone git@github.com:ResonantHbbHgg/bbggLimits.git
-cd bbggLimits
-scramv1 b -j 10
-```
-
-### Making Limit Trees
-
-In order to make limit trees from all samples use these script:
-```
-makeAllTrees.py -x nonres [--NRW]
-```
-
+### Details 
 The *C++ Loop* code to produce the Limit Trees is located at
 *src/bbggLTMaker.cc*. In order to run it over a single tree use the
 python script *scripts/pyLimitTreeMaker.py*, which exists in the
@@ -95,35 +95,8 @@ makeAllTrees.py -x res \
 -f LT_Jan26_Res_
 ```   
 
-### Using C++ script to make Limit Trees (will be depricated soon):
-The script is located in *bin/LimitTreeMaker.C*
-```
-LimitTreeMaker OPTIONS
-```   
-
-##### LimitTreeMaker Options:   
-* -i <input list of files, text file with root files full paths> ( or -inputFile <single root file> )   
-* -o <output location>   
-* -min <min mtot> -max <max mtot>   
-* -scale <Lumi*CrossSection*SF/NEvts, 1 for data>   
-* -photonCR (do photon control region)   
-* -KF (use Mtot_KF to cut on mass window)   
-* -MX (use MX to cut on mass window) (choose either -MX or -KF!)   
-* -tilt (select tilted mass window)   
-* -doNoCat (no categorization, all is cat0)   
-* -btagWP <WP> (set btagging working point for categories   
-* -doCatMixed (do categories with mixed btagging - cat0: 2>low, cat1: 1<low+1>high)   
-* -singleCat (only one category, High Mass analysis)   
-* -doBVariation <VAR> (Apply b-tagging SF factors: 0, 1 or -1)
-* -doPhoVariation <VAR> (Apply photon SF factors: 0, 1 or -1)
-* -cosThetaStar <VAR> (Cut on CosTheta Star)
-                                
-
-
-
 ### Set the Limits
-
-For setting the Resonant limits, follow instructions in *LimitSetting* sub-directory.
+For setting the Resonant limits, the instructions will come soon.
 
 For Non-Resonant limit, stay here and run:
 ```

@@ -1,13 +1,17 @@
 {
+
     "LTDIR" : "/src/HiggsAnalysis/bbggLimits/LT_Res_MVA_Radion",
+
     "signal" : {
         "types" : ["Radion"],
 	"signalModelCard" : "/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D_dcb.rs"
     },
     "other" : {
+
         "doDoubleSidedCB": 1,
         "Combinelxbatch" : 0,
         "version" : 66,
+
 	"integratedLumi" : 36.5,
         "energy" : "13TeV",
         "higgsMass" : 125.0,
@@ -21,8 +25,10 @@
         "drawBackgroundFit" : 0,
         "useSigTheoryUnc" : 0,
 	"doBrazilianFlag" : false,
+
 	"runCombine" : false,
 	"combineOption" : 2,
+
 	"minMggMassFit" : 100,
 	"maxMggMassFit" : 180,
 	"minMjjMassFit"	: 60,
@@ -40,7 +46,7 @@
 	"low":false,
 	"obs":false,
 	"twotag":false,
-        "doBias":false,
+        "doBias":1,
         "biasConfig": "BiasStudies/ForBias.json"
 	
     },

@@ -28,6 +28,9 @@
 
 using namespace std;
 
+// Total points for the Non-resonant re-weighting
+//1507 (of initial grid) + 12 (benchmarks) = 1519
+#define NRWTOT 1519
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
 
@@ -43,9 +46,9 @@ public :
    ULong64_t o_evt;
    UInt_t o_run;
 
-   Float_t o_NRWeights[1507];
-   TFile * NRwFile;
-   TH2F * NR_Wei_Hists[1507];
+   Float_t o_NRWeights[NRWTOT];
+   TFile *NRwFile, *NRwFile2;
+   TH2F *NR_Wei_Hists[NRWTOT];
    
    Int_t           o_category;
    Int_t           o_isSignal;
