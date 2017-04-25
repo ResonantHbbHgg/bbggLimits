@@ -62,6 +62,7 @@ if 'nonres' in opt.x:
             [7, 50000], [8, 50000], [9, 49600], [10, 49800], [11, 50000], [12, 50000], [13, 50000] ]
   
 
+
   TreeDir = '/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/FlatTrees-Jan31/'
 
   SignalFiles = "/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph.root"
@@ -94,6 +95,7 @@ if 'nonres' in opt.x:
     catscheme += ' --LMLJBTC ' + str(opt.LMLJBTC) + ' --HMLJBTC ' + str(opt.HMLJBTC) + ' --LMSJBTC ' + str(opt.LMSJBTC) + ' --HMSJBTC ' + str(opt.HMSJBTC) + ' '
   postFix = massOpt + catscheme + " --cosThetaStarHigh " + str(opt.ctsCut) + " "
 
+
   if (opt.gendiphofilter): postFix += " --genDiPhotonFilter "
 
   SFs = " --bVariation 0 --phoVariation 0"
@@ -108,6 +110,7 @@ if 'nonres' in opt.x:
   
   for MM in nodes:
     i = MM[0]
+
     if opt.onlysmhh == True and 'SM' not in str(i): continue
     sigScale = float(opt.lumi)/float(MM[1])
     if opt.doSMHiggs:
@@ -117,6 +120,7 @@ if 'nonres' in opt.x:
 
     if opt.NRW:
       NRW = ' --NRW --NRscale '+ str(float(opt.lumi)/float(N0))
+
     else:
       NRW = ''
     command = "pyLimitTreeMaker.py -f " + Signals.replace("THENODE", str(i)) + " -o " + directory+"_LowMass" + " --min 0 --max " + opt.massNR + " --scale " + str(sigScale) + postFix + SFs + NRW

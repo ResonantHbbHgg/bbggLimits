@@ -252,7 +252,7 @@ fixed_parameters = parameters[:]
 fixed_parameters.remove(options.x)
 fixed_parameters.remove(options.y)
 
-def filterPoints(x):
+def filterPoints(x, filt=None):
     global fixed_parameters, parameter_values
 
     for p in fixed_parameters:

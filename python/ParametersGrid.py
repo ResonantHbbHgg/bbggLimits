@@ -42,18 +42,21 @@ def loadMapping_():
         del d['point']
         t = tuple(d.items())
         d['point'] = p
+
+        new_data.append(d)
         if t not in seen:
             seen.add(t)
-            new_data.append(d)
+            # new_data.append(d)
 
     return sorted(new_data, key=lambda t: t['point'])
 
 
-def getPointFromParameters(l, yt, c2, cg, c2g):
+def getPointFromParameters(l, yt, c2, cg, c2g, mapping = None):
     """
     Returns the point matching the 5 parameters, or None if there's none
     """
-    mapping = loadMapping_()
+    if mapping==None:
+        mapping = loadMapping_()
 
     point = [x['point'] for x in mapping if x['lambda'] == l and x['yt'] == yt and x['c2'] == c2 and x['cg'] == cg and x['c2g'] == c2g]
 
@@ -62,25 +65,30 @@ def getPointFromParameters(l, yt, c2, cg, c2g):
     elif len(point) == 1:
         return point[0]
     else:
-        raise Exception('More than 1 point mapping to a given set of parameters: %s' % (', '.join([str(p) for p in point])))
+        print  'WARNING: More than 1 point mapping to a given set of parameters: %s' % (', '.join([str(p) for p in point]))
+        print '\t We will take the first one'
+        # raise Exception('More than 1 point mapping to a given set of parameters: %s' % (', '.join([str(p) for p in point])))
+        return point[0]
 
-def getParametersFromPoint(point, dict=False):
+def getParametersFromPoint(point, mapping = None, as_dict = False):
     """
     Returns a tuple of lambda, yt, c2, cg and c2g for a given point
     """
-    mapping = loadMapping_()
+    if mapping==None:
+        mapping = loadMapping_()
 
     if point < 0:
         return None
 
     point = [x for x in mapping if x['point'] == point]
+
     if len(point) == 0:
         return None
     elif len(point) != 1:
         raise Exception('More than 1 point mapping to a given set of parameters: %s' % (', '.join([str(p['point']) for p in point])))
     else:
         p = point[0]
-        if dict:
+        if as_dict:
             return p
         else:
             return (p['lambda'], p['yt'], p['c2'], p['cg'], p['c2g'])
@@ -94,54 +102,64 @@ def getLambdaScanPoints(yt=1, c2=0, cg=0, c2g=0):
 
     return [x['point'] for x in sorted(points, key=lambda t: t['lambda'])]
 
-def getYtScanPoints(klambda=1, c2=0, cg=0, c2g=0):
+def getYtScanPoints(klambda=1, c2=0, cg=0, c2g=0, mapping=None):
     """
     Return a list of point suitable for the yt scan
     """
-    mapping = loadMapping_()
+    if mapping==None:
+        mapping = loadMapping_()
 
 
     points = [x for x in mapping if x['lambda'] == klambda and x['c2'] == c2 and x['cg'] == cg and x['c2g'] == c2g]
 
     return [x['point'] for x in sorted(points, key=lambda t: t['yt'])]
 
-def getC2ScanPoints(klambda=1, yt=1, cg=0, c2g=0):
+def getC2ScanPoints(klambda=1, yt=1, cg=0, c2g=0, mapping = None):
     """
     Return a list of point suitable for the c2 scan
     """
-    mapping = loadMapping_()
+    if mapping==None:
+        mapping = loadMapping_()
 
     points = [x for x in mapping if x['lambda'] == klambda and x['yt'] == yt and x['cg'] == cg and x['c2g'] == c2g]
 
     return [x['point'] for x in sorted(points, key=lambda t: t['c2'])]
 
-def getCgScanPoints(klambda=1, yt=1, c2=0, c2g=0):
+def getCgScanPoints(klambda=1, yt=1, c2=0, c2g=0, mapping=None):
     """
     Return a list of point suitable for the cg scan
     """
-    mapping = loadMapping_()
+    if mapping==None:
+        mapping = loadMapping_()
 
     points = [x for x in mapping if x['lambda'] == klambda and x['yt'] == yt and x['c2'] == c2 and x['c2g'] == c2g]
 
     return [x['point'] for x in sorted(points, key=lambda t: t['cg'])]
 
-def getC2gScanPoints(klambda=1, yt=1, c2=0, cg=0):
+def getC2gScanPoints(klambda=1, yt=1, c2=0, cg=0, mapping=None):
     """
     Return a list of point suitable for the c2g scan
     """
-    mapping = loadMapping_()
+    if mapping==None:
+        mapping = loadMapping_()
 
     points = [x for x in mapping if x['lambda'] == klambda and x['yt'] == yt and x['c2'] == c2 and x['cg'] == cg]
 
     return [x['point'] for x in sorted(points, key=lambda t: t['c2g'])]
 
-def getPoints(f):
+def getPoints(f, mapping=None, *f_args):
     """
     Returns a list of points passing the filter f
     """
-    mapping = loadMapping_()
+    try:
+        filt = f_args[0]
+    except:
+        filt = None
+    print 'Filter for points is:', filt
+    if mapping==None:
+        mapping = loadMapping_()
 
-    points = [x['point'] for x in mapping if f(x)]
+    points = [x['point'] for x in mapping if f(x, filt)]
 
     return points
 
@@ -152,9 +170,9 @@ def getCrossSectionForParameters(l, yt, c2, cg, c2g):
 
     params = (l, yt, c2, cg, c2g)
 
-    A = [2.09078, 10.1517, 0.282307, 0.101205, 1.33191, -8.51168, -1.37309, 2.82636, 
+    A = [2.09078, 10.1517, 0.282307, 0.101205, 1.33191, -8.51168, -1.37309, 2.82636,
          1.45767, -4.91761, -0.675197, 1.86189, 0.321422, -0.836276, -0.568156]
-    
+
     # From https://github.com/cms-hh/Plotting/blob/nonResonant/nonResonant/5Dfunction.py#L38
     def f(kl, kt, c2, cg, c2g):
       return A[0]*kt**4 + A[1]*c2**2 + (A[2]*kt**2 + A[3]*cg**2)*kl**2 + A[4]*c2g**2 + \
@@ -171,14 +189,13 @@ def getCrossSectionForParameters(l, yt, c2, cg, c2g):
     res = f(*params)
     return res * hh_sm_xs, res * hh_sm_xs_down, res * hh_sm_xs_up
 
-def getCrossSectionForPoint(point):
+def getCrossSectionForPoint(point, mapping=None):
     """
     Get the theoretical cross-section for a given point in fb
     """
-
-    return getCrossSectionForParameters(*getParametersFromPoint(point))
+    return getCrossSectionForParameters(*getParametersFromPoint(point, mapping))
 
 if __name__ == "__main__":
-  
+
   # Load the mapping file from the `data` folder
   mapping = loadMapping_()
