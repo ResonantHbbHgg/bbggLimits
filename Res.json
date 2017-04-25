@@ -1,12 +1,17 @@
 {
-    "LTDIR" : "/src/HiggsAnalysis/bbggLimits/LT-Feb06-ResLMnWRadion",
+
+    "LTDIR" : "/src/HiggsAnalysis/bbggLimits/LT_Res_MVA_Radion",
+
     "signal" : {
         "types" : ["Radion"],
-	"signalModelCard" : "/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D_sig.rs"
+	"signalModelCard" : "/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D_dcb.rs"
     },
     "other" : {
+
+        "doDoubleSidedCB": 1,
         "Combinelxbatch" : 0,
-        "version" : 73,
+        "version" : 66,
+
 	"integratedLumi" : 36.5,
         "energy" : "13TeV",
         "higgsMass" : 125.0,
@@ -15,25 +20,27 @@
         "doBands" : 0,
         "ncat" : 2,
         "analysisType" : "fitTo2D_resSearch_withRegKinFit",
-        "doSingleLimit" : 1,
-        "drawSignalFit" : 1,
+        "doSingleLimit" : 0,
+        "drawSignalFit" : 0,
         "drawBackgroundFit" : 0,
         "useSigTheoryUnc" : 0,
 	"doBrazilianFlag" : false,
-	"runCombine" : 1,
-	"combineOption" : 1,
+
+	"runCombine" : false,
+	"combineOption" : 2,
+
 	"minMggMassFit" : 100,
 	"maxMggMassFit" : 180,
-	"minMjjMassFit"	: 80,
-	"maxMjjMassFit"	: 200,
+	"minMjjMassFit"	: 60,
+	"maxMjjMassFit"	: 180,
 	"minSigFitMgg" :115,
 	"maxSigFitMgg" :135,
-	"minSigFitMjj" :80,
-	"maxSigFitMjj" :200,
+	"minSigFitMjj" :60,
+	"maxSigFitMjj" :180,
 	"minHigMggFit" :115,
 	"maxHigMggFit" :135,
-	"minHigMjjFit":80,
-	"maxHigMjjFit":200,
+	"minHigMjjFit":60,
+	"maxHigMjjFit":180,
 	"HH":false,
 	"base":true,
 	"low":false,

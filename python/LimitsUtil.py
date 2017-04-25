@@ -5,205 +5,18 @@ from shutil import copy
 from pprint import pformat
 # import pebble as pb
 from multiprocessing import Pool, TimeoutError, current_process
+from HiggsAnalysis.bbggLimits.DataCardUtils import *
+from HiggsAnalysis.bbggLimits.IOUtils import *
+from HiggsAnalysis.bbggLimits.CombineUtils import *
 
 __BAD__ = 666
 
-#def DataCardMaker(newFolder, NCAT, sigExpStr, bkgObsStr):
-def DataCardMaker(Folder, nCats, signalExp, observed, isRes = 0):
-  if isRes == 0 and nCats == 1:
-    print 'Resonant needs two cats!'
-    sys.exit(2)
-
-  if nCats == 2:
-    inputDatacardName = os.getenv("CMSSW_BASE")+'/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/LowMassResDatacardModel.txt'
-    if isRes == 0:
-      inputDatacardName = os.getenv("CMSSW_BASE")+'/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/NonResDatacardModel.txt'
-
-    inputDatacard = open(inputDatacardName, 'r')
-    outputDatacard = open(Folder+'/datacards/hhbbgg_13TeV_DataCard.txt', 'w')
-    outToWrite = ''
-    for line in inputDatacard:
-      outTemp = line.replace("INPUTBKGLOC", Folder+'/workspaces/hhbbgg.inputbkg_13TeV.root')
-      outTemp2 = outTemp.replace("INPUTSIGLOC", Folder+'/workspaces/hhbbgg.mH125_13TeV.inputsig.root')
-      outTemp3 = outTemp2.replace("OBSCAT0", '{:.0f}'.format(float(str(observed.split(',')[0]))))
-      outTemp4 = outTemp3.replace("OBSCAT1", '{:.0f}'.format(float(str(observed.split(',')[1]))))
-      outTemp5 = outTemp4.replace("SIGCAT0", str(signalExp.split(',')[0]))
-      outTemp6 = outTemp5.replace("SIGCAT1", str(signalExp.split(',')[1]))
-      if float(observed.split(',')[0]) < 11:
-        newTemp1 = outTemp6
-        newTemp2 = newTemp1.replace('CMS_hhbbgg_13TeV_mgg_bkg_slope3_cat0', '### CMS_hhbbgg_13TeV_mgg_bkg_slope3_cat0')
-        outTemp6 = newTemp2.replace('CMS_hhbbgg_13TeV_mjj_bkg_slope3_cat0', '### CMS_hhbbgg_13TeV_mjj_bkg_slope3_cat0')
-      if float(observed.split(',')[1]) < 11:
-        newTemp1 = outTemp6
-        newTemp2 = newTemp1.replace('CMS_hhbbgg_13TeV_mgg_bkg_slope3_cat1', '### CMS_hhbbgg_13TeV_mgg_bkg_slope3_cat1')
-        outTemp6 = newTemp2.replace('CMS_hhbbgg_13TeV_mjj_bkg_slope3_cat1', '### CMS_hhbbgg_13TeV_mjj_bkg_slope3_cat1')
-      outToWrite += outTemp6
-    outputDatacard.write(outToWrite)
-    outputDatacard.close()
-
-  if nCats == 1 and isRes == 1:
-    inputDatacardName = 'Models/HighMassResDatacardModel.txt'
-    inputDatacard = open(inputDatacardName, 'r')
-    outputDatacard = open(Folder+'/datacards/hhbbgg_13TeV_DataCard.txt', 'w')
-    outToWrite = ''
-    for line in inputDatacard:
-      outTemp = line.replace("INPUTBKGLOC", Folder+'/workspaces/hhbbgg.inputbkg_13TeV.root')
-      outTemp2 = outTemp.replace("INPUTSIGLOC", Folder+'/workspaces/hhbbgg.mH125_13TeV.inputsig.root')
-      outTemp3 = outTemp2.replace("OBSCAT0", str(observed))
-      outTemp5 = outTemp3.replace("SIGCAT0", str(signalExp))
-      if float(observed.split(',')[0]) < 11:
-        newTemp1 = outTemp5
-        newTemp2 = newTemp1.replace('CMS_hhbbgg_13TeV_mgg_bkg_slope3_cat0', '### CMS_hhbbgg_13TeV_mgg_bkg_slope3_cat0')
-        outTemp5 = newTemp2.replace('CMS_hhbbgg_13TeV_mjj_bkg_slope3_cat0', '### CMS_hhbbgg_13TeV_mjj_bkg_slope3_cat0')
-      outToWrite += outTemp5
-    outputDatacard.write(outToWrite)
-    outputDatacard.close()
-
-######
-######
-def createDir(myDir, log=None, over=True):
-  if log!=None:
-    log.info('Creating a new directory: %s', myDir)
-  if os.path.exists(myDir):
-    if log!=None:
-      log.warning("\t This directory already exists: %s", myDir)
-    if over:
-      # Overwrite it...
-      if log!=None:
-        log.warning("But we will continue anyway. * This will overwrite some files inside this directory! *")
-    else:
-      if log!=None:
-        log.error(' And so I exit this place...')
-      print 'The directory exists and we exit. Dir = ', myDir
-      sys.exit(1)
-  else:
-    try: os.makedirs(myDir)
-    except OSError:
-      if os.path.isdir(myDir): pass
-      else: raise
-######
-######
 
 def printTime(t1, t2, log):
   tNew = time.time()
   log.debug('Time since start of worker: %.2f sec; since previous point: %.2f sec' %(tNew-t2,tNew-t1))
   return tNew
 
-######
-######
-def runCombineOnLXBatch(inDir, doBlind, log, combineOpt=1, Label=None):
-  log.info('Running combine tool.  Dir: %s Blinded: %r', inDir, doBlind)
-  log.debug('inDir should be the immediate directory where the card is located')
-  print "im here8"
-
-  if doBlind and combineOpt!=3:
-    # In HybridNew this option does not work
-    blinded = "--run blind"
-  else:
-    blinded = ''
-
-  if combineOpt==1:
-    combineMethod = 'Asymptotic'
-  elif combineOpt==2:
-    combineMethod = 'Asymptotic --X-rtd TMCSO_AdaptivePseudoAsimov=50'
-  elif combineOpt==3:
-    combineMethod = 'HybridNew --testStat=LHC --frequentist '
-  else:
-    log.error('This option is not supported: %r', combineOpt)
-    return __BAD__
-
-  print "im here9"
-
-  cardName = inDir+"/hhbbgg_13TeV_DataCard.txt"
-  resFile  = inDir+"/result_"+str(combineOpt)
-  batchFileName = inDir+"/batch_"+str(combineOpt)
-  if Label!=None:
-    batchFileName += "_L_"+str(Label)
-    resFile += "_L_"+str(Label)
-  batchFileName += ".sh"
-  resFile += ".log"
-
-  if Label == None:
-    thisLabel = ''
-  else:
-    thisLabel = "-n " + Label
-
-  cmssw_base =  os.getenv("CMSSW_BASE")
-  outputFileStringTmp0 = '''
-#!/bin/bash
-
-cd CMSSWBASE/src/HiggsAnalysis/bbggLimits/
-eval `scramv1 runtime -sh`
-combine -M COMBINEMETHOD -m 125 LABEL BLINDED --datacard CARDNAME > RESFILE 2>&1
-
-mv OUTFILE OUTDIR
-
-'''
-
-  print "im here10"
-
-  outputFileStringTmp0 = outputFileStringTmp0.replace("BLINDED", blinded)
-  outputFileStringTmp1 = outputFileStringTmp0.replace("CMSSWBASE", cmssw_base)
-  outputFileStringTmp2 = outputFileStringTmp1.replace("CARDNAME", cardName)
-  outputFileStringTmp4 = outputFileStringTmp2.replace("OUTDIR", inDir)
-
-  if combineOpt < 3:
-    print "im here11"
-    outputFileStringTmp5 = outputFileStringTmp4.replace("LABEL", thisLabel)
-    outputFileStringTmp7 = outputFileStringTmp5.replace("COMBINEMETHOD", combineMethod)
-    outputFileStringTmp8 = outputFileStringTmp7.replace("RESFILE", resFile)
-    outCombineFileName = 'higgsCombine'+thisLabel.replace("-n ", "") +'.Asymptotic.mH125.root'
-    outputFileStringTmp9 = outputFileStringTmp8.replace("OUTFILE", outCombineFileName)
-    print "im here 19"
-    batchFile = open(batchFileName, "w+")
-    batchFile.write(outputFileStringTmp9)
-    batchFile.close()
-    os.system("chmod a+rwx " + batchFileName)
-    os.system("bsub -q 1nd -o "+ resFile.replace(".log", "_batch.out") + " < " + batchFileName)
-
-  if combineOpt == 3:
-    print "im here12"
-    #do expected bands
-    quantiles = ["0.025","0.160","0.500","0.840","0.975"]
-    qNames = ['m2s', 'm1s', 'central', 'p1s', 'p2s']
-    for iqt,qt in enumerate(quantiles):
-      myLabel = thisLabel + "_qt_"+str(qNames[iqt])
-      if thisLabel == '':
-        myLabel = "-n " + "_qt_"+str(qNames[iqt])
-      myMethod = combineMethod + " --expectedFromGrid " + str(qt)
-      myName = batchFileName.replace(".sh", "_qt_"+str(qNames[iqt])+".sh")
-      myresFile = resFile.replace(".log", "_qt_"+str(qNames[iqt])+".log")
-      outputFileStringTmp5 = outputFileStringTmp4.replace("LABEL", myLabel)
-      outputFileStringTmp6 = outputFileStringTmp5.replace("COMBINEMETHOD", myMethod)
-      outputFileStringTmp7 = outputFileStringTmp6.replace("RESFILE", myresFile)
-      outCombineFileName = 'higgsCombine'+myLabel.replace("-n ", "")+".HybridNew.mH125.quant"+str(qt)+".root"
-      outputFileStringTmp8 = outputFileStringTmp7.replace("OUTFILE", outCombineFileName)
-      print "im here13"
-      batchFile = open(myName, "w+")
-      batchFile.write(outputFileStringTmp8)
-      batchFile.close()
-      os.system("chmod a+rwx " + myName)
-      os.system("bsub -q 1nd -o "+ myresFile.replace(".log", "_batch.out") + " < " + myName)
-    #if not blinded, do observed
-    if not doBlind:
-      print "im here14"
-      myName = batchFileName.replace(".sh", "_qt_observed.sh")
-      myresFile = resFile.replace(".log", "_qt_observed.log")
-      myLabel = thisLabel + "_observed"
-      if thisLabel == '':
-        myLabel = "-n _observed"
-      outputFileStringTmp5 = outputFileStringTmp4.replace("LABEL", myLabel)
-      outputFileStringTmp6 = outputFileStringTmp5.replace("COMBINEMETHOD", combineMethod)
-      outputFileStringTmp7 = outputFileStringTmp6.replace("RESFILE", myresFile)
-      outCombineFileName = 'higgsCombine'+myLabel.replace("-n ", "")+'.HybridNew.mH125.root'
-      outputFileStringTmp8 = outputFileStringTmp7.replace("OUTFILE", outCombineFileName)
-      print "im here 15"
-      batchFile = open(myName, "w+")
-      batchFile.write(outputFileStringTmp8)
-      batchFile.close()
-      os.system("chmod a+rwx " + myName)
-      os.system("bsub -q 1nd -o "+ myresFile.replace(".log", "_batch.out") + " < " + myName)
-      
 ######
 ######
 def runCombine(inDir, doBlind, log, combineOpt = 1, Combinelxbatch = 0, Label = None):
@@ -290,6 +103,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
   combineOpt = Params['other']['combineOption']
   doBias = Params['other']['doBias']
   biasConfig = Params['other']['biasConfig']
+  doDoubleSidedCB = Params['other']['doDoubleSidedCB']
 
   massCuts = [Params['other']["minMggMassFit"], Params['other']["maxMggMassFit"],
               Params['other']["minMjjMassFit"], Params['other']["maxMjjMassFit"],
@@ -323,7 +137,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     sigCat = 0
   elif point == 'box':
     sigCat = 1
-  elif point > 15:
+  elif int(point) > 15:
     sigCat = int(point)
     isRes = 1
     Label.replace("Node", "Mass")
@@ -399,6 +213,15 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
                           logging.getLoggerClass().root.handlers[0].baseFilename+'.bbgg2D')
 
     theFitter.SetVerbosityLevel(opt.verb)
+
+    if 'HighMass' in t:
+      theFitter.SetNCat0(2)
+    else:
+      theFitter.SetNCat0(0)
+
+    print 'Using Double Sided Crystal Ball as Signal Model:',doDoubleSidedCB
+    if doDoubleSidedCB: theFitter.UseDoubleSidedCB()
+
     LTDir = LTDir_type.replace('TYPE', t)
     mass = 125.0
 
@@ -428,7 +251,22 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
 
     if addHiggs:
       procLog.debug('Here will add SM Higgs contributions')
-      # theFitter.AddHigData( mass,direc,1)
+      higTypes = Params['higgs']['type']
+      print 'Higgs types:', higTypes
+      higgsExp = {}
+      for iht,HT in enumerate(higTypes):
+        higgsExp[HT] = [0,0]
+        ht = higTypes[HT]
+        print ht, HT
+        higFileName = str(LTDir)+"/LT_output_"+str(ht)+".root"
+        
+        exphig = theFitter.AddHigData( mass,higFileName,iht, str(HT))
+        theFitter.HigModelFit(mass,iht, str(HT) )
+        theFitter.MakeHigWS(str('hhbbgg.')+str(HT), iht, str(HT))
+
+        higgsExp[HT] = [exphig[0], exphig[1]]
+
+      print "Done SM Higgs bzz"
 
     ddata = str(LTDir + '/LT_'+dataName+'.root')
     ddata = ddata.replace("MASS", str(point))
@@ -490,8 +328,12 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
         bkgObsStr += ","
 
     print "IM HERE2"
+
     # Make datacards:
-    DataCardMaker(str(newFolder), NCAT, sigExpStr, bkgObsStr, isRes)
+    if isRes==1: DataCardMaker(str(newFolder), NCAT, sigExpStr, bkgObsStr, isRes)
+    elif addHiggs == 0: DataCardMaker(str(newFolder), NCAT, sigExpStr, bkgObsStr, isRes, t)
+    else: DataCardMaker_wHiggs(str(newFolder), NCAT, sigExpStr, bkgObsStr, higgsExp, t)
+
     procLog.info("\t DATACARD DONE. Node/Mass=%r, GridPoint=%r, type=%r", point,NRgridPoint,t)
     if opt.verb>0: p8 = printTime(p7,start,procLog)
 
