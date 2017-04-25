@@ -63,6 +63,9 @@ public :
    Double_t        o_ljet_bdis;
    Double_t        o_sjet_bdis;
    Double_t        o_HHTagger;
+   Double_t        o_jt1diffweight;
+   Double_t        o_jt2diffweight;
+   Double_t        o_diffweight;
    Double_t        jet1PT;
    Double_t	   jet2PT;
    Double_t	   jet1ETA;
@@ -81,6 +84,10 @@ public :
    double mvaCat1_lm;
    double mvaCat0_hm;
    double mvaCat1_hm;
+   double LowMassLeadingJetBtagCut;
+   double HighMassLeadingJetBtagCut;
+   double LowMassSubLeadingJetBtagCut;
+   double HighMassSubLeadingJetBtagCut;
    int photonCR;
    int doKinFit;
    int doMX;
@@ -94,8 +101,11 @@ public :
    int phoVariation;
    int doNonResWeights;
    int photonCRNormToSig;
+   int GenDiPhotonFilter;
    double tiltWindow;
    double massThreshold;
+   bool isCustMVA;
+   bool isRes;
    typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > LorentzVector;
 
    // Declaration of leaf types
@@ -132,7 +142,8 @@ public :
    Int_t	subleadingJet_flavour;
    Int_t	leadingJet_hadFlavour;
    Int_t	subleadingJet_hadFlavour;
-   std::vector<std::pair<float,float>> btmap;
+   std::vector<std::pair<double,float>> btmap;
+   TString myDiffOpt;
 
    Double_t gen_mHH, gen_cosTheta;
    ULong64_t event;
@@ -226,6 +237,10 @@ public :
    BTagCalibrationReader* l_reader_loose_up;
    BTagCalibrationReader* l_reader_loose_down;
 
+   BTagCalibrationReader* b_diffreader_tight;
+   BTagCalibrationReader* c_diffreader_tight;
+   BTagCalibrationReader* l_diffreader_tight;
+
 
    bbggLTMaker(TTree *tree=0);
    virtual ~bbggLTMaker();
@@ -264,14 +279,29 @@ public :
    void SetCosThetaStarHigh(float cut) { cosThetaStarCutHigh = cut; }
 
 //setup
+   void BTagDiffWeightOpt( TString thisOpt) { myDiffOpt = thisOpt; }
    void SetOutFileName( std::string fname ) { outFileName = fname; }
    void BTagSetup(TString btagfile, TString effsfile);
-   std::vector<std::pair<float,float>> BTagWeight(bbggLTMaker::LorentzVector jet1, int flavour1, bbggLTMaker::LorentzVector jet2, int flavour2, int variation=0);
+   std::vector<std::pair<double,float>> BTagWeight(bbggLTMaker::LorentzVector jet1, int flavour1, bbggLTMaker::LorentzVector jet2, int flavour2, int variation=0);
    void SetupPhotonSF(TString idfile, TString evfile);
    float PhotonSF(LorentzVector pho, int phovar = 0);
    void SetMassThreshold(float par){ massThreshold = par;}
+
+   void BTagDiffSetup(TString btagfile, TString effsfile, TString diffOpt);
+   double BTagDiffWeight(bbggLTMaker::LorentzVector jet1, int flavour1, float bdis);
+
+   void SetLowMassLeadingJetBtagCut ( double LMLJBTC ) { LowMassLeadingJetBtagCut = LMLJBTC;}
+   void SetHighMassLeadingJetBtagCut ( double HMLJBTC ) { HighMassLeadingJetBtagCut = HMLJBTC;}
+   void SetLowMassSubLeadingJetBtagCut ( double LMSJBTC ) { LowMassSubLeadingJetBtagCut = LMSJBTC;}
+   void SetHighMassSubLeadingJetBtagCut ( double HMSJBTC ) { HighMassSubLeadingJetBtagCut = HMSJBTC;}
+
+   void FilterGenDiPhotons() { GenDiPhotonFilter = 1;}
    
    void DoNRWeights(int doNRW) { doNonResWeights = doNRW; }
+
+   void IsRes() {isRes=1;}
+
+   void isCustomCatMVA() {isCustMVA = 1;}
 };
 
 #endif
@@ -279,6 +309,8 @@ public :
 #ifdef bbggLTMaker_cxx
 bbggLTMaker::bbggLTMaker(TTree *tree) : fChain(0)
 {
+   GenDiPhotonFilter = 0;
+   isRes = 0;
    mtotMax = 12000.;
    mtotMin = 200.;
    normalization = 1.;
@@ -306,6 +338,11 @@ bbggLTMaker::bbggLTMaker(TTree *tree) : fChain(0)
    doNonResWeights = 0;
    photonCRNormToSig = 0;
    massThreshold = 350;
+   myDiffOpt = "central";
+   LowMassLeadingJetBtagCut = -10;
+   HighMassLeadingJetBtagCut = -10;
+   LowMassSubLeadingJetBtagCut = -10;
+   HighMassSubLeadingJetBtagCut = -10;
    Init(tree);
 }
 
@@ -369,6 +406,7 @@ void bbggLTMaker::Init(TTree *tree)
    HHTagger = 0;
    HHTagger_LM = 0;
    HHTagger_HM = 0;
+   isCustMVA=0;
    // Set branch addresses and branch pointers
    if (!tree) return;
    fChain = tree;

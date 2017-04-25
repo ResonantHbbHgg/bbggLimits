@@ -16,10 +16,11 @@ def main(argv):
 	bins = []
 	Label = ""
         DSCB = False
-	xmax = {'mgg':140, 'mjj': 250}
+        iHiggs = 'ggh'
+	xmax = {'mgg':140, 'mjj': 180}
         xmin = {'mgg':118, 'mjj': 60}
 	try:
-		opts, args = getopt.getopt(argv,"w:c:o:l:a:b:L:D",["workspace=", "cat=", "observable=","lumi=","analysis=","bins=", "Label=", "DSCB"])
+		opts, args = getopt.getopt(argv,"w:c:o:l:a:b:L:i:D",["workspace=", "cat=", "observable=","lumi=","analysis=","bins=", "Label=", "iHiggs", "DSCB"])
 	except getopt.GetoptError:
 		print 'MakeBkgPlot.py -w <workspace file> -c <cat> -o <obs1,obs2,obs3> -l <lumi> -a <analysis title> -b <binobs1,binobs2>'
 		sys.exit(2)
@@ -44,6 +45,8 @@ def main(argv):
 			Label = arg
 		if opt == "--DSCB":
 			DSCB = True
+		if opt == "-i" or opt == "--iHiggs":
+			iHiggs = str(arg)
 	if wfile == "" or cat == -1 or obs == "" or lumi == "" or analysis == "":
 		print 'MakeBkgPlot.py -w <workspace file> -c <cat> -o <observable> -l <lumi> -a <analysis title>'
 		sys.exit(2)
@@ -59,10 +62,22 @@ def main(argv):
 	ccat = CAT
 	if int(CAT) == 2: ccat = 0
 	if int(CAT) == 3: ccat = 1
+        
 	for i,ob in enumerate(obs):
-		data2D = workspace.data("Sig_cat"+str(CAT))
+		print "Dataset name:", "Hig_"+iHiggs+"_cat"+str(CAT)
+		data2D = workspace.data("Hig_"+iHiggs+"_cat"+str(CAT))
 		data2D.Print()
-		pdf = workspace.pdf(ob+"Sig_cat"+str(ccat)+"_CMS_sig_cat"+str(CAT))
+		print "##############################################"
+		print "######## Number of weighted events:", "Hig_"+iHiggs+"_cat"+str(CAT), Label, data2D.sumEntries()
+		print "##############################################"
+		print 'mggHig_ggh_cat0_CMS_hig_ggh_cat2'
+		pdfname = ob+"Hig_"+iHiggs+"_cat"+str(ccat)+"_CMS_hig_"+iHiggs+'_cat'+str(CAT)
+                print 'mjjHig_ggh_cat0_CMS_hig_ggh_cat2'
+		print pdfname
+#		workspace.Print()
+		pdf = workspace.pdf(pdfname)#ob+"Hig_"+iHiggs+"_cat"+str(ccat)+"_CMS_hig_"+iHiggs+'cat'+str(CAT))
+#		print ob+"Hig_"+iHiggs+"_cat"+str(CAT)
+		pdf.Print()
 #		pdf = workspace.pdf("BkgPdf_cat"+str(cat))
 		var = workspace.var(ob)
 		data = data2D.reduce(RooArgSet(var))
@@ -71,7 +86,7 @@ def main(argv):
 		if 'mgg' in ob:
 			label = "M(#gamma#gamma) [GeV]"	
 
-		MakeSigPlot(data, pdf, var, label, lumi, cat, analysis, doBands, Label+"_signal_fit_"+ob+"_cat"+str(CAT), bins[i], xmin[ob], xmax[ob], 1, DSCB)
+		MakeSigPlot(data, pdf, var, label, lumi, cat, analysis, doBands, Label+"_signal_fit_"+ob+"_cat"+str(CAT), bins[i], xmin[ob], xmax[ob], 1, DSCB, iHiggs)
 
 if __name__ == "__main__":
 	main(sys.argv[1:])

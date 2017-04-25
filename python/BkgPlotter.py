@@ -21,7 +21,7 @@ def MakeBkgPlot(data, pdf, var, label, lumi, cat, analysis, doBands, fname, binn
 	else:
 		data.plotOn(frame,RooFit.DataError(RooAbsData.SumW2),RooFit.XErrorSize(0))
 
-	pdf.plotOn(frame,RooFit.LineColor(kRed+1),RooFit.Precision(1E-10))
+	pdf.plotOn(frame,RooFit.LineColor(kRed+1),RooFit.Precision(1E-5))
 
 	curve = frame.getObject( int(frame.numItems()-1) )
 	datah = frame.getObject( int(frame.numItems()-2) )

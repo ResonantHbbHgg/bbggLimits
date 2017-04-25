@@ -102,7 +102,10 @@ class bbgg2DFitter {
   float _minHigMjjFit;
   float _maxHigMjjFit;
   int _fitStrategy = 2;
+  int _ncat0 = 0;
+  bool _useDSCB = 0;
   std::map<int,float> sigExpec;
+  std::vector<std::map<TString,float>> higExpec;
   std::map<int,float> bkgExpec;
   std::map<int,float> dataObs;
   //Workspace
@@ -120,16 +123,18 @@ class bbgg2DFitter {
 		   float minSigFitMgg,float maxSigFitMgg,float minSigFitMjj,float maxSigFitMjj,
 		   float minHigMggFit,float maxHigMggFit,float minHigMjjFit,float maxHigMjjFit,
 		   Int_t doNRW=-2, std::string logFileName="");
+   void SetNCat0(int nc0) { _ncat0 = nc0;}
+   void UseDoubleSidedCB() { _useDSCB = 1;}
    void SetVerbosityLevel(Int_t v) {_verbLvl=v;}
    void SetCut(TString cut) {_cut = cut;}
    void SetType(std::string tp) { _signalType = tp; }
    RooArgSet* defineVariables(); //DONE
    int AddSigData(float mass, TString signalfile); //DONE
-   void AddHigData(float mass, TString signalfile, int higgschannel); //DONE
+   std::vector<float> AddHigData(float mass, TString signalfile, int higgschannel, TString higName); //DONE
    void AddBkgData(TString datafile); //DONE
    void SigModelFit(float mass); //DONE
-   void HigModelFit(float mass, int higgschannel); //DONE
-   RooFitResult* BkgModelFit(Bool_t,bool); //DONE
+   void HigModelFit(float mass, int higgschannel, TString higName); //DONE
+   RooFitResult* BkgModelFit(Bool_t m,bool h); //DONE
    RooFitResult* BkgModelFit(Bool_t m,bool h,std::vector<std::string>higgstrue,std::map<std::string,int>higgsNumber) {
      return BkgModelFit(m, h);} //DONE
    void MakePlots(float mass); //DONE
@@ -138,7 +143,7 @@ class bbgg2DFitter {
    void MakePlotsHiggs(float mass,std::vector<std::string>higgstrue,std::map<std::string,int>higgsNumber) {
      MakePlotsHiggs(mass);}
    void MakeSigWS(std::string filename); //DONE
-   void MakeHigWS(std::string filename, int higgschannel); //DONE
+   void MakeHigWS(std::string filename, int higgschannel, TString higName); //DONE
    void MakeBkgWS(std::string filename); //DONE
    void MakeFitsForBias(std::string biasConfig, std::string outputFile);
    // const char* filenameh0, const char* filenameh1, const char* filenameh2, const char* filenameh4);
@@ -162,6 +167,9 @@ class bbgg2DFitter {
    float GetObservedCats(int cat) {
      if(dataObs.find(cat) == dataObs.end() ){std::cout << "[GetObservedCats] Cat not found! Cat ="<<cat << std::endl; return -1;}
      else { return dataObs[cat]; }}
+
+   void SetHigExpectedCats(int cat, TString higNm, float expec) { higExpec[cat][higNm] = expec;}
+   float GetExpectedCats(int cat, TString higNm) { return higExpec[cat][higNm];}
 
    std::vector<float> EffectiveSigma(RooRealVar* mass, RooAbsPdf* binned_pdf, float wmin, float wmax, float step, float epsilon);
 

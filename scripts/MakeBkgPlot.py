@@ -61,7 +61,11 @@ def main(argv):
 	for i,ob in enumerate(obs):
 		data2D = workspace.data("data_obs_cat"+str(CAT))
 		data2D.Print()
-		pdf = workspace.pdf(ob+"BkgTmpBer1_cat"+str(CAT))
+		#mjjBkgTmpBer1_cat0_CMS_Bkg_cat0
+		ccat = CAT
+		if int(CAT) == 2: ccat = 0
+		if int(CAT) == 3: ccat = 1
+		pdf = workspace.pdf(ob+"BkgTmpBer1_cat"+str(ccat)+"_CMS_Bkg_cat"+str(CAT))
 #		pdf = workspace.pdf("BkgPdf_cat"+str(cat))
 		var = workspace.var(ob)
 		data = data2D.reduce(RooArgSet(var))

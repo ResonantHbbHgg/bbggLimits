@@ -3,6 +3,7 @@
 from ROOT import *
 import os,sys
 import HiggsAnalysis.bbggLimits.MassWindows as MW
+import HiggsAnalysis.bbggLimits.SMHiggsSamples as SMHiggsSamples
 
 import argparse
 parser =  argparse.ArgumentParser(description='Limit Tree maker')
@@ -12,13 +13,13 @@ parser.add_argument('--NRW', dest="NRW", action="store_true", default=False,
                                         help="add non-resonant weights")
 parser.add_argument("-v", "--verbosity",  dest="verb", action="store_true", default=False,
                                         help="Print out more stuff")
-parser.add_argument("-d", "--dataDir", dest="dataDir", default=None,
+parser.add_argument("-d", "--dataDir", dest="dataDir", default=None, type=str,
                                        help="Input data directory location")
 parser.add_argument("-s", "--signalDir", dest="signalDir", default=None,
                                        help="Input signal directory location")
 parser.add_argument("--massNR", dest="massNR", default="400",
                                        help="Non resonant M(4body) mass categorization threshold")
-parser.add_argument("-l", "--lumi", dest="lumi", default=36.5,
+parser.add_argument("-l", "--lumi", dest="lumi", default=35.87,
                                        help="Integrated lumi to scale signal")
 parser.add_argument("-f", "--folder", dest="folder", default="LT_",
                                        help="Output folder name")
@@ -30,6 +31,7 @@ parser.add_argument("--doPhotonCR", dest="isPhotonCR", action="store_true", defa
                                        help="Use photon control region")
 parser.add_argument("--doPhotonCRSignalNorm", dest="isPhotonCRSignalNorm", action="store_true", default=False,
                                        help="Pick events from photon control region to match event yield of signal region")
+parser.add_argument("--doSMHiggs", dest='doSMHiggs', action="store_true", default=False, help="Make SM single H trees")
 parser.add_argument("--ctsCut", dest="ctsCut", default=-10)
 parser.add_argument("--resMass", dest="resMass", default=-100, help="Do one specific mass")
 parser.add_argument('--doCatMVA', dest="doCatMVA", action="store_true", default=False,
@@ -38,6 +40,12 @@ parser.add_argument('--MVAHMC0', dest='MVAHMC0', type=float, default=0.982, help
 parser.add_argument('--MVAHMC1', dest='MVAHMC1', type=float, default=0.875, help="MVAHMC1")
 parser.add_argument('--MVALMC0', dest='MVALMC0', type=float, default=0.982, help="MVALMC0")
 parser.add_argument('--MVALMC1', dest='MVALMC1', type=float, default=0.875, help="MVALMC1")
+parser.add_argument('--onlySMHH', dest='onlysmhh', action='store_true', default=False)
+parser.add_argument('--LMLJBTC', dest='LMLJBTC', type=float, default=-10)
+parser.add_argument('--HMLJBTC', dest='HMLJBTC', type=float, default=-10)
+parser.add_argument('--LMSJBTC', dest='LMSJBTC', type=float, default=-10)
+parser.add_argument('--HMSJBTC', dest='HMSJBTC', type=float, default=-10)
+parser.add_argument('--genDiPhotonFilter', dest='gendiphofilter', action='store_true', default=False)
 
 opt = parser.parse_args()
 
@@ -56,11 +64,21 @@ if 'nonres' in opt.x:
 
 
   TreeDir = '/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/FlatTrees-Jan31/'
+
   SignalFiles = "/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph.root"
   if opt.signalDir is None:
     Signals = TreeDir + '/SignalGenInfo/'+SignalFiles
   else:
     Signals = opt.signalDir + SignalFiles
+
+
+  if opt.doSMHiggs:
+    nodes = SMHiggsSamples.SMHiggsNodes
+    Signals = opt.signalDir + '/THENODE'
+
+  # bbggTools trees:
+  #Signals = "root://eoscms//eos/cms/store/user/rateixei/HHbbgg/FlatTrees/ICHEP_Regressed4b/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph.root"
+
 
   DataFiles = "/DoubleEG.root"
   if opt.dataDir is None:
@@ -74,7 +92,11 @@ if 'nonres' in opt.x:
   catscheme = " --doCatNonRes --btagTight 0.9535 --btagMedium 0.8484 --btagLoose 0.5426 "
   if opt.doCatMVA:
     catscheme = " --doCatMVA --MVAHMC0 " + str(opt.MVAHMC0) + " --MVAHMC1 " + str(opt.MVAHMC1) + " --MVALMC0 " + str(opt.MVALMC0)+ " --MVALMC1 " + str(opt.MVALMC1)+ " "
+    catscheme += ' --LMLJBTC ' + str(opt.LMLJBTC) + ' --HMLJBTC ' + str(opt.HMLJBTC) + ' --LMSJBTC ' + str(opt.LMSJBTC) + ' --HMSJBTC ' + str(opt.HMSJBTC) + ' '
   postFix = massOpt + catscheme + " --cosThetaStarHigh " + str(opt.ctsCut) + " "
+
+
+  if (opt.gendiphofilter): postFix += " --genDiPhotonFilter "
 
   SFs = " --bVariation 0 --phoVariation 0"
 
@@ -89,7 +111,11 @@ if 'nonres' in opt.x:
   for MM in nodes:
     i = MM[0]
 
+    if opt.onlysmhh == True and 'SM' not in str(i): continue
     sigScale = float(opt.lumi)/float(MM[1])
+    if opt.doSMHiggs:
+      sigScale = float(opt.lumi)*float(MM[2])/float(MM[1])
+
     print "DOING LowMassCat Signal, node ", i
 
     if opt.NRW:
@@ -115,12 +141,13 @@ if 'nonres' in opt.x:
     os.system("hadd %s/LT_NR_Nodes_2to13_merged.root %s/LT_output_GluGluToHHTo2B2G_node_[1-9]*.root"%(directory+"_HighMass", directory+"_HighMass"))
     os.system("hadd %s/LT_NR_Nodes_2to13_merged.root %s/LT_output_GluGluToHHTo2B2G_node_[1-9]*.root"%(directory+"_LowMass",  directory+"_LowMass"))
   
-  print "DOING LowMassCat Data"
-  command = "pyLimitTreeMaker.py -f " + Data + " -o " +   directory+"_LowMass" + " --min 0 --max " + opt.massNR + " --scale 1." + postFix + doPhotonControlRegion
-  os.system(command)
-  print "DOING HighMassCat Data"
-  command = "pyLimitTreeMaker.py -f " + Data + " -o " +   directory+"_HighMass" + " --min " + opt.massNR + " --max 35000 --scale 1." + postFix + doPhotonControlRegion 
-  os.system(command)
+  if opt.dataDir != "0":
+    print "DOING LowMassCat Data"
+    command = "pyLimitTreeMaker.py -f " + Data + " -o " +   directory+"_LowMass" + " --min 0 --max " + opt.massNR + " --scale 1." + postFix + doPhotonControlRegion
+    os.system(command)
+    print "DOING HighMassCat Data"
+    command = "pyLimitTreeMaker.py -f " + Data + " -o " +   directory+"_HighMass" + " --min " + opt.massNR + " --max 35000 --scale 1." + postFix + doPhotonControlRegion 
+    os.system(command)
 
 elif 'res' in opt.x:
   masses = {
@@ -154,7 +181,7 @@ elif 'res' in opt.x:
   if opt.doCatMVA:
     catScheme = " --doCatMVA --MVAHMC0 " + str(opt.MVAHMC0) + " --MVAHMC1 " + str(opt.MVAHMC1) + " --MVALMC0 " + str(opt.MVALMC0)+ " --MVALMC1 " + str(opt.MVALMC1)+ " "
 
-  postFix = " --MX --tilt " + catScheme+ " --btagTight 0.9535 --btagMedium 0.8484 --btagLoose 0.5426 --massThreshold " + str(opt.massNR) + " "
+  postFix = " --isRes --MX --tilt " + catScheme+ " --btagTight 0.9535 --btagMedium 0.8484 --btagLoose 0.5426 --massThreshold " + str(opt.massNR) + " "
   SFs = " --bVariation 0 --phoVariation 0"
 
   directory = dirPrefix + opt.resType
