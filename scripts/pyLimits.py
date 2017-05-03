@@ -179,7 +179,7 @@ if __name__ == "__main__":
 
   # Using a modified implementation of [1]:
 
-  print "Running over:", myNodes
+  print "Running over:", res_Nodes, res_Points
 
   pCount=0
   totJobs = len(res_Nodes)+len(res_Points)+len(res_Masses)
@@ -222,7 +222,7 @@ if __name__ == "__main__":
           # print p, p.pid
           if str(p.pid)==PID:
             mainLog.debug('Found it still running indeed! :: %r, %r, %r %r', p, p.pid, p.is_alive(), p.exitcode)
-
+        
             # We can also double-check how long it's been running with system 'ps' command:"
             # tt = str(subprocess.check_output('ps -p "'+str(p.pid)+'" o etimes=', shell=True)).strip()
             # print 'Run time from OS (may be way off the real time..) = ', tt

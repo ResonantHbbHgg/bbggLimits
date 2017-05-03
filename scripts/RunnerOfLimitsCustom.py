@@ -15,7 +15,7 @@ tempfile= '''
     },
     "other" : {
         "doDoubleSidedCB": 1,
-        "Combinelxbatch" : 1,
+        "Combinelxbatch" : 0,
         "version" : 66,
 	"integratedLumi" : 36.5,
         "energy" : "13TeV",
@@ -25,7 +25,7 @@ tempfile= '''
         "doBands" : 0,
         "ncat" : 2,
         "analysisType" : "fitTo2D_resSearch_withRegKinFit",
-        "doSingleLimit" : 1,
+        "doSingleLimit" : 0,
         "drawSignalFit" : 0,
         "drawBackgroundFit" : 0,
         "useSigTheoryUnc" : 0,

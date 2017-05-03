@@ -65,7 +65,8 @@ if 'nonres' in opt.x:
 
   TreeDir = '/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/FlatTrees-Jan31/'
 
-  SignalFiles = "/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph.root"
+  SignalFiles = "/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph_0.root"
+  # SignalFiles = "/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph.root"
   if opt.signalDir is None:
     Signals = TreeDir + '/SignalGenInfo/'+SignalFiles
   else:
