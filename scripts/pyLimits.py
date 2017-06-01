@@ -5,6 +5,7 @@ import os,sys,json,time,re
 import logging
 from shutil import copy
 from pprint import pformat
+import getpass
 # import pebble as pb
 from multiprocessing import Pool, TimeoutError, current_process
 from HiggsAnalysis.bbggLimits.LimitsUtil import *
@@ -94,6 +95,9 @@ if __name__ == "__main__":
 
   gSystem.Load('libHiggsAnalysisbbggLimits')
 
+  username = getpass.getuser()
+  print "UserName = ", username
+  
   #workingPath = os.getcwd()
   # parentDir = os.path.abspath(os.path.join(workingPath, os.pardir))
   #if opt.verb: print workingPath
@@ -128,8 +132,8 @@ if __name__ == "__main__":
 
   mainLog.info(pformat(opt))
 
-  createDir('/tmp/PIDs/',mainLog,True)
-  createDir('/tmp/logs/',mainLog,True)
+  createDir('/tmp/'+username+'/PIDs/',mainLog,True)
+  createDir('/tmp/'+username+'/logs/',mainLog,True)
 
   res_Masses = []
   if opt.mass!=None:
@@ -179,7 +183,7 @@ if __name__ == "__main__":
 
   # Using a modified implementation of [1]:
 
-  print "Running over:", myNodes
+  print "Running over:", res_Nodes, res_Points
 
   pCount=0
   totJobs = len(res_Nodes)+len(res_Points)+len(res_Masses)
@@ -210,9 +214,9 @@ if __name__ == "__main__":
         # We know which process gave us an exception: it is "j" in "i", so let's kill it!
         # First, let's get the PID of that process:
         if i==0:
-          pidfile = '/tmp/PIDs/PoolWorker_Node_'+str(j)+'.pid'
+          pidfile = '/tmp/'+username+'/PIDs/PoolWorker_Node_'+str(j)+'.pid'
         elif i==1:
-          pidfile = '/tmp/PIDs/PoolWorker_gridPoint_'+str(j)+'.pid'
+          pidfile = '/tmp/'+username+'/PIDs/PoolWorker_gridPoint_'+str(j)+'.pid'
         PID = None
         if os.path.isfile(pidfile):
           PID = str(open(pidfile).read())
@@ -222,7 +226,7 @@ if __name__ == "__main__":
           # print p, p.pid
           if str(p.pid)==PID:
             mainLog.debug('Found it still running indeed! :: %r, %r, %r %r', p, p.pid, p.is_alive(), p.exitcode)
-
+        
             # We can also double-check how long it's been running with system 'ps' command:"
             # tt = str(subprocess.check_output('ps -p "'+str(p.pid)+'" o etimes=', shell=True)).strip()
             # print 'Run time from OS (may be way off the real time..) = ', tt

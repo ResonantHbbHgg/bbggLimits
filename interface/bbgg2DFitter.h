@@ -128,7 +128,7 @@ class bbgg2DFitter {
    void SetVerbosityLevel(Int_t v) {_verbLvl=v;}
    void SetCut(TString cut) {_cut = cut;}
    void SetType(std::string tp) { _signalType = tp; }
-   RooArgSet* defineVariables(); //DONE
+   RooArgSet* defineVariables(bool s); //DONE
    int AddSigData(float mass, TString signalfile); //DONE
    std::vector<float> AddHigData(float mass, TString signalfile, int higgschannel, TString higName); //DONE
    void AddBkgData(TString datafile); //DONE
