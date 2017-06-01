@@ -28,7 +28,7 @@ do
 #samples on EOS
     
     
-    # L_SIGNAL=root://eoscms.cern.ch//eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/April26_Mjj70to190/EGML_Signal_Mjj70to190/Hadd
+    #L_SIGNAL=root://eoscms.cern.ch//eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/April26_Mjj70to190/EGML_Signal_Mjj70to190/Hadd
     L_SIGNAL=./FlatTrees-May02-Sig
     L_BACKGROUND=root://eoscms.cern.ch//eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/April26_Mjj70to190/EGML_Background_Mjj70to190/Hadd
     L_DATA=root://eoscms.cern.ch//eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/April26_Mjj70to190/EGML_Data_Mjj70to190/Hadd

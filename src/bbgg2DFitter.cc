@@ -155,14 +155,21 @@ void bbgg2DFitter::Initialize(RooWorkspace* workspace, Int_t SigMass, float Lumi
 	   <<"\n "<<std::endl;
 }
 
-RooArgSet* bbgg2DFitter::defineVariables()
+RooArgSet* bbgg2DFitter::defineVariables(bool swithToSimpleWeight=false)
 {
   RooRealVar* mgg  = new RooRealVar("mgg","M(#gamma#gamma)",_minMggMassFit,_maxMggMassFit,"GeV");
   RooRealVar* mtot = new RooRealVar("mtot","M(#gamma#gammajj)",200,1600,"GeV");
   RooRealVar* mjj  = new RooRealVar("mjj","M(jj)",_minMjjMassFit,_maxMjjMassFit,"GeV");
   RooCategory* cut_based_ct = new RooCategory("cut_based_ct","event category 4") ;
 
-  RooRealVar* evWeight = new RooRealVar(_wName.c_str(),"HqT x PUwei",0.,100,"");
+  TString tmp_wName(_wName.c_str());
+  // This is to address a specific issue when adding single Higgs samples, while running with --NRW option.
+  // In that case, for a signal sample we should take evWeight_NRW_%d, while for single higgs sample, we should use evWeight
+  if (swithToSimpleWeight)
+    tmp_wName="evWeight";
+
+  RooRealVar* evWeight = new RooRealVar(tmp_wName,"HqT x PUwei",-100.,100,"");
+  
   //
   cut_based_ct->defineType("cat4_0",0);
   cut_based_ct->defineType("cat4_1",1);
@@ -273,7 +280,12 @@ int bbgg2DFitter::AddSigData(float mass, TString signalfile)
 
 std::vector<float> bbgg2DFitter::AddHigData(float mass, TString signalfile, int higgschannel, TString higName)
 {
-  RooArgSet* ntplVars = defineVariables();
+  if (_verbLvl>1) {
+    std::cout << "================= Adding Single Higgs ==========================" <<std::endl;
+    std::cout<<" \t mass: "<<mass<<" signalfile="<<signalfile<<" higgschannel="<<higgschannel<<" higName="<<higName<<std::endl;
+  }
+
+  RooArgSet* ntplVars = defineVariables(1);
   TFile higFile(signalfile);
   TTree* higTree = (TTree*) higFile.Get("TCVARS");
   if(higTree==nullptr)

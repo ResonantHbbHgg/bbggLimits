@@ -3,7 +3,7 @@ import os,sys,json,time,re
 import logging
 from shutil import copy
 from pprint import pformat
-# import pebble as pb
+import getpass
 from multiprocessing import Pool, TimeoutError, current_process
 from HiggsAnalysis.bbggLimits.DataCardUtils import *
 from HiggsAnalysis.bbggLimits.IOUtils import *
@@ -11,6 +11,8 @@ from HiggsAnalysis.bbggLimits.CombineUtils import *
 
 __BAD__ = 666
 
+username = getpass.getuser()
+print "UserName = ", username
 
 def printTime(t1, t2, log):
   tNew = time.time()
@@ -153,7 +155,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     baseFolder="./bbggToolsResults_v"+str(Params['other']["version"])
 
   # Create PID file to track the job:
-  pidfile = "/tmp/PIDs/PoolWorker"+Label+".pid"
+  pidfile = "/tmp/"+username+"/PIDs/PoolWorker"+Label+".pid"
   file(pidfile, 'w').write(str(PID))
 
   procName = current_process().name
@@ -161,7 +163,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     logging.basicConfig(level=logLvl,
                         format='%(asctime)s PID:%(process)d %(name)-12s %(levelname)-8s %(message)s',
                         datefmt='%m-%d %H:%M',
-                        filename='/tmp/logs/processLog_'+str(procName)+'.log',
+                        filename='/tmp/'+username+'/logs/processLog_'+str(procName)+'.log',
                         filemode='w')
   except:
     print 'I got excepted!'
