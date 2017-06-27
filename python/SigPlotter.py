@@ -1,6 +1,9 @@
 from ROOT import *
 from math import sqrt
 import HiggsAnalysis.bbggLimits.tdrStyle as tdr
+from HiggsAnalysis.bbggLimits.NiceColors import *
+from HiggsAnalysis.bbggLimits.MyCMSStyle import *
+
 #import RooFit
 
 def getEffSigma(mass, pdf, wmin=110., wmax=130.,  step=0.01, epsilon=1.e-4):
@@ -45,7 +48,13 @@ def MakeSigPlot(data, pdf, var, label, lumi, cat, analysis, doBands, fname, binn
 	if not isSig: data.plotOn(frame,RooFit.DataError(RooAbsData.SumW2),RooFit.XErrorSize(0))
 	if isSig: data.plotOn(frame,RooFit.MarkerStyle(kOpenSquare), RooFit.DataError(RooAbsData.SumW2),RooFit.XErrorSize(0))
 
-	pdf.plotOn(frame,RooFit.LineColor(kAzure),RooFit.Precision(1E-5))
+#	SigColor = kAzure
+	SigColor = TColor.GetColor(NiceBlueDark)
+	if Xmin != -1 and Xmax != -1:
+		var.setRange("plot", Xmin, Xmax)
+		pdf.plotOn(frame,RooFit.LineColor(SigColor),RooFit.Precision(1E-5), RooFit.Range("plot"))
+	else:
+		pdf.plotOn(frame,RooFit.LineColor(SigColor),RooFit.Precision(1E-5))
 	if not DSCB:
 		pdf.plotOn(frame,RooFit.LineColor(kAzure-4),RooFit.LineStyle(kDashDotted),RooFit.Components(str(var.GetName())+"GaussSig_cat"+str(cat)), RooFit.Precision(1E-5))
 		pdf.plotOn(frame,RooFit.LineColor(kAzure-9),RooFit.LineStyle(kDashed),RooFit.Components(str(var.GetName())+"CBSig_cat"+str(cat)),RooFit.Precision(1E-5))
@@ -66,7 +75,9 @@ def MakeSigPlot(data, pdf, var, label, lumi, cat, analysis, doBands, fname, binn
 #	sigmas[1].SetFillColor(kCyan)
 
 	Max = frame.GetMaximum()
+	SetGeneralStyle()
 	c = TCanvas("c", "c", 800, 600)
+	SetPadStyle(c)
 #	c.SetLogy()
 	frame.Draw()
 	xmax = frame.GetXaxis().GetXmax()
@@ -89,6 +100,9 @@ def MakeSigPlot(data, pdf, var, label, lumi, cat, analysis, doBands, fname, binn
 	sigmas[1].GetYaxis().SetTitleSize(0.045)
 	sigmas[1].GetXaxis().SetRangeUser(xmin*1.0001, xmax*0.9999)
 	sigmas[1].GetYaxis().SetTitle("Events/("+str(int(deltabin))+" GeV)")
+	c.Update()
+	SetAxisTextSizes(sigmas[1], 0.3, 1.05)
+	c.Update()
 	if deltabin < 1:
 		sigmas[1].GetYaxis().SetTitle("Events/("+"%.01f"%deltabin+" GeV)")
 	if Xmin > 0 and Xmax > 0:
@@ -109,37 +123,44 @@ def MakeSigPlot(data, pdf, var, label, lumi, cat, analysis, doBands, fname, binn
 	tlatex.SetTextFont(63)
 	tlatex.SetTextAlign(11)
 	tlatex.SetTextSize(25)
-	tlatex.DrawLatex(0.17, 0.96, "CMS Preliminary Simulation")
+#	tlatex.DrawLatex(0.17, 0.96, "CMS Preliminary Simulation")
 #	tlatex.SetTextFont(53)
 #	tlatex.DrawLatex(0.18, 0.85, "Preliminary Simulation")
 	tlatex.SetTextFont(43)
 	tlatex.SetTextSize(20)
 #	tlatex.DrawLatex(0.68, 0.91, "L = " + str(lumi) + " fb^{-1} (13 TeV)")
-	tlatex.SetTextSize(25)
-	xbegin = 0.60
-	ybegin = 0.87
+	tlatex.SetTextSize(23)
+	xbegin = 0.18
+	ybegin = 0.97
 	Cat = "High Purity Category"
-	if int(cat) == 1:
+	if int(cat) == 1 or int(cat) == 3:
 		Cat = "Medium Purity Category"
 	if int(cat) == -1:
 		Cat = "High Mass (Single Cat.)"
 	print cat, Cat
 	if "|" in analysis:
 		an = analysis.split("|")
+		for iAN,AN in enumerate(an):
+#			tlatex.DrawLatex(xbegin, ybegin-0.06*float(iAN), AN)
+			tlatex.DrawLatex(0.65, ybegin-0.06*float(iAN)-0.1, AN)
 #		tlatex.SetTextFont(63)
-		tlatex.DrawLatex(xbegin, ybegin, an[0])
+#		tlatex.DrawLatex(xbegin, ybegin, an[0])
 #		tlatex.SetTextFont(43)
-		tlatex.DrawLatex(xbegin, ybegin-0.06, an[1])	
-		tlatex.DrawLatex(xbegin, ybegin-0.12, Cat)
+#		tlatex.DrawLatex(xbegin, ybegin-0.06, an[1])	
+#		tlatex.DrawLatex(xbegin, ybegin-0.06*float(len(an)), Cat)
+		tlatex.DrawLatex(0.65, ybegin-0.06*float(len(an))-0.1, Cat)
 	else:
-#		tlatex.SetTextFont(63)
-		tlatex.DrawLatex(xbegin, ybegin, analysis)
-#		tlatex.SetTextFont(43)
-		tlatex.DrawLatex(xbegin, ybegin-0.06, Cat)
+#		tlatex.DrawLatex(xbegin, ybegin, analysis)
+#		tlatex.DrawLatex(xbegin, ybegin-0.06, Cat)
+		tlatex.DrawLatex(0.65, ybegin-0.1, analysis)
+		tlatex.DrawLatex(0.65, ybegin-0.16, Cat)
 
-	leg = TLegend(xbegin, ybegin-0.55, 0.935, ybegin-0.15)
+	leg = TLegend(0.66, ybegin-float(len(analysis.split("|"))+2)*0.06-0.33, 0.935, ybegin-float(len(analysis.split("|"))+2)*0.06)
+#	leg = TLegend(0.7, ybegin-0.05, 0.935, ybegin+0.05)
 	if '|' not in analysis:
-		leg =  TLegend(xbegin, ybegin-0.61, 0.935, ybegin-0.21)
+		leg =  TLegend(0.7, ybegin-0.61, 0.935, ybegin-0.21)
+#		leg =  TLegend(0.7, ybegin-0.05, 0.935, ybegin+0.05)
+#	leg.SetNColumns(4)
 
 	leg.SetFillStyle(0)
 	leg.SetLineWidth(0)
@@ -165,7 +186,7 @@ def MakeSigPlot(data, pdf, var, label, lumi, cat, analysis, doBands, fname, binn
 		leg.AddEntry(sigmas[0], "#mu = "+ str("%.2f" % thisMean)+ " GeV", "l")
 		leg.AddEntry(sigmas[1], "#sigma_{Eff} = "+str("%.2f" % getEffSigma(var, pdf, Xmin, Xmax)) + " GeV", "l")
 	leg.Draw()
-
+	DrawCMSLabels(c, '')
 	c.SaveAs(fname+".pdf")
 	c.SaveAs(fname+".png")
 

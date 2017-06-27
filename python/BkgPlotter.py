@@ -1,5 +1,7 @@
 from ROOT import *
 from math import sqrt
+from HiggsAnalysis.bbggLimits.NiceColors import *
+from HiggsAnalysis.bbggLimits.MyCMSStyle import *
 
 def MakeBkgPlot(data, pdf, var, label, lumi, cat, analysis, doBands, fname, binning, Blinded):
 
@@ -21,7 +23,9 @@ def MakeBkgPlot(data, pdf, var, label, lumi, cat, analysis, doBands, fname, binn
 	else:
 		data.plotOn(frame,RooFit.DataError(RooAbsData.SumW2),RooFit.XErrorSize(0))
 
-	pdf.plotOn(frame,RooFit.LineColor(kRed+1),RooFit.Precision(1E-5))
+#	colCurve = kRed+1
+	colCurve = TColor.GetColor(NiceRed)
+	pdf.plotOn(frame,RooFit.LineColor(colCurve),RooFit.Precision(1E-5))
 
 	curve = frame.getObject( int(frame.numItems()-1) )
 	datah = frame.getObject( int(frame.numItems()-2) )
@@ -38,19 +42,29 @@ def MakeBkgPlot(data, pdf, var, label, lumi, cat, analysis, doBands, fname, binn
 #	sigmas[1].SetFillColor(kCyan)
 
 	Max = frame.GetMaximum()
+	SetGeneralStyle()
 	c = TCanvas("c", "c", 800, 600)
 #	c.SetLogy()
 	frame.Draw()
 	xmax = frame.GetXaxis().GetXmax()
 	xmin = frame.GetXaxis().GetXmin()
+        c.Update()
+        SetPadStyle(c)
+        c.Update()
+        SetAxisTextSizes(frame)
+        c.Update()
 
 	deltabin = (xmax - xmin)/binning
 	sigmas = MakeBands(data, pdf, var, frame, curve, xmin, xmax, deltabin,0)
 	print xmax, xmin
-	sigmas[0].SetFillColor(kAzure-4)
-	sigmas[0].SetLineColor(kAzure-4)
-	sigmas[1].SetFillColor(kCyan)
-	sigmas[1].SetLineColor(kCyan)
+#	col1Sigma = kAzure-4
+#	col2Sigma = kCyan
+	col2Sigma = TColor.GetColor(NiceBlue)
+	col1Sigma = TColor.GetColor(NiceBlueDark)
+	sigmas[0].SetFillColor(col1Sigma)
+	sigmas[0].SetLineColor(col1Sigma)
+	sigmas[1].SetFillColor(col2Sigma)
+	sigmas[1].SetLineColor(col2Sigma)
 
 	sigmas[1].Draw("AE3")
 	sigmas[1].SetMaximum(Max*1.75)
@@ -80,18 +94,18 @@ def MakeBkgPlot(data, pdf, var, label, lumi, cat, analysis, doBands, fname, binn
 	tlatex.SetTextFont(63)
 	tlatex.SetTextAlign(11)
 	tlatex.SetTextSize(25)
-	tlatex.DrawLatex(0.11, 0.91, "CMS")
+#	tlatex.DrawLatex(0.11, 0.91, "CMS")
 	tlatex.SetTextFont(53)
-	tlatex.DrawLatex(0.18, 0.91, "Preliminary")
+#	tlatex.DrawLatex(0.18, 0.91, "Preliminary")
 	tlatex.SetTextFont(43)
 	tlatex.SetTextSize(20)
 	tlatex.SetTextAlign(31)
-	tlatex.DrawLatex(0.9, 0.91, "L = " + str(lumi) + " fb^{-1} (13 TeV)")
+#	tlatex.DrawLatex(0.9, 0.91, "L = " + str(lumi) + " fb^{-1} (13 TeV)")
 	tlatex.SetTextAlign(11)
 	tlatex.SetTextSize(25)
-	Cat = "High Purity Category"
+	Cat = "High purity category"
 	if int(cat) == 1:
-		Cat = "Medium Purity Category"
+		Cat = "Medium purity category"
 	if int(cat) == -1:
 		Cat = "High Mass (Single Cat.)"
 	print cat, Cat
@@ -128,7 +142,7 @@ def MakeBkgPlot(data, pdf, var, label, lumi, cat, analysis, doBands, fname, binn
 	leg.AddEntry(sigmas[0], "Fit #pm 1#sigma", "f")
 	leg.AddEntry(sigmas[1], "Fit #pm 2#sigma", "f")
 	leg.Draw()
-
+	DrawCMSLabels(c, '35.9')
 	c.SaveAs(fname+"cat"+str(cat)+".pdf")
 	c.SaveAs(fname+"cat"+str(cat)+".png")
 
@@ -157,11 +171,17 @@ def MakeBkgPlot(data, pdf, var, label, lumi, cat, analysis, doBands, fname, binn
 #	sigmas[1].SetFillColor(kCyan)
 
 	Max = frame.GetMaximum()
+	SetGeneralStyle()
 	c = TCanvas("c", "c", 800, 600)
 #	c.SetLogy()
 	frame.Draw()
 	xmax = frame.GetXaxis().GetXmax()
 	xmin = frame.GetXaxis().GetXmin()
+	c.Update()
+	SetPadStyle(c)
+	c.Update()
+	SetAxisTextSizes(frame)
+	c.Update()
 
 	deltabin = (xmax - xmin)/binning
 	sigmas = MakeBands(data, pdf, var, frame, curve, xmin, xmax, deltabin, isSig)
@@ -200,16 +220,16 @@ def MakeBkgPlot(data, pdf, var, label, lumi, cat, analysis, doBands, fname, binn
 	tlatex.SetTextFont(63)
 	tlatex.SetTextAlign(11)
 	tlatex.SetTextSize(25)
-	tlatex.DrawLatex(0.11, 0.91, "CMS")
+#	tlatex.DrawLatex(0.11, 0.91, "CMS")
 	tlatex.SetTextFont(53)
-	tlatex.DrawLatex(0.18, 0.91, "Preliminary")
+#	tlatex.DrawLatex(0.18, 0.91, "Preliminary")
 	tlatex.SetTextFont(43)
 	tlatex.SetTextSize(20)
-	tlatex.DrawLatex(0.68, 0.91, "L = " + str(lumi) + " fb^{-1} (13 TeV)")
+#	tlatex.DrawLatex(0.68, 0.91, "L = " + str(lumi) + " fb^{-1} (13 TeV)")
 	tlatex.SetTextSize(25)
-	Cat = "High Purity Category"
+	Cat = "High purity category"
 	if int(cat) == 1:
-		Cat = "Medium Purity Category"
+		Cat = "Medium purity category"
 	if int(cat) == -1:
 		Cat = "High Mass (Single Cat.)"
 	print cat, Cat
@@ -247,7 +267,7 @@ def MakeBkgPlot(data, pdf, var, label, lumi, cat, analysis, doBands, fname, binn
 	leg.AddEntry(sigmas[0], "Fit #pm 1#sigma", "f")
 	leg.AddEntry(sigmas[1], "Fit #pm 2#sigma", "f")
 	leg.Draw()
-
+	DrawCMSLabels(c, '35.9')
 	c.SaveAs(fname+".pdf")
 	c.SaveAs(fname+".png")
 '''

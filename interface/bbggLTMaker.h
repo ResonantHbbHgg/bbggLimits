@@ -13,6 +13,7 @@
 #include <TFile.h>
 #include <TSelector.h>
 #include <TH2F.h>
+#include <TH3F.h>
 
 // Header file for the classes stored in the TTree if any.
 #include <vector>
@@ -99,6 +100,7 @@ public :
    int doCatMVA;
    int bVariation;
    int phoVariation;
+   int trigVariation;
    int doNonResWeights;
    int photonCRNormToSig;
    int GenDiPhotonFilter;
@@ -136,6 +138,8 @@ public :
    Float_t          HHTagger;
    Float_t          HHTagger_HM;
    Float_t          HHTagger_LM;
+   Float_t	    leadingPhotonR9full5x5;
+   Float_t	    subleadingPhotonR9full5x5;
    Int_t	isSignal;
    Int_t	isPhotonCR;
    Int_t	leadingJet_flavour;
@@ -187,6 +191,8 @@ public :
    TBranch	  *b_subleadingJet_hadFlavour;
    TBranch	  *b_CosThetaStar;
    TBranch	  *b_CosThetaStar_CS;
+   TBranch	  *b_leadingPhotonR9full5x5;
+   TBranch	  *b_subleadingPhotonR9full5x5;
    TBranch        *b_HHTagger;
    TBranch        *b_HHTagger_LM;
    TBranch        *b_HHTagger_HM;
@@ -196,6 +202,11 @@ public :
    TH2F* photonIDhist;
    TFile* csevFile;
    TH2F* csevhist;
+
+   //Trigger stuff
+   TFile* triggerFile;
+   TH3F* ltriggerHist;
+   TH3F* striggerHist;
 
    //BTaggin weights stuff
    BTagCalibration* calib;
@@ -242,7 +253,7 @@ public :
    BTagCalibrationReader* l_diffreader_tight;
 
 
-   bbggLTMaker(TTree *tree=0);
+   bbggLTMaker(TTree *tree=0, bool IsRes=0);
    virtual ~bbggLTMaker();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
@@ -272,6 +283,7 @@ public :
 //corrections
    void DoBVariation( int tt) { bVariation = tt; }
    void DoPhoVariation(int tt) { phoVariation = tt;}
+   void DoTrigVariation(int tt) { trigVariation = tt;}
 //other
    void IsPhotonCR( int pcr ) { photonCR = pcr; }
    void IsPhotonCRNormToSig( int pcr ) { photonCRNormToSig = pcr; }
@@ -286,6 +298,8 @@ public :
    void SetupPhotonSF(TString idfile, TString evfile);
    float PhotonSF(LorentzVector pho, int phovar = 0);
    void SetMassThreshold(float par){ massThreshold = par;}
+   void SetupTriggerSF(TString trig_file);
+   float TriggerSF(LorentzVector lpho, float lr9, LorentzVector spho, float sr9, int var);
 
    void BTagDiffSetup(TString btagfile, TString effsfile, TString diffOpt);
    double BTagDiffWeight(bbggLTMaker::LorentzVector jet1, int flavour1, float bdis);
@@ -307,10 +321,10 @@ public :
 #endif
 
 #ifdef bbggLTMaker_cxx
-bbggLTMaker::bbggLTMaker(TTree *tree) : fChain(0)
+bbggLTMaker::bbggLTMaker(TTree *tree, bool IsRes) : fChain(0)
 {
    GenDiPhotonFilter = 0;
-   isRes = 0;
+   isRes = IsRes;
    mtotMax = 12000.;
    mtotMin = 200.;
    normalization = 1.;
@@ -335,6 +349,7 @@ bbggLTMaker::bbggLTMaker(TTree *tree) : fChain(0)
    cosThetaStarCutHigh = 100;
    bVariation = -999;
    phoVariation = -999;
+   trigVariation = -999;
    doNonResWeights = 0;
    photonCRNormToSig = 0;
    massThreshold = 350;
@@ -446,9 +461,13 @@ void bbggLTMaker::Init(TTree *tree)
    fChain->SetBranchAddress("subleadingJet_hadFlavour", &subleadingJet_hadFlavour, &b_subleadingJet_hadFlavour);
    fChain->SetBranchAddress("CosThetaStar", &CosThetaStar, &b_CosThetaStar);
    fChain->SetBranchAddress("CosThetaStar_CS", &CosThetaStar_CS, &b_CosThetaStar_CS);
-   fChain->SetBranchAddress("HHTagger", &HHTagger, &b_HHTagger);
-   fChain->SetBranchAddress("HHTagger_LM", &HHTagger_LM, &b_HHTagger_LM);
-   fChain->SetBranchAddress("HHTagger_HM", &HHTagger_HM, &b_HHTagger_HM);
+   fChain->SetBranchAddress("leadingPhotonR9full5x5", &leadingPhotonR9full5x5, &b_leadingPhotonR9full5x5);
+   fChain->SetBranchAddress("subleadingPhotonR9full5x5", &subleadingPhotonR9full5x5, &b_subleadingPhotonR9full5x5);
+   TString WhichTagger = "HHTagger";
+   if(isRes) WhichTagger = "ResHHTagger";
+   fChain->SetBranchAddress(WhichTagger, &HHTagger, &b_HHTagger);
+   fChain->SetBranchAddress(TString(WhichTagger+"_LM"), &HHTagger_LM, &b_HHTagger_LM);
+   fChain->SetBranchAddress(TString(WhichTagger+"_HM"), &HHTagger_HM, &b_HHTagger_HM);
    Notify();
 }
 

@@ -3,6 +3,9 @@ import os,sys,json,time,re
 import logging
 from shutil import copy
 from pprint import pformat
+import getpass
+username = getpass.getuser()
+
 
 def runCombine(inDir, doBlind, log, combineOpt = 1, Combinelxbatch = 0, Label = None):
   log.info('Running combine tool.  Dir: %s Blinded: %r', inDir, doBlind)
@@ -93,14 +96,18 @@ def runCombineOnLXBatch(inDir, doBlind, log, combineOpt=1, Label=None):
 
 cd CMSSWBASE/src/HiggsAnalysis/bbggLimits/
 eval `scramv1 runtime -sh`
+mkdir /tmp/USER/LABELP/
+cd /tmp/USER/LABELP/
 combine -M COMBINEMETHOD -m 125 LABEL BLINDED --datacard CARDNAME > RESFILE 2>&1
 
-mv OUTFILE OUTDIR
+mv /tmp/USER/LABELP/OUTFILE OUTDIR
 
 '''
 
   print "im here10"
 
+  outputFileStringTmp0 = outputFileStringTmp0.replace("USER", username)
+  outputFileStringTmp0 = outputFileStringTmp0.replace("LABELP", Label)
   outputFileStringTmp0 = outputFileStringTmp0.replace("BLINDED", blinded)
   outputFileStringTmp1 = outputFileStringTmp0.replace("CMSSWBASE", cmssw_base)
   outputFileStringTmp2 = outputFileStringTmp1.replace("CARDNAME", cardName)

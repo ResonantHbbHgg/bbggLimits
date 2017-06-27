@@ -8,6 +8,9 @@ from multiprocessing import Pool, TimeoutError, current_process
 from HiggsAnalysis.bbggLimits.DataCardUtils import *
 from HiggsAnalysis.bbggLimits.IOUtils import *
 from HiggsAnalysis.bbggLimits.CombineUtils import *
+from HiggsAnalysis.bbggLimits.AnalyticalReweighting import *
+from os import listdir
+from os.path import isfile, join
 
 __BAD__ = 666
 
@@ -79,6 +82,9 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     logLvl = logging.DEBUG
 
   LTDir_type  = os.getenv("CMSSW_BASE")+Params['LTDIR']
+  if '/tmp' in Params['LTDIR'] or '/store' in Params['LTDIR']:
+    LTDir_type = Params['LTDIR']
+  print LTDir_type
   signalModelCard = os.getenv("CMSSW_BASE")+Params['signal']['signalModelCard']
   lumi = Params['other']["integratedLumi"];
   energy = str(Params['other']["energy"])
@@ -186,6 +192,9 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
   if NRgridPoint >= 0:
     SignalFile = "/LT_NR_Nodes_2to13_merged.root"
 
+  if opt.analyticalRW == True:
+    SignalFile="/LT_NR_Nodes_All_merged_kl_"+str(opt.ARW_kl).replace(".", "p")+"_kt_"+str(opt.ARW_kt).replace(".", "p")+"_cg_"+str(opt.ARW_cg).replace(".", "p")+"_c2_"+str(opt.ARW_c2).replace(".", "p")+"_c2g_"+str(opt.ARW_c2g).replace(".", "p")+".root"
+
   procLog.debug('%s, %s', SignalFile, pformat(signalTypes))
 
 
@@ -210,9 +219,12 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
                           massCuts[3],massCuts[4],massCuts[5],
                           massCuts[6],massCuts[7],massCuts[8],
                           massCuts[9],massCuts[10],massCuts[11], NRgridPoint,
-                          logging.getLoggerClass().root.handlers[0].baseFilename+'.bbgg2D')
+                          logging.getLoggerClass().root.handlers[0].baseFilename+'.bbgg2D', opt.analyticalRW)
 
     theFitter.SetVerbosityLevel(opt.verb)
+
+#    if opt.analyticalRW == True:
+#      theFitter.DoARW()
 
     if 'HighMass' in t:
       theFitter.SetNCat0(2)
@@ -223,6 +235,10 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     if doDoubleSidedCB: theFitter.UseDoubleSidedCB()
 
     LTDir = LTDir_type.replace('TYPE', t)
+    onlyfiles = [fff for fff in listdir(LTDir) if isfile(join(LTDir, fff))]
+    print 'Files in ', LTDir
+    print onlyfiles
+
     mass = 125.0
 
     openStatus = theFitter.AddSigData( mass, str(LTDir+thisSignalFile))
@@ -330,9 +346,10 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     print "IM HERE2"
 
     # Make datacards:
-    if isRes==1: DataCardMaker(str(newFolder), NCAT, sigExpStr, bkgObsStr, isRes)
-    elif addHiggs == 0: DataCardMaker(str(newFolder), NCAT, sigExpStr, bkgObsStr, isRes, t)
-    else: DataCardMaker_wHiggs(str(newFolder), NCAT, sigExpStr, bkgObsStr, higgsExp, t)
+    myLoc = os.getenv("CMSSW_BASE") + '/src/HiggsAnalysis/bbggLimits/'+newFolder
+    if isRes==1: DataCardMaker(str(myLoc), NCAT, sigExpStr, bkgObsStr, isRes)
+    elif addHiggs == 0: DataCardMaker(str(myLoc), NCAT, sigExpStr, bkgObsStr, isRes, t)
+    else: DataCardMaker_wHiggs(str(myLoc), NCAT, sigExpStr, bkgObsStr, higgsExp, t)
 
     procLog.info("\t DATACARD DONE. Node/Mass=%r, GridPoint=%r, type=%r", point,NRgridPoint,t)
     if opt.verb>0: p8 = printTime(p7,start,procLog)
@@ -345,7 +362,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
         print "IM HERE5"
         if Combinelxbatch:
           print "IM HERE6"
-          runCombineOnLXBatch(newFolder+"/datacards/", doBlinding, procLog, combineOpt, t+Label)
+          runCombineOnLXBatch(myLoc+"/datacards/", doBlinding, procLog, combineOpt, t+Label)
         else:
           print "IM HERE7"
           runCombine(newFolder+"/datacards/", doBlinding, procLog, combineOpt, Combinelxbatch, t+Label)
@@ -365,29 +382,47 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     newDir = baseFolder+'/CombinedCard'+Label
     createDir(newDir,procLog)
 
+    combCard_pre = newDir+'/hhbbgg_13TeV_DataCard_pre.txt'
     combCard = newDir+'/hhbbgg_13TeV_DataCard.txt'
-    os.system("combineCards.py "+ cardsToMerge + " > " + combCard+' ')
+    os.system("combineCards.py "+ cardsToMerge + " > " + combCard_pre+' ')
 
     # Now we actually need to fix the combined card
+    newCard = ''
     for t in signalTypes:
       strReplace = baseFolder+'/'+t+Label+'/datacards/'
-      os.system("sed -i 's|"+strReplace+"./|./|g' "+combCard)
+      newCard += '## replacing ' +strReplace+ ' for nothing \n'
+
+    with open(combCard_pre,'r') as f:
+      for line in f:
+        myString = line
+        for t in signalTypes:
+          myString = myString.replace(baseFolder+'/'+t+Label+'/datacards/', '')
+        newCard += myString + '\n'
+
+    newCombCard = open(combCard, 'w')
+    newCombCard.write(newCard)
+    newCombCard.close()
 
     if doCombine:
-      for method in [1,2,3]:
-        # If options 1,2,3 are provided - run the corresponding limits:
-        # 1 - asymptotic, 2 - asymptotoc with adaptive azimov option; 3 - hybridnew
-        # If combineOpt==4: run all of them at once
-        if combineOpt!=4 and method!=combineOpt: continue
-        try:
-          combStatus = runCombine(newDir, doBlinding, procLog, method, Combinelxbatch, Label)
-        except:
-          return __BAD__
-        procLog.info("\t COMBINE with Option=%r is DONE. Node=%r, GridPoint=%r, type=%r \n \t Status = %r",
+      if Combinelxbatch:
+        print "IM HERE6"
+        myLoc = os.getenv("CMSSW_BASE") + '/src/HiggsAnalysis/bbggLimits/' + newDir
+        runCombineOnLXBatch(myLoc+"/", doBlinding, procLog, combineOpt, "CombinedCard"+Label)
+      else:
+        for method in [1,2,3]:
+          # If options 1,2,3 are provided - run the corresponding limits:
+          # 1 - asymptotic, 2 - asymptotoc with adaptive azimov option; 3 - hybridnew
+          # If combineOpt==4: run all of them at once
+          if combineOpt!=4 and method!=combineOpt: continue
+          try:
+            combStatus = runCombine(newDir, doBlinding, procLog, method, Combinelxbatch, Label)
+          except:
+            return __BAD__
+          procLog.info("\t COMBINE with Option=%r is DONE. Node=%r, GridPoint=%r, type=%r \n \t Status = %r",
                     method, point,NRgridPoint,t, combStatus)
-        if combStatus!=0:
-          procLog.error('Combine failed...')
-          # return __BAD__
+          if combStatus!=0:
+            procLog.error('Combine failed...')
+            # return __BAD__
 
 
   if opt.verb>0: p9 = printTime(p8,start,procLog)

@@ -12,7 +12,6 @@ crab_*
 crabConfig_*
 
 # ROOT-related files
-*.root
 *_cc.d
 *_cc.so
 *_C.d

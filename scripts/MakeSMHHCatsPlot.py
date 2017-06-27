@@ -4,7 +4,9 @@ from ROOT import *
 import sys, getopt, os
 import argparse
 import glob
-import HiggsAnalysis.bbggLimits.tdrStyle as tdr
+#import HiggsAnalysis.bbggLimits.tdrStyle as tdr
+import HiggsAnalysis.bbggLimits.MyCMSStyle as mCMS
+from HiggsAnalysis.bbggLimits.NiceColors import *
 
 gROOT.SetBatch(kTRUE)
 
@@ -13,7 +15,7 @@ parser.add_argument('-f', '--inputFolders', dest="folders", default=None, type=s
                     help="input folders")
 parser.add_argument('-n', '--inputNames', dest="names", default=None, type=str, nargs='+', required=True,
                     help="input folders cat names")
-parser.add_argument('-l', '--lumi', dest='lumi', default='36.5', type=str, help='Integrated luminosoty')
+parser.add_argument('-l', '--lumi', dest='lumi', default='35.9', type=str, help='Integrated luminosoty')
 parser.add_argument('--label', dest='label', default='', type=str, help='Label')
 parser.add_argument('--log', dest='log', action='store_true', default=False)
 parser.add_argument('--isAsymptotic', dest='asymp', action='store_true', default=False)
@@ -29,28 +31,33 @@ opt = parser.parse_args()
 -rw-r--r--. 1 rateixei zh 6537 Jan 30 01:45 higgsCombine_Node_SM_CatBased400CTS_qt_p2s.HybridNew.mH125.quant0.975.root
 '''
 
+#leg = TLegend(0.5, 0.51, 0.89, 0.95)
+leg = TLegend(0.13, 0.65, 0.87, 0.89)
+leg.SetNColumns(2)
+leg.SetFillColorAlpha(kWhite, 0.8)
 def main(argv):
   print opt.folders, opt.names
-  tdr.setTDRStyle()
+#  tdr.setTDRStyle()
 
   quantiles = ['0.025', '0.160', '0.500', '0.840', '0.975', '-1']
   qt_names = ['m2s', 'm1s', 'central', 'p1s', 'p2s', 'obs']
   gr_1s = TGraphAsymmErrors()
-  gr_1s.SetFillColor(kGreen+1)
+  gr_1s.SetFillColor(cNiceGreen2)
 #  gr_1s.SetLineColor(kBlack)
   gr_2s = TGraphAsymmErrors()
-  gr_2s.SetFillColor(kOrange)
+  gr_2s.SetFillColor(cNiceYellow2)
 #  gr_2s.SetLineColor(kBlack)
   gr_ce = TGraphErrors()
-  gr_ce.SetLineColor(kBlue)
-  gr_ce.SetMarkerColor(kBlue)
+  gr_ce.SetLineColor(cNiceBlueDark)
+  gr_ce.SetMarkerColor(cNiceBlueDark)
   gr_ce.SetMarkerStyle(24)
   gr_ce.SetMarkerSize(0)
+  gr_ce.SetLineWidth(3)
   gr_observed = TGraphErrors()
-  gr_observed.SetLineColor(kRed+3)
+  gr_observed.SetLineColor(kBlack)
   gr_observed.SetLineWidth(3)
   gr_observed.SetLineStyle(kDashed)
-  gr_observed.SetMarkerColor(kRed+3)
+  gr_observed.SetMarkerColor(kBlack)
   gr_observed.SetMarkerStyle(20)
   gr_observed.SetMarkerSize(1)
   thisMax = 0
@@ -86,18 +93,21 @@ def main(argv):
     gr_observed.SetPoint(iff, iff+0.5, qts['-1'])
     gr_observed.SetPointError(iff, 0.5, 0.)
 
+  mCMS.SetGeneralStyle()
   c0 = TCanvas('a', 'a', 800, 600)
   c0.SetGrid()
   if opt.log: c0.SetLogy()
+  mCMS.SetPadStyle(c0)
   gr_2s.Draw("AE2Z")
   if opt.log:
-    gr_2s.GetYaxis().SetRangeUser(0.5/(normalization), thisMax*8)
-    gr_2s.GetYaxis().SetLimits(0.5/(normalization), thisMax*8)
+    gr_2s.GetYaxis().SetRangeUser(0.5/(normalization), thisMax*50)
+    gr_2s.GetYaxis().SetLimits(0.5/(normalization), thisMax*50)
   else:
-    gr_2s.GetYaxis().SetRangeUser(0., thisMax*1.2)
-    gr_2s.GetYaxis().SetLimits(0., thisMax*1.2)
+    gr_2s.GetYaxis().SetRangeUser(0., thisMax*1.3)
+    gr_2s.GetYaxis().SetLimits(0., thisMax*1.3)
   gr_2s.GetXaxis().CenterLabels()
-  if opt.normSM: gr_2s.GetYaxis().SetTitle("#sigma(pp#rightarrowHH) x #it{B}(HH#rightarrowb#bar{b}#gamma#gamma)/#sigma_{SM} x #it{B}_{SM}")
+  mCMS.SetAxisTextSizes(gr_2s)
+  if opt.normSM: gr_2s.GetYaxis().SetTitle("#sigma(pp#rightarrowHH)/#sigma_{SM}")
   else: gr_2s.GetYaxis().SetTitle("#sigma(pp#rightarrowHH) x #it{B}(HH#rightarrowb#bar{b}#gamma#gamma) [fb]")
   nbins = gr_2s.GetXaxis().GetNbins()
   rat = float(float(nbins+1.5)/float(len(opt.folders)))
@@ -114,24 +124,26 @@ def main(argv):
   c0.Update()
   gr_1s.Draw("E2Z same")
   gr_ce.Draw("EZ same")
+  gPad.RedrawAxis("G")
+  gPad.RedrawAxis()
   if opt.unblind: gr_observed.Draw("EPZ same")
 
-  leg = TLegend(0.5, 0.51, 0.89, 0.95)
-  headerTitle = "pp#rightarrowHH#rightarrowb#bar{b}#gamma#gamma (SM)"
+  headerTitle = "#font[61]{pp#rightarrowHH#rightarrowb#bar{b}#gamma#gamma (SM)}"
   leg.SetHeader(headerTitle)
   header =leg.GetListOfPrimitives().First()
   header.SetTextSize(.045)
-  leg.SetFillStyle(0)
-  leg.SetLineWidth(0)
+#  leg.SetFillStyle(0)
+#  leg.SetLineWidth(0)
   leg.SetBorderSize(0)
-  leg.AddEntry(gr_observed, 'Observed 95% C.L. upper limit', 'lp')
-  leg.AddEntry(gr_ce, 'Expected 95% C.L. upper limit', 'l')
-  leg.AddEntry(gr_1s, 'Expected #pm 1 std. dev.', 'f')
-  leg.AddEntry(gr_2s, 'Expected #pm 2 std. dev.', 'f')
+  leg.AddEntry(gr_observed, 'Observed 95% C.L. limit', 'lp')
+  leg.AddEntry(gr_ce, 'Expected 95% C.L. limit', 'l')
+  leg.AddEntry(gr_1s, 'Expected #pm 1 #sigma', 'f')
+  leg.AddEntry(gr_2s, 'Expected #pm 2 #sigma', 'f')
   leg.SetTextSize(0.035)
 
-  tdr.cmsPrel(float(opt.lumi)*1000,  "13",  0, True,  0, 1.25)
+#  tdr.cmsPrel(float(opt.lumi)*1000,  "13",  0, True,  0, 1.25)
   leg.Draw("same")
+  mCMS.DrawCMSLabels(c0, opt.lumi)
   c0.SaveAs("test"+opt.label+"_SM.pdf")
 
 if __name__ == "__main__":

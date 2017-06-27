@@ -67,6 +67,12 @@ parser.add_argument('-t', '--timeout',dest="timeout", type=int, default=None,
                     help="Per job timeout (in seconds) for multiprocessing. Jobs will be killed if run longer than this.")
 parser.add_argument('--extraLabel', dest='extraLabel', default='',
                     help='Extra label')
+parser.add_argument('--analyticalRW', dest='analyticalRW', action='store_true', default=False)
+parser.add_argument('--kl', dest='ARW_kl', type=float, default=1.0)
+parser.add_argument('--kt', dest='ARW_kt', type=float, default=1.0)
+parser.add_argument('--cg', dest='ARW_cg', type=float, default=0.0)
+parser.add_argument('--c2', dest='ARW_c2', type=float, default=0.0)
+parser.add_argument('--c2g', dest='ARW_c2g', type=float, default=0.0)
 
 opt = parser.parse_args()
 print opt

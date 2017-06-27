@@ -41,18 +41,34 @@ process			0	1	2	3	4	5	6	0	1	2	3	4	5	6
 rate			SIGCAT0	1	GGHC0	TTHC0	VHC0	BBHC0	VBFC0	SIGCAT1	1	GGHC1	TTHC1	VHC1	BBHC1	VBFC1
 
 # General
-lumi_13TeV lnN		1.027	-	1.027	1.027	1.027	1.027	1.027	1.027	-	1.027	1.027	1.027	1.027	1.027
+lumi_13TeV lnN          1.027   -       1.027   1.027   1.027   1.027   1.027   1.027   -       1.027   1.027   1.027   1.027   1.027
 #Normalization
-CMS_eff_DiphoTrig lnN	1.020	-	1.020	1.020	1.020	1.020	1.020	1.020	-	1.020	1.020	1.020	1.020	1.020
-CMS_eff_PhoID lnN	1.010	-	1.010	1.010	1.010	1.010	1.010	1.010	-	1.010	1.010	1.010	1.010	1.010
-CMS_eff_JetSel lnN	1.030	-	1.030	1.030	1.030	1.030	1.030	1.030	-	1.030	1.030	1.030	1.030	1.030
-CMS_eff_cats lnN	1.045/0.955	-	1.045/0.955	1.045/0.955	1.045/0.955	1.045/0.955	1.045/0.955	0.99/1.01	-	0.99/1.01	0.99/1.01	0.99/1.01	0.99/1.01	0.99/1.01
+CMS_eff_DiphoTrig lnN   1.020   -       1.020   1.020   1.020   1.020   1.020   1.020   -       1.020   1.020   1.020   1.020   1.020
+CMS_eff_PhoID lnN       1.010   -       1.010   1.010   1.010   1.010   1.010   1.010   -       1.010   1.010   1.010   1.010   1.010
+CMS_eff_JetSel lnN      1.005   -       1.005   1.005   1.005   1.005   1.005   1.005   -       1.005   1.005   1.005   1.005   1.005
+CMS_eff_mxCat   lnN     1.005/0.995     -       1.005/0.995     1.005/0.995     1.005/0.995     1.005/0.995     1.005/0.995     1.005/0.995     -       1.005/0.995     -       1.005/0.995     1.005/0.995     1.005/0.995     1.005/0.995     1.005/0.995     0.995/0.995
+CMS_eff_cats lnN        1.05/0.95       -       1.05/0.95       1.05/0.95       1.05/0.95       1.05/0.95       1.05/0.95       0.98/1.02       -       0.98/1.02       0.98/1.02       0.98/1.02       0.98/1.02       0.98/1.02
+
+# General
+#lumi_13TeV lnN		1.027	-	1.027	1.027	1.027	1.027	1.027	1.027	-	1.027	1.027	1.027	1.027	1.027
+#Normalization
+#CMS_eff_DiphoTrig lnN	1.020	-	1.020	1.020	1.020	1.020	1.020	1.020	-	1.020	1.020	1.020	1.020	1.020
+#CMS_eff_PhoID lnN	1.010	-	1.010	1.010	1.010	1.010	1.010	1.010	-	1.010	1.010	1.010	1.010	1.010
+#CMS_eff_JetSel lnN	1.030	-	1.030	1.030	1.030	1.030	1.030	1.030	-	1.030	1.030	1.030	1.030	1.030
+#CMS_eff_cats lnN	1.045/0.955	-	1.045/0.955	1.045/0.955	1.045/0.955	1.045/0.955	1.045/0.955	0.99/1.01	-	0.99/1.01	0.99/1.01	0.99/1.01	0.99/1.01	0.99/1.01
 
 #Shape
-CMS_hgg_sig_m0_absShift param 1 0.01 # displacement of the dipho mean error = sqrt(0.4^ 2 + 0.2^ 2) 
-CMS_hgg_sig_sigmaScale param 1 0.01 # optimistic estimate of resolution uncertainty 
-CMS_hbb_sig_m0_absShift param 1 0.02 # displacement of the dijet mean error 
-CMS_hbb_sig_sigmaScale param 1 0.08 # optimistic estimate of resolution uncertainty 
+CMS_hgg_sig_m0_absShift_cat0 param 1 0.01 # displacement of the dipho mean error = sqrt(0.4^ 2 + 0.2^ 2) 
+CMS_hgg_sig_sigmaScale_cat0 param 1 0.01 # optimistic estimate of resolution uncertainty 
+CMS_hbb_sig_m0_absShift_cat0 param 1 0.01 # displacement of the dijet mean error 
+CMS_hbb_sig_sigmaScale_cat0 param 1 0.05 # optimistic estimate of resolution uncertainty 
+CMS_hgg_sig_m0_absShift_cat1 param 1 0.01 # displacement of the dipho mean error = sqrt(0.4^ 2 + 0.2^ 2) 
+CMS_hgg_sig_sigmaScale_cat1 param 1 0.01 # optimistic estimate of resolution uncertainty 
+CMS_hbb_sig_m0_absShift_cat1 param 1 0.01 # displacement of the dijet mean error 
+CMS_hbb_sig_sigmaScale_cat1 param 1 0.05 # optimistic estimate of resolution uncertainty 
+
+#CMS_hbb_sig_m0_absShift param 1 0.02 # displacement of the dijet mean error 
+#CMS_hbb_sig_sigmaScale param 1 0.08 # optimistic estimate of resolution uncertainty 
 
 #Curve Normalization params
 CMS_Bkg_cat0_norm flatParam # Normalization uncertainty on background slope

@@ -63,6 +63,8 @@ parser.add_argument('--bVariation', dest="bVariation", type=int, default=-999,
                     help="Apply b-tagging SF factors: 1 or -1")
 parser.add_argument('--phoVariation', dest="phoVariation", type=int, default=-999,
                     help="Photon varioation (whatever that means)")
+parser.add_argument('--bDiffVariation', dest='bDiffVar', type=str, default='central',
+                    help="Differential b-tagging variation")
 
 #nonres weights
 parser.add_argument('--NRW', dest="NRW", action="store_true", default=False,
@@ -123,7 +125,7 @@ def setAndLoop(fname, options, outFile):
     print "\n Do something about it!"
     sys.exit(1)
 
-  LTM = bbggLTMaker(tr)
+  LTM = bbggLTMaker(tr, options.isres)
 
 #mx usage 
   LTM.SetMax( options.mtotMax )
@@ -145,6 +147,7 @@ def setAndLoop(fname, options, outFile):
 #corrections
   LTM.DoBVariation( options.bVariation )
   LTM.DoPhoVariation( options.phoVariation )
+  LTM.DoTrigVariation( options.phoVariation )
   LTM.DoNRWeights( options.NRW )
 #other
   LTM.IsPhotonCR( options.photonCR )
@@ -158,6 +161,8 @@ def setAndLoop(fname, options, outFile):
   LTM.SetHighMassLeadingJetBtagCut( options.HMLJBTC )
   LTM.SetLowMassSubLeadingJetBtagCut( options.LMSJBTC )
   LTM.SetHighMassSubLeadingJetBtagCut( options.HMSJBTC )
+
+  LTM.BTagDiffWeightOpt( options.bDiffVar )
 
   if (opt.gendiphofilter): LTM.FilterGenDiPhotons()
 

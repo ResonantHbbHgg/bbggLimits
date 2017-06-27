@@ -16,8 +16,8 @@ def main(argv):
 	bins = []
 	Label = ""
         DSCB = False
-	xmax = {'mgg':140, 'mjj': 250}
-        xmin = {'mgg':118, 'mjj': 60}
+	xmax = {'mgg':135, 'mjj': 190}
+        xmin = {'mgg':118, 'mjj': 70}
 	try:
 		opts, args = getopt.getopt(argv,"w:c:o:l:a:b:L:D",["workspace=", "cat=", "observable=","lumi=","analysis=","bins=", "Label=", "DSCB"])
 	except getopt.GetoptError:
@@ -70,7 +70,6 @@ def main(argv):
 		label = "M(jj) [GeV]"
 		if 'mgg' in ob:
 			label = "M(#gamma#gamma) [GeV]"	
-
 		MakeSigPlot(data, pdf, var, label, lumi, cat, analysis, doBands, Label+"_signal_fit_"+ob+"_cat"+str(CAT), bins[i], xmin[ob], xmax[ob], 1, DSCB)
 
 if __name__ == "__main__":
