@@ -13,6 +13,7 @@ During the batch step, several files will fail because you won't be able to moun
 Therefore, you will need to run this script several times until no file is missing.
 The script will only run again the files that don't exist in the folder, so you won't run everything again if you run the script twice (only the missing files).
 '''
+
 '''
 if os.path.isdir("/tmp/"+username+"/eos/") == False :
   print "Mounting eos under /tmp/"+username+"/eos/ ..."
@@ -54,16 +55,15 @@ COMMAND
 
 scans = [ scan_2d, scan_kl ]
 mkount = 0
-for scan in scans:
- for cc in case:
+for cc in case:
   print cc
-  for kl in scan['kl']:
-   for kt in scan['kt']:
-    for cg in scan['cg']:
-     for c2 in scan['c2']:
-      for c2g in scan['c2g']:
-  #     print kl, kt, cg, c2, c2g
-  
+  for ii in range(0, len(klJHEP)):
+       kl = klJHEP[ii]
+       kt = ktJHEP[ii]
+       cg = cgJHEP[ii]
+       c2 = c2JHEP[ii]
+       c2g =c2gJHEP[ii]
+
        fname = 'LT_NR_Nodes_All_merged_kl_'+ str(kl).replace('.', 'p') + '_kt_' + str(kt).replace('.', 'p') + '_cg_' + str(cg).replace('.', 'p') + '_c2_' + str(c2).replace('.', 'p') + '_c2g_' + str(c2g).replace('.', 'p') + '.root'
   #     my_file = Path(opt.out + '/' + fname)
   #     if my_file.is_file():

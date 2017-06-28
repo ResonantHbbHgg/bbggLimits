@@ -7,9 +7,9 @@ LMLJBTC=0.00
 LMSJBTC=0.00
 
 #L_SIGNAL='/afs/cern.ch/work/r/rateixei/work/DiHiggs/bbggTools_flashgg_tag-Moriond17-v10/CMSSW_8_0_26_patch1/src/flashgg/bbggTools/test/RunJobs/EGML_Signal_GEN/Hadd/'
-L_BACKGROUND='/tmp/rateixei/eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/May2_Mjj70to190_NewCatMVA/EGML_Background_Mjj70_NewMVA/Hadd/'
-L_DATA='/tmp/rateixei/eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/May2_Mjj70to190_NewCatMVA/EGML_Data_Mjj70_NewMVA/Hadd/'
-L_SIGNAL='/tmp/rateixei/eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/May2_Mjj70to190_NewCatMVA/EGML_Signal_Mjj70_NewMVA/Hadd/'
+L_BACKGROUND='/eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/May2_Mjj70to190_NewCatMVA/EGML_Background_Mjj70_NewMVA/Hadd/'
+L_DATA='/eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/May2_Mjj70to190_NewCatMVA/EGML_Data_Mjj70_NewMVA/Hadd/'
+L_SIGNAL='/eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/May2_Mjj70to190_NewCatMVA/EGML_Signal_Mjj70_NewMVA/Hadd/'
 
 bashFile_org = '''
 #!/bin/bash

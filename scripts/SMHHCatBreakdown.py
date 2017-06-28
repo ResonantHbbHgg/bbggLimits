@@ -64,12 +64,12 @@ allco = fdName + '/higgsCombineCombinedCard_Node '
 unblind = ''
 if opt.ub: unblind = ' --unblind '
 
-command = 'scripts/MakeSMHHCatsPlot.py -f ' + lmmpc + lmhpc + lmcom + hmmpc + hmhpc + hmcom + allco + unblind + ' -n LM-MP LM-HP "LM Comb." HM-MP HM-HP "HM Comb." "All Comb." -l 35.90 --log --isAsymptotic '
+command = 'scripts/MakeSMHHCatsPlot.py -f ' + lmmpc + lmhpc + lmcom + hmmpc + hmhpc + hmcom + allco + unblind + ' -n LM-MP LM-HP "LM Comb." HM-MP HM-HP "HM Comb." "All Comb." -l 35.9 --log --isAsymptotic '
 os.system(command)
 command = 'mv test_SM.pdf ' + opt.folder + '/HHSM_CategoryBreakdown.pdf'
 os.system(command)
 
-command = 'scripts/MakeSMHHCatsPlot.py -f ' + lmmpc + lmhpc + lmcom + hmmpc + hmhpc + hmcom + allco + unblind + ' -n LM-MP LM-HP "LM Comb." HM-MP HM-HP "HM Comb." "All Comb." -l 35.90 --log --isAsymptotic --normSM '
+command = 'scripts/MakeSMHHCatsPlot.py -f ' + lmmpc + lmhpc + lmcom + hmmpc + hmhpc + hmcom + allco + unblind + ' -n LM-MP LM-HP "LM Comb." HM-MP HM-HP "HM Comb." "All Comb." -l 35.9 --log --isAsymptotic --normSM '
 os.system(command)
 command = 'mv test_SM.pdf ' + opt.folder + '/HHSM_CategoryBreakdown_norm.pdf'
 os.system(command)

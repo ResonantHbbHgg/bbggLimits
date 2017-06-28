@@ -1,117 +1,181 @@
-# Package for computing limits for the Run II analyses
+# Steps for full analysis
 
-## Instalation
-First, setup the environment with the Higgs Combine tools: https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideHiggsAnalysisCombinedLimit#For_end_users_that_don_t_need_to   
-Currently working with 74X (check latest on HiggsCombine twiki).   
+## Nonresonant Analysis
 
-Get bbggLimits:   
+#### 1) Make limit trees   
+
 ```
-cd ${CMSSW_BASE}/src/HiggsAnalysis/
-git clone git@github.com:ResonantHbbHgg/bbggLimits.git
-cd bbggLimits
-scramv1 b -j 10
+cp SmartScripts/ForApproval_MakeNonResonantLimitTrees.py .
+python ForApproval_MakeNonResonantLimitTrees.py
 ```
 
-## Making Limit Trees
+**Note**: The script above can also be used to optimize the MVA and Mhh categorization, by adding other working points to the for loops.
 
-In order to make limit trees from all samples use these script:
-```
-makeAllTrees.py -x nonres [--NRW]
-```
+#### 2) Make JHEP benchmark limit trees   
+NOTE: Run more than once to make sure all limit trees have been produced (needs to investigate why some fail).   
 
-### Working examples
-
-Make non-res shape benchmark points trees (MVA based with 400 Mhh threshold):
 ```
-makeAllTrees.py -x nonres \   
--d /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/Regression_Data/Hadd \   
--s /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/Regression_Signal/Hadd/ \   
--f LT_NonRes_MVABased400Reg_ \   
---doCatMVA --MVAHMC0 0.960 --MVAHMC1 0.6 --MVALMC0 0.96 --MVALMC1 0.750 --massNR 400   
-```   
-   
-Make non-res shape benchmark points trees (cut based with 400 Mhh threshold and cut on cos theta star):   
-```
-makeAllTrees.py -x nonres \   
--d /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/newData_HHTagger/Hadd \   
--s /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/Signal_HHTagger400/Hadd/ \   
--f LT_NonRes_CatBased400CTS_ --massNR 400 --ctsCut 0.8   
-```   
-   
-Make resonant limit trees with low mass categorization:   
-```
-makeAllTrees.py -x res \   
--d /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/newData_HHTagger/Hadd \   
--s /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/Signal_HHTagger400/Hadd/ \   
--f LT_ResLMnW   
-```   
-   
-Make resonant limit trees with high mass categorization:   
-```
-makeAllTrees.py -x res \   
--d /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/newData_HHTagger/Hadd \   
--s /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/Signal_HHTagger400/Hadd/ \   
--f LT_ResHM --highMassRes     
-```    
-
-
-### Details 
-The *C++ Loop* code to produce the Limit Trees is located at
-*src/bbggLTMaker.cc*. In order to run it over a single tree use the
-python script *scripts/pyLimitTreeMaker.py*, which exists in the
-*$PATH* after scram build. To run it just do:
-```
-pyLimitTreeMaker.py -f fileName.root -o outDir
+cp SmartScripts/ForApproval_MakeJHEPLimitTrees.py .
+python ForApproval_MakeJHEPLimitTrees.py
 ```
 
-where `fileName.root` is a an input Flat tree to be run over, and
-`outDir` is where the output trees will be created. The
-`makeAllTrees.py` mentioned in the beginning utilizes the
-`pyLimitTreeMaker.py` and runs it over many input  files.
+#### 3) Make limit trees for kappa lambda and kl x kt scans   
 
+NOTE: Run more than once to make sure all limit trees have been produced (needs to investigate why some fail).   
 
-More options for the `pyLimitTreeMaker.py` can be specified:
-* `-f <input File>` or `-i <Text file with a List of Root files full paths>`
-* `-o  <output location>` - directory will be created.
-* `--min  <min mtot>`, `--max <max mtot>`
-* `--scale  <Lumi*CrossSection*SF/NEvts>` - scale; should be 1 for data.
-* `--photonCR`  - do photon control region.
-* `--KF`  - use Mtot_KF to cut on mass window.
-* `--MX` -  use MX to cut on mass window; choose either `--MX` or `--KF`!.
-* `--tilt`  - select tilted mass window.
-* `--doNoCat`  - no categorization, all is *cat0*.
-* `--btagWP <WP>` - set btagging working point for categories.
-* `--doCatMixed` -  do categories with mixed btagging;  Cat0: 2>low, Cat1: 1<low+1>high
-* `--singleCat`  - only one category, High Mass analysis.
-* `--doBVariation <VAR>`  - apply b-tagging SF factors: 0, 1 or -1.
-* `--doPhoVariation <VAR>`  - Apply photon SF factors: 0, 1 or -1.
-* `--cosThetaStar <VAR>`  - cut on CosTheta Star variable
-
-Example to make all resonant limit trees:   
 ```
-makeAllTrees.py -x res \   
--d /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/DataJan20/Hadd \   
--s /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/SignalJan20/Hadd \   
--f LT_Jan26_Res_
-```   
-
-### Set the Limits
-For setting the Resonant limits, the instructions will come soon.
-
-For Non-Resonant limit, stay here and run:
+cp SmartScripts/ForApproval_MakeARWBSMLimitTrees.py .
+python ForApproval_MakeARWBSMLimitTrees.py
 ```
-pyNonResLimits.py -f NonRes.json --nodes 2 3 SM --points 0-10
+
+#### 4) Run JHEP benchmark limits
 ```
-This example will run all fitting and limits for *Nodes 2,3,SM* and
-the re-weighting to *points 0-10* out of 0-1506 avaialable. The results
-of the combined limit should appear in *outDir/CombinedCard_Node_X/*
-subdirectories.
+cp SmartScripts/ForApproval_MakeJHEPLimits.py .
+python ForApproval_MakeJHEPLimits.py
+```
+##### 4.1) Check that all the limits were computed   
 
-* `-o <dir>` - Output directory (will be created)
-* `--overwrite` - If the output directory exists - overwite it. By default, the script will exit
-* `-v <integer>` - Verbosity level: 0 - Minimal or no messages; 1 - INFO; 2 - DEBUG; 3 - Go crazy.
-If the verbosity level is greater than zero, log files are created at `/tmp/logs/` per process.
-* `-j <ncpu>`  - Number of CPU cores to use. Default is 2.
-* `-t <sec>` - Per job timeout (in seconds) for multiprocessing. Jobs will be killed if run longer than this.
+NOTE: Some limits fail, not sure why. Need to run again (needs to investigate why some fail, is it a problem with the script?).
 
-Good luck!
+```
+cp SmartScripts/ForApproval_MakeJHEPTxtList.py .
+python ForApproval_MakeJHEPTxtList.py
+```
+
+If there are points in the "missing" text file, run:   
+
+```
+cp SmartScripts/ForApproval_MakeJHEPLimits_Missing.py .
+python ForApproval_MakeJHEPLimits_Missing.py
+```
+
+#### 5) Make JHEP benchmarks plot
+
+```
+cp SmartScripts/ForApproval_MakeJHEPplot.sh .
+source ForApproval_MakeJHEPplot.sh
+```
+
+#### 6) Run kappa lambda scan limits:
+
+```
+cp SmartScripts/ForApproval_MakeKLScanLimits.py .
+python ForApproval_MakeKLScanLimits.py
+```
+
+##### 6.1) Check that all the limits were computed
+
+NOTE: Some limits fail, not sure why. Need to run again (needs to investigate why some fail, is it a problem with the script?).
+
+```
+cp SmartScripts/ForApproval_MakeKLScanTxtList.py .
+python ForApproval_MakeKLScanTxtList.py
+```
+
+If there are points in the "missing" text file, run:
+
+```
+cp SmartScripts/ForApproval_MakeKLScanLimits_Missing.py .
+python ForApproval_MakeKLScanLimits_Missing.py
+```
+
+#### 7) Make kappa lambda scan plot:
+
+```
+cp SmartScripts/ForApproval_MakeKLplot.sh .
+source ForApproval_MakeKLplot.sh
+```
+
+#### 8) Make kl x kt scan limits:
+
+```
+cp SmartScripts/ForApproval_MakeKLKTScanLimits.py .
+python ForApproval_MakeKLKTScanLimits.py
+```
+
+##### 8.1) Check that all the limits were computed
+
+NOTE: Some limits fail, not sure why. Need to run again (needs to investigate why some fail, is it a problem with the script?).
+
+```
+cp SmartScripts/ForApproval_MakeKLKTScanTxtList.py .
+python ForApproval_MakeKLKTScanTxtList.py
+``` 
+
+If there are points in the "missing" text file, run:
+
+```
+cp SmartScripts/ForApproval_MakeKLKTScanLimits_Missing.py .
+python ForApproval_MakeKLKTScanLimits_Missing.py
+```
+
+#### 9) Make kl x kt plot:
+
+You need to run 6.1 first, even if all the limits are done. It will create a txt file with all points and limits that will be used by the plotting macro.
+
+```
+cp SmartScripts/ForApproval_MakeKLKTplot.sh .
+source ForApproval_MakeKLKTplot.sh
+```
+
+## Resonant Analysis
+
+#### 1) Make resonant limit trees and run limits
+
+```
+cp SmartScripts/ForApproval_MakeResonantAnalysis.py .
+python ForApproval_MakeResonantAnalysis.py
+```
+
+This script will produce the limit trees and run the limits for both the low mass and high mass categorizations, for radion and graviton signal hypotheses. 
+
+#### 2) Make resonant limit plot
+
+```
+cp SmartScripts/ForApproval_MakeResPlot.sh
+source ForApproval_MakeResPlot.sh
+```
+
+## Support plots
+
+#### 1) Make nonresonant background plots (background+signal+single Higgs):
+
+```
+cp SmartScripts/ForApproval_MakeSMHHFullBkgPlots.sh .
+source ForApproval_MakeSMHHFullBkgPlots.sh
+```
+
+#### 2) Make nonresonant signal-like single Higgs fits:
+
+```
+cp SmartScripts/ForApproval_MakeSMHHHiggsSignalFits.sh .
+source ForApproval_MakeSMHHHiggsSignalFits.sh
+```
+
+#### 3) Make SMHH signal fits:
+
+```
+cp SmartScripts/ForApproval_MakeSMHHSignalFits.sh .
+source ForApproval_MakeSMHHSignalFits.sh
+```
+
+#### 3) Make resonant signal fits:
+
+```
+cp SmartScripts/ForApproval_MakeResonantSignalFits.sh .
+source ForApproval_MakeResonantSignalFits.sh
+```
+
+#### 4) Make resonant background fits (only background and fit error):
+
+```
+cp SmartScripts/ForApproval_MakeResonantBackgroundFits.sh .
+source ForApproval_MakeResonantBackgroundFits.sh
+```
+
+#### 4) Make SM HH limit category breakdown
+
+```
+cp SmartScripts/ForApproval_MakeSMHHCatsPlot.sh .
+source ForApproval_MakeSMHHCatsPlot.sh
+```

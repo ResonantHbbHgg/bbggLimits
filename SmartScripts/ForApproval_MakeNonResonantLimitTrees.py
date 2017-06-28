@@ -8,15 +8,18 @@ LMLJBTC=0.55
 #Low Mass subleading jet b-tag (medium)
 LMSJBTC=0.55
 
+#Mounting EOS is not needed anymore!!
+'''
 if os.path.isdir("/tmp/"+username+"/eos/") == False :
   print "Mounting eos under /tmp/"+username+"/eos/ ..."
   command = 'mkdir /tmp/'+username+'/eos/'
   os.system(command)
   command = "eosmount /tmp/"+username+"/eos/"
+'''
 
-L_BACKGROUND='/tmp/'+username+'/eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/May2_Mjj70to190_NewCatMVA/EGML_Background_Mjj70_NewMVA/Hadd/'
-L_SIGNAL='/tmp/'+username+'/eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/May2_Mjj70to190_NewCatMVA/EGML_Signal_GEN/Hadd/'
-L_DATA='/tmp/'+username+'/eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/May2_Mjj70to190_NewCatMVA/EGML_Data_Mjj70_NewMVA/Hadd/'
+L_BACKGROUND='/eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/May2_Mjj70to190_NewCatMVA/EGML_Background_Mjj70_NewMVA/Hadd/'
+L_SIGNAL='/eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/May2_Mjj70to190_NewCatMVA/EGML_Signal_GEN/Hadd/'
+L_DATA='/eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/May2_Mjj70to190_NewCatMVA/EGML_Data_Mjj70_NewMVA/Hadd/'
 
 bashFile = '''
 #!/bin/bash
@@ -50,7 +53,6 @@ for M1 in ['600']:
           command = 'python scripts/makeAllTrees.py -x nonres -d ' + L_DATA + ' -s ' + L_SIGNAL + ' -f ' + L_OUTDIR + ' --doCatMVA --MVAHMC0 0.' + C0 + ' --MVAHMC1 0.' + M1 + ' --MVALMC0 0.' + C1 + ' --MVALMC1 0.' + M2 + ' --massNR ' + MM + ' --LMLJBTC ' + str(LMLJBTC) + ' --LMSJBTC ' + str(LMSJBTC) + ' '
           print command
           os.system(command)
-          break
 
           command = 'python scripts/makeAllTrees.py -x nonres -s ' + L_BACKGROUND + ' -d 0 -f ' + L_OUTDIR + ' --doCatMVA --MVAHMC0 0.' + C0 + ' --MVAHMC1 0.' + M1 + ' --MVALMC0 0.' + C1 + ' --MVALMC1 0.' + M2 + ' --massNR ' + MM + ' --doSMHiggs --LMLJBTC ' + str(LMLJBTC) + ' --LMSJBTC ' + str(LMSJBTC) + ' --genDiPhotonFilter ' + ' '
           print command

@@ -11,6 +11,23 @@ A13tev = [2.09078, 10.1517, 0.282307, 0.101205, 1.33191, -8.51168, -1.37309, 2.8
 
 def functionGF(kl,kt,c2,cg,c2g,A): return A[0]*kt**4 + A[1]*c2**2 + (A[2]*kt**2 + A[3]*cg**2)*kl**2  + A[4]*c2g**2 + ( A[5]*c2 + A[6]*kt*kl )*kt**2  + (A[7]*kt*kl + A[8]*cg*kl )*c2 + A[9]*c2*c2g  + (A[10]*cg*kl + A[11]*c2g)*kt**2+ (A[12]*kl*cg + A[13]*c2g )*kt*kl + A[14]*cg*c2g*kl
 
+def Compare(th, exp):
+  isless = 0
+  Range = []
+  for x in range(-1000,1000):
+    xx = float(x)/50
+    yexp = exp.Eval(xx)
+    yth  =  th.Eval(xx)
+    if yexp > yth and isless == 0:
+      print 'Observed/Expected', yexp, 'Th', yth, 'klambda', xx
+      isless = 1
+      Range.append(xx)
+    if yexp < yth and isless == 1:
+      print 'Observed/Expected', yexp, 'Th', yth, 'klambda', xx
+      isless = 0
+      Range.append(xx)
+    
+
 
 parser =  argparse.ArgumentParser(description='Limit Tree maker')
 parser.add_argument("-f", "--folder", dest="f", type=str)
@@ -109,7 +126,7 @@ plots['0.025'].Draw("A3Z")
 plots['0.025'].GetXaxis().SetTitle('#kappa_{#lambda}/#kappa_{t}')
 #plots['0.025'].GetYaxis().SetTitle('95% C.L. limit on #sigma(pp#rightarrowHH)#times#font[52]{B}(HH#rightarrowb#bar{b}#gamma#gamma) [fb]')
 plots['0.025'].GetYaxis().SetTitle('#sigma(pp#rightarrowHH)#times#font[52]{B}(HH#rightarrowb#bar{b}#gamma#gamma) [fb]')
-plots['0.025'].SetMaximum(14)
+plots['0.025'].SetMaximum(18)
 plots['0.025'].GetXaxis().SetRangeUser(-20, 20)
 SetAxisTextSizes(plots['0.025'])
 c.Update()
@@ -155,10 +172,26 @@ DrawCMSLabels(c, '35.9')
 
 c.SaveAs(opt.outf.replace(".root", "")+".pdf")
 
+
+print 'Expected excluded range with kt = 1'
+Compare(nonresXSEC, plots['0.500'])
+print 'Expected excluded range with kt = 2'
+Compare(nonresXSEC_2, plots['0.500'])
+if(opt.unblind):
+  print 'Observed excluded range with kt = 1'
+  Compare(nonresXSEC, plots['-1'])
+  print 'Observed excluded range with kt = 2'
+  Compare(nonresXSEC_2, plots['-1'])
+
+
 outfile.cd()
 for qt in quantiles:
   plots[qt].Write()
 
 nonresXSEC.Write()
 nonresXSEC_2.Write()
+
+
 outfile.Close()
+
+

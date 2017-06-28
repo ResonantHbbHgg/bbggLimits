@@ -2,15 +2,18 @@
 
 ## 1) Make MaxLikelihood fit
 
-combine --datacard LIMS_LT_350_HMHPC_970_HMMPC_600_LMHPC_985_LMMPC_600_v66/CombinedCard_Node_SMkl1p0_kt1p0_cg0p0_c20p0_c2g0p0/hhbbgg_13TeV_DataCard.txt -M MaxLikelihoodFit --saveWorkspace --saveShapes --saveNormalization --X-rtd TMCSO_AdaptivePseudoAsimov=50 -n SMHHForBkgPlots
+LIMFOLDER=LIMS_LT_350_HMHPC_970_HMMPC_600_LMHPC_985_LMMPC_600_v66
+POINT=kl1p0_kt1p0_cg0p0_c20p0_c2g0p0 #this is SM
 
-mv mlfitSMHHForBkgPlots.root LIMS_LT_350_HMHPC_970_HMMPC_600_LMHPC_985_LMMPC_600_v66/CombinedCard_Node_SMkl1p0_kt1p0_cg0p0_c20p0_c2g0p0/
-mv higgsCombineSMHHForBkgPlots.MaxLikelihoodFit.mH120.root LIMS_LT_350_HMHPC_970_HMMPC_600_LMHPC_985_LMMPC_600_v66/CombinedCard_Node_SMkl1p0_kt1p0_cg0p0_c20p0_c2g0p0/
-mv MaxLikelihoodFitResult.root LIMS_LT_350_HMHPC_970_HMMPC_600_LMHPC_985_LMMPC_600_v66/CombinedCard_Node_SMkl1p0_kt1p0_cg0p0_c20p0_c2g0p0/
+combine --datacard ${LIMFOLDER}/CombinedCard_Node_SM${POINT}/hhbbgg_13TeV_DataCard.txt -M MaxLikelihoodFit --saveWorkspace --saveShapes --saveNormalization --X-rtd TMCSO_AdaptivePseudoAsimov=50 -n SMHHForBkgPlots
+
+mv mlfitSMHHForBkgPlots.root ${LIMFOLDER}/CombinedCard_Node_SM${POINT}/
+mv higgsCombineSMHHForBkgPlots.MaxLikelihoodFit.mH120.root ${LIMFOLDER}/CombinedCard_Node_SM${POINT}/
+mv MaxLikelihoodFitResult.root ${LIMFOLDER}/CombinedCard_Node_SM${POINT}/
 
 ## 2) Make plots with fit
 
-INFILE=LIMS_LT_350_HMHPC_970_HMMPC_600_LMHPC_985_LMMPC_600_v66/CombinedCard_Node_SMkl1p0_kt1p0_cg0p0_c20p0_c2g0p0/MaxLikelihoodFitResult.root
+INFILE=${LIMFOLDER}/CombinedCard_Node_SM${POINT}/MaxLikelihoodFitResult.root
 OUTFILE_HM=FullBkgPlot_HM
 OUTFILE_LM=FullBkgPlot_LM
 #all four below to be taken from the datacard (signal rate)*33.49*0.0026

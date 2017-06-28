@@ -15,13 +15,17 @@ def AddReWeightBranch(intree, newfilename, KL, CT, CG, C2G, C2T):
   outfile = TFile(newfilename, "RECREATE")
 
   model = NonResonantModel()
-  dumb = model.ReadCoefficients(cmssw_base+"/src/HHStatAnalysis/AnalyticalModels/data/coefficientsByBin_extended_3M.txt")
+#  dumb = model.ReadCoefficients(cmssw_base+"/src/HHStatAnalysis/AnalyticalModels/data/coefficientsByBin_extended_3M.txt")
+  dumb = model.ReadCoefficients(cmssw_base+"/src/HHStatAnalysis/AnalyticalModels/data/coefficientsByBin_extended_3M_costHHSim_19-4.txt")
 
-  histfilename=cmssw_base+"/src/HiggsAnalysis/bbggLimits/data/NR_AnalyticalWeight/Hist2DSum_V0_SM_box.root"
-  histtitle= "SumV0_AnalyticalBinExt"
+#  histfilename=cmssw_base+"/src/HiggsAnalysis/bbggLimits/data/NR_AnalyticalWeight/Hist2DSum_V0_SM_box.root"
+  histfilename=cmssw_base+"/src/HHStatAnalysis/Support/NonResonant/HistSum2D_4b_rebin_SimCostHH_19-4.root"
+#  histtitle= "SumV0_AnalyticalBinExt"
+  histtitle= "SumV0_AnalyticalBinExtSimCostHH"
   fileHH=TFile(histfilename)
   sumHAnalyticalBin = fileHH.Get(histtitle)
   print KL, CT, CG, C2G, C2T
+  #need to turn kappa top = 0 to kappa top = very small, otherwise weights are 0
   if abs(CT) < 0.00001: CT = 0.00001
   calcSumOfWeights = model.getNormalization(KL,CT,C2T,CG,C2G,histfilename,histtitle)
 

@@ -102,7 +102,7 @@ HERE = os.environ['PWD']
 
 #FOLDER = 'LT_MJJ70NewMVA_350_HMHPC_970_HMMPC_600_LMHPC_985_LMMPC_600_allNodes'
 FOLDER = 'LT_350_HMHPC_970_HMMPC_600_LMHPC_985_LMMPC_600'
-EOSLOC = 'root://eoscms.cern.ch//eos/cms/store/group/phys_higgs/resonant_HH/RunII/LimitTrees/2016/'
+EOSLOC = 'root://eoscms.cern.ch//eos/cms/store/group/phys_higgs/resonant_HH/RunII/LimitTrees/ForApproval_2016/'
 L_OUTLOC_org = '/tmp/'+username+'/'
 
 counter = 0
