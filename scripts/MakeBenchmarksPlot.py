@@ -6,6 +6,7 @@ from HiggsAnalysis.bbggLimits.NiceColors import *
 from HiggsAnalysis.bbggLimits.DefineScans import *
 
 gROOT.SetBatch()
+gStyle.SetOptStat(0)
 
 parser =  argparse.ArgumentParser(description='Limit Tree maker')
 parser.add_argument("-f", "--folder", dest="f", type=str)
@@ -54,18 +55,37 @@ for ii in xrange(0, len(klJHEP)):
 
 print plots
 
+h1 = TH1F('h1', '', 14, 0.5, 14.5)
+h1.GetXaxis().SetTitle("Shape Benchmark Points")
+h1.GetYaxis().SetTitle("#sigma(pp#rightarrowHH) #times #it{B}(HH#rightarrowb#bar{b}#gamma#gamma) [fb]")
+h1.SetMaximum(11)
+
 for ib in range(0, len(klJHEP)):
+
+  ibin = ib
+  if ib == 0: ibin = 13
+  if ib == 13: ibin = 14
+
   for qt in quantiles:
     print lims['-1']
     if '-1' in qt:
-      plots[qt].SetPoint(ib, ib, lims['-1'][ib])
+      plots[qt].SetPoint(ib, ibin, lims['-1'][ib])
     else:
-      plots[qt].SetPoint(ib, ib, lims['0.500'][ib])
+      plots[qt].SetPoint(ib, ibin, lims['0.500'][ib])
+  
   plots['0.160'].SetPointError(ib, 0,0, lims['0.500'][ib] - lims['0.160'][ib], lims['0.840'][ib] - lims['0.500'][ib] )
   plots['0.025'].SetPointError(ib, 0,0, lims['0.500'][ib] - lims['0.025'][ib], lims['0.975'][ib] - lims['0.500'][ib] )
   plots['-1'].SetPointError(ib, myLineWidth,myLineWidth, myLineHeight, myLineHeight )
   plots['0.500'].SetPointError(ib, myLineWidth,myLineWidth, myLineHeight, myLineHeight )
+  thisbin = h1.FindBin(float(ibin - 0.01))
+  h1.GetXaxis().SetBinLabel(thisbin, str(ibin))
 
+smbin = h1.FindBin(12.99)
+topbin = h1.FindBin(13.99)
+h1.GetXaxis().SetBinLabel(smbin, '#font[61]{SM}')
+h1.GetXaxis().SetBinLabel(topbin, '#font[61]{#kappa_{#lambda}= 0}')
+SetAxisTextSizes(h1)
+h1.GetXaxis().SetLabelSize(0.052)
 
 #s2_col = kYellow
 s2_col = TColor.GetColor(NiceYellow2)
@@ -81,17 +101,18 @@ cen_col = cNiceBlueDark
 SetGeneralStyle()
 c0 = TCanvas("c", "c", 800, 600)
 c0.SetGrid()
-plots['0.025'].SetMaximum(11)
-plots['0.025'].Draw("APZ")
+h1.Draw()
+#plots['0.025'].SetMaximum(11)
+plots['0.025'].Draw("PZ same")
 plots['0.025'].SetLineColor(s2_col)
 plots['0.025'].SetLineWidth(8)
-plots['0.025'].SetTitle("")
-plots['0.025'].GetXaxis().SetLimits(-1, len(klJHEP))
-plots['0.025'].GetYaxis().SetRangeUser(0, 10)
-plots['0.025'].GetXaxis().SetTitle("Shape Benchmark Points")
-plots['0.025'].GetYaxis().SetTitle("#sigma(pp#rightarrowHH)#times#it{B}(HH#rightarrowb#bar{b}#gamma#gamma) [fb]")
+#plots['0.025'].SetTitle("")
+#plots['0.025'].GetXaxis().SetLimits(-1, len(klJHEP))
+#plots['0.025'].GetYaxis().SetRangeUser(0, 10)
+#plots['0.025'].GetXaxis().SetTitle("Shape Benchmark Points")
+#plots['0.025'].GetYaxis().SetTitle("#sigma(pp#rightarrowHH)#times#it{B}(HH#rightarrowb#bar{b}#gamma#gamma) [fb]")
 c0.Update()
-plots['0.160'].Draw("EPZ")
+plots['0.160'].Draw("EPZ same")
 plots['0.160'].SetMarkerStyle(21)
 plots['0.160'].SetMarkerColor(s1_col)
 plots['0.160'].SetLineWidth(7)
@@ -99,7 +120,7 @@ plots['0.160'].SetLineColor(s1_col)
 c0.Update()
 SetPadStyle(c0)
 c0.Update()
-SetAxisTextSizes(plots['0.025'])
+#SetAxisTextSizes(plots['0.025'])
 c0.Update()
 plots['0.500'].SetLineWidth(2)
 plots['0.500'].SetLineColor(cen_col)
