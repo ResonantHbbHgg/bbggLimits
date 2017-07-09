@@ -17,8 +17,8 @@ def main(argv):
 	Label = ""
         DSCB = False
         iHiggs = 'ggh'
-	xmax = {'mgg':140, 'mjj': 180}
-        xmin = {'mgg':118, 'mjj': 60}
+	xmax = {'mgg':140, 'mjj': 190}
+        xmin = {'mgg':118, 'mjj': 70}
 	try:
 		opts, args = getopt.getopt(argv,"w:c:o:l:a:b:L:i:D",["workspace=", "cat=", "observable=","lumi=","analysis=","bins=", "Label=", "iHiggs", "DSCB"])
 	except getopt.GetoptError:

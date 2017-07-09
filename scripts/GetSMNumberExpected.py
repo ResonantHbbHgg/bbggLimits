@@ -20,6 +20,8 @@ mysamps = {
 
 myyields = {}
 
+print opt.folder, onlyfiles
+
 for f in onlyfiles:
   if f not in mysamps: continue
   tf = TFile(opt.folder+'/'+f)
@@ -43,8 +45,9 @@ for ff in mysamps:
   f = mysamps[ff]
   if 'HH' in f: continue
   print f, '\t&\t', "{:.3f}".format(myyields[f][0]), '\t&\t', "{:.3f}".format(myyields[f][1]), '\t\t \\\\'
-  totsm0 += myyields[f][0]
-  totsm1 += myyields[f][1]
+  if "Obs" not in f:
+    totsm0 += myyields[f][0]
+    totsm1 += myyields[f][1]
 print '\\hline'
 print 'Total SM H \t&\t', "{:.3f}".format(totsm0), '\t&\t', "{:.3f}".format(totsm1), '\t\t \\\\'
 print '\\hline'

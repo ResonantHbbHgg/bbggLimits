@@ -66,7 +66,7 @@ void bbgg2DFitter::Initialize(RooWorkspace* workspace, Int_t SigMass, float Lumi
 			      float minMggMassFit,float maxMggMassFit,float minMjjMassFit,float maxMjjMassFit,
 			      float minSigFitMgg,float maxSigFitMgg,float minSigFitMjj,float maxSigFitMjj,
 			      float minHigMggFit,float maxHigMggFit,float minHigMjjFit,float maxHigMjjFit,
-			      Int_t doNRW, std::string logFileName)
+			      Int_t doNRW, std::string logFileName, bool doARW)
 {
   //std::cout<<"DBG.  We Initialize..."<<std::endl;
   
@@ -92,7 +92,8 @@ void bbgg2DFitter::Initialize(RooWorkspace* workspace, Int_t SigMass, float Lumi
   _minHigMjjFit=minHigMjjFit;
   _maxHigMjjFit=maxHigMjjFit;
   TGaxis::SetMaxDigits(3);
-
+  _doARW = doARW;
+//  doARW = 0;
 
   _singleHiggsNames = {"ggh_m125_powheg_13TeV","tth_m125_13TeV"};
   _singleHiggsMap = {
@@ -124,6 +125,11 @@ void bbgg2DFitter::Initialize(RooWorkspace* workspace, Int_t SigMass, float Lumi
     _wName = Form("evWeight_NRW_%d",doNRW);
   else
     _wName = "evWeight";
+
+  if (doARW) {
+    _wName = "new_evWeight";
+    _nonResWeightIndex = -10;
+  }
 
   //std::cout<<"DBG.  Finished Initialize..."<<std::endl;
 
@@ -161,17 +167,33 @@ RooArgSet* bbgg2DFitter::defineVariables()
   RooRealVar* mtot = new RooRealVar("mtot","M(#gamma#gammajj)",200,1600,"GeV");
   RooRealVar* mjj  = new RooRealVar("mjj","M(jj)",_minMjjMassFit,_maxMjjMassFit,"GeV");
   RooCategory* cut_based_ct = new RooCategory("cut_based_ct","event category 4") ;
+  RooRealVar* evWeight = 0;
+  RooRealVar* new_evWeight = 0;
+  if (!_doARW)
+    evWeight = new RooRealVar(_wName.c_str(),"HqT x PUwei",-100000.,100000, "");
+  else
+  {
+    evWeight = new RooRealVar("evWeight","HqT x PUwei",-100000, 100000,"");
+    new_evWeight = new RooRealVar("new_evWeight","HqT x PUwei x ARW",-100000,100000,"");
+  }
 
-  RooRealVar* evWeight = new RooRealVar(_wName.c_str(),"HqT x PUwei",0.,100,"");
   //
   cut_based_ct->defineType("cat4_0",0);
   cut_based_ct->defineType("cat4_1",1);
   cut_based_ct->defineType("cat4_2",2);
   cut_based_ct->defineType("cat4_3",3);
   //
-  RooArgSet* ntplVars = new RooArgSet(*mgg, *mjj, *cut_based_ct, *evWeight);
-  if (_nonResWeightIndex>=-1)
+  RooArgSet* ntplVars = 0;
+  if (_doARW)
+    ntplVars = new RooArgSet(*mgg, *mjj, *cut_based_ct, *evWeight, *new_evWeight);
+  else if (_nonResWeightIndex>=-1)
+  {
+    ntplVars = new RooArgSet(*mgg, *mjj, *cut_based_ct, *evWeight);
     ntplVars->add(*mtot);
+  }
+  else
+    ntplVars = new RooArgSet(*mgg, *mjj, *cut_based_ct, *evWeight);
+
   // AP: Why these are here? They are already in the set:
   //ntplVars->add(*mgg);
   //ntplVars->add(*mjj);
@@ -187,7 +209,7 @@ int bbgg2DFitter::AddSigData(float mass, TString signalfile)
   if(opened==false) return -1;
   TTree* sigTree = (TTree*)sigFile.Get("TCVARS");
   
-  if (_verbLvl>1) std::cout << "================= Add Signal==============================" <<std::endl;
+  if (_verbLvl>1) std::cout << "================= Add Signal============================== " << _wName.c_str() << " " << _doARW << " " << _nonResWeightIndex << std::endl;
   //Luminosity
   RooRealVar lumi("lumi","lumi", _lumi);
   _w->import(lumi);
@@ -213,6 +235,8 @@ int bbgg2DFitter::AddSigData(float mass, TString signalfile)
   }
 
   RooDataSet sigScaled("sigScaled","dataset",sigTree,*ntplVars,_cut, _wName.c_str());
+//  if(_doARW) sigScaled = RooDataSet("sigScaled","dataset",sigTree,*ntplVars,_cut, "new_evWeight");
+//  else sigScaled = RooDataSet("sigScaled","dataset",sigTree,*ntplVars,_cut, _wName.c_str());
 
   RooDataSet* sigToFit[_NCAT];
   TString cut0 = " && 1>0";
@@ -225,15 +249,20 @@ int bbgg2DFitter::AddSigData(float mass, TString signalfile)
   if (_nonResWeightIndex>=-1)
     myArgList.add(*_w->var("mtot"));
 
+  myArgList.Print();
 
   for ( int i=0; i<_NCAT; ++i)
     {
 
+      std::cout << "-- Reducing cat " << i << std::endl;
+
       sigToFit[i] = (RooDataSet*) sigScaled.reduce(myArgList,_cut+TString::Format(" && cut_based_ct==%d ",i)+cut0);
+
       if (_fitStrategy == 1)
 	sigToFit[i] = (RooDataSet*) sigScaled.reduce(myArgList,_cut+TString::Format(" && cut_based_ct==%d && mjj < 140 ",i)+cut0);
 
       this->SetSigExpectedCats(i, sigToFit[i]->sumEntries());
+
       if (_verbLvl>0) {
 	std::cout << "======================================================================" <<std::endl;
 	std::cout<<"[DBG]  Cat="<<i<< "\t Sig sumEntries="<<sigToFit[i]->sumEntries()<<std::endl;
@@ -246,14 +275,17 @@ int bbgg2DFitter::AddSigData(float mass, TString signalfile)
       }
 
       /*This defines each category*/
+      std::cout << "-- Importing cat " << i << std::endl;
       _w->import(*sigToFit[i],Rename(TString::Format("Sig_cat%d",i)));
     }
   // Create full signal data set without categorization
+  std::cout << "-- Reducing all signal, no cat" << std::endl;
   RooDataSet* sigToFitAll = (RooDataSet*) sigScaled.reduce(myArgList,_cut);
   if (_fitStrategy == 1)
     sigToFitAll = (RooDataSet*) sigScaled.reduce(myArgList,_cut+TString(" && mjj < 140 "));
 
   _w->import(*sigToFitAll,Rename("Sig"));
+
   // here we print the number of entries on the different categories
   if (_verbLvl>1) {
     std::cout << "======================================================================" <<std::endl;
@@ -1246,13 +1278,19 @@ void bbgg2DFitter::MakeSigWS(std::string fileBaseName)
   //**********************************************************************//
   std::vector<RooAbsPdf*> SigPdf(_NCAT,nullptr);
   RooWorkspace *wAll = new RooWorkspace("w_all","w_all");
-  _w->factory("CMS_hgg_sig_m0_absShift[1,1,1]");
+/*  _w->factory("CMS_hgg_sig_m0_absShift[1,1,1]");
   _w->factory("CMS_hbb_sig_m0_absShift[1,1,1]");
   _w->factory("CMS_hgg_sig_sigmaScale[1,1,1]");
-  _w->factory("CMS_hbb_sig_sigmaScale[1,1,1]");
+  _w->factory("CMS_hbb_sig_sigmaScale[1,1,1]");*/
   for (int c = 0; c < _NCAT; ++c)
     {
       int newC = c + _ncat0;
+
+      _w->factory(TString::Format("CMS_hgg_sig_m0_absShift_cat%d[1,1,1]", newC));
+      _w->factory(TString::Format("CMS_hbb_sig_m0_absShift_cat%d[1,1,1]", newC));
+      _w->factory(TString::Format("CMS_hgg_sig_sigmaScale_cat%d[1,1,1]", newC));
+      _w->factory(TString::Format("CMS_hbb_sig_sigmaScale_cat%d[1,1,1]", newC));
+
       //IMPORTHERE
       //
       SigPdf[c] = (RooAbsPdf*) _w->pdf(TString::Format("SigPdf_cat%d",c));
@@ -1274,13 +1312,19 @@ void bbgg2DFitter::MakeSigWS(std::string fileBaseName)
         wAll->import( *_w->var( tempObjMjj->GetName() ), RenameVariable( thisVarName, newVarName));
       }
       //Shifts and smearings
-      _w->factory(TString::Format("prod::CMS_hgg_sig_m0_cat%d(mgg_sig_m0_cat%d, CMS_hgg_sig_m0_absShift)", newC, newC));
+/*      _w->factory(TString::Format("prod::CMS_hgg_sig_m0_cat%d(mgg_sig_m0_cat%d, CMS_hgg_sig_m0_absShift)", newC, newC));
       _w->factory(TString::Format("prod::CMS_hbb_sig_m0_cat%d(mjj_sig_m0_cat%d, CMS_hbb_sig_m0_absShift)", newC, newC));
       _w->factory(TString::Format("prod::CMS_hgg_sig_sigma_cat%d(mgg_sig_sigma_cat%d, CMS_hgg_sig_sigmaScale)", newC, newC));
-      _w->factory(TString::Format("prod::CMS_hbb_sig_sigma_cat%d(mjj_sig_sigma_cat%d, CMS_hbb_sig_sigmaScale)", newC, newC));
+      _w->factory(TString::Format("prod::CMS_hbb_sig_sigma_cat%d(mjj_sig_sigma_cat%d, CMS_hbb_sig_sigmaScale)", newC, newC));*/
+      _w->factory(TString::Format("prod::CMS_hgg_sig_m0_cat%d(mgg_sig_m0_cat%d, CMS_hgg_sig_m0_absShift_cat%d)", newC, newC, newC));
+      _w->factory(TString::Format("prod::CMS_hbb_sig_m0_cat%d(mjj_sig_m0_cat%d, CMS_hbb_sig_m0_absShift_cat%d)", newC, newC, newC));
+      _w->factory(TString::Format("prod::CMS_hgg_sig_sigma_cat%d(mgg_sig_sigma_cat%d, CMS_hgg_sig_sigmaScale_cat%d)", newC, newC, newC));
+      _w->factory(TString::Format("prod::CMS_hbb_sig_sigma_cat%d(mjj_sig_sigma_cat%d, CMS_hbb_sig_sigmaScale_cat%d)", newC, newC, newC));
       if(!_useDSCB) {
-        _w->factory(TString::Format("prod::CMS_hgg_gsigma_cat%d(mgg_sig_gsigma_cat%d, CMS_hgg_sig_sigmaScale)", newC, newC));
-        _w->factory(TString::Format("prod::CMS_hbb_gsigma_cat%d(mjj_sig_gsigma_cat%d, CMS_hbb_sig_sigmaScale)", newC, newC));
+/*        _w->factory(TString::Format("prod::CMS_hgg_gsigma_cat%d(mgg_sig_gsigma_cat%d, CMS_hgg_sig_sigmaScale)", newC, newC));
+        _w->factory(TString::Format("prod::CMS_hbb_gsigma_cat%d(mjj_sig_gsigma_cat%d, CMS_hbb_sig_sigmaScale)", newC, newC));*/
+        _w->factory(TString::Format("prod::CMS_hgg_gsigma_cat%d(mgg_sig_gsigma_cat%d, CMS_hgg_sig_sigmaScale_cat%d)", newC, newC, newC));
+        _w->factory(TString::Format("prod::CMS_hbb_gsigma_cat%d(mjj_sig_gsigma_cat%d, CMS_hbb_sig_sigmaScale_cat%d)", newC, newC, newC));
       }
 
       TString EditPDF = TString::Format("EDIT::CMS_sig_cat%d(SigPdf_cat%d,", newC, c);
@@ -1347,15 +1391,21 @@ void bbgg2DFitter::MakeHigWS(std::string fileHiggsName,int higgschannel, TString
 
       //Shifts and smearings
       //CMS_hgg_sig_m0_absShift, CMS_hbb_sig_m0_absShift, CMS_hgg_sig_sigmaScale, and CMS_hbb_sig_sigmaScale have already been defined when doing SigWS
-      _w->factory(TString::Format("prod::CMS_hgg_hig_m0_%s_cat%d(mgg_hig_m0_%s_cat%d, CMS_hgg_sig_m0_absShift)", higName.Data(), newC, higName.Data(), newC));
+/*      _w->factory(TString::Format("prod::CMS_hgg_hig_m0_%s_cat%d(mgg_hig_m0_%s_cat%d, CMS_hgg_sig_m0_absShift)", higName.Data(), newC, higName.Data(), newC));
+      _w->factory(TString::Format("prod::CMS_hgg_hig_sigma_%s_cat%d(mgg_hig_sigma_%s_cat%d, CMS_hgg_sig_sigmaScale)", higName.Data(), newC, higName.Data(), newC));*/
+      _w->factory(TString::Format("prod::CMS_hgg_hig_m0_%s_cat%d(mgg_hig_m0_%s_cat%d, CMS_hgg_sig_m0_absShift_cat%d)", higName.Data(), newC, higName.Data(), newC, newC));
+      _w->factory(TString::Format("prod::CMS_hgg_hig_sigma_%s_cat%d(mgg_hig_sigma_%s_cat%d, CMS_hgg_sig_sigmaScale_cat%d)", higName.Data(), newC, higName.Data(), newC, newC));
 
-      _w->factory(TString::Format("prod::CMS_hgg_hig_sigma_%s_cat%d(mgg_hig_sigma_%s_cat%d, CMS_hgg_sig_sigmaScale)", higName.Data(), newC, higName.Data(), newC));
-
-      if(!_useDSCB) _w->factory(TString::Format("prod::CMS_hgg_gsigma_%s_cat%d(mgg_hig_gsigma_%s_cat%d, CMS_hgg_sig_sigmaScale)", higName.Data(), newC, higName.Data(), newC));
+//      if(!_useDSCB) _w->factory(TString::Format("prod::CMS_hgg_gsigma_%s_cat%d(mgg_hig_gsigma_%s_cat%d, CMS_hgg_sig_sigmaScale)", higName.Data(), newC, higName.Data(), newC));
+      if(!_useDSCB) _w->factory(TString::Format("prod::CMS_hgg_gsigma_%s_cat%d(mgg_hig_gsigma_%s_cat%d, CMS_hgg_sig_sigmaScale_cat%d)", 
+                                                               higName.Data(), newC, higName.Data(), newC, newC));
       if (higName.Contains("ggh") == 0 && higName.Contains("vbf") == 0) {
-        _w->factory(TString::Format("prod::CMS_hbb_hig_m0_%s_cat%d(mjj_hig_m0_%s_cat%d, CMS_hbb_sig_m0_absShift)", higName.Data(), newC, higName.Data(), newC));
+/*        _w->factory(TString::Format("prod::CMS_hbb_hig_m0_%s_cat%d(mjj_hig_m0_%s_cat%d, CMS_hbb_sig_m0_absShift)", higName.Data(), newC, higName.Data(), newC));
         _w->factory(TString::Format("prod::CMS_hbb_hig_sigma_%s_cat%d(mjj_hig_sigma_%s_cat%d, CMS_hbb_sig_sigmaScale)", higName.Data(), newC, higName.Data(), newC));
-        if(!_useDSCB) _w->factory(TString::Format("prod::CMS_hbb_hig_gsigma_%s_cat%d(mjj_hig_gsigma_%s_cat%d, CMS_hbb_sig_sigmaScale)", higName.Data(), newC, higName.Data(), newC));
+        if(!_useDSCB) _w->factory(TString::Format("prod::CMS_hbb_hig_gsigma_%s_cat%d(mjj_hig_gsigma_%s_cat%d, CMS_hbb_sig_sigmaScale)", higName.Data(), newC, higName.Data(), newC));*/
+        _w->factory(TString::Format("prod::CMS_hbb_hig_m0_%s_cat%d(mjj_hig_m0_%s_cat%d, CMS_hbb_sig_m0_absShift_cat%d)", higName.Data(), newC, higName.Data(), newC, newC));
+        _w->factory(TString::Format("prod::CMS_hbb_hig_sigma_%s_cat%d(mjj_hig_sigma_%s_cat%d, CMS_hbb_sig_sigmaScale_cat%d)", higName.Data(), newC, higName.Data(), newC, newC));
+        if(!_useDSCB) _w->factory(TString::Format("prod::CMS_hbb_hig_gsigma_%s_cat%d(mjj_hig_gsigma_%s_cat%d, CMS_hbb_sig_sigmaScale_cat%d)", higName.Data(), newC, higName.Data(), newC, newC));
       }
 
       TString EditPDF = TString::Format("EDIT::CMS_hig_%s_cat%d(HigPdf_%s_cat%d,", higName.Data(), newC, higName.Data(), c);

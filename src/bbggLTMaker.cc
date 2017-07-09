@@ -7,6 +7,7 @@
 #include "CondFormats/BTauObjects/interface/BTagCalibrationReader.h"
 
 bool DEBUG = 0;
+#define NRWTOT 1507 // Total points for the Non-resonant re-weighting
 
 void bbggLTMaker::Loop()
 {
@@ -99,38 +100,23 @@ void bbggLTMaker::Loop()
     // Note that the following file is not committed to git (it's too large).
     // Get it from /afs/cern.ch/user/a/andrey/public/HH/weights_v1_1507_points.root
     // and copy in your working directory:
-    TString fileNameWei = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/data/weights_v1_1507_points.root");
+    TString fileNameWei = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/weights_v1_1507_points.root");
     NRwFile = new TFile(fileNameWei, "OPEN");
-
-    // This file includes 12 benchmark v3 weights.
-    // Get it from /afs/cern.ch/user/a/andrey/public/HH/ and copy in your working directory:
-    TString fileNameWei2 = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/data/weights_v3_bench12_points.root");
-    NRwFile2 = new TFile(fileNameWei2, "OPEN");
      
-    if (NRwFile->IsZombie() || NRwFile2->IsZombie()){
-      cout<<" Input file for Non-Res weihts does not exist!"<<endl;
+    if (NRwFile->IsZombie()){
+      cout<<" Input file does not exist!"<<endl;
       exit(1);
     }
     NRwFile->Print();
-    NRwFile2->Print();
 
     TList *histList = NRwFile->GetListOfKeys();
-    for (UInt_t n=0; n<1507; n++){
+    for (UInt_t n=0; n<NRWTOT; n++)
       if (histList->Contains(Form("point_%i_weights",n)))
 	NR_Wei_Hists[n] = (TH2F*)NRwFile->Get(Form("point_%i_weights",n));
       else
 	cout<<"This one does not existe pas: "<<n<<endl;
-    }
 
-    TList *histList2 = NRwFile2->GetListOfKeys();
-    for (UInt_t n=0; n<12; n++){
-      if (histList2->Contains(Form("point_%i_weights",n)))
-	NR_Wei_Hists[1507+n] = (TH2F*)NRwFile2->Get(Form("point_%i_weights",n));
-      else
-	cout<<"This one does not existe pas: "<<1507+n<<endl;
-    }
   }
-
 
   Long64_t nentries = fChain->GetEntriesFast();
 
@@ -145,6 +131,7 @@ void bbggLTMaker::Loop()
     cout << "bEffs file: " << bEffs_file << endl;
     bbggLTMaker::BTagSetup(bSF_file, bEffs_file);
     bbggLTMaker::BTagDiffSetup(bSF_file, bEffs_file, myDiffOpt);
+    cout << "btagging differential: " << bEffs_file << " " << myDiffOpt << std::endl;
   }
 
   if(phoVariation > -100){
@@ -155,6 +142,13 @@ void bbggLTMaker::Loop()
     TString phoSFeveto_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/MVAID/ScalingFactors_80X_Summer16.root");
     cout << "phoSFsEV file: " << phoSFeveto_file << endl;
     bbggLTMaker::SetupPhotonSF( phoSFID_file, phoSFeveto_file);
+  }
+
+  float trig_sf = 1;
+  if(trigVariation > -100){
+    TString trig_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/TriggerSF/TriggerSFs.root");
+    cout << "TriggSF file: " << trig_file << endl;
+    bbggLTMaker::SetupTriggerSF(trig_file);
   }
 
   Long64_t toRun = nentries;
@@ -264,8 +258,35 @@ void bbggLTMaker::Loop()
        if( subleadingJet_bDis > 0.92) bt2 = btmap[5].first;
 
        btagweight = bt1*bt2;
-       o_jt1diffweight = bbggLTMaker::BTagDiffWeight(*leadingJet, leadingJet_hadFlavour, leadingJet_bDis);
+
+       if( leadingJet_hadFlavour == 5) {
+         if(DEBUG) std::cout << "Leading Jet pt " << leadingJet->Pt() << " " << leadingJet->Eta() << " " << leadingJet_hadFlavour << " " << leadingJet_bDis << std::endl;
+         o_jt1diffweight = bbggLTMaker::BTagDiffWeight(*leadingJet, leadingJet_hadFlavour, leadingJet_bDis);
+       }
+       else if (TString(myDiffOpt).Contains(TString("central"))) {
+         if(DEBUG) std::cout << "Leading Jet pt " << leadingJet->Pt() << " " << leadingJet->Eta() << " " << leadingJet_hadFlavour << " " << leadingJet_bDis << std::endl;
+         o_jt1diffweight = bbggLTMaker::BTagDiffWeight(*leadingJet, leadingJet_hadFlavour, leadingJet_bDis);
+       }
+       else {
+         o_jt1diffweight = 1;
+       }
+
+       if( subleadingJet_hadFlavour == 5) {
+         if(DEBUG) std::cout << "Leading Jet pt " << subleadingJet->Pt() << " " << subleadingJet->Eta() << " " << subleadingJet_hadFlavour << " " << subleadingJet_bDis << std::endl;
+         o_jt2diffweight = bbggLTMaker::BTagDiffWeight(*subleadingJet, subleadingJet_hadFlavour, subleadingJet_bDis);
+       }
+       else if (TString(myDiffOpt).Contains(TString("central"))) {
+         if(DEBUG) std::cout << "SubLeading Jet pt " << subleadingJet->Pt() << " " << subleadingJet->Eta() << " " << subleadingJet_hadFlavour << " " << subleadingJet_bDis << std::endl;
+         o_jt2diffweight = bbggLTMaker::BTagDiffWeight(*subleadingJet, subleadingJet_hadFlavour, subleadingJet_bDis);
+       }
+       else {
+         o_jt2diffweight = 1;
+       }
+
+/*
+       if(DEBUG) std::cout << "SubLeading Jet pt " << subleadingJet->Pt() << " " << subleadingJet->Eta() << " " << subleadingJet_hadFlavour << " " << subleadingJet_bDis << std::endl;
        o_jt2diffweight = bbggLTMaker::BTagDiffWeight(*subleadingJet, subleadingJet_hadFlavour, subleadingJet_bDis);
+*/
        o_diffweight =  o_jt1diffweight*o_jt2diffweight;
 
 //       std::cout << o_jt1diffweight << "\t" << o_jt2diffweight << std::endl;
@@ -279,10 +300,14 @@ void bbggLTMaker::Loop()
 
     if(doCatNonRes)
     {
-       if ( o_category == 2 && leadingJet_bDis > btagWP_tight && subleadingJet_bDis > btagWP_tight) o_category = 0;
-       if ( o_category == 2 && leadingJet_bDis > btagWP_loose  && leadingJet_bDis < btagWP_tight && subleadingJet_bDis > btagWP_tight) o_category = 1;
-       if ( o_category == 2 && subleadingJet_bDis > btagWP_loose  && subleadingJet_bDis < btagWP_tight && leadingJet_bDis > btagWP_tight) o_category = 1;
-       if ( o_category == 2 ) o_category = -1;
+//       if ( o_category == 2 && leadingJet_bDis > btagWP_tight && subleadingJet_bDis > btagWP_tight) o_category = 0;
+//       if ( o_category == 2 && leadingJet_bDis > btagWP_loose  && leadingJet_bDis < btagWP_tight && subleadingJet_bDis > btagWP_tight) o_category = 1;
+//       if ( o_category == 2 && subleadingJet_bDis > btagWP_loose  && subleadingJet_bDis < btagWP_tight && leadingJet_bDis > btagWP_tight) o_category = 1;
+//       if ( o_category == 2 ) o_category = -1;
+       if ( o_category == 2 && leadingJet_bDis > btagWP_medium && subleadingJet_bDis > btagWP_medium) o_category = 0;
+       if ( o_category == 2 && leadingJet_bDis > btagWP_medium ) o_category = 1;
+       if ( o_category == 2 && subleadingJet_bDis > btagWP_medium ) o_category = 1;
+       if ( o_category == 2 && leadingJet_bDis < btagWP_medium && subleadingJet_bDis < btagWP_medium ) o_category = -1;
     }
     else if (doCatLowMass)
     {
@@ -304,14 +329,16 @@ void bbggLTMaker::Loop()
     else if (doCatMVA)
     {
        if (o_bbggMass > massThreshold ) {
-         if(!isRes && (leadingJet_bDis < HighMassLeadingJetBtagCut || subleadingJet_bDis < HighMassSubLeadingJetBtagCut)) o_category = -1;
+//         if(!isRes && (leadingJet_bDis < HighMassLeadingJetBtagCut || subleadingJet_bDis < HighMassSubLeadingJetBtagCut)) o_category = -1;
+         if((leadingJet_bDis < HighMassLeadingJetBtagCut || subleadingJet_bDis < HighMassSubLeadingJetBtagCut)) o_category = -1;
          if(o_category == 2 && HHTagger_HM > mvaCat0_hm) o_category = 0;
          if(o_category == 2 && HHTagger_HM > mvaCat1_hm && HHTagger_HM < mvaCat0_hm) o_category = 1;
          if(o_category == 2 && HHTagger_HM < mvaCat1_hm) o_category = -1;
        } else {
 //         if(leadingJet->Pt() < 50) o_category = -1;
 //         if(!isRes && (leadingJet_bDis < 0.57 || subleadingJet_bDis < 0.57)) o_category = -1;
-         if(!isRes && (leadingJet_bDis < LowMassLeadingJetBtagCut || subleadingJet_bDis < LowMassSubLeadingJetBtagCut)) o_category = -1;
+//         if(!isRes && (leadingJet_bDis < LowMassLeadingJetBtagCut || subleadingJet_bDis < LowMassSubLeadingJetBtagCut)) o_category = -1;
+         if((leadingJet_bDis < LowMassLeadingJetBtagCut || subleadingJet_bDis < LowMassSubLeadingJetBtagCut)) o_category = -1;
 //         if(!isRes && (leadingJet_bDis < 0.8484 || subleadingJet_bDis < 0.8484)) o_category = -1;
          if(o_category == 2 && HHTagger_LM > mvaCat0_lm) o_category = 0;
          if(o_category == 2 && HHTagger_LM > mvaCat1_lm && HHTagger_LM < mvaCat0_lm) o_category = 1;
@@ -329,10 +356,15 @@ void bbggLTMaker::Loop()
       pho2_sf =  bbggLTMaker::PhotonSF(*subleadingPhoton, phoVariation);
     }
 
-    o_weight = o_preweight*o_btagweight*pho1_sf*pho2_sf;
+    if(trigVariation > -100) {
+      trig_sf = bbggLTMaker::TriggerSF(*leadingPhoton, leadingPhotonR9full5x5, *subleadingPhoton, subleadingPhotonR9full5x5, trigVariation);
+      if(DEBUG) cout << "Trigger sf: " << trig_sf << " lpt " << leadingPhoton->Pt()<< " spt " << subleadingPhoton->Pt() << " leta "<< leadingPhoton->Eta() << " seta "<< subleadingPhoton->Eta() << " lr9 "<< leadingPhotonR9full5x5 << " sr9 "<< subleadingPhotonR9full5x5 << std::endl;
+    }
+
+    o_weight = o_preweight*o_btagweight*pho1_sf*pho2_sf*trig_sf;
     //doing differential btagging sfs if using MVA based categorization
     if (doCatMVA) {
-      o_weight = o_preweight*o_diffweight*pho1_sf*pho2_sf;
+      o_weight = o_preweight*o_diffweight*pho1_sf*pho2_sf*trig_sf;
     }
 
     if( o_preweight == 1) o_weight = 1; //if o_preweight == 1, this is data, no SF
@@ -407,6 +439,13 @@ void bbggLTMaker::SetupPhotonSF(TString idfile, TString evfile)
   csevFile = new TFile(evfile, "READ");
 //  csevhist = (TH2F*) csevFile->Get("csev_sfs");
   csevhist = (TH2F*) csevFile->Get("Scaling_Factors_CSEV_R9 Inclusive");
+}
+
+void bbggLTMaker::SetupTriggerSF(TString sfFile)
+{
+  triggerFile = new TFile(sfFile, "READ");
+  ltriggerHist = (TH3F*) triggerFile->Get("leadingPhotonTSF");
+  striggerHist = (TH3F*) triggerFile->Get("subleadingPhotonTSF");
 }
 
 float bbggLTMaker::PhotonSF(bbggLTMaker::LorentzVector pho, int phovar)
@@ -657,4 +696,21 @@ std::vector<std::pair<double,float>> bbggLTMaker::BTagWeight(bbggLTMaker::Lorent
     outMap.push_back( make_pair( tightdown2, jet2eff_tight ) );
   }
   return outMap;
+}
+
+float bbggLTMaker::TriggerSF(LorentzVector lpho, float lr9, LorentzVector spho, float sr9, int var)
+{
+   int leadingBin = ltriggerHist->FindBin(lr9, fabs(lpho.Eta()), lpho.Pt());
+   int subleadingBin = striggerHist->FindBin(sr9, fabs(spho.Eta()), spho.Pt());
+   if(DEBUG) cout << "[bbggLTMaker::TriggerSF] leading Bin: " << leadingBin << " subleadingBin " << subleadingBin << std::endl;
+
+   float leadingSF = ltriggerHist->GetBinContent(leadingBin);
+   float sleadingSF =striggerHist->GetBinContent(subleadingBin);
+   if(DEBUG) cout << "[bbggLTMaker::TriggerSF] leading SF: " << leadingSF << " subleadingSF " << sleadingSF << std::endl;
+
+   float leadingErr = ltriggerHist->GetBinError(leadingBin);
+   float subleadingErr = striggerHist->GetBinError(subleadingBin);
+   if(DEBUG) cout << "[bbggLTMaker::TriggerSF] leading SFerr: " << leadingErr << " subleadingSFerr " << subleadingErr << std::endl;
+
+   return (leadingSF + var*leadingErr)*(sleadingSF + var*subleadingErr);
 }

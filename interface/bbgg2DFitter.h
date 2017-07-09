@@ -104,6 +104,7 @@ class bbgg2DFitter {
   int _fitStrategy = 2;
   int _ncat0 = 0;
   bool _useDSCB = 0;
+  bool _doARW = 0;
   std::map<int,float> sigExpec;
   std::vector<std::map<TString,float>> higExpec;
   std::map<int,float> bkgExpec;
@@ -122,7 +123,7 @@ class bbgg2DFitter {
 		   float minMggMassFit,float maxMggMassFit,float minMjjMassFit,float maxMjjMassFit,
 		   float minSigFitMgg,float maxSigFitMgg,float minSigFitMjj,float maxSigFitMjj,
 		   float minHigMggFit,float maxHigMggFit,float minHigMjjFit,float maxHigMjjFit,
-		   Int_t doNRW=-2, std::string logFileName="");
+		   Int_t doNRW=-2, std::string logFileName="", bool doARW=0);
    void SetNCat0(int nc0) { _ncat0 = nc0;}
    void UseDoubleSidedCB() { _useDSCB = 1;}
    void SetVerbosityLevel(Int_t v) {_verbLvl=v;}
@@ -146,6 +147,7 @@ class bbgg2DFitter {
    void MakeHigWS(std::string filename, int higgschannel, TString higName); //DONE
    void MakeBkgWS(std::string filename); //DONE
    void MakeFitsForBias(std::string biasConfig, std::string outputFile);
+   void DoARW() {_doARW = 1;}
    // const char* filenameh0, const char* filenameh1, const char* filenameh2, const char* filenameh4);
   
    void SetConstantParams(const RooArgSet* params); //DONE

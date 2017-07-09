@@ -1,16 +1,44 @@
 # Package for computing limits for the Run II analyses
 
 ## Instalation
-First, setup the environment with the Higgs Combine tools: https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideHiggsAnalysisCombinedLimit#For_end_users_that_don_t_need_to   
+First, setup the environment with the Higgs Combination tools: https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideHiggsAnalysisCombinedLimit  
 Currently working with 74X (check latest on HiggsCombine twiki).   
 
-Get bbggLimits:   
+
+#### Step 1: Get Combine   
+(Taken from combine twiki on June 27)   
+
+```
+export SCRAM_ARCH=slc6_amd64_gcc491
+cmsrel CMSSW_7_4_7
+cd CMSSW_7_4_7/src 
+cmsenv
+git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
+cd HiggsAnalysis/CombinedLimit
+git fetch origin
+git checkout v6.3.1
+scramv1 b clean; scramv1 b # always make a clean build, as scram doesn't always see updates to src/LinkDef.h
+```       
+
+#### Step 2: Get HH support stuff    
+(Needed for analytical reweighting. When trying to reproduce EPS results, check with Konstantin and Alexandra about which tag to use for the following repositories.)    
+
+```
+cd ${CMSSW_BASE}/src/
+git clone git@github.com:cms-hh/HHStatAnalysis.git
+scramv1 b HHStatAnalysis/AnalyticalModels #only build whats needed, no need Harvester (will keep complaining, though. If you want to compile the full HHStatAnalysis, also get CombineHarvester package.)
+cd ${CMSSW_BASE}/src/HHStatAnalysis
+git clone git@github.com:cms-hh/Support.git
+```    
+
+#### Step 3: Get bbggTools    
 ```
 cd ${CMSSW_BASE}/src/HiggsAnalysis/
-git clone git@github.com:ResonantHbbHgg/bbggLimits.git
-cd bbggLimits
-scramv1 b -j 10
+git clone -b dev-rafael-May8 git@github.com:ResonantHbbHgg/bbggLimits.git
+cd ${CMSSW_BASE}/src/HiggsAnalysis/bbggLimits/
+scramv1 b # a lot of complaints about bbggHighMassFitter.cc (this is not used anymore, needs to be deleted)
 ```
+
 
 ## Making Limit Trees
 

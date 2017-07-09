@@ -45,6 +45,7 @@ parser.add_argument('--LMLJBTC', dest='LMLJBTC', type=float, default=-10)
 parser.add_argument('--HMLJBTC', dest='HMLJBTC', type=float, default=-10)
 parser.add_argument('--LMSJBTC', dest='LMSJBTC', type=float, default=-10)
 parser.add_argument('--HMSJBTC', dest='HMSJBTC', type=float, default=-10)
+parser.add_argument('--btagDiffVar', dest='btagdiffvar', type=str, default='central')
 parser.add_argument('--genDiPhotonFilter', dest='gendiphofilter', action='store_true', default=False)
 
 opt = parser.parse_args()
@@ -61,28 +62,25 @@ if 'nonres' in opt.x:
   nodes = [ ["box", 50000], ["SM", 50000], [2, 49600], [3, 50000], [4, 50000], [5, 50000], [6, 50000],
             [7, 50000], [8, 50000], [9, 49600], [10, 49800], [11, 50000], [12, 50000], [13, 50000] ]
   
-
-
-  TreeDir = '/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/FlatTrees-Jan31/'
-
+  # APZ trees:
   SignalFiles = "/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph.root"
   if opt.signalDir is None:
-    Signals = TreeDir + '/SignalGenInfo/'+SignalFiles
+    Signals = "/afs/cern.ch/user/a/andrey/work/hh/CMSSW_8_0_8_patch1/src/APZ/fgg-ana/NotATestNov12/" + SignalFiles
   else:
     Signals = opt.signalDir + SignalFiles
-
 
   if opt.doSMHiggs:
     nodes = SMHiggsSamples.SMHiggsNodes
     Signals = opt.signalDir + '/THENODE'
 
   # bbggTools trees:
+  #Signals = "/afs/cern.ch/user/a/andrey/work/hh/CMSSW_8_0_8_patch1/src/flashgg/bbggTools/test/RunJobs/NonResAll/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph_0.root" 
   #Signals = "root://eoscms//eos/cms/store/user/rateixei/HHbbgg/FlatTrees/ICHEP_Regressed4b/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph.root"
-
+  #Signals = "root://eoscms//eos/cms/store/user/rateixei/HHbbgg/FlatTrees/ICHEP_Regressed4b/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph.root"
 
   DataFiles = "/DoubleEG.root"
   if opt.dataDir is None:
-    Data = TreeDir+"/Data/DoubleEG.root"
+    Data = "root://eoscms//eos/cms/store/user/rateixei/HHbbgg/FlatTrees/ICHEP_Regressed4b/DoubleEG.root"
   else:
     Data = opt.dataDir + DataFiles
 
@@ -95,10 +93,9 @@ if 'nonres' in opt.x:
     catscheme += ' --LMLJBTC ' + str(opt.LMLJBTC) + ' --HMLJBTC ' + str(opt.HMLJBTC) + ' --LMSJBTC ' + str(opt.LMSJBTC) + ' --HMSJBTC ' + str(opt.HMSJBTC) + ' '
   postFix = massOpt + catscheme + " --cosThetaStarHigh " + str(opt.ctsCut) + " "
 
-
   if (opt.gendiphofilter): postFix += " --genDiPhotonFilter "
 
-  SFs = " --bVariation 0 --phoVariation 0"
+  SFs = " --bVariation 0 --phoVariation 0 --bDiffVariation " + opt.btagdiffvar + ' '
 
   directory = dirPrefix
   os.system( "mkdir " + directory+"_LowMass" )
@@ -110,7 +107,6 @@ if 'nonres' in opt.x:
   
   for MM in nodes:
     i = MM[0]
-
     if opt.onlysmhh == True and 'SM' not in str(i): continue
     sigScale = float(opt.lumi)/float(MM[1])
     if opt.doSMHiggs:
@@ -120,7 +116,6 @@ if 'nonres' in opt.x:
 
     if opt.NRW:
       NRW = ' --NRW --NRscale '+ str(float(opt.lumi)/float(N0))
-
     else:
       NRW = ''
     command = "pyLimitTreeMaker.py -f " + Signals.replace("THENODE", str(i)) + " -o " + directory+"_LowMass" + " --min 0 --max " + opt.massNR + " --scale " + str(sigScale) + postFix + SFs + NRW
@@ -151,12 +146,8 @@ if 'nonres' in opt.x:
 
 elif 'res' in opt.x:
   masses = {
-    'Radion' : [[250,49800],[260,50000],[270,48400],[280,50000],[300,49200],[320,50000],[340,50000],
-                [350,50000],[400,50000],[450,50000],[500,49200],[550,50000],[600,50000],[650,50000],
-                [700,50000],[750,50000],[800,50000],[900,50000]],
-    'BulkGraviton' : [[250,50000], [260,50000], [270,50000], [280,49600], [300,50000], [320,50000], [340,50000],
-                      [350,50000], [400,50000], [450,50000], [500,50000], [550,50000], [600,50000], [650,50000], 
-                      [700,49200], [750,50000], [800,49800], [900,50000], [1000,50000]]
+  'Radion' : [[250,49800],[260,50000],[270,48400],[280,50000],[300,49200],[320,50000],[340,50000],[350,50000],[400,50000],[450,50000],[500,49200],[550,50000],[600,50000],[650,50000],[700,50000],[750,50000],[800,50000],[900,50000]],
+  'BulkGraviton' : [[250,50000], [260,50000], [270,50000], [280,49600], [300,50000], [320,50000], [340,50000], [350,50000], [400,50000], [450,50000], [500,50000], [550,50000], [600,50000], [650,50000], [700,49200], [750,50000], [800,49800], [900,50000], [1000,50000]]
   }
 
   # APZ trees:
@@ -169,7 +160,7 @@ elif 'res' in opt.x:
 
   DataFiles = "/DoubleEG.root"
   if opt.dataDir is None:
-    Data = "root://eoscms//eos/cms/store/user/rateixei/HHbbgg/2016_FlatTrees/Moriond_Jan30_350Training/Data/DoubleEG.root"
+    Data = "root://eoscms//eos/cms/store/user/rateixei/HHbbgg/FlatTrees/ICHEP_Regressed4b/DoubleEG.root"
   else:
     Data = opt.dataDir + DataFiles
 
@@ -180,9 +171,11 @@ elif 'res' in opt.x:
     catScheme = " --doCatHighMass "
   if opt.doCatMVA:
     catScheme = " --doCatMVA --MVAHMC0 " + str(opt.MVAHMC0) + " --MVAHMC1 " + str(opt.MVAHMC1) + " --MVALMC0 " + str(opt.MVALMC0)+ " --MVALMC1 " + str(opt.MVALMC1)+ " "
+    catScheme += ' --LMLJBTC ' + str(opt.LMLJBTC) + ' --HMLJBTC ' + str(opt.HMLJBTC) + ' --LMSJBTC ' + str(opt.LMSJBTC) + ' --HMSJBTC ' + str(opt.HMSJBTC) + ' '
 
   postFix = " --isRes --MX --tilt " + catScheme+ " --btagTight 0.9535 --btagMedium 0.8484 --btagLoose 0.5426 --massThreshold " + str(opt.massNR) + " "
-  SFs = " --bVariation 0 --phoVariation 0"
+#  SFs = " --bVariation 0 --phoVariation 0"
+  SFs = " --bVariation 0 --phoVariation 0 --bDiffVariation " + opt.btagdiffvar + ' '
 
   directory = dirPrefix + opt.resType
   os.system( "mkdir " + directory )
