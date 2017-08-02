@@ -115,31 +115,9 @@ More options for the `pyLimitTreeMaker.py` can be specified:
 * `--doPhoVariation <VAR>`  - Apply photon SF factors: 0, 1 or -1.
 * `--cosThetaStar <VAR>`  - cut on CosTheta Star variable
 
-Example to make all resonant limit trees:   
-```
-makeAllTrees.py -x res \   
--d /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/DataJan20/Hadd \   
--s /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/SignalJan20/Hadd \   
--f LT_Jan26_Res_
-```   
 
 ### Set the Limits
-For setting the Resonant limits, the instructions will come soon.
-
-For Non-Resonant limit, stay here and run:
-```
-pyNonResLimits.py -f NonRes.json --nodes 2 3 SM --points 0-10
-```
-This example will run all fitting and limits for *Nodes 2,3,SM* and
-the re-weighting to *points 0-10* out of 0-1506 avaialable. The results
-of the combined limit should appear in *outDir/CombinedCard_Node_X/*
-subdirectories.
-
-* `-o <dir>` - Output directory (will be created)
-* `--overwrite` - If the output directory exists - overwite it. By default, the script will exit
-* `-v <integer>` - Verbosity level: 0 - Minimal or no messages; 1 - INFO; 2 - DEBUG; 3 - Go crazy.
-If the verbosity level is greater than zero, log files are created at `/tmp/logs/` per process.
-* `-j <ncpu>`  - Number of CPU cores to use. Default is 2.
-* `-t <sec>` - Per job timeout (in seconds) for multiprocessing. Jobs will be killed if run longer than this.
+In order to reporduce EPS17 results, follow instructions here:
+https://github.com/ResonantHbbHgg/bbggLimits/blob/master/SmartScripts/README.md
 
 Good luck!
