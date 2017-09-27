@@ -8,11 +8,12 @@ from pprint import pformat
 # import pebble as pb
 from multiprocessing import Pool, TimeoutError, current_process
 from HiggsAnalysis.bbggLimits.LimitsUtil import *
-
-gROOT.SetBatch()
-
+import getpass
+__username__ = getpass.getuser()
 __author__ = 'Rafael Teixeira de Lima & Andrey Pozdnyakov'
 __BAD__ = 666
+
+gROOT.SetBatch()
 
 import argparse
 
@@ -98,7 +99,7 @@ begin = time.time()
 if __name__ == "__main__":
   print "This is the __main__ part"
 
-  gSystem.Load('libHiggsAnalysisbbggLimits')
+  # gSystem.Load('libHiggsAnalysisbbggLimits')
 
   #workingPath = os.getcwd()
   # parentDir = os.path.abspath(os.path.join(workingPath, os.pardir))
@@ -109,13 +110,13 @@ if __name__ == "__main__":
 
   if opt.verb>1:
     print '\t Input JSON config file:'
-    print json.dumps(Params, sort_keys=True,indent=4)
+    print json.dumps(Params, sort_keys=True, indent=4)
 
 
   if opt.outDir:
-    baseFolder=opt.outDir+"_v"+str(Params['other']["version"])
+    baseFolder=opt.outDir
   else:
-    baseFolder="./bbggToolsResults_v"+str(Params['other']["version"])
+    baseFolder="./bbggToolsResults"
 
   createDir(baseFolder, over=opt.overwrite)
 
@@ -134,8 +135,8 @@ if __name__ == "__main__":
 
   mainLog.info(pformat(opt))
 
-  createDir('/tmp/PIDs/',mainLog,True)
-  createDir('/tmp/logs/',mainLog,True)
+  createDir('/tmp/'+__username__+'/PIDs/',mainLog,True)
+  createDir('/tmp/'+__username__+'/logs/',mainLog,True)
 
   res_Masses = []
   if opt.mass!=None:
@@ -160,7 +161,7 @@ if __name__ == "__main__":
       # Run on multiple cores:
       res_Nodes.append((n,pool.apply_async(runFullChain, args = (opt, Params, n,-1,str(opt.extraLabel)))))
 
-      # Use signle core:
+      # Use single core:
       #runFullChain(Params, NRnode=n)
 
   res_Points = []
@@ -171,27 +172,37 @@ if __name__ == "__main__":
     for p in listOfPoints:
       res_Points.append((str(p), pool.apply_async(runFullChain, args = (opt, Params, None,p,opt.extraLabel))))
 
+
+  res_ARW = []
+  if opt.analyticalRW:
+    mainLog.debug('Running Analytical Reweighting to (kl, kt, c2, cg, c2g):\n'+
+                  pformat([opt.ARW_kl, opt.ARW_kt, opt.ARW_c2, opt.ARW_cg, opt.ARW_c2g]))
+    res_ARW.append(('ARW', pool.apply_async(runFullChain, args = (opt, Params, None, -1, opt.extraLabel))))
+
+      
   pool.close()
 
 
-  # APZ. The code below tryies to kill the processes which take too long.
+  # APZ. The code below tries to kill the processes which take too long.
   # This implementation is ugly. The better way to do this is to use pebble,
   # But it's only available in Python 3...
   # Useful posts:
   # [1] http://stackoverflow.com/questions/20055498/python-multiprocessing-pool-kill-specific-long-running-or-hung-process
   # [2] http://stackoverflow.com/questions/20991968/asynchronous-multiprocessing-with-a-worker-pool-in-python-how-to-keep-going-aft
   # [3] http://stackoverflow.com/questions/26063877/python-multiprocessing-module-join-processes-with-timeout
-
+  #
+  # UPD 2017-Sep-27: the killing part is actually commented out now. It's not needed really
+  # We just wait for the job to finish
 
   # Using a modified implementation of [1]:
 
-  print "Running over:", myNodes
+  # print "Running over:", myNodes
 
   pCount=0
-  totJobs = len(res_Nodes)+len(res_Points)+len(res_Masses)
+  totJobs = len(res_Nodes)+len(res_Points)+len(res_Masses)+len(res_ARW)
 
   badJobs = []
-  for i, r in enumerate([res_Masses, res_Nodes, res_Points]):
+  for i, r in enumerate([res_Masses, res_Nodes, res_Points, res_ARW]):
     badJobs.append([])
 
     #mainLog.debug('Type of r: %r,  length of r: %r', i, len(r))
@@ -211,14 +222,18 @@ if __name__ == "__main__":
       except Exception as e:
         mainLog.warning("We have reached an exception related to %s" % (str(e)))
         mainLog.warning("%s is timed out! It's been %f sec that you're running, dear %s" % (j, time.time()-procCheckT, j))
+        
+        """
         mainLog.warning("That is too long... Because of that we've gotta kill you. Sorry.")
 
         # We know which process gave us an exception: it is "j" in "i", so let's kill it!
         # First, let's get the PID of that process:
         if i==0:
-          pidfile = '/tmp/PIDs/PoolWorker_Node_'+str(j)+'.pid'
+          pidfile = '/tmp/'+__username__+'/PIDs/PoolWorker_Mass_'+str(j)+'.pid'
         elif i==1:
-          pidfile = '/tmp/PIDs/PoolWorker_gridPoint_'+str(j)+'.pid'
+          pidfile = '/tmp/'+__username__+'/PIDs/PoolWorker_Node_'+str(j)+'.pid'
+        elif i==2:
+          pidfile = '/tmp/'+__username__+'/PIDs/PoolWorker_gridPoint_'+str(j)+'.pid'
         PID = None
         if os.path.isfile(pidfile):
           PID = str(open(pidfile).read())
@@ -244,8 +259,8 @@ if __name__ == "__main__":
 
             os.remove(pidfile)
             break
-
-    mainLog.debug('Broke out of the while loop.. for '+pformat(r))
+        """
+    mainLog.debug('Broke out of the while loop.. for '+str(i))
   mainLog.debug('Broke out of the enumerate loop...')
 
 

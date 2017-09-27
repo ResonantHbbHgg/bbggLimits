@@ -17,7 +17,8 @@ git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsA
 cd HiggsAnalysis/CombinedLimit
 git fetch origin
 git checkout v6.3.1
-scramv1 b clean; scramv1 b # always make a clean build, as scram doesn't always see updates to src/LinkDef.h
+scramv1 b clean
+scramv1 b
 ```       
 
 #### Step 2: Get HH support stuff    
@@ -26,15 +27,15 @@ scramv1 b clean; scramv1 b # always make a clean build, as scram doesn't always 
 ```
 cd ${CMSSW_BASE}/src/
 git clone git@github.com:cms-hh/HHStatAnalysis.git
-scramv1 b HHStatAnalysis/AnalyticalModels #only build whats needed, no need Harvester (will keep complaining, though. If you want to compile the full HHStatAnalysis, also get CombineHarvester package.)
+scramv1 b HHStatAnalysis/AnalyticalModels
 cd ${CMSSW_BASE}/src/HHStatAnalysis
 git clone git@github.com:cms-hh/Support.git
 ```    
 
-#### Step 3: Get bbggTools    
+#### Step 3: Get bbggLimits code    
 ```
 cd ${CMSSW_BASE}/src/HiggsAnalysis/
-git clone -b dev-rafael-May8 git@github.com:ResonantHbbHgg/bbggLimits.git
+git clone  git@github.com:ResonantHbbHgg/bbggLimits.git
 cd ${CMSSW_BASE}/src/HiggsAnalysis/bbggLimits/
 scramv1 b # a lot of complaints about bbggHighMassFitter.cc (this is not used anymore, needs to be deleted)
 ```
@@ -83,7 +84,7 @@ makeAllTrees.py -x res \
 ```    
 
 
-### Details 
+#### Details 
 The *C++ Loop* code to produce the Limit Trees is located at
 *src/bbggLTMaker.cc*. In order to run it over a single tree use the
 python script *scripts/pyLimitTreeMaker.py*, which exists in the
@@ -98,26 +99,38 @@ where `fileName.root` is a an input Flat tree to be run over, and
 `pyLimitTreeMaker.py` and runs it over many input  files.
 
 
-More options for the `pyLimitTreeMaker.py` can be specified:
-* `-f <input File>` or `-i <Text file with a List of Root files full paths>`
-* `-o  <output location>` - directory will be created.
-* `--min  <min mtot>`, `--max <max mtot>`
-* `--scale  <Lumi*CrossSection*SF/NEvts>` - scale; should be 1 for data.
-* `--photonCR`  - do photon control region.
-* `--KF`  - use Mtot_KF to cut on mass window.
-* `--MX` -  use MX to cut on mass window; choose either `--MX` or `--KF`!.
-* `--tilt`  - select tilted mass window.
-* `--doNoCat`  - no categorization, all is *cat0*.
-* `--btagWP <WP>` - set btagging working point for categories.
-* `--doCatMixed` -  do categories with mixed btagging;  Cat0: 2>low, Cat1: 1<low+1>high
-* `--singleCat`  - only one category, High Mass analysis.
-* `--doBVariation <VAR>`  - apply b-tagging SF factors: 0, 1 or -1.
-* `--doPhoVariation <VAR>`  - Apply photon SF factors: 0, 1 or -1.
-* `--cosThetaStar <VAR>`  - cut on CosTheta Star variable
-
+More options for the `pyLimitTreeMaker.py` can be specified, 
+as can be seen [directly in the code](https://github.com/ResonantHbbHgg/bbggLimits/blob/10c319b013134e5bb15a561557f960dc2f1ea6b2/scripts/pyLimitTreeMaker.py#L11-L85)
 
 ### Set the Limits
-In order to reporduce EPS17 results, follow instructions here:
-https://github.com/ResonantHbbHgg/bbggLimits/blob/master/SmartScripts/README.md
+One the limit trees are produced, we would like to make 2D(m(gg), m(bb)) fits in each category, and run the limits.
+
+The main functions that do the fits are implemented here in `src/bbgg2DFitter.cc`.  The
+python scripts are needed to handle many situations (resonant, non-resonant, re-weighting
+to various benchmark points, etc.). In order to run just one limit you need
+`scripts/pyLimits.py`. Minimal options for the *SM* point are:
+```
+./pyLimits.py -f conf_NonRes_EPS17.json -o outputDirName --nodes SM 
+``` 
+
+The above command must be run on _lxplus_, because the input root files are located on EOS
+(the path is specified in json config file).__ 
+The `pyLimits.py` script would call _runFullChain()_ method which is implemented in
+`python/LimitsUtil.py`.  So in fact, the [LimitsUtil.py](python/LimitsUtil.py) script is the base code which
+interacts with the functions in `bbgg2DFitter.cc`.
+
+
+Using the `--nodes SM` option tells to take a Limit Tree produced from a single SM MC
+sample.  Alternatively, one can do the re-weighting of all existing non-resonant
+samples and therefore increase the statistics of the SM signal (number of events in the
+sample is only 50K). Analytical re-weighting was used for EPS17 results of 2016 data, run it like so: 
+```
+./pyLimits.py -f conf_NonRes_EPS17.json -o outputDirName -- 
+```
+
+The above command should give you the limits identical to
+[the ones on SVN](https://svnweb.cern.ch/cern/wsvn/cmshcg/trunk/cadi/HIG-17-008/NonResonant/Benchmarks/CombinedCard_Node_SMkl1p0_kt1p0_cg0p0_c20p0_c2g0p0/result_2_L_CombinedCard_Node_SMkl1p0_kt1p0_cg0p0_c20p0_c2g0p0.log).
+In order to reporduce the rest EPS17 results, follow instructions here:
+[SmartScripts/README.md](SmartScripts/README.md)
 
 Good luck!
