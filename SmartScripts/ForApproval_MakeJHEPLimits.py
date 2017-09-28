@@ -142,9 +142,9 @@ for ii in range(0, len(klJHEP)):
      bFile.close()
      command = 'chmod a+rwx ' + '/tmp/'+username+'/batch_'+pointStr+'.sh'
      os.system(command)
-     command = 'source ' + '/tmp/'+username+'/batch_'+pointStr+'.sh'
+#     command = 'source ' + '/tmp/'+username+'/batch_'+pointStr+'.sh'
 #     os.system(command)
-     #command = "bsub -q 1nh -o /tmp/"+username+"/"+pointStr+".log -J batch_" + pointStr  + " < /tmp/"+username+"/batch_" + pointStr + '.sh'
+     command = "bsub -q 1nh -o /tmp/"+username+"/"+pointStr+".log -J batch_" + pointStr  + " < /tmp/"+username+"/batch_" + pointStr + '.sh'
 #     command = "bsub -q 1nh  -J batch_" + pointStr  + " < /tmp/"+username+"/batch_" + pointStr + '.sh'
      print command
      os.system(command)

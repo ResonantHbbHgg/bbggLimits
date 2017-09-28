@@ -14,8 +14,8 @@ eval `scramv1 runtime -sh`
 if [ ! -d "L_OUTLOC/L_OUTDIR_HighMass" ]; then
   echo 'MAKING DIRS... L_OUTLOC/ and L_OUTLOC/L_OUTDIR_HighMass and L_OUTLOC/L_OUTDIR_LowMass'
   mkdir L_OUTLOC/
-  mkdir -p "L_OUTLOC/L_OUTDIR_HighMass"
-  mkdir -p "L_OUTLOC/L_OUTDIR_LowMass"
+  mkdir L_OUTLOC/L_OUTDIR_HighMass
+  mkdir L_OUTLOC/L_OUTDIR_LowMass
 fi
 
 if [ ! -d "L_OUTLOC" ]; then
@@ -147,8 +147,8 @@ for line in missingFiles:
      bFile.close()
      command = 'chmod a+rwx ' + '/tmp/'+username+'/batch_'+pointStr+'.sh'
      os.system(command)
-     #command = 'source ' + '/tmp/'+username+'/batch_'+pointStr+'.sh'
-     #     os.system(command)
+#     command = 'source ' + '/tmp/'+username+'/batch_'+pointStr+'.sh'
+#     os.system(command)
      command = "bsub -q 1nh -o /tmp/"+username+"/"+pointStr+".log -J batch_" + pointStr  + " < /tmp/"+username+"/batch_" + pointStr + '.sh'
 #     command = "bsub -q 1nh  -J batch_" + pointStr  + " < /tmp/"+username+"/batch_" + pointStr + '.sh'
      print command
