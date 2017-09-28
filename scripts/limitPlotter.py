@@ -475,7 +475,7 @@ if __name__ == "__main__":
     mg.GetXaxis().SetLimits(-1.3, 1.3)
   mg.GetYaxis().SetTitle('#sigma(pp #rightarrow HH) #times B(HH #rightarrow bb#gamma#gamma)_{95% CL} (fb)')
 
-  mg.SetMaximum(12)
+  mg.SetMaximum(20)
 
   gPad.RedrawAxis()
 

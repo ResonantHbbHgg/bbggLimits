@@ -3,7 +3,6 @@ import os,sys,json,time,re
 import logging
 from shutil import copy
 from pprint import pformat
-# import pebble as pb
 from multiprocessing import Pool, TimeoutError, current_process
 from HiggsAnalysis.bbggLimits.DataCardUtils import *
 from HiggsAnalysis.bbggLimits.IOUtils import *
