@@ -260,7 +260,7 @@ if __name__ == "__main__":
             os.remove(pidfile)
             break
         """
-    mainLog.debug('Broke out of the while loop.. for '+str(i))
+    mainLog.debug('Broke out of the while loop.. for '+pformat(r)+' at '+str(i))
   mainLog.debug('Broke out of the enumerate loop...')
 
 

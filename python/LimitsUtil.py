@@ -226,14 +226,15 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
       if opt.verb>0: p4 = printTime(p3,start,procLog)
 
     if addHiggs:
-      procLog.debug('Here will add SM Higgs contributions')
       higTypes = Params['higgs']['type']
-      print 'Higgs types:', higTypes
+      if opt.verb>1:
+        procLog.debug('Here will add SM Higgs contributions \n Higgs types: '+ pformat(higTypes))
       higgsExp = {}
       for iht,HT in enumerate(higTypes):
         higgsExp[HT] = [0,0]
         ht = higTypes[HT]
-        print ht, HT
+        if opt.verb>1:
+          procLog.debug('iht = %r, ht = %r, HT = %r' % (iht,ht,HT))
         higFileName = str(LTDir)+"/LT_output_"+str(ht)+".root"
         
         exphig = theFitter.AddHigData( mass,higFileName,iht, str(HT))
@@ -242,7 +243,8 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
 
         higgsExp[HT] = [exphig[0], exphig[1]]
 
-      print "Done SM Higgs bzz"
+      if opt.verb>1:
+        procLog.debug("Done SM Higgs bzz")
 
     ddata = str(LTDir + '/LT_'+dataName+'.root')
     ddata = ddata.replace("MASS", str(point))
@@ -262,7 +264,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
       return __BAD__
 
     if opt.verb>1:
-      fitresults.Print()
+      procLog.debug("\n Fit Results: \n\n"+pformat(fitresults.Print()))
 
     wsFileBkgName = "hhbbgg.inputbkg_13TeV"
     theFitter.MakeBkgWS( wsFileBkgName);
@@ -278,9 +280,6 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
       
     procLog.info("\t BIAS FITS DONE. Node=%r, GridPoint=%r, type=%r", point,NRgridPoint,t)
     if opt.verb>0: p7 = printTime(p6,start,procLog)
-
-    # This is making cards ala 8 TeV. We don't need this for now
-    #theFitter.MakeDataCard( fileBaseName, wsFileBkgName, useSigTheoryUnc)
 
     print "IM HERE"
 

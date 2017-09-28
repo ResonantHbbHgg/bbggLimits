@@ -102,35 +102,33 @@ where `fileName.root` is a an input Flat tree to be run over, and
 More options for the `pyLimitTreeMaker.py` can be specified, 
 as can be seen [directly in the code](https://github.com/ResonantHbbHgg/bbggLimits/blob/10c319b013134e5bb15a561557f960dc2f1ea6b2/scripts/pyLimitTreeMaker.py#L11-L85)
 
-### Set the Limits
-One the limit trees are produced, we would like to make 2D(m(gg), m(bb)) fits in each category, and run the limits.
+### Set the Limits 
+Once the limit trees are produced, we would like to make the 2D fits in
+(m(gg), m(bb)) plane, for each category, and then run the limits.
 
-The main functions that do the fits are implemented here in `src/bbgg2DFitter.cc`.  The
-python scripts are needed to handle many situations (resonant, non-resonant, re-weighting
-to various benchmark points, etc.). In order to run just one limit you need
-`scripts/pyLimits.py`. Minimal options for the *SM* point are:
-```
-./pyLimits.py -f conf_NonRes_EPS17.json -o outputDirName --nodes SM 
-``` 
+The main functions to do the fits are implemented in `src/bbgg2DFitter.cc`.  The python
+scripts are needed to handle many different situations (resonant, non-resonant,
+re-weighting to various benchmark points, etc.). In order to run just one limit you need
+`scripts/pyLimits.py`. Minimal options for the *SM* point are: ``` ./pyLimits.py -f
+conf_NonRes_EPS17.json -o outputDirName --nodes SM ```
 
 The above command must be run on _lxplus_, because the input root files are located on EOS
-(the path is specified in json config file).__ 
+(the path is specified in json config file). __ 
 The `pyLimits.py` script would call _runFullChain()_ method which is implemented in
-`python/LimitsUtil.py`.  So in fact, the [LimitsUtil.py](python/LimitsUtil.py) script is the base code which
-interacts with the functions in `bbgg2DFitter.cc`.
-
-
-Using the `--nodes SM` option tells to take a Limit Tree produced from a single SM MC
+`python/LimitsUtil.py`.  So in fact, the [LimitsUtil.py](python/LimitsUtil.py) script is
+the base code which interacts with the functions in `bbgg2DFitter.cc`. __
+Using the `--nodes SM` option tells it to use the Limit Tree produced from a single SM MC
 sample.  Alternatively, one can do the re-weighting of all existing non-resonant
-samples and therefore increase the statistics of the SM signal (number of events in the
-sample is only 50K). Analytical re-weighting was used for EPS17 results of 2016 data, run it like so: 
+samples and therefore increase the statistics of the SM signal (number of events in a single
+sample is only 50K). Analytical re-weighting was used for EPS17 results of 2016 data. __
+Run it like so: 
 ```
-./pyLimits.py -f conf_NonRes_EPS17.json -o outputDirName -- 
+./pyLimits.py -f conf_NonRes_EPS17.json -o outputDirName --analyticalRW 
 ```
 
 The above command should give you the limits identical to
 [the ones on SVN](https://svnweb.cern.ch/cern/wsvn/cmshcg/trunk/cadi/HIG-17-008/NonResonant/Benchmarks/CombinedCard_Node_SMkl1p0_kt1p0_cg0p0_c20p0_c2g0p0/result_2_L_CombinedCard_Node_SMkl1p0_kt1p0_cg0p0_c20p0_c2g0p0.log).
-In order to reporduce the rest EPS17 results, follow instructions here:
+In order to reporduce the rest of _EPS17_ results, follow the instructions here:
 [SmartScripts/README.md](SmartScripts/README.md)
 
 Good luck!
