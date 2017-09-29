@@ -55,7 +55,8 @@ Make non-res shape benchmark points trees (MVA based with 350 M(HH) threshold):
 makeAllTrees.py -x nonres -f LT_OutDir \   
 --doCatMVA --MVAHMC0 0.970 --MVAHMC1 0.600 --MVALMC0 0.985 --MVALMC1 0.600 --massNR 350 --LMLJBTC 0.55 --LMSJBTC 0.55
 ```   
-You can aslo provide the locations of the flat tree ntuples via `-s`, `-d`, `-b` options.
+You can aslo provide the locations of the flat trees if they are not the ones hardcoded in
+the script, via `-s`, `-d`, `-b` options.
 
 Make non-res shape benchmark points trees (cut based with 400 Mhh threshold and cut on cos theta star):   
 ```
@@ -72,7 +73,8 @@ Make resonant limit trees with high mass categorization:
 TBD
 ```    
 
-In order to re-produce the limit trees used for EPS17 results, follow instructions in [SmartScripts/README.md](SmartScripts/README.md)
+In order to re-produce the limit trees used for EPS17 results, follow instructions in
+[SmartScripts/README.md](SmartScripts/README.md).
 
 
 #### Details 
@@ -102,7 +104,7 @@ scripts are needed to handle many different situations (resonant, non-resonant,
 re-weighting to various benchmark points, etc.). In order to run just one limit you need
 `scripts/pyLimits.py`. Minimal options for the *SM* point are:  
 ``` 
-./pyLimits.py -fconf_NonRes_EPS17.json -o outputDirName --nodes SM 
+./pyLimits.py -f conf_NonRes_EPS17.json -o outputDirName --nodes SM 
 ```
 
 The above command must be run on _lxplus_, because the input root files are located on EOS
@@ -111,12 +113,11 @@ The `pyLimits.py` script would call _runFullChain()_ method which is implemented
 `python/LimitsUtil.py`.  So in fact, the [LimitsUtil.py](python/LimitsUtil.py) script is
 the base code which interacts with the functions in `bbgg2DFitter.cc`.  
 Using the `--nodes SM` option tells it to use the Limit Tree produced from a single SM MC
-sample.  Alternatively, one can do the re-weighting of all existing non-resonant
-samples and therefore increase the statistics of the SM signal (number of events in a single
-sample is only 50K). Analytical re-weighting was used for EPS17 results of 2016 data.  
+sample.  Alternatively, one can do the re-weighting of the merged non-resonant
+samples and therefore increase the statistics of the SM signal. Analytical re-weighting was used for EPS17 results of 2016 data.  
 Run it like so: 
-```
-./pyLimits.py -f conf_NonRes_EPS17.json -o outputDirName --analyticalRW 
+``` 
+./pyLimits.py -f conf_NonRes_EPS17.json -o outputDirName --analyticalRW
 ```
 
 The above command should give you the limits identical to
