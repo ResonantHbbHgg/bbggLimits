@@ -104,7 +104,7 @@ scripts are needed to handle many different situations (resonant, non-resonant,
 re-weighting to various benchmark points, etc.). In order to run just one limit you need
 `scripts/pyLimits.py`. Minimal options for the *SM* point are:  
 ``` 
-./pyLimits.py -f conf_NonRes_EPS17.json -o outputDirName --nodes SM 
+pyLimits.py -f conf_NonRes_EPS17.json -o outputDirName --nodes SM 
 ```
 
 The above command must be run on _lxplus_, because the input root files are located on EOS
@@ -117,7 +117,7 @@ sample.  Alternatively, one can do the re-weighting of the merged non-resonant
 samples and therefore increase the statistics of the SM signal. Analytical re-weighting was used for EPS17 results of 2016 data.  
 Run it like so: 
 ``` 
-./pyLimits.py -f conf_NonRes_EPS17.json -o outputDirName --analyticalRW
+pyLimits.py -f conf_NonRes_EPS17.json -o outputDirName --analyticalRW
 ```
 
 The above command should give you the limits identical to
