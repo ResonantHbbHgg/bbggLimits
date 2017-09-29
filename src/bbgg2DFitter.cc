@@ -204,12 +204,15 @@ RooArgSet* bbgg2DFitter::defineVariables()
 
 int bbgg2DFitter::AddSigData(float mass, TString signalfile)
 {
-  TFile sigFile(signalfile);
-  bool opened=sigFile.IsOpen();
+  if (_verbLvl>1) std::cout << "================= Add Signal========================== " << _wName.c_str() << " " << _doARW << " " << _nonResWeightIndex << std::endl;
+  if (_verbLvl>1) std::cout << " File to open:"<<signalfile  << std::endl;
+  TFile *sigFile = TFile::Open(signalfile);
+  bool opened=sigFile->IsOpen();
   if(opened==false) return -1;
-  TTree* sigTree = (TTree*)sigFile.Get("TCVARS");
-  
-  if (_verbLvl>1) std::cout << "================= Add Signal============================== " << _wName.c_str() << " " << _doARW << " " << _nonResWeightIndex << std::endl;
+  if (_verbLvl>1) std::cout << " TFile opened:"<<signalfile  << std::endl;
+
+  TTree* sigTree = (TTree*)sigFile->Get("TCVARS");
+
   //Luminosity
   RooRealVar lumi("lumi","lumi", _lumi);
   _w->import(lumi);

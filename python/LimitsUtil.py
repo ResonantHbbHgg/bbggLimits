@@ -3,7 +3,6 @@ import os,sys,json,time,re
 import logging
 from shutil import copy
 from pprint import pformat
-# import pebble as pb
 from multiprocessing import Pool, TimeoutError, current_process
 from HiggsAnalysis.bbggLimits.DataCardUtils import *
 from HiggsAnalysis.bbggLimits.IOUtils import *
@@ -11,62 +10,15 @@ from HiggsAnalysis.bbggLimits.CombineUtils import *
 from HiggsAnalysis.bbggLimits.AnalyticalReweighting import *
 from os import listdir
 from os.path import isfile, join
+import getpass
 
+__username__ = getpass.getuser()
 __BAD__ = 666
-
 
 def printTime(t1, t2, log):
   tNew = time.time()
   log.debug('Time since start of worker: %.2f sec; since previous point: %.2f sec' %(tNew-t2,tNew-t1))
   return tNew
-
-######
-######
-def runCombine(inDir, doBlind, log, combineOpt = 1, Combinelxbatch = 0, Label = None):
-  log.info('Running combine tool.  Dir: %s Blinded: %r', inDir, doBlind)
-  log.debug('inDir should be the immediate directory where the card is located')
-  if Combinelxbatch:
-    runCombineOnLXBatch(inDir, doBlind, log, combineOpt, Label)
-    return 
-
-  if doBlind and combineOpt!=3:
-    # In HybridNew this option does not work
-    blinded = "--run blind"
-  else:
-    blinded = ''
-
-  if combineOpt==1:
-    combineMethod = 'Asymptotic'
-  elif combineOpt==2:
-    combineMethod = 'Asymptotic --X-rtd TMCSO_AdaptivePseudoAsimov=50'
-  elif combineOpt==3:
-    combineMethod = 'HybridNew --testStat=LHC --frequentist'
-  else:
-    log.error('This option is not supported: %r', combineOpt)
-    return __BAD__
-
-
-  cardName = inDir+"/hhbbgg_13TeV_DataCard.txt"
-  resFile  = inDir+"/result_"+str(combineOpt)+".log"
-
-
-  command1 = ' '.join(['combine -M', combineMethod,'-m 125 -n',Label,blinded,cardName,">",resFile,"2>&1"])
-  log.info('Combine command we run:\n%s', command1)
-
-  combExitCode = os.system(command1)
-
-  if combineOpt in [1,2]:
-    fName = 'higgsCombine'+Label+'.Asymptotic.mH125.root'
-  elif combineOpt in [3]:
-    fName = 'higgsCombine'+Label+'.HybridNew.mH125.root'
-
-  outDir = inDir
-  os.rename(fName, outDir+'/'+fName.replace('.root', '_%i.root'%combineOpt))
-
-  return combExitCode
-
-######
-######
 
 
 def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
@@ -82,11 +34,13 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     logLvl = logging.DEBUG
 
   LTDir_type  = os.getenv("CMSSW_BASE")+Params['LTDIR']
-  if '/tmp' in Params['LTDIR'] or '/store' in Params['LTDIR']:
+  if '/tmp' in Params['LTDIR'] or '/store' in Params['LTDIR'] or '/afs' in Params['LTDIR']:
     LTDir_type = Params['LTDIR']
-  print LTDir_type
+    if '/store' in Params['LTDIR']:
+      LTDir_type = 'root://eoscms//eos/cms'+Params['LTDIR']
+  
   signalModelCard = os.getenv("CMSSW_BASE")+Params['signal']['signalModelCard']
-  lumi = Params['other']["integratedLumi"];
+  lumi = 35.87 # Only used for plot produced by bbgg2Dfitter
   energy = str(Params['other']["energy"])
   mass   = Params['other']["higgsMass"]
   addHiggs   = Params['other']["addHiggs"]
@@ -131,6 +85,8 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     Label = "_Node_"+str(point)
   elif NRgridPoint!=-1:
     Label = "_gridPoint_"+str(NRgridPoint)
+  elif opt.analyticalRW==True:
+    Label = "_ARW_"
   else:
     print 'WARning: using list of nodes from the json input file'
     return __BAD__
@@ -154,12 +110,12 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
 
 
   if opt.outDir:
-    baseFolder="./"+opt.outDir+"_v"+str(Params['other']["version"])
+    baseFolder="./"+opt.outDir
   else:
-    baseFolder="./bbggToolsResults_v"+str(Params['other']["version"])
+    baseFolder="./bbggToolsResults"
 
   # Create PID file to track the job:
-  pidfile = "/tmp/PIDs/PoolWorker"+Label+".pid"
+  pidfile = "/tmp/"+__username__+"/PIDs/PoolWorker"+Label+".pid"
   file(pidfile, 'w').write(str(PID))
 
   procName = current_process().name
@@ -167,7 +123,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     logging.basicConfig(level=logLvl,
                         format='%(asctime)s PID:%(process)d %(name)-12s %(levelname)-8s %(message)s',
                         datefmt='%m-%d %H:%M',
-                        filename='/tmp/logs/processLog_'+str(procName)+'.log',
+                        filename='/tmp/'+__username__+'/logs/processLog_'+str(procName)+'.log',
                         filemode='w')
   except:
     print 'I got excepted!'
@@ -231,16 +187,16 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     else:
       theFitter.SetNCat0(0)
 
-    print 'Using Double Sided Crystal Ball as Signal Model:',doDoubleSidedCB
+    if opt.verb>0:
+      procLog.info('Using Double Sided Crystal Ball as Signal Model: %r', doDoubleSidedCB)
     if doDoubleSidedCB: theFitter.UseDoubleSidedCB()
 
     LTDir = LTDir_type.replace('TYPE', t)
-    onlyfiles = [fff for fff in listdir(LTDir) if isfile(join(LTDir, fff))]
-    print 'Files in ', LTDir
-    print onlyfiles
 
     mass = 125.0
-
+    if opt.verb>0:
+      procLog.info('Signal File:\n'+LTDir+thisSignalFile)
+    
     openStatus = theFitter.AddSigData( mass, str(LTDir+thisSignalFile))
     if openStatus==-1:
       procLog.error('There is a problem with openStatus')
@@ -266,14 +222,15 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
       if opt.verb>0: p4 = printTime(p3,start,procLog)
 
     if addHiggs:
-      procLog.debug('Here will add SM Higgs contributions')
       higTypes = Params['higgs']['type']
-      print 'Higgs types:', higTypes
+      if opt.verb>1:
+        procLog.debug('Here will add SM Higgs contributions \n Higgs types: '+ pformat(higTypes))
       higgsExp = {}
       for iht,HT in enumerate(higTypes):
         higgsExp[HT] = [0,0]
         ht = higTypes[HT]
-        print ht, HT
+        if opt.verb>1:
+          procLog.debug('iht = %r, ht = %r, HT = %r' % (iht,ht,HT))
         higFileName = str(LTDir)+"/LT_output_"+str(ht)+".root"
         
         exphig = theFitter.AddHigData( mass,higFileName,iht, str(HT))
@@ -282,7 +239,8 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
 
         higgsExp[HT] = [exphig[0], exphig[1]]
 
-      print "Done SM Higgs bzz"
+      if opt.verb>1:
+        procLog.debug("Done SM Higgs bzz")
 
     ddata = str(LTDir + '/LT_'+dataName+'.root')
     ddata = ddata.replace("MASS", str(point))
@@ -302,7 +260,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
       return __BAD__
 
     if opt.verb>1:
-      fitresults.Print()
+      procLog.debug("\n Fit Results: \n\n"+pformat(fitresults.Print()))
 
     wsFileBkgName = "hhbbgg.inputbkg_13TeV"
     theFitter.MakeBkgWS( wsFileBkgName);
@@ -319,9 +277,6 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     procLog.info("\t BIAS FITS DONE. Node=%r, GridPoint=%r, type=%r", point,NRgridPoint,t)
     if opt.verb>0: p7 = printTime(p6,start,procLog)
 
-    # This is making cards ala 8 TeV. We don't need this for now
-    #theFitter.MakeDataCard( fileBaseName, wsFileBkgName, useSigTheoryUnc)
-    #print "\t 8TeV DATACARD DONE"
     print "IM HERE"
 
     sigExp = []

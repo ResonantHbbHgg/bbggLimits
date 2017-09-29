@@ -65,7 +65,7 @@ if 'nonres' in opt.x:
   # APZ trees:
   SignalFiles = "/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph.root"
   if opt.signalDir is None:
-    Signals = "/afs/cern.ch/user/a/andrey/work/hh/CMSSW_8_0_8_patch1/src/APZ/fgg-ana/NotATestNov12/" + SignalFiles
+    Signals = "root://eoscms//eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/May2_Mjj70to190_NewCatMVA/EGML_Signal_GEN/Hadd/" + SignalFiles
   else:
     Signals = opt.signalDir + SignalFiles
 
@@ -73,14 +73,10 @@ if 'nonres' in opt.x:
     nodes = SMHiggsSamples.SMHiggsNodes
     Signals = opt.signalDir + '/THENODE'
 
-  # bbggTools trees:
-  #Signals = "/afs/cern.ch/user/a/andrey/work/hh/CMSSW_8_0_8_patch1/src/flashgg/bbggTools/test/RunJobs/NonResAll/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph_0.root" 
-  #Signals = "root://eoscms//eos/cms/store/user/rateixei/HHbbgg/FlatTrees/ICHEP_Regressed4b/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph.root"
-  #Signals = "root://eoscms//eos/cms/store/user/rateixei/HHbbgg/FlatTrees/ICHEP_Regressed4b/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph.root"
 
   DataFiles = "/DoubleEG.root"
   if opt.dataDir is None:
-    Data = "root://eoscms//eos/cms/store/user/rateixei/HHbbgg/FlatTrees/ICHEP_Regressed4b/DoubleEG.root"
+    Data = "root://eoscms//eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/May2_Mjj70to190_NewCatMVA/EGML_Data_Mjj70_NewMVA/Hadd/DoubleEG.root"
   else:
     Data = opt.dataDir + DataFiles
 
@@ -160,7 +156,7 @@ elif 'res' in opt.x:
 
   DataFiles = "/DoubleEG.root"
   if opt.dataDir is None:
-    Data = "root://eoscms//eos/cms/store/user/rateixei/HHbbgg/FlatTrees/ICHEP_Regressed4b/DoubleEG.root"
+    Data = "root://eoscms//eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/May2_Mjj70to190_NewCatMVA/EGML_Data_Mjj70_NewMVA/Hadd/DoubleEG.root"
   else:
     Data = opt.dataDir + DataFiles
 
