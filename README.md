@@ -50,38 +50,29 @@ makeAllTrees.py -x nonres [--NRW]
 
 ### Working examples
 
-Make non-res shape benchmark points trees (MVA based with 400 Mhh threshold):
+Make non-res shape benchmark points trees (MVA based with 350 M(HH) threshold):
 ```
-makeAllTrees.py -x nonres \   
--d /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/Regression_Data/Hadd \   
--s /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/Regression_Signal/Hadd/ \   
--f LT_NonRes_MVABased400Reg_ \   
---doCatMVA --MVAHMC0 0.960 --MVAHMC1 0.6 --MVALMC0 0.96 --MVALMC1 0.750 --massNR 400   
+makeAllTrees.py -x nonres -f LT_OutDir \   
+--doCatMVA --MVAHMC0 0.970 --MVAHMC1 0.600 --MVALMC0 0.985 --MVALMC1 0.600 --massNR 350 --LMLJBTC 0.55 --LMSJBTC 0.55
 ```   
-   
+You can aslo provide the locations of the flat tree ntuples via `-s`, `-d`, `-b` options.
+
 Make non-res shape benchmark points trees (cut based with 400 Mhh threshold and cut on cos theta star):   
 ```
-makeAllTrees.py -x nonres \   
--d /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/newData_HHTagger/Hadd \   
--s /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/Signal_HHTagger400/Hadd/ \   
--f LT_NonRes_CatBased400CTS_ --massNR 400 --ctsCut 0.8   
+TBD
 ```   
    
 Make resonant limit trees with low mass categorization:   
 ```
-makeAllTrees.py -x res \   
--d /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/newData_HHTagger/Hadd \   
--s /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/Signal_HHTagger400/Hadd/ \   
--f LT_ResLMnW   
+TBD
 ```   
    
 Make resonant limit trees with high mass categorization:   
 ```
-makeAllTrees.py -x res \   
--d /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/newData_HHTagger/Hadd \   
--s /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/Signal_HHTagger400/Hadd/ \   
--f LT_ResHM --highMassRes     
+TBD
 ```    
+
+In order to re-produce the limit trees used for EPS17 results, follow instructions in [SmartScripts/README.md](SmartScripts/README.md)
 
 
 #### Details 
@@ -109,18 +100,20 @@ Once the limit trees are produced, we would like to make the 2D fits in
 The main functions to do the fits are implemented in `src/bbgg2DFitter.cc`.  The python
 scripts are needed to handle many different situations (resonant, non-resonant,
 re-weighting to various benchmark points, etc.). In order to run just one limit you need
-`scripts/pyLimits.py`. Minimal options for the *SM* point are: ``` ./pyLimits.py -f
-conf_NonRes_EPS17.json -o outputDirName --nodes SM ```
+`scripts/pyLimits.py`. Minimal options for the *SM* point are:  
+``` 
+./pyLimits.py -fconf_NonRes_EPS17.json -o outputDirName --nodes SM 
+```
 
 The above command must be run on _lxplus_, because the input root files are located on EOS
-(the path is specified in json config file). __ 
+(the path is specified in json config file).  
 The `pyLimits.py` script would call _runFullChain()_ method which is implemented in
 `python/LimitsUtil.py`.  So in fact, the [LimitsUtil.py](python/LimitsUtil.py) script is
-the base code which interacts with the functions in `bbgg2DFitter.cc`. __
+the base code which interacts with the functions in `bbgg2DFitter.cc`.  
 Using the `--nodes SM` option tells it to use the Limit Tree produced from a single SM MC
 sample.  Alternatively, one can do the re-weighting of all existing non-resonant
 samples and therefore increase the statistics of the SM signal (number of events in a single
-sample is only 50K). Analytical re-weighting was used for EPS17 results of 2016 data. __
+sample is only 50K). Analytical re-weighting was used for EPS17 results of 2016 data.  
 Run it like so: 
 ```
 ./pyLimits.py -f conf_NonRes_EPS17.json -o outputDirName --analyticalRW 
