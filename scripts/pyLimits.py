@@ -5,12 +5,12 @@ import os,sys,json,time,re
 import logging
 from shutil import copy
 from pprint import pformat
-# import pebble as pb
 from multiprocessing import Pool, TimeoutError, current_process
 from HiggsAnalysis.bbggLimits.LimitsUtil import *
 import getpass
 __username__ = getpass.getuser()
 __author__ = 'Rafael Teixeira de Lima & Andrey Pozdnyakov'
+
 __BAD__ = 666
 
 gROOT.SetBatch()
@@ -190,13 +190,13 @@ if __name__ == "__main__":
   # [1] http://stackoverflow.com/questions/20055498/python-multiprocessing-pool-kill-specific-long-running-or-hung-process
   # [2] http://stackoverflow.com/questions/20991968/asynchronous-multiprocessing-with-a-worker-pool-in-python-how-to-keep-going-aft
   # [3] http://stackoverflow.com/questions/26063877/python-multiprocessing-module-join-processes-with-timeout
+  # Here I'm using a modified implementation of [1]:
   #
-  # UPD 2017-Sep-27: the killing part is actually commented out now. It's not needed really
-  # We just wait for the job to finish
+  # UPD 2017-Sep-27: the killing part is actually commented out now. It's not needed really.
+  # We just wait for the jobs to finish.
 
-  # Using a modified implementation of [1]:
 
-  # print "Running over:", myNodes
+  print "Running over:", res_Masses, res_Nodes, res_Points, res_ARW
 
   pCount=0
   totJobs = len(res_Nodes)+len(res_Points)+len(res_Masses)+len(res_ARW)

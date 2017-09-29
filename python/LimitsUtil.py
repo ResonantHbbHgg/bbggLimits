@@ -34,11 +34,11 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     logLvl = logging.DEBUG
 
   LTDir_type  = os.getenv("CMSSW_BASE")+Params['LTDIR']
-  if '/tmp' in Params['LTDIR'] or '/store' in Params['LTDIR']:
+  if '/tmp' in Params['LTDIR'] or '/store' in Params['LTDIR'] or '/afs' in Params['LTDIR']:
     LTDir_type = Params['LTDIR']
     if '/store' in Params['LTDIR']:
-      LTDir_type = 'root://eoscms.cern.ch//eos/cms'+Params['LTDIR']
-  print LTDir_type
+      LTDir_type = 'root://eoscms//eos/cms'+Params['LTDIR']
+  
   signalModelCard = os.getenv("CMSSW_BASE")+Params['signal']['signalModelCard']
   lumi = 35.87 # Only used for plot produced by bbgg2Dfitter
   energy = str(Params['other']["energy"])
@@ -193,12 +193,9 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
 
     LTDir = LTDir_type.replace('TYPE', t)
 
-    #if opt.verb>2:
-    #  onlyfiles = [fff for fff in listdir(LTDir) if isfile(join(LTDir, fff))]
-    #  procLog.info('Files in %r: \n %s', LTDir, pformat(onlyfiles))
-
     mass = 125.0
-    print LTDir,thisSignalFile
+    if opt.verb>0:
+      procLog.info('Signal File:\n'+LTDir+thisSignalFile)
     
     openStatus = theFitter.AddSigData( mass, str(LTDir+thisSignalFile))
     if openStatus==-1:
