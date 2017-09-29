@@ -120,6 +120,8 @@ Run it like so:
 pyLimits.py -f conf_NonRes_EPS17.json -o outputDirName --analyticalRW
 ```
 
+In case of problems it's useful to increase verbosity level with `-v 1(2,3)` option. In this case the logs should be found in your `/tmp/username/logs` and in the _master_ log, `outputDirName/mainLog_date-time.log`
+
 The above command should give you the limits identical to
 [the ones on SVN](https://svnweb.cern.ch/cern/wsvn/cmshcg/trunk/cadi/HIG-17-008/NonResonant/Benchmarks/CombinedCard_Node_SMkl1p0_kt1p0_cg0p0_c20p0_c2g0p0/result_2_L_CombinedCard_Node_SMkl1p0_kt1p0_cg0p0_c20p0_c2g0p0.log).
 In order to reporduce the rest of _EPS17_ results, follow the instructions here:
