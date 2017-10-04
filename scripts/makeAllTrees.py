@@ -108,6 +108,9 @@ if 'nonres' in opt.x:
     if opt.doSMHiggs:
       sigScale = float(opt.lumi)*float(MM[2])/float(MM[1])
 
+      # Temporary:
+      #if 'bb' not in MM: continue
+      
     print "DOING LowMassCat Signal, node ", i
 
     if opt.NRW:
