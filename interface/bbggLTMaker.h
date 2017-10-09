@@ -92,7 +92,6 @@ public :
    int photonCR;
    int doKinFit;
    int doMX;
-   int tilt;
    int doNoCat;
    int doCatNonRes;
    int doCatLowMass;
@@ -104,7 +103,6 @@ public :
    int doNonResWeights;
    int photonCRNormToSig;
    int GenDiPhotonFilter;
-   double tiltWindow;
    double massThreshold;
    bool isCustMVA;
    bool isRes;
@@ -268,7 +266,6 @@ public :
    void SetMin( double par ) { mtotMin = par; }
    void IsMX( int par ) { doMX = par; }
    void IsKinFit( int par ) { doKinFit = par; }
-   void SetTilt( int par ) { tilt = par;}
 //normalization
    void SetNormalization(double norm, double norm2=1) { normalization = norm; normalizationNR = norm2;}
 //categorization

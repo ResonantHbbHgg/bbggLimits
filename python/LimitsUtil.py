@@ -86,11 +86,15 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
   elif NRgridPoint!=-1:
     Label = "_gridPoint_"+str(NRgridPoint)
   elif opt.analyticalRW==True:
-    Label = "_ARW_"
+    Label = "_ARW_"+"_".join([str(opt.ARW_kl),str(opt.ARW_kt),str(opt.ARW_cg),str(opt.ARW_c2),str(opt.ARW_c2g)])
+    Label = Label.replace('.','p')
+    Label = Label.replace('-','m')
   else:
     print 'WARning: using list of nodes from the json input file'
     return __BAD__
 
+  print "Label=",Label
+  
   sigCat = 0
   isRes = 0
   if point==None:

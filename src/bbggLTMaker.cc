@@ -219,25 +219,11 @@ void bbggLTMaker::Loop()
     if(doKinFit)
       o_bbggMass = diHiggsCandidate_KF->M();
     if(doMX)
-      o_bbggMass = diHiggsCandidate->M() - dijetCandidate->M() + 125.;
+      o_bbggMass = diHiggsCandidate->M() - dijetCandidate->M() - diphotonCandidate->M() + 250.;
 
     //mtot cut
-    bool passedMassCut = 1;
-
-    if(o_bbggMass < mtotMin || o_bbggMass > mtotMax)
-      passedMassCut = 0;
-
-    if(tilt){
-      passedMassCut = 1;
-      if( (o_bbggMass-o_ggMass) > mtotMax - 125.)
-	passedMassCut = 0;
-      if( (o_bbggMass-o_ggMass) < mtotMin - 125.)
-	passedMassCut = 0;
-    }
-
-    if(passedMassCut == 0)
-      continue;
-
+    if(o_bbggMass < mtotMin || o_bbggMass > mtotMax) continue;
+    
     bool isInterestingRegion = 1;
     if(isSignal){
       if(photonCR==0 && photonCRNormToSig==0) isInterestingRegion = 1;
@@ -403,9 +389,9 @@ void bbggLTMaker::Loop()
 	  o_NRWeights[n] = 1;
 	}
 	else {
-	  //Check if histogram exist
 	  UInt_t binNum = NR_Wei_Hists[n]->FindBin(gen_mHH, fabs(gen_cosTheta));
 	  o_NRWeights[n] = NR_Wei_Hists[n]->GetBinContent(binNum);
+	  //if 
 	  // Just print out for one n:
 	  if (DEBUG && n==100 && jentry%1000 == 0)
 	    cout<<n<<" **  mHH = "<<gen_mHH<<"   cosT*="<<fabs(gen_cosTheta)<<"  bin="<<binNum<<" wei="<<o_NRWeights[n]<<endl;
