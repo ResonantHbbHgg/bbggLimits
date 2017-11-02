@@ -139,17 +139,17 @@ CMS_hhbbgg_13TeV_mjj_bkg_slope3[0.5,-10000, 10000];
 CMS_hhbbgg_13TeV_mjj_bkg_slope3_cat0[0.5,-10000, 10000];
 CMS_hhbbgg_13TeV_mjj_bkg_slope3_cat1[0.5,-10000, 10000];
 
-mjj_hig_slope1_ggh_cat0[0.1, -1000, 1000];
-mjj_hig_slope2_ggh_cat0[0.1, -1000, 1000];
-mjj_hig_slope3_ggh_cat0[0.1, -1000, 1000];
+mjj_hig_slope1_ggh_cat0[0.1, 0, 10];
+mjj_hig_slope2_ggh_cat0[0.1, 0, 10];
+mjj_hig_slope3_ggh_cat0[0.1, 0, 10];
 
 mjj_hig_slope1_ggh_cat1[0.1, -1000, 1000];
 mjj_hig_slope2_ggh_cat1[0.1, -1000, 1000];
 mjj_hig_slope3_ggh_cat1[0.1, -1000, 1000];
 
-mjj_hig_slope1_vbf_cat0[0.1, -1000, 1000];
-mjj_hig_slope2_vbf_cat0[0.1, -1000, 1000];
-mjj_hig_slope3_vbf_cat0[0.1, -1000, 1000];
+mjj_hig_slope1_vbf_cat0[0.1, 0, 10];
+mjj_hig_slope2_vbf_cat0[0.1, 0, 10];
+mjj_hig_slope3_vbf_cat0[0.1, 0, 10];
 
 mjj_hig_slope1_vbf_cat1[0.1, -1000, 1000];
 mjj_hig_slope2_vbf_cat1[0.1, -1000, 1000];

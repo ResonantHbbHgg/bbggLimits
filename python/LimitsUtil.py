@@ -81,14 +81,12 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
   if point!=None and NRgridPoint!=-1:
     print 'WARning: cannot have both the Node and grid Point. Chose one and try again'
     return __BAD__
+  elif opt.analyticalRW==True:
+    Label = "_ARW_"
   elif point!=None:
     Label = "_Node_"+str(point)
   elif NRgridPoint!=-1:
     Label = "_gridPoint_"+str(NRgridPoint)
-  elif opt.analyticalRW==True:
-    Label = "_ARW_"+"_".join([str(opt.ARW_kl),str(opt.ARW_kt),str(opt.ARW_cg),str(opt.ARW_c2),str(opt.ARW_c2g)])
-    Label = Label.replace('.','p')
-    Label = Label.replace('-','m')
   else:
     print 'WARning: using list of nodes from the json input file'
     return __BAD__
@@ -183,8 +181,8 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
 
     theFitter.SetVerbosityLevel(opt.verb)
 
-#    if opt.analyticalRW == True:
-#      theFitter.DoARW()
+    #    if opt.analyticalRW == True:
+    #      theFitter.DoARW()
 
     if 'HighMass' in t:
       theFitter.SetNCat0(2)

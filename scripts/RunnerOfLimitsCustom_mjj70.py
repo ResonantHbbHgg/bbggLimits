@@ -31,7 +31,7 @@ tempfile= '''
         "doBands" : 0,
         "ncat" : 2,
         "analysisType" : "fitTo2D_resSearch_withRegKinFit",
-        "doSingleLimit" : 1,
+        "doSingleLimit" : 0,
         "drawSignalFit" : 0,
         "drawBackgroundFit" : 0,
         "useSigTheoryUnc" : 0,
@@ -79,7 +79,8 @@ else:
   jsonname = opt.jsonname
 
 sigTypes = '["HighMass", "LowMass"]'
-toRun = '--nodes SM'
+toRun = ''
+#toRun = '--nodes SM'
 addHiggs = '1'
 rMass = ''
 if '-10' not in opt.mass:

@@ -57,7 +57,7 @@ void bbggLTMaker::Loop()
   outTree->Branch("mjj", &o_bbMass, "o_bbMass/D");
   outTree->Branch("mgg", &o_ggMass, "o_ggMass/D");
   outTree->Branch("mtot", &o_bbggMass, "o_bbggMass/D"); //
-  outTree->Branch("btmap", &btmap);
+  //outTree->Branch("btmap", &btmap);
   outTree->Branch("jet1PT", &jet1PT, "jet1PT/D");
   outTree->Branch("jet2PT", &jet2PT, "jet2PT/D");
   outTree->Branch("jet1ETA", &jet1ETA, "jet1ETA/D");
@@ -389,12 +389,15 @@ void bbggLTMaker::Loop()
 	  o_NRWeights[n] = 1;
 	}
 	else {
-	  UInt_t binNum = NR_Wei_Hists[n]->FindBin(gen_mHH, fabs(gen_cosTheta));
-	  o_NRWeights[n] = NR_Wei_Hists[n]->GetBinContent(binNum);
-	  //if 
-	  // Just print out for one n:
-	  if (DEBUG && n==100 && jentry%1000 == 0)
-	    cout<<n<<" **  mHH = "<<gen_mHH<<"   cosT*="<<fabs(gen_cosTheta)<<"  bin="<<binNum<<" wei="<<o_NRWeights[n]<<endl;
+	  if (gen_mHH > 1800) // The re-weighting histograms are limited by this cut
+	    o_NRWeights[n]=0;
+	  else {
+	    const UInt_t binNum = NR_Wei_Hists[n]->FindBin(gen_mHH, fabs(gen_cosTheta));
+	    o_NRWeights[n] = NR_Wei_Hists[n]->GetBinContent(binNum);
+	    // Just print out for one n:
+	    if (DEBUG && n==100 && jentry%1000 == 0)
+	      cout<<n<<" **  mHH = "<<gen_mHH<<"   cosT*="<<fabs(gen_cosTheta)<<"  bin="<<binNum<<" wei="<<o_NRWeights[n]<<endl;
+	  }
 	}
 	
 	o_NRWeights[n] = o_NRWeights[n]*normalizationNR*genTotalWeight*o_btagweight*pho1_sf*pho2_sf;

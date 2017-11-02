@@ -74,7 +74,6 @@ def runCombineOnLXBatch(inDir, doBlind, log, combineOpt=1, Label=None):
     return __BAD__
 
   print "im here9"
-  print "im here9"
 
   cardName = inDir+"/hhbbgg_13TeV_DataCard.txt"
   resFile  = inDir+"/result_"+str(combineOpt)
@@ -96,7 +95,7 @@ def runCombineOnLXBatch(inDir, doBlind, log, combineOpt=1, Label=None):
 
 cd CMSSWBASE/src/HiggsAnalysis/bbggLimits/
 eval `scramv1 runtime -sh`
-mkdir /tmp/USER/LABELP/
+mkdir -p /tmp/USER/LABELP/
 cd /tmp/USER/LABELP/
 combine -M COMBINEMETHOD -m 125 LABEL BLINDED --datacard CARDNAME > RESFILE 2>&1
 

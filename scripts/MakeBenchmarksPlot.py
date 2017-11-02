@@ -15,7 +15,7 @@ parser.add_argument('-l', '--lumi', dest='lumi', type=str, default='35.9')
 parser.add_argument("--unblind", dest="unblind", action='store_true', default=False)
 opt = parser.parse_args()
 
-outfile = TFile(opt.out, 'RECREATE')
+#outfile = TFile(opt.out+'.root', 'RECREATE')
 
 myLineHeight = 0.02
 myLineWidth = 0.05
@@ -30,30 +30,31 @@ for qt in quantiles:
 
 
 for ii in xrange(0, len(klJHEP)):
-# for ikt in scan['kt']:
-#  for cg in scan['cg']:
-#   for c2 in scan['c2']:
-#    for c2g in scan['c2g']:
+  # for ikt in scan['kt']:
+  #  for cg in scan['cg']:
+  #   for c2 in scan['c2']:
+  #    for c2g in scan['c2g']:
+  kl = klJHEP[ii]
+  kt = ktJHEP[ii]
+  c2 = c2JHEP[ii]
+  cg = cgJHEP[ii]
+  c2g = c2gJHEP[ii]
 
- kl = klJHEP[ii]
- kt = ktJHEP[ii]
- c2 = c2JHEP[ii]
- cg = cgJHEP[ii]
- c2g = c2gJHEP[ii]
+  nodename = 'Node_SM'+'_'.join(['kl'+str(kl), 'kt' + str(kt), 'cg'+ str(cg), 'c2' + str(c2), 'c2g' + str(c2g)]).replace('.', 'p').replace('-', 'm')
+  #nodename = "_".join(['ARW','kl'+str(kl), 'kt' + str(kt), 'cg'+ str(cg), 'c2' + str(c2), 'c2g' + str(c2g)]).replace('.', 'p').replace('-', 'm')
+  name = opt.f + '/CombinedCard_'+nodename  + '/higgsCombineCombinedCard_' + nodename + '.Asymptotic.mH125.root'
 
- nodename = 'kl'+str(kl).replace('.', 'p').replace('-', 'm') + '_kt' + str(kt).replace('.', 'p').replace('-', 'm') + '_cg'+ str(cg).replace('.', 'p').replace('-', 'm') + '_c2' + str(c2).replace('.', 'p').replace('-', 'm') + '_c2g' + str(c2g).replace('.', 'p').replace('-', 'm')
- name = opt.f + '/CombinedCard_Node_SM'+nodename  + '/higgsCombineCombinedCard_Node_SM' + nodename + '.Asymptotic.mH125.root'
- print name
- rfile = TFile(name, 'READ')
- if rfile.IsZombie(): continue
- tree = rfile.Get("limit")
- if tree == None or tree.GetEntriesFast() < 1: continue
- for qt in quantiles:
-  tree.Draw("limit", "quantileExpected>"+str(float(qt)-0.001) + ' && quantileExpected < ' +str(float(qt)+0.001), "goff")
-  lims[qt].append(tree.GetV1()[0])
- rfile.Close()
+  print name
+  rfile = TFile(name, 'READ')
+  if rfile.IsZombie(): continue
+  tree = rfile.Get("limit")
+  if tree == None or tree.GetEntriesFast() < 1: continue
+  for qt in quantiles:
+    tree.Draw("limit", "quantileExpected>"+str(float(qt)-0.001) + ' && quantileExpected < ' +str(float(qt)+0.001), "goff")
+    lims[qt].append(tree.GetV1()[0])
+  rfile.Close()
 
-print plots
+  print plots
 
 h1 = TH1F('h1', '', 14, 0.5, 14.5)
 h1.GetXaxis().SetTitle("Shape Benchmark Points")
