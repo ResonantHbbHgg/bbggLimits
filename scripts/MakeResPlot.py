@@ -41,9 +41,11 @@ opt = parser.parse_args()
 #massesLM = [250, 260, 270, 280, 300, 320, 340, 350, 400, 450, 500, 550]
 #massesHM = [550, 600, 650, 700, 750, 800, 900]
 
-leg = TLegend(0.13, 0.65, 0.87, 0.89)
-leg.SetNColumns(2)
-leg.SetFillColorAlpha(kWhite, 0.8)
+legL = TLegend(0.20, 0.65, 0.48, 0.80)
+leg = TLegend(0.49, 0.60, 0.87, 0.85)
+#leg.SetNColumns(2)
+legL.SetFillColorAlpha(kWhite, 0.9)
+leg.SetFillColorAlpha(kWhite, 0.9)
 def main(argv):
   print opt.folder, opt.name
 #  tdr.setTDRStyle()
@@ -62,8 +64,9 @@ def main(argv):
   gr_1s.SetFillColor(cNiceGreen2)
   gr_1s.SetLineColor(cNiceGreen2)
   gr_2s = TGraphAsymmErrors()
-  gr_2s.SetFillColor(cNiceYellow2)
-  gr_2s.SetLineColor(cNiceYellow2)
+  gr_2s.SetFillColor(kOrange)
+  gr_2s.SetLineColor(kOrange)
+#  gr_2s.SetLineColor(cNiceYellow2)
   gr_ce = TGraphErrors()
   gr_ce.SetLineColor(cNiceBlueDark)
   gr_ce.SetLineWidth(2)
@@ -79,8 +82,10 @@ def main(argv):
   hmgr_1s.SetFillColor(cNiceGreen2)
   hmgr_1s.SetLineColor(cNiceGreen2)
   hmgr_2s = TGraphAsymmErrors()
-  hmgr_2s.SetFillColor(cNiceYellow2)
-  hmgr_2s.SetLineColor(cNiceYellow2)
+  hmgr_2s.SetFillColor(kOrange)
+  hmgr_2s.SetLineColor(kOrange)
+#  hmgr_2s.SetFillColor(cNiceYellow2)
+#  hmgr_2s.SetLineColor(cNiceYellow2)
   hmgr_ce = TGraphErrors()
   hmgr_ce.SetLineColor(cNiceBlueDark)
   hmgr_ce.SetLineWidth(2)
@@ -93,8 +98,8 @@ def main(argv):
   hmgr_observed.SetMarkerColor(kBlack)
   hmgr_observed.SetMarkerStyle(20)
   thisMax = 0
-  masses = [250, 260, 270, 280, 300, 320, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 900]
-  massesLM = [250, 260, 270, 280, 300, 320, 350, 400, 450, 500, 550, 600]
+  masses = [260, 270, 280, 300, 320, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 900]
+  massesLM = [260, 270, 280, 300, 320, 350, 400, 450, 500, 550, 600]
   massesHM = [600, 650, 700, 750, 800, 900]
 
   if opt.hmfolder: masses = massesLM
@@ -159,13 +164,13 @@ def main(argv):
 
   SetGeneralStyle()
   c0 = TCanvas('a', 'a', 800, 600)
-  c0.SetGrid()
+#  c0.SetGrid()
 #  SetFrameStyle(c0)
   SetPadStyle(c0)
   if opt.log: c0.SetLogy()
   gr_2s.Draw("A3Z")
   gr_2s.GetYaxis().SetRangeUser(0, thisMax*1.2)
-  gr_2s.GetYaxis().SetTitle("#sigma(pp#rightarrowX) #times #it{B}(X#rightarrowHH#rightarrowb#bar{b}#gamma#gamma) [fb]")
+  gr_2s.GetYaxis().SetTitle("#sigma(pp#rightarrowX) #times #it{B}(X#rightarrowHH#rightarrow#gamma#gammab#bar{b}) [fb]")
   gr_2s.GetXaxis().SetTitle("Resonance Mass [GeV]")
   myMin = 0
   myMax = thisMax*1.2
@@ -191,7 +196,7 @@ def main(argv):
     hmgr_1s.Draw("3Z same")
     hmgr_ce.Draw("LZP same")
     gr_ce.Draw("LZP same")
-    line = TLine(600, myMin, 600, myMax)
+    line = TLine(600, myMin, 600, 6)
     line.SetLineStyle(kDashed)
     line.SetLineWidth(2)
     line.Draw("same")
@@ -204,37 +209,58 @@ def main(argv):
   c0.cd()
   c0.Update()
   c0.RedrawAxis()
-  c0.SetGrid()
+#  c0.SetGrid()
 
-  headerTitle = "#font[61]{pp#rightarrowX#rightarrowHH#rightarrowb#bar{b}#gamma#gamma (Spin-0)}"
-  if opt.isGrav: headerTitle = "#font[61]{pp#rightarrowX#rightarrowHH#rightarrowb#bar{b}#gamma#gamma (Spin-2)}"
+  headerTitleL = "#font[61]{pp#rightarrowX#rightarrowHH#rightarrow#gamma#gammab#bar{b} (spin-0)}\n"
+  if opt.isGrav: headerTitleL = "#font[61]{pp#rightarrowX#rightarrowHH#rightarrow#gamma#gammab#bar{b} (spin-2)}\n"
+
+  ltx = TLatex(260, 150, headerTitleL)
+  ltx.SetTextSize(.035)
+  ltx.DrawLatex(280, myMax*0.6, headerTitleL)
+
+  legL.SetLineWidth(0)
+  legL.SetBorderSize(0)
+
+  
+  headerTitle = "95% CL upper limits"
   leg.SetHeader(headerTitle)
   header = leg.GetListOfPrimitives().First()
   header.SetTextSize(.035)
 #  leg.SetFillStyle(0)
+
+
   leg.SetLineWidth(0)
   leg.SetBorderSize(0)
-  leg.AddEntry(gr_observed, 'Observed 95% C.L. limit', 'lp')
-  leg.AddEntry(gr_ce, 'Expected 95% C.L. limit', 'lp')
-  leg.AddEntry(gr_1s, 'Expected #pm 1 #sigma', 'f')
-  leg.AddEntry(gr_2s, 'Expected #pm 2 #sigma', 'f')
+  leg.AddEntry(gr_observed, 'Observed', 'lp')
+  leg.AddEntry(gr_ce, 'Expected', 'lp')
+  leg.AddEntry(gr_1s, 'Expected #pm 1 std. deviation', 'f')
+  leg.AddEntry(gr_2s, 'Expected #pm 2 std. deviation', 'f')
   leg.SetTextSize(0.035)
   if opt.isGrav:
     gr_grav_0p5kpl.SetLineColor(cNicePurple)
     gr_grav_1p0kpl.SetLineColor(cNiceRed)
     gr_grav_0p5kpl.Draw("same LZ")
     gr_grav_1p0kpl.Draw("same LZ")
-    leg.AddEntry(gr_grav_0p5kpl, grav_0p5kpl_leg, 'l')
-    leg.AddEntry(gr_grav_1p0kpl, grav_1p0kpl_leg, 'l')
+    headerTitle = "Bulk KK-graviton"
+    legL.SetHeader(headerTitle)
+    legL.SetTextSize(.035)
+    legL.AddEntry(gr_grav_0p5kpl, grav_0p5kpl_leg, 'l')
+    legL.AddEntry(gr_grav_1p0kpl, grav_1p0kpl_leg, 'l')
   else:
-    gr_rad_1tev.SetLineColor(cNicePurple)
+    gr_rad_2tev.SetLineColor(cNicePurple)
     gr_rad_3tev.SetLineColor(cNiceRed)
-    gr_rad_1tev.Draw("same LZ")
+    gr_rad_2tev.Draw("same LZ")
     gr_rad_3tev.Draw("same LZ")
-    leg.AddEntry(gr_rad_1tev, rad_1tev_leg, 'l')
-    leg.AddEntry(gr_rad_3tev, rad_3tev_leg, 'l')
+    headerTitle = "Bulk radion"
+    legL.SetHeader(headerTitle)
+    legL.SetTextSize(.035)
+    legL.AddEntry(gr_rad_2tev, rad_2tev_leg, 'l')
+    legL.AddEntry(gr_rad_3tev, rad_3tev_leg, 'l')
+ 
+  legL.SetTextSize(0.035)
 
   leg.Draw()
+  legL.Draw()
 
 #  tdr.cmsPrel(float(opt.lumi)*1000,  "13",  0, True,  0, 1.25)
   DrawCMSLabels(c0, '35.9')
