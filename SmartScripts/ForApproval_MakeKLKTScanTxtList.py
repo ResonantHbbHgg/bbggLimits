@@ -2,7 +2,7 @@ from ROOT import *
 import argparse, os
 from HiggsAnalysis.bbggLimits.DefineScans import *
 
-folder = ["LIMS_LT_350_HMHPC_970_HMMPC_600_LMHPC_985_LMMPC_600_v66"]
+folder = ["/eos/cms/store/group/phys_higgs/resonant_HH/RunII/Limits/FinalLimits_EPS2017/KLKTScan_LIMS_LT_350_HMHPC_970_HMMPC_600_LMHPC_985_LMMPC_600_v66"]
 outf = "KLKT_Scan_Text_LIMS_LT_350_HMHPC_970_HMMPC_600_LMHPC_985_LMMPC_600_v66"
 
 
