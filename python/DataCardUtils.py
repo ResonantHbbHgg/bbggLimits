@@ -4,9 +4,9 @@ from shutil import copy
 
 def DataCardMaker_wHiggs(Folder, nCats, signalExp, observed, higgsExp, HType):
   if HType=="HighMass":
-    inputDatacardName = os.getenv("CMSSW_BASE")+'/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/NonResDatacardModel_HM_wHiggs.txt'
+    inputDatacardName = os.getenv("CMSSW_BASE")+'/src/HiggsAnalysis/bbggLimits/Models/NonResDatacardModel_HM_wHiggs.txt'
   else:
-    inputDatacardName = os.getenv("CMSSW_BASE")+'/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/NonResDatacardModel_LM_wHiggs.txt'
+    inputDatacardName = os.getenv("CMSSW_BASE")+'/src/HiggsAnalysis/bbggLimits/Models/NonResDatacardModel_LM_wHiggs.txt'
 
   inputDatacard = open(inputDatacardName, 'r')
   outputDatacard = open(Folder+'/datacards/hhbbgg_13TeV_DataCard.txt', 'w')
@@ -41,11 +41,11 @@ def DataCardMaker(Folder, nCats, signalExp, observed, isRes = 0, HType=0):
     sys.exit(2)
 
   if nCats == 2:
-    inputDatacardName = os.getenv("CMSSW_BASE")+'/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/LowMassResDatacardModel.txt'
+    inputDatacardName = os.getenv("CMSSW_BASE")+'/src/HiggsAnalysis/bbggLimits/Models/LowMassResDatacardModel.txt'
     if isRes == 0 and HType=="HighMass":
-      inputDatacardName = os.getenv("CMSSW_BASE")+'/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/NonResDatacardModel_HM.txt'
+      inputDatacardName = os.getenv("CMSSW_BASE")+'/src/HiggsAnalysis/bbggLimits/Models/NonResDatacardModel_HM.txt'
     if isRes == 0 and HType=="LowMass":
-      inputDatacardName = os.getenv("CMSSW_BASE")+'/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/NonResDatacardModel_LM.txt'
+      inputDatacardName = os.getenv("CMSSW_BASE")+'/src/HiggsAnalysis/bbggLimits/Models/NonResDatacardModel_LM.txt'
 
     inputDatacard = open(inputDatacardName, 'r')
     outputDatacard = open(Folder+'/datacards/hhbbgg_13TeV_DataCard.txt', 'w')

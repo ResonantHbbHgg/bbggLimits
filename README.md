@@ -52,26 +52,15 @@ makeAllTrees.py -x nonres [--NRW]
 
 Make non-res shape benchmark points trees (MVA based with 350 M(HH) threshold):
 ```
-makeAllTrees.py -x nonres -f LT_OutDir \   
+makeAllTrees.py -x nonres -f LT_OutDir \  
 --doCatMVA --MVAHMC0 0.970 --MVAHMC1 0.600 --MVALMC0 0.985 --MVALMC1 0.600 --massNR 350 --LMLJBTC 0.55 --LMSJBTC 0.55
 ```   
 You can aslo provide the locations of the flat trees if they are not the ones hardcoded in
-the script, via `-s`, `-d`, `-b` options.
-
-Make non-res shape benchmark points trees (cut based with 400 Mhh threshold and cut on cos theta star):   
+the script, via `-s`, `-d`, `-b` options. For example, to make the trees from single H, use: 
 ```
-TBD
-```   
-   
-Make resonant limit trees with low mass categorization:   
-```
-TBD
-```   
-   
-Make resonant limit trees with high mass categorization:   
-```
-TBD
-```    
+makeAllTrees.py -x nonres -f LT_OutDir -s FlatT_SignalDir\ -d 0 \  
+--doCatMVA --MVAHMC0 0.970 --MVAHMC1 0.600 --MVALMC0 0.985 --MVALMC1 0.600 --massNR 350 --doSMHiggs --LMLJBTC 0.55 --LMSJBTC 0.55 --genDiPhotonFilte
+```  
 
 In order to re-produce the limit trees used for EPS17 results, follow instructions in
 [SmartScripts/README.md](SmartScripts/README.md).

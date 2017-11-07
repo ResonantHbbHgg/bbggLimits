@@ -17,7 +17,7 @@ tempfile= '''
     "LTDIR" : "DIRLOC/DIRNAME_TYPE",
     "signal" : {
 	"types" : SIGTYPES,
-	"signalModelCard" : "/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D_higgs_mjj70.rs"
+	"signalModelCard" : "/src/HiggsAnalysis/bbggLimits/Models/models_2D_higgs_mjj70.rs"
     },
     "other" : {
         "doDoubleSidedCB": 1,
