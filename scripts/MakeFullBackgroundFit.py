@@ -60,6 +60,8 @@ dims = ['mjj', 'mgg']
 bins = [24, 80]
 xtitle = ['M(jj) [GeV]', 'M(#gamma#gamma) [GeV]']
 ytitle = ['Events/(5 GeV)', 'Events/(1 GeV)']
+yLimits = {'mgg': [14, 90, 14, 60], 'mjj': [18, 220, 30, 150]}
+
 for cc in cats:
  for iobs,obs in enumerate(dims):
 
@@ -181,7 +183,7 @@ for cc in cats:
   frame.Draw()
   frame.GetXaxis().SetTitle(xtitle[iobs])
   frame.GetYaxis().SetTitle(ytitle[iobs])
-  frame.SetMaximum(frame.GetMaximum()*1.6)
+  frame.SetMaximum(yLimits[obs][cc])
   frame.SetMinimum(0.0001)
   leg.Draw('same')
   c.Update()
@@ -226,5 +228,6 @@ for cc in cats:
 
   DrawCMSLabels(c, '35.9')
   c.SaveAs(opt.outf+str(cc) + obs+".pdf")
+  c.SaveAs(opt.outf+str(cc) + obs+".png")
 
 ofile.Close()

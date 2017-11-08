@@ -17,12 +17,11 @@ tempfile= '''
     "LTDIR" : "DIRLOC/DIRNAME_TYPE",
     "signal" : {
 	"types" : SIGTYPES,
-	"signalModelCard" : "/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D_higgs_mjj70.rs"
+	"signalModelCard" : "/src/HiggsAnalysis/bbggLimits/Models/models_2D_higgs_mjj70.rs"
     },
     "other" : {
         "doDoubleSidedCB": 1,
         "Combinelxbatch" : 1,
-        "version" : 66,
 	"integratedLumi" : 36.5,
         "energy" : "13TeV",
         "higgsMass" : 125.0,
@@ -30,14 +29,13 @@ tempfile= '''
         "doBlinding" : 0,
         "doBands" : 0,
         "ncat" : 2,
-        "analysisType" : "fitTo2D_resSearch_withRegKinFit",
-        "doSingleLimit" : 1,
+        "doSingleLimit" : 0,
         "drawSignalFit" : 0,
         "drawBackgroundFit" : 0,
         "useSigTheoryUnc" : 0,
 	"doBrazilianFlag" : false,
 	"runCombine" :true,
-	"combineOption" : 2,
+	"combineOption" : 1,
 	"minMggMassFit" : 100,
 	"maxMggMassFit" : 180,
 	"minMjjMassFit"	: 70,
@@ -79,7 +77,8 @@ else:
   jsonname = opt.jsonname
 
 sigTypes = '["HighMass", "LowMass"]'
-toRun = '--nodes SM'
+toRun = ''
+#toRun = '--nodes SM'
 addHiggs = '1'
 rMass = ''
 if '-10' not in opt.mass:

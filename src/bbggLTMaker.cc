@@ -7,7 +7,6 @@
 #include "CondFormats/BTauObjects/interface/BTagCalibrationReader.h"
 
 bool DEBUG = 0;
-#define NRWTOT 1507 // Total points for the Non-resonant re-weighting
 
 void bbggLTMaker::Loop()
 {
@@ -58,7 +57,7 @@ void bbggLTMaker::Loop()
   outTree->Branch("mjj", &o_bbMass, "o_bbMass/D");
   outTree->Branch("mgg", &o_ggMass, "o_ggMass/D");
   outTree->Branch("mtot", &o_bbggMass, "o_bbggMass/D"); //
-  outTree->Branch("btmap", &btmap);
+  //outTree->Branch("btmap", &btmap);
   outTree->Branch("jet1PT", &jet1PT, "jet1PT/D");
   outTree->Branch("jet2PT", &jet2PT, "jet2PT/D");
   outTree->Branch("jet1ETA", &jet1ETA, "jet1ETA/D");
@@ -97,25 +96,35 @@ void bbggLTMaker::Loop()
     }
 
     // Now get the Histograms for re-weighting from the root file.
-    // Note that the following file is not committed to git (it's too large).
-    // Get it from /afs/cern.ch/user/a/andrey/public/HH/weights_v1_1507_points.root
-    // and copy in your working directory:
-    TString fileNameWei = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/weights_v1_1507_points.root");
+    TString fileNameWei = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/data/weights_v1_1507_points.root");
     NRwFile = new TFile(fileNameWei, "OPEN");
-     
-    if (NRwFile->IsZombie()){
-      cout<<" Input file does not exist!"<<endl;
+
+    // This file includes 12 benchmark v3 weights.
+    TString fileNameWei2 = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/data/weights_v3_bench12_points.root");
+    NRwFile2 = new TFile(fileNameWei2, "OPEN");
+ 
+    if (NRwFile->IsZombie() || NRwFile2->IsZombie()){
+      cout<<" Input file for Non-Res weights does not exist!"<<endl;
       exit(1);
     }
     NRwFile->Print();
-
+    NRwFile2->Print();
+    
     TList *histList = NRwFile->GetListOfKeys();
-    for (UInt_t n=0; n<NRWTOT; n++)
+    for (UInt_t n=0; n<1507; n++){
       if (histList->Contains(Form("point_%i_weights",n)))
 	NR_Wei_Hists[n] = (TH2F*)NRwFile->Get(Form("point_%i_weights",n));
       else
 	cout<<"This one does not existe pas: "<<n<<endl;
+    }
 
+    TList *histList2 = NRwFile2->GetListOfKeys();
+    for (UInt_t n=0; n<12; n++){
+      if (histList2->Contains(Form("point_%i_weights",n)))
+	NR_Wei_Hists[1507+n] = (TH2F*)NRwFile2->Get(Form("point_%i_weights",n));
+      else
+	cout<<"This one does not existe pas: "<<1507+n<<endl;
+    }
   }
 
   Long64_t nentries = fChain->GetEntriesFast();
@@ -135,10 +144,10 @@ void bbggLTMaker::Loop()
   }
 
   if(phoVariation > -100){
-//    TString phoSFID_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/MVAID/mvaIDsf.root");
+    //    TString phoSFID_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/MVAID/mvaIDsf.root");
     TString phoSFID_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/MVAID/egammaEffi.txt_EGM2D.root");
     cout << "phoSFsID file: " << phoSFID_file << endl;
-//    TString phoSFeveto_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/MVAID/csevsf.root");
+    //    TString phoSFeveto_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/MVAID/csevsf.root");
     TString phoSFeveto_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/MVAID/ScalingFactors_80X_Summer16.root");
     cout << "phoSFsEV file: " << phoSFeveto_file << endl;
     bbggLTMaker::SetupPhotonSF( phoSFID_file, phoSFeveto_file);
@@ -210,25 +219,11 @@ void bbggLTMaker::Loop()
     if(doKinFit)
       o_bbggMass = diHiggsCandidate_KF->M();
     if(doMX)
-      o_bbggMass = diHiggsCandidate->M() - dijetCandidate->M() + 125.;
+      o_bbggMass = diHiggsCandidate->M() - dijetCandidate->M() - diphotonCandidate->M() + 250.;
 
     //mtot cut
-    bool passedMassCut = 1;
-
-    if(o_bbggMass < mtotMin || o_bbggMass > mtotMax)
-      passedMassCut = 0;
-
-    if(tilt){
-      passedMassCut = 1;
-      if( (o_bbggMass-o_ggMass) > mtotMax - 125.)
-	passedMassCut = 0;
-      if( (o_bbggMass-o_ggMass) < mtotMin - 125.)
-	passedMassCut = 0;
-    }
-
-    if(passedMassCut == 0)
-      continue;
-
+    if(o_bbggMass < mtotMin || o_bbggMass > mtotMax) continue;
+    
     bool isInterestingRegion = 1;
     if(isSignal){
       if(photonCR==0 && photonCRNormToSig==0) isInterestingRegion = 1;
@@ -394,12 +389,15 @@ void bbggLTMaker::Loop()
 	  o_NRWeights[n] = 1;
 	}
 	else {
-	  //Check if histogram exist
-	  UInt_t binNum = NR_Wei_Hists[n]->FindBin(gen_mHH, fabs(gen_cosTheta));
-	  o_NRWeights[n] = NR_Wei_Hists[n]->GetBinContent(binNum);
-	  // Just print out for one n:
-	  if (DEBUG && n==100 && jentry%1000 == 0)
-	    cout<<n<<" **  mHH = "<<gen_mHH<<"   cosT*="<<fabs(gen_cosTheta)<<"  bin="<<binNum<<" wei="<<o_NRWeights[n]<<endl;
+	  if (gen_mHH > 1800) // The re-weighting histograms are limited by this cut
+	    o_NRWeights[n]=0;
+	  else {
+	    const UInt_t binNum = NR_Wei_Hists[n]->FindBin(gen_mHH, fabs(gen_cosTheta));
+	    o_NRWeights[n] = NR_Wei_Hists[n]->GetBinContent(binNum);
+	    // Just print out for one n:
+	    if (DEBUG && n==100 && jentry%1000 == 0)
+	      cout<<n<<" **  mHH = "<<gen_mHH<<"   cosT*="<<fabs(gen_cosTheta)<<"  bin="<<binNum<<" wei="<<o_NRWeights[n]<<endl;
+	  }
 	}
 	
 	o_NRWeights[n] = o_NRWeights[n]*normalizationNR*genTotalWeight*o_btagweight*pho1_sf*pho2_sf;

@@ -8,7 +8,7 @@ gROOT.SetBatch()
 __author__ = 'Andrey Pozdnyakov'
 
 import argparse
-parser =  argparse.ArgumentParser(description='Limit Tree maker')
+parser =  argparse.ArgumentParser(description='Limit plotting script')
 parser.add_argument('-b','--blind', dest="blind", action="store_true", default=False,
                     help="Do not try to get observed limits.")
 parser.add_argument("-c", dest="combineOpt", type=int, default=1,
@@ -28,6 +28,7 @@ opt = parser.parse_args()
 
 import HiggsAnalysis.bbggLimits.ParametersGrid as pg
 import HiggsAnalysis.bbggLimits.TdrStyle as tdr
+import HiggsAnalysis.bbggLimits.CMS_lumi as CMS_lumi
 gridMap = pg.loadMapping_()
 
 br = 0.26 / 100.
@@ -143,7 +144,7 @@ if __name__ == "__main__":
   cgPoints_2 = pg.getPoints(filterMyPoints, gridMap, filt)
   print 'Cg_2 points:\n', cgPoints_2
 
-  gROOT.LoadMacro("./CMS_lumi.C")
+  #gROOT.LoadMacro("./CMS_lumi.C")
   tdr.setTDRStyle()
   tdrStyle.SetTitleSize(0.054, "Y")
   tdrStyle.SetTitleYOffset(1.1)
@@ -235,7 +236,7 @@ if __name__ == "__main__":
       xErr.append(0.5)
 
   else:
-    print 'Making limit plot for 0-1507 grid points'
+    print 'Making limit plot for 0-1518 grid points'
 
     for n in xrange(0,1519):
 
@@ -328,6 +329,8 @@ if __name__ == "__main__":
   exp1SigHiErr_Array  = np.array([b-a for a,b in zip(expMean,exp1SigHi)])
   exp2SigHiErr_Array  = np.array([b-a for a,b in zip(expMean,exp2SigHi)])
 
+  print expMean
+  
   mg = TMultiGraph()
   mg.SetTitle('')
 
@@ -475,7 +478,7 @@ if __name__ == "__main__":
     mg.GetXaxis().SetLimits(-1.3, 1.3)
   mg.GetYaxis().SetTitle('#sigma(pp #rightarrow HH) #times B(HH #rightarrow bb#gamma#gamma)_{95% CL} (fb)')
 
-  mg.SetMaximum(20)
+  mg.SetMaximum(11)
 
   gPad.RedrawAxis()
 
@@ -523,7 +526,7 @@ if __name__ == "__main__":
     gPad.SetLogy()
 
 
-  CMS_lumi(c1, 4, 11, "")
+  CMS_lumi.CMS_lumi(c1, 4, 11)
 
   ext = ['.png']
   if opt.pdf: ext.append('.pdf')

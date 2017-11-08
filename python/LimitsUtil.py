@@ -53,7 +53,6 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
   drawSignalFit = Params['other']['drawSignalFit']
   doCombine       = Params['other']["runCombine"]
   useSigTheoryUnc = Params['other']["useSigTheoryUnc"]
-  analysisType = Params['other']["analysisType"]
   HH   = Params['other']["HH"]
   base = Params['other']["base"]
   low  = Params['other']["low"]
@@ -81,16 +80,18 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
   if point!=None and NRgridPoint!=-1:
     print 'WARning: cannot have both the Node and grid Point. Chose one and try again'
     return __BAD__
+  elif opt.analyticalRW==True:
+    Label = "_ARW_"
   elif point!=None:
     Label = "_Node_"+str(point)
   elif NRgridPoint!=-1:
     Label = "_gridPoint_"+str(NRgridPoint)
-  elif opt.analyticalRW==True:
-    Label = "_ARW_"
   else:
     print 'WARning: using list of nodes from the json input file'
     return __BAD__
 
+  print "Label=",Label
+  
   sigCat = 0
   isRes = 0
   if point==None:
@@ -179,8 +180,8 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
 
     theFitter.SetVerbosityLevel(opt.verb)
 
-#    if opt.analyticalRW == True:
-#      theFitter.DoARW()
+    #    if opt.analyticalRW == True:
+    #      theFitter.DoARW()
 
     if 'HighMass' in t:
       theFitter.SetNCat0(2)
@@ -277,7 +278,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     procLog.info("\t BIAS FITS DONE. Node=%r, GridPoint=%r, type=%r", point,NRgridPoint,t)
     if opt.verb>0: p7 = printTime(p6,start,procLog)
 
-    print "IM HERE"
+    print PID, "IM HERE"
 
     sigExp = []
     bkgObs = []
@@ -298,7 +299,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
         sigExpStr += ","
         bkgObsStr += ","
 
-    print "IM HERE2"
+    print PID, "IM HERE2"
 
     # Make datacards:
     myLoc = os.getenv("CMSSW_BASE") + '/src/HiggsAnalysis/bbggLimits/'+newFolder
@@ -309,17 +310,17 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     procLog.info("\t DATACARD DONE. Node/Mass=%r, GridPoint=%r, type=%r", point,NRgridPoint,t)
     if opt.verb>0: p8 = printTime(p7,start,procLog)
 
-    print "IM HERE3"
+    print PID, "IM HERE3"
     # Limits by type:
     if doSingleLimit or isRes:
-      print "IM HERE4"
+      print PID, "IM HERE4"
       if doCombine:
-        print "IM HERE5"
+        print PID, "IM HERE5"
         if Combinelxbatch:
-          print "IM HERE6"
+          print PID, "IM HERE6"
           runCombineOnLXBatch(myLoc+"/datacards/", doBlinding, procLog, combineOpt, t+Label)
         else:
-          print "IM HERE7"
+          print PID, "IM HERE7"
           runCombine(newFolder+"/datacards/", doBlinding, procLog, combineOpt, Combinelxbatch, t+Label)
 
     
@@ -360,7 +361,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
 
     if doCombine:
       if Combinelxbatch:
-        print "IM HERE6"
+        print PID, "IM HERE6"
         myLoc = os.getenv("CMSSW_BASE") + '/src/HiggsAnalysis/bbggLimits/' + newDir
         runCombineOnLXBatch(myLoc+"/", doBlinding, procLog, combineOpt, "CombinedCard"+Label)
       else:
