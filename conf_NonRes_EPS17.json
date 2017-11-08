@@ -14,7 +14,6 @@
         "doBlinding" : 0,
         "doBands" : 0,
         "ncat" : 2,
-        "analysisType" : "fitTo2D_resSearch_withRegKinFit",
         "doSingleLimit" : 0,
         "drawSignalFit" : 0,
         "drawBackgroundFit" : 0,

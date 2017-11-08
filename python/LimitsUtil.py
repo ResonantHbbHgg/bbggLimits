@@ -53,7 +53,6 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
   drawSignalFit = Params['other']['drawSignalFit']
   doCombine       = Params['other']["runCombine"]
   useSigTheoryUnc = Params['other']["useSigTheoryUnc"]
-  analysisType = Params['other']["analysisType"]
   HH   = Params['other']["HH"]
   base = Params['other']["base"]
   low  = Params['other']["low"]

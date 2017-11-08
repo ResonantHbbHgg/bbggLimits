@@ -30,21 +30,18 @@ for qt in quantiles:
 
 
 for ii in xrange(0, len(klJHEP)):
-  # for ikt in scan['kt']:
-  #  for cg in scan['cg']:
-  #   for c2 in scan['c2']:
-  #    for c2g in scan['c2g']:
   kl = klJHEP[ii]
   kt = ktJHEP[ii]
   c2 = c2JHEP[ii]
   cg = cgJHEP[ii]
   c2g = c2gJHEP[ii]
 
-  nodename = 'Node_SM'+'_'.join(['kl'+str(kl), 'kt' + str(kt), 'cg'+ str(cg), 'c2' + str(c2), 'c2g' + str(c2g)]).replace('.', 'p').replace('-', 'm')
-  #nodename = "_".join(['ARW','kl'+str(kl), 'kt' + str(kt), 'cg'+ str(cg), 'c2' + str(c2), 'c2g' + str(c2g)]).replace('.', 'p').replace('-', 'm')
+  #nodename = 'Node_SM'+'_'.join(['kl'+str(kl), 'kt' + str(kt), 'cg'+ str(cg), 'c2' + str(c2), 'c2g' + str(c2g)]).replace('.', 'p').replace('-', 'm')
+  nodename = "_".join(['ARW','kl'+str(kl), 'kt' + str(kt), 'cg'+ str(cg), 'c2' + str(c2), 'c2g' + str(c2g)]).replace('.', 'p').replace('-', 'm')
   name = opt.f + '/CombinedCard_'+nodename  + '/higgsCombineCombinedCard_' + nodename + '.Asymptotic.mH125.root'
 
   print name
+  
   rfile = TFile(name, 'READ')
   if rfile.IsZombie(): continue
   tree = rfile.Get("limit")
@@ -53,8 +50,8 @@ for ii in xrange(0, len(klJHEP)):
     tree.Draw("limit", "quantileExpected>"+str(float(qt)-0.001) + ' && quantileExpected < ' +str(float(qt)+0.001), "goff")
     lims[qt].append(tree.GetV1()[0])
   rfile.Close()
-
-  print plots
+  print 'Expected limit at r=0.5: ', lims['0.500']
+  # print plots
 
 h1 = TH1F('h1', '', 14, 0.5, 14.5)
 h1.GetXaxis().SetTitle("Shape Benchmark Points")
@@ -68,7 +65,7 @@ for ib in range(0, len(klJHEP)):
   if ib == 13: ibin = 14
 
   for qt in quantiles:
-    print lims['-1']
+    # print lims['-1']
     if '-1' in qt:
       plots[qt].SetPoint(ib, ibin, lims['-1'][ib])
     else:
@@ -150,6 +147,9 @@ DrawCMSLabels(c0, '35.9')
 
 c0.SaveAs(opt.out+"NonResPlot.pdf")
 c0.SaveAs(opt.out+"NonResPlot.png")
+
+
+plots['0.500'].Print("all")
 
 sys.exit()
 
