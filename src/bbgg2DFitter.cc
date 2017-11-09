@@ -1,7 +1,7 @@
 #define bbgg2DFitter_cxx
 #include "HiggsAnalysis/bbggLimits/interface/bbgg2DFitter.h"
 #include "HiggsAnalysis/bbggLimits/interface/bbggFittingTools.h"
-#include "HiggsAnalysis/bbggLimits/interface/Colors.h"
+//#include "HiggsAnalysis/bbggLimits/interface/Colors.h"
 #include "HiggsAnalysis/CombinedLimit/interface/RooMultiPdf.h"
 #include "HiggsAnalysis/CombinedLimit/interface/HZZ2L2QRooPdfs.h"
 //Boost
