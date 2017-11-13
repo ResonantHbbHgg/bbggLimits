@@ -70,9 +70,9 @@ def main(argv):
 		var = workspace.var(ob)
 		data = data2D.reduce(RooArgSet(var))
 
-		label = "M(jj) [GeV]"
+		label = "m_{jj} [GeV]"
 		if 'mgg' in ob:
-			label = "M(#gamma#gamma) [GeV]"
+			label = "m_{#gamma#gamma} [GeV]"
 
 		MakeBkgPlot(data, pdf, var, label, lumi, cat, analysis, doBands, myLabel+"background_fit_"+ob, bins[i], Blinded)
 

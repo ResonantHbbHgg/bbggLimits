@@ -10,7 +10,7 @@ from HiggsAnalysis.bbggLimits.ResonantCrossSections import *
 from HiggsAnalysis.bbggLimits.NiceColors import *
 from HiggsAnalysis.bbggLimits.MyCMSStyle import *
 
-gROOT.SetBatch(kTRUE)
+gROOT.SetBatch()
 
 parser =  argparse.ArgumentParser(description='Limit Tree maker')
 parser.add_argument('-f', '--inputFolder', dest="folder", default=None, type=str, required=True,
