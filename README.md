@@ -58,7 +58,7 @@ makeAllTrees.py -x nonres -f LT_OutDir \
 You can aslo provide the locations of the flat trees if they are not the ones hardcoded in
 the script, via `-s`, `-d`, `-b` options. For example, to make the trees from single H, use: 
 ```
-makeAllTrees.py -x nonres -f LT_OutDir -s FlatT_SignalDir\ -d 0 \  
+makeAllTrees.py -x nonres -f LT_OutDir -s FlatT_SignalDir -d 0 \  
 --doCatMVA --MVAHMC0 0.970 --MVAHMC1 0.600 --MVALMC0 0.985 --MVALMC1 0.600 --massNR 350 --doSMHiggs --LMLJBTC 0.55 --LMSJBTC 0.55 --genDiPhotonFilte
 ```  
 
