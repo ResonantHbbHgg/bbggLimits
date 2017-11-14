@@ -221,6 +221,7 @@ leg.Draw('same')
 
 DrawCMSLabels(c1, '35.9')
 c1.SaveAs("klktplot.pdf")
+c1.SaveAs("klktplot.png")
 
 
 c0 = TCanvas('c0', 'c0', 800, 600)
@@ -247,6 +248,7 @@ for gr,gr in enumerate(myGraphs):
     DrawCMSLabels(c0, '35.9')
     c0.Update()
     c0.SaveAs('cen_lims.pdf')
+    c0.SaveAs('cen_lims.png')
     break
 
 if opt.unblind == True:
@@ -274,6 +276,7 @@ if opt.unblind == True:
       DrawCMSLabels(cob, '35.9')
       cob.Update()
       cob.SaveAs('obs_lims.pdf')
+      cob.SaveAs('obs_lims.png')
       break
 
 outf.Close()
