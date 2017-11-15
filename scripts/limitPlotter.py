@@ -307,9 +307,14 @@ if __name__ == "__main__":
       if opt.x in 'klkt':
         klktScanList += ' '.join([str(count), str(pg.getParametersFromPoint(n,gridMap,True)['lambda']),
                                   str(pg.getParametersFromPoint(n,gridMap,True)['yt']),
-                                  str(l[2]), str(l[5]), str(l[3]), str(l[1]), str(l[4]), str(l[0])])
-        klktScanList += '\n'
+                                  str(l[2]), str(l[5]), str(l[3]), str(l[1]), str(l[4]), str(l[0]), '\n'])
         count+=1
+        # Add symmetric values:
+        klktScanList += ' '.join([str(count), str(-pg.getParametersFromPoint(n,gridMap,True)['lambda']),
+                                  str(-pg.getParametersFromPoint(n,gridMap,True)['yt']),
+                                  str(l[2]), str(l[5]), str(l[3]), str(l[1]), str(l[4]), str(l[0]), '\n'])
+        count+=1
+    
       try:
         theo.append(pg.getCrossSectionForPoint(n, gridMap)[0]*br)
       except:
@@ -319,6 +324,15 @@ if __name__ == "__main__":
       xErr.append(0.5)
 
   if opt.x=='klkt':
+    # Adding fake values at the edges to make plotting script work:
+    for l in [-20, 20]:
+      for t in np.linspace(-2.5, 2.5, 11):
+        klktScanList += ' '.join([str(count), str(l), str(t), '3.0 4.0 5.0 3.0 6.0 2.0 \n'])
+        count+=1
+    for t in [-2.5, 2.5]:
+      for l in np.linspace(-20, 20, 11):
+        klktScanList += ' '.join([str(count), str(l), str(t), '3.0 4.0 5.0 3.0 6.0 2.0 \n'])
+        count+=1
     outList = open("KlKtList.txt", "w+")
     outList.write(klktScanList)
     outList.close()
