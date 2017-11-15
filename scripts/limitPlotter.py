@@ -336,7 +336,10 @@ if __name__ == "__main__":
     outList = open("KlKtList.txt", "w+")
     outList.write(klktScanList)
     outList.close()
-    os.system("python scripts/MakeKLKTplot.py --limitsFile KlKtList.txt --outFile KlKtList.root --unblind")
+    if opt.blind:
+      os.system("python scripts/MakeKLKTplot.py --limitsFile KlKtList.txt --outFile KlKtList.root")
+    else:
+      os.system("python scripts/MakeKLKTplot.py --limitsFile KlKtList.txt --outFile KlKtList.root --unblind")
     
   if len(xAxis) == 0:
     print 'There are no points to plot! Exiting...'
