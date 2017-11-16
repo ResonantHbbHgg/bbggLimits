@@ -103,17 +103,20 @@ The `pyLimits.py` script would call _runFullChain()_ method which is implemented
 the base code which interacts with the functions in `bbgg2DFitter.cc`.  
 Using the `--nodes SM` option tells it to use the Limit Tree produced from a single SM MC
 sample.  Alternatively, one can do the re-weighting of the merged non-resonant
-samples and therefore increase the statistics of the SM signal. Analytical re-weighting was used for EPS17 results of 2016 data.  
-Run it like so: 
+samples and therefore increase the statistics of the SM signal.  
+Run it like so:
 ``` 
-pyLimits.py -f conf_NonRes_EPS17.json -o outputDirName --analyticalRW
+pyLimits.py -f conf_default.json -o outputDirName --analyticalRW
 ```
-
-In case of problems it's useful to increase verbosity level with `-v 1(2,3)` option. In this case the logs should be found in your `/tmp/username/logs` and in the _master_ log, `outputDirName/mainLog_date-time.log`
-
+(Such re-weighting was used for EPS17 results of 2016 data.)
 The above command should give you the limits identical to
 [the ones on SVN](https://svnweb.cern.ch/cern/wsvn/cmshcg/trunk/cadi/HIG-17-008/NonResonant/Benchmarks/CombinedCard_Node_SMkl1p0_kt1p0_cg0p0_c20p0_c2g0p0/result_2_L_CombinedCard_Node_SMkl1p0_kt1p0_cg0p0_c20p0_c2g0p0.log).
-In order to reporduce the rest of _EPS17_ results, follow the instructions here:
+In order to reporduce the rest of the _EPS17_ results, follow the instructions here:
 [SmartScripts/README.md](SmartScripts/README.md)
+ 
+In case of problems it's useful to increase verbosity level with `-v 1(2,3)` option. In
+this case the logs should be found in your `/tmp/username/logs` and in the _master_ log,
+`outputDirName/mainLog_date-time.log`
+
 
 Good luck!

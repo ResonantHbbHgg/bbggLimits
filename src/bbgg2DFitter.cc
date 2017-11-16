@@ -69,7 +69,7 @@ void bbgg2DFitter::Initialize(RooWorkspace* workspace, Int_t SigMass, float Lumi
 			      Int_t doNRW, std::string logFileName, bool doARW)
 {
   //std::cout<<"DBG.  We Initialize..."<<std::endl;
-  
+
   _doblinding = doBlinding;
   _NCAT = nCat;
   _sigMass = SigMass;
@@ -185,7 +185,7 @@ RooArgSet* bbgg2DFitter::defineVariables(bool swithToSimpleWeight=false)
     new_evWeight = new RooRealVar("new_evWeight","HqT x PUwei x ARW",-100000,100000,"");
   }
 
- 
+
   cut_based_ct->defineType("cat4_0",0);
   cut_based_ct->defineType("cat4_1",1);
   cut_based_ct->defineType("cat4_2",2);
@@ -320,9 +320,9 @@ std::vector<float> bbgg2DFitter::AddHigData(float mass, TString signalfile, int 
     std::cout << "================= Adding Single Higgs ==========================" <<std::endl;
     std::cout<<" \t mass: "<<mass<<" signalfile="<<signalfile<<" higgschannel="<<higgschannel<<" higName="<<higName<<std::endl;
   }
-  
+
   RooArgSet* ntplVars = defineVariables(1);
-  
+
   TFile higFile(signalfile);
   TTree* higTree = (TTree*) higFile.Get("TCVARS");
   if(higTree==nullptr)
@@ -502,7 +502,7 @@ void bbgg2DFitter::SigModelFit(float mass)
                                 *_w->var(TString::Format("mjj_sig_sigma_cat%d",c)) ) );
       }
       if (!_useDSCB) {
-         sigParams.add(RooArgSet( 
+         sigParams.add(RooArgSet(
 			   *_w->var(TString::Format("mgg_sig_alpha_cat%d",c)),
 			   *_w->var(TString::Format("mgg_sig_n_cat%d",c)),
 			   *_w->var(TString::Format("mgg_sig_gsigma_cat%d",c)),
@@ -561,8 +561,8 @@ void bbgg2DFitter::HigModelFit(float mass, int higgschannel, TString higName)
 //      if(higgschannel == 1 || higgschannel == 3) mjjHig[c] = (RooAbsPdf*) _w->pdf(TString::Format("mjjHig_%d_cat%d",higgschannel,c));
       if(higName.Contains("ggh") == 1 || higName.Contains("vbf") == 1) {
         mjjHig[c] = new RooBernstein(TString::Format("mjjHig_%s_cat%d",higName.Data(),c),"",*mjj,
-			RooArgList( *_w->var( TString::Format("mjj_hig_slope1_%s_cat%d", higName.Data(),c) ), 
-				    *_w->var( TString::Format("mjj_hig_slope2_%s_cat%d", higName.Data(),c) ), 
+			RooArgList( *_w->var( TString::Format("mjj_hig_slope1_%s_cat%d", higName.Data(),c) ),
+				    *_w->var( TString::Format("mjj_hig_slope2_%s_cat%d", higName.Data(),c) ),
 				    *_w->var( TString::Format("mjj_hig_slope3_%s_cat%d", higName.Data(),c) ) ));
       } else {
         mjjHig[c] = (RooAbsPdf*) _w->pdf(TString::Format("mjjHig_%s_cat%d",higName.Data(),c));
@@ -880,13 +880,13 @@ void bbgg2DFitter::MakePlots(float mass)
       else {
 	// This is Non-resonant case
 
-	
+
 	if (_NR_MassRegion==1)
 	  tlat0->DrawLatex(0.16, 0.87, catdesc.at(c) + " (Low Mass)");
 	if (_NR_MassRegion==2)
 	  tlat0->DrawLatex(0.16, 0.87, catdesc.at(c) + " (High Mass)");
 
-	
+
 	if (_nonResWeightIndex==-1){
 	  // This is the Nodes
 	  if (_sigMass==0) str_desc=TString::Format(" Nonresonant HH, SM");
@@ -900,8 +900,8 @@ void bbgg2DFitter::MakePlots(float mass)
 	else
 	  std::cout<<"Warning this index is BAD: "<<_nonResWeightIndex<<std::endl;
       }
-     
-      
+
+
       tlat0->DrawLatex(0.16, 0.82, str_desc);
 
       str_desc=TString::Format(" #mu = %.2f GeV",mean_mgg[c]);
@@ -1414,7 +1414,7 @@ void bbgg2DFitter::MakeHigWS(std::string fileHiggsName,int higgschannel, TString
       _w->factory(TString::Format("prod::CMS_hgg_hig_sigma_%s_cat%d(mgg_hig_sigma_%s_cat%d, CMS_hgg_sig_sigmaScale_cat%d)", higName.Data(), newC, higName.Data(), newC, newC));
 
 //      if(!_useDSCB) _w->factory(TString::Format("prod::CMS_hgg_gsigma_%s_cat%d(mgg_hig_gsigma_%s_cat%d, CMS_hgg_sig_sigmaScale)", higName.Data(), newC, higName.Data(), newC));
-      if(!_useDSCB) _w->factory(TString::Format("prod::CMS_hgg_gsigma_%s_cat%d(mgg_hig_gsigma_%s_cat%d, CMS_hgg_sig_sigmaScale_cat%d)", 
+      if(!_useDSCB) _w->factory(TString::Format("prod::CMS_hgg_gsigma_%s_cat%d(mgg_hig_gsigma_%s_cat%d, CMS_hgg_sig_sigmaScale_cat%d)",
                                                                higName.Data(), newC, higName.Data(), newC, newC));
       if (higName.Contains("ggh") == 0 && higName.Contains("vbf") == 0) {
 /*        _w->factory(TString::Format("prod::CMS_hbb_hig_m0_%s_cat%d(mjj_hig_m0_%s_cat%d, CMS_hbb_sig_m0_absShift)", higName.Data(), newC, higName.Data(), newC));
@@ -1733,6 +1733,18 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs)
       RooAbsPdf* BkgPdf1 = (RooAbsPdf*) mggBkgTmpBer1->Clone(TString::Format("BkgPdf_cat%d",c));
       _w->import(*BkgPdf1);
     }
+
+    if (data_h2) data_h2->Delete();
+    if (data_h11) data_h11->Delete();
+  }
+
+  // Don't make plots, exit here!
+  return fitresults;
+
+  for (int c = 0; c < ncat; ++c) { // to each category
+
+    TH2* data_h2 = 0;
+    TH1* data_h11 = 0;
 
     if (_verbLvl>1) std::cout << "[BkgModelFit] Done with fit " << c << std::endl;
 
@@ -2053,27 +2065,7 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs)
 	  plotmjjBkg[c]->Draw("SAME");
 	}
       else plotmjjBkg[c]->Draw("SAME"); // close dobands
-      //plotmjjBkg[c]->getObject(1)->Draw("SAME");
-      //plotmjjBkg[c]->getObject(2)->Draw("P SAME");
-      ////////////////////////////////////////////////////////// plot higgs
-      /*
-      if(addhiggs){
-	for(unsigned int d=0;d!=_singleHiggsNames.size();++d)
-	  {
-	    static std::vector<int>color{2,3,6,7,4};
-	    int realint=_singleHiggsMap[_singleHiggsNames[d]];
-	    sigToFitvec[realint][c] = (RooDataSet*) _w->data(TString::Format("Hig_%d_cat%d",realint,c));
-	    double norm = 1.0*sigToFitvec[realint][c]->sumEntries(); //
-	    //norm0 = 0.0000001;
-	    mjjSigvec[realint][c] = (RooAbsPdf*) _w->pdf(TString::Format("mjjHig_%d_cat%d",realint,c));
-	    // we are not constructing signal pdf, this is constructed on sig to fit function...
-	    mjjSigvec[realint][c] ->plotOn(plotmjjBkg[c],Normalization(norm,RooAbsPdf::NumEvent),DrawOption("F"),LineColor(color[realint]),FillStyle(1001),FillColor(19));
-	    mjjSigvec[realint][c]->plotOn(plotmjjBkg[c],Normalization(norm,RooAbsPdf::NumEvent),LineColor(color[realint]),LineStyle(1));
-	    //
-	  }
-      }
-      */
-      //////////////////////////////////////////////////////////
+
       plotmjjBkg[c]->Draw("SAME");
       if(c==0||c==2)plotmjjBkg[c]->SetMinimum(0.005); // no error bar in bins with zero events
       if(c==1||c==3)plotmjjBkg[c]->SetMinimum(0.01); // no error bar in bins with zero events
@@ -2147,7 +2139,7 @@ void bbgg2DFitter::MakeFitsForBias(std::string biasConfig, std::string outputFil
   std::vector<std::string> biasFunctions;
   std::string plotTitle="";
   std::vector<std::string> legends;
-  double bkgNorm_up, bkgNorm_down, bkgNorm; 
+  double bkgNorm_up, bkgNorm_down, bkgNorm;
 
   //Read json
   boost::property_tree::ptree pt;

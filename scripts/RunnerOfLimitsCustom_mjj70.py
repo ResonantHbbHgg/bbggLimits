@@ -26,6 +26,7 @@ tempfile= '''
         "energy" : "13TeV",
         "higgsMass" : 125.0,
         "addHiggs" : AHIGGS,
+        "scaleSingleHiggs" : 0,
         "doBlinding" : 0,
         "doBands" : 0,
         "ncat" : 2,

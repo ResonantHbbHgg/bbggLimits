@@ -44,6 +44,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
   energy = str(Params['other']["energy"])
   mass   = Params['other']["higgsMass"]
   addHiggs   = Params['other']["addHiggs"]
+  scaleSingleHiggs = Params['other']["scaleSingleHiggs"]
   doBlinding = Params['other']["doBlinding"]
   doBands = Params['other']["doBands"]
   NCAT    = Params['other']["ncat"]
@@ -150,7 +151,8 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     SignalFile = "/LT_NR_Nodes_2to13_merged.root"
 
   if opt.analyticalRW == True:
-    SignalFile="/LT_NR_Nodes_All_merged_kl_"+str(opt.ARW_kl).replace(".", "p")+"_kt_"+str(opt.ARW_kt).replace(".", "p")+"_cg_"+str(opt.ARW_cg).replace(".", "p")+"_c2_"+str(opt.ARW_c2).replace(".", "p")+"_c2g_"+str(opt.ARW_c2g).replace(".", "p")+".root"
+    pointStr = "_".join(['kl',str(opt.ARW_kl),'kt',str(opt.ARW_kt),'cg',str(opt.ARW_cg),'c2',str(opt.ARW_c2),'c2g',str(opt.ARW_c2g)]).replace('.', 'p')
+    SignalFile="/LT_NR_Nodes_All_merged_"+pointStr+".root"
 
   procLog.debug('%s, %s', SignalFile, pformat(signalTypes))
 
@@ -197,6 +199,10 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     mass = 125.0
     if opt.verb>0:
       procLog.info('Signal File:\n'+LTDir+thisSignalFile)
+      
+    if not os.path.isfile(LTDir+thisSignalFile):
+      print 'File does not exist: ', LTDir+thisSignalFile
+      return __BAD__
     
     openStatus = theFitter.AddSigData( mass, str(LTDir+thisSignalFile))
     if openStatus==-1:
@@ -303,9 +309,12 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
 
     # Make datacards:
     myLoc = os.getenv("CMSSW_BASE") + '/src/HiggsAnalysis/bbggLimits/'+newFolder
-    if isRes==1: DataCardMaker(str(myLoc), NCAT, sigExpStr, bkgObsStr, isRes)
-    elif addHiggs == 0: DataCardMaker(str(myLoc), NCAT, sigExpStr, bkgObsStr, isRes, t)
-    else: DataCardMaker_wHiggs(str(myLoc), NCAT, sigExpStr, bkgObsStr, higgsExp, t)
+    if isRes==1:
+      DataCardMaker(str(myLoc), NCAT, sigExpStr, bkgObsStr, isRes)
+    elif addHiggs == 0:
+      DataCardMaker(str(myLoc), NCAT, sigExpStr, bkgObsStr, isRes, t)
+    else:
+      DataCardMaker_wHiggs(str(myLoc), NCAT, sigExpStr, bkgObsStr, higgsExp, t, scaleSingleHiggs, opt.ARW_kl, opt.ARW_kt)
 
     procLog.info("\t DATACARD DONE. Node/Mass=%r, GridPoint=%r, type=%r", point,NRgridPoint,t)
     if opt.verb>0: p8 = printTime(p7,start,procLog)
