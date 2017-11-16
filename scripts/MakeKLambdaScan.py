@@ -55,8 +55,10 @@ for qt in quantiles:
 myKl = []
 notworked = open('klscan_notworked.txt', 'w+')
 for kl in scan_kl['kl']:
-#  fname = opt.f + '/HighMass_Node_SMkl' + str(kl).replace('.', 'p').replace('-', 'm') + '_kt1p0_cg0p0_c20p0_c2g0p0/datacards/higgsCombineHighMass_Node_SMkl' + str(kl).replace('.', 'p').replace('-', 'm') + '_kt1p0_cg0p0_c20p0_c2g0p0.Asymptotic.mH125.root'
-  fname = opt.f + '/CombinedCard_Node_SMkl' + str(kl).replace('.', 'p').replace('-', 'm') + '_kt1p0_cg0p0_c20p0_c2g0p0/higgsCombineCombinedCard_Node_SMkl' + str(kl).replace('.', 'p').replace('-', 'm') + '_kt1p0_cg0p0_c20p0_c2g0p0.Asymptotic.mH125.root'
+  #  fname = opt.f + '/HighMass_Node_SMkl' + str(kl).replace('.', 'p').replace('-', 'm') + '_kt1p0_cg0p0_c20p0_c2g0p0/datacards/higgsCombineHighMass_Node_SMkl' + str(kl).replace('.', 'p').replace('-', 'm') + '_kt1p0_cg0p0_c20p0_c2g0p0.Asymptotic.mH125.root'
+  #fname = opt.f + '/CombinedCard_Node_SMkl' + str(kl).replace('.', 'p').replace('-', 'm') + '_kt1p0_cg0p0_c20p0_c2g0p0/higgsCombineCombinedCard_Node_SMkl' + str(kl).replace('.', 'p').replace('-', 'm') + '_kt1p0_cg0p0_c20p0_c2g0p0.Asymptotic.mH125.root'
+  fname = opt.f + ('/CombinedCard_ARW_kl' + str(kl) + '_kt1p0_cg0p0_c20p0_c2g0p0/higgsCombineCombinedCard_ARW_kl' + str(kl)).replace('.', 'p').replace('-', 'm') + '_kt1p0_cg0p0_c20p0_c2g0p0.Asymptotic.mH125.root'
+
   tfile = TFile(fname, "READ")
   if tfile.IsZombie() == 1:
     notworked.write(str(kl) + " 1.0 0.0 0.0 0.0 \n")
@@ -170,7 +172,8 @@ c.RedrawAxis()
 
 DrawCMSLabels(c, '35.9')
 
-c.SaveAs(opt.outf.replace(".root", "")+".pdf")
+c.SaveAs(opt.outf.replace(".root", ".pdf"))
+c.SaveAs(opt.outf.replace(".root", ".png"))
 
 
 print 'Expected excluded range with kt = 1'

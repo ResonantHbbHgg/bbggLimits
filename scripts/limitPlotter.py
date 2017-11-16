@@ -212,7 +212,9 @@ if __name__ == "__main__":
       exp2SigHi.append(l[4])
       if not opt.blind:
         obs.append(l[5])
-
+      else:
+        obs.append(0)
+        
       if opt.verb>0:
         print n,l
 
@@ -239,6 +241,8 @@ if __name__ == "__main__":
       exp2SigHi.append(l[4])
       if not opt.blind:
         obs.append(l[5])
+      else:
+        obs.append(0)
 
       if opt.verb>0:
         print n,l
@@ -292,6 +296,8 @@ if __name__ == "__main__":
       exp2SigHi.append(l[4])
       if not opt.blind:
         obs.append(l[5])
+      else:
+        obs.append(0)
 
       if opt.x=='grid':
         xAxis.append(float(n))
@@ -325,13 +331,13 @@ if __name__ == "__main__":
 
   if opt.x=='klkt':
     # Adding fake values at the edges to make plotting script work:
-    for l in [-20, 20]:
-      for t in np.linspace(-2.5, 2.5, 11):
-        klktScanList += ' '.join([str(count), str(l), str(t), '3.0 4.0 5.0 3.0 6.0 2.0 \n'])
+    for kl in [-20, 20]:
+      for kt in np.linspace(-2.5, 2.5, 11):
+        klktScanList += ' '.join([str(count), str(kl), str(kt), '3.0 4.0 5.0 3.0 6.0 2.0 \n'])
         count+=1
-    for t in [-2.5, 2.5]:
-      for l in np.linspace(-20, 20, 11):
-        klktScanList += ' '.join([str(count), str(l), str(t), '3.0 4.0 5.0 3.0 6.0 2.0 \n'])
+    for kt in [-2.5, 2.5]:
+      for kl in np.linspace(-20, 20, 11):
+        klktScanList += ' '.join([str(count), str(kl), str(kt), '3.0 4.0 5.0 3.0 6.0 2.0 \n'])
         count+=1
     outList = open("KlKtList.txt", "w+")
     outList.write(klktScanList)
