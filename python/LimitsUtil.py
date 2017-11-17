@@ -125,7 +125,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     logging.basicConfig(level=logLvl,
                         format='%(asctime)s PID:%(process)d %(name)-12s %(levelname)-8s %(message)s',
                         datefmt='%m-%d %H:%M',
-                        filename='/tmp/'+__username__+'/logs/processLog_'+str(procName)+'.log',
+                        filename=baseFolder+'/logs/processLog_'+str(procName)+Label+'.log',
                         filemode='w')
   except:
     print 'I got excepted!'
@@ -151,7 +151,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     SignalFile = "/LT_NR_Nodes_2to13_merged.root"
 
   if opt.analyticalRW == True:
-    pointStr = "_".join(['kl',str(opt.ARW_kl),'kt',str(opt.ARW_kt),'cg',str(opt.ARW_cg),'c2',str(opt.ARW_c2),'c2g',str(opt.ARW_c2g)]).replace('.', 'p')
+    pointStr = "_".join(['kl',str(opt.ARW_kl),'kt',str(opt.ARW_kt),'cg',str(opt.ARW_cg),'c2',str(opt.ARW_c2),'c2g',str(opt.ARW_c2g)]).replace('.', 'p').replace('-', 'm')
     SignalFile="/LT_NR_Nodes_All_merged_"+pointStr+".root"
 
   procLog.debug('%s, %s', SignalFile, pformat(signalTypes))
@@ -347,26 +347,31 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     newDir = baseFolder+'/CombinedCard'+Label
     createDir(newDir,procLog)
 
-    combCard_pre = newDir+'/hhbbgg_13TeV_DataCard_pre.txt'
+    #combCard_pre = newDir+'/hhbbgg_13TeV_DataCard_pre.txt'
     combCard = newDir+'/hhbbgg_13TeV_DataCard.txt'
-    os.system("combineCards.py "+ cardsToMerge + " > " + combCard_pre+' ')
+    os.system("combineCards.py "+ cardsToMerge + " > " + combCard)
 
     # Now we actually need to fix the combined card
-    newCard = ''
     for t in signalTypes:
-      strReplace = baseFolder+'/'+t+Label+'/datacards/'
-      newCard += '## replacing ' +strReplace+ ' for nothing \n'
+      #  strReplace = baseFolder+'/'+t+Label+'/datacards/'
+      strReplace = baseFolder+'/'+t+Label+'/datacards/'+os.getenv("CMSSW_BASE")+'/src/HiggsAnalysis/bbggLimits/' 
+      os.system("sed -i 's|"+strReplace+"||g' "+combCard)
+      print "String to replace:", strReplace
+      
+    #newCard = ''
+    #for t in signalTypes:
+    #  strReplace = baseFolder+'/'+t+Label+'/datacards/'
+    #  newCard += '## replacing ' +strReplace+ ' for nothing \n'
+    #with open(combCard_pre,'r') as f:
+    #  for line in f:
+    #    myString = line
+    #    for t in signalTypes:
+    #      myString = myString.replace(baseFolder+'/'+t+Label+'/datacards/', '')
+    #    newCard += myString + '\n'
 
-    with open(combCard_pre,'r') as f:
-      for line in f:
-        myString = line
-        for t in signalTypes:
-          myString = myString.replace(baseFolder+'/'+t+Label+'/datacards/', '')
-        newCard += myString + '\n'
-
-    newCombCard = open(combCard, 'w')
-    newCombCard.write(newCard)
-    newCombCard.close()
+    #newCombCard = open(combCard, 'w')
+    #newCombCard.write(newCard)
+    #newCombCard.close()
 
     if doCombine:
       if Combinelxbatch:
@@ -384,7 +389,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
           except:
             return __BAD__
           procLog.info("\t COMBINE with Option=%r is DONE. Node=%r, GridPoint=%r, type=%r \n \t Status = %r",
-                    method, point,NRgridPoint,t, combStatus)
+                       method, point,NRgridPoint,t, combStatus)
           if combStatus!=0:
             procLog.error('Combine failed...')
             # return __BAD__

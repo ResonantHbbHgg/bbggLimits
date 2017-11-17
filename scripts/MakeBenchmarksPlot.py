@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from ROOT import *
 from array import array
 import argparse, os, sys
@@ -10,12 +12,9 @@ gStyle.SetOptStat(0)
 
 parser =  argparse.ArgumentParser(description='Limit Tree maker')
 parser.add_argument("-f", "--folder", dest="f", type=str)
-parser.add_argument("-o", "--outfile", dest="out", type=str)
 parser.add_argument('-l', '--lumi', dest='lumi', type=str, default='35.9')
 parser.add_argument("--unblind", dest="unblind", action='store_true', default=False)
 opt = parser.parse_args()
-
-#outfile = TFile(opt.out+'.root', 'RECREATE')
 
 myLineHeight = 0.02
 myLineWidth = 0.05
@@ -36,9 +35,11 @@ for ii in xrange(0, len(klJHEP)):
   cg = cgJHEP[ii]
   c2g = c2gJHEP[ii]
 
+  # Use this one for Rafael's results: 
   #nodename = 'Node_SM'+'_'.join(['kl'+str(kl), 'kt' + str(kt), 'cg'+ str(cg), 'c2' + str(c2), 'c2g' + str(c2g)]).replace('.', 'p').replace('-', 'm')
-  nodename = "_".join(['ARW','kl'+str(kl), 'kt' + str(kt), 'cg'+ str(cg), 'c2' + str(c2), 'c2g' + str(c2g)]).replace('.', 'p').replace('-', 'm')
-  name = opt.f + '/CombinedCard_'+nodename  + '/higgsCombineCombinedCard_' + nodename + '.Asymptotic.mH125.root'
+
+  nodename = "_".join(['ARW','kl',str(kl), 'kt',str(kt), 'cg',str(cg), 'c2',str(c2), 'c2g',str(c2g)]).replace('.', 'p').replace('-', 'm')
+  name = opt.f + '/CombinedCard_'+nodename  + '/higgsCombine_' + nodename + '.Asymptotic.mH125_1.root'
 
   print name
   
@@ -145,8 +146,8 @@ leg.Draw("same")
 
 DrawCMSLabels(c0, '35.9')
 
-c0.SaveAs(opt.out+"NonResPlot.pdf")
-c0.SaveAs(opt.out+"NonResPlot.png")
+c0.SaveAs(opt.f+"/BenchmarkPlot.pdf")
+c0.SaveAs(opt.f+"/BenchmarkPlot.png")
 
 
 plots['0.500'].Print("all")

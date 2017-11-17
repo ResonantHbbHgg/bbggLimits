@@ -48,6 +48,7 @@ def runCombine(inDir, doBlind, log, combineOpt = 1, Combinelxbatch = 0, Label = 
   outDir = inDir
   os.rename(fName, outDir+'/'+fName.replace('.root', '_%i.root'%combineOpt))
 
+  log.info("Combine is done. %r should be produced", fName)
   return combExitCode
 
 #########################

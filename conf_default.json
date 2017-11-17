@@ -1,6 +1,6 @@
 
 {
-    "LTDIR" : "/afs/cern.ch/user/a/andrey/work/hh/MXFIX_LT_350_HMHPC_970_HMMPC_600_LMHPC_985_LMMPC_600_TYPE",
+    "LTDIR" : "/afs/cern.ch/user/a/andrey/work/hh/NewHope_TYPE",
     "signal" : {
 	"types" : ["HighMass", "LowMass"],
 	"signalModelCard" : "/src/HiggsAnalysis/bbggLimits/Models/models_2D_higgs_mjj70.rs"
