@@ -54,9 +54,9 @@ for ii in xrange(0, len(klJHEP)):
   # print plots
 
 h1 = TH1F('h1', '', 14, 0.5, 14.5)
-h1.GetXaxis().SetTitle("Shape Benchmark Points")
-h1.GetYaxis().SetTitle("#sigma(pp#rightarrowHH) #times #it{B}(HH#rightarrowb#bar{b}#gamma#gamma) [fb]")
-h1.SetMaximum(11)
+h1.GetXaxis().SetTitle("Shape benchmark hypothesis")
+h1.GetYaxis().SetTitle("#sigma(pp#rightarrowHH) #times #it{B}(HH#rightarrow#gamma#gammab#bar{b}) [fb]")
+h1.SetMaximum(10)
 
 for ib in range(0, len(klJHEP)):
 
@@ -80,13 +80,13 @@ for ib in range(0, len(klJHEP)):
 
 smbin = h1.FindBin(12.99)
 topbin = h1.FindBin(13.99)
-h1.GetXaxis().SetBinLabel(smbin, '#font[61]{SM}')
-h1.GetXaxis().SetBinLabel(topbin, '#font[61]{#kappa_{#lambda}= 0}')
+h1.GetXaxis().SetBinLabel(smbin, 'SM')
+h1.GetXaxis().SetBinLabel(topbin, '#kappa_{#lambda}= 0')
 SetAxisTextSizes(h1)
 h1.GetXaxis().SetLabelSize(0.052)
 
 #s2_col = kYellow
-s2_col = TColor.GetColor(NiceYellow2)
+s2_col = kOrange
 #s1_col = kGreen
 s1_col = TColor.GetColor(NiceGreen2)
 #th_col = kRed
@@ -98,12 +98,13 @@ cen_col = cNiceBlueDark
 
 SetGeneralStyle()
 c0 = TCanvas("c", "c", 800, 600)
-c0.SetGrid()
+#c0.SetGrid()
 h1.Draw()
 #plots['0.025'].SetMaximum(11)
 plots['0.025'].Draw("PZ same")
 plots['0.025'].SetLineColor(s2_col)
-plots['0.025'].SetLineWidth(8)
+plots['0.025'].SetFillColor(s2_col)
+plots['0.025'].SetLineWidth(10)
 #plots['0.025'].SetTitle("")
 #plots['0.025'].GetXaxis().SetLimits(-1, len(klJHEP))
 #plots['0.025'].GetYaxis().SetRangeUser(0, 10)
@@ -111,10 +112,11 @@ plots['0.025'].SetLineWidth(8)
 #plots['0.025'].GetYaxis().SetTitle("#sigma(pp#rightarrowHH)#times#it{B}(HH#rightarrowb#bar{b}#gamma#gamma) [fb]")
 c0.Update()
 plots['0.160'].Draw("EPZ same")
-plots['0.160'].SetMarkerStyle(21)
+#plots['0.160'].SetMarkerStyle(21)
 plots['0.160'].SetMarkerColor(s1_col)
-plots['0.160'].SetLineWidth(7)
+plots['0.160'].SetLineWidth(10)
 plots['0.160'].SetLineColor(s1_col)
+plots['0.160'].SetFillColor(s1_col)
 c0.Update()
 SetPadStyle(c0)
 c0.Update()
@@ -124,22 +126,38 @@ plots['0.500'].SetLineWidth(2)
 plots['0.500'].SetLineColor(cen_col)
 plots['0.500'].SetFillStyle(1)
 plots['0.500'].SetFillColor(cen_col)
+plots['0.500'].SetMarkerColor(cen_col)
+plots['0.500'].SetMarkerStyle(24)
+plots['0.500'].SetMarkerSize(1.1)
 plots['-1'].SetLineWidth(2)
 plots['-1'].SetLineColor(kBlack)
 plots['-1'].SetFillStyle(1)
 plots['-1'].SetFillColor(kBlack)
+plots['-1'].SetMarkerColor(kBlack)
+plots['-1'].SetMarkerStyle(20)
+plots['-1'].SetMarkerSize(1.1)
 
-plots['0.500'].Draw("2 same")
-if opt.unblind: plots['-1'].Draw("2 same")
+plots['0.500'].Draw("P same")
+if opt.unblind: plots['-1'].Draw("P same")
 
-leg = TLegend(0.12, 0.45, 0.45, 0.89)
+
+ltx = TLatex()
+ltx.SetNDC()
+ltx.SetTextSize(.035)
+ltx.DrawLatex(0.14,0.83,'#font[61]{pp#rightarrowHH#rightarrow#gamma#gammab#bar{b}}')
+
+
+leg = TLegend(0.50, 0.6, 0.80, 0.87)
 leg.SetFillColorAlpha(kWhite, 0.8)
 leg.SetBorderSize(0)
-leg.SetHeader("#font[61]{pp#rightarrowHH#rightarrowb#bar{b}#gamma#gamma}")#{#kappa_{t} = 1, c_{g} = c_{2g} = c_{2} = 0}")
-leg.AddEntry(plots['-1'], 'Observed 95% C.L. limit', 'l')
-leg.AddEntry(plots['0.500'], 'Expected 95% C.L. limit', 'l')
-leg.AddEntry(plots['0.160'], 'Expected #pm 1#sigma', 'l')
-leg.AddEntry(plots['0.025'], 'Expected #pm 2#sigma', 'l')
+headerTitle = "95% CL upper limits"
+leg.SetHeader(headerTitle)
+header = leg.GetListOfPrimitives().First()
+leg.SetTextSize(.035)
+leg.AddEntry(plots['-1'], 'Observed', 'p')
+leg.AddEntry(plots['0.500'], 'Expected', 'p')
+leg.AddEntry(plots['0.160'], 'Expected #pm 1 std. deviation', 'l')
+leg.AddEntry(plots['0.025'], 'Expected #pm 2 std. deviation', 'l')
 leg.Draw("same")
 
 

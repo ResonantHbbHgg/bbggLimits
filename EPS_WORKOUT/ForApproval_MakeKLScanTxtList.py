@@ -2,8 +2,8 @@ from ROOT import *
 import argparse, os
 from HiggsAnalysis.bbggLimits.DefineScans import *
 
-folder = ["/eos/cms/store/group/phys_higgs/resonant_HH/RunII/Limits/FinalLimits_EPS2017/JHEP_LIMS_LT_350_HMHPC_970_HMMPC_600_LMHPC_985_LMMPC_600_v66"]
-outf = "JHEP_Text_LIMS_LT_350_HMHPC_970_HMMPC_600_LMHPC_985_LMMPC_600_v66"
+folder = ["/eos/cms/store/group/phys_higgs/resonant_HH/RunII/Limits/FinalLimits_EPS2017/KLScan_LIMS_LT_350_HMHPC_970_HMMPC_600_LMHPC_985_LMMPC_600_v66"]
+outf = "KL_Scan_Text_LIMS_LT_350_HMHPC_970_HMMPC_600_LMHPC_985_LMMPC_600_v66"
 
 
 quantiles = ['0.025', '0.160', '0.500', '0.840', '0.975', '-1']
@@ -22,22 +22,19 @@ counter = 0
 myScan = scan_kl
 
 for ff in folder:
-  for ii in range(0, len(klJHEP)):
-    kl = klJHEP[ii]
-    kt = ktJHEP[ii]
-    cg = cgJHEP[ii]
-    c2 = c2JHEP[ii]
-    c2g =c2gJHEP[ii]
+
+ for kl in myScan['kl']:
+  for kt in myScan['kt']:
 #    if npts > 50: break 
 #    npts += 1
-    thisName = 'kl' + str(kl).replace('.', 'p').replace('-', 'm') + '_kt' + str(kt).replace('.', 'p').replace('-', 'm') + '_cg'+str(cg).replace('.', 'p').replace('-', 'm')+'_c2'+str(c2).replace('.', 'p').replace('-', 'm')+'_c2g'+str(c2g).replace('.', 'p').replace('-', 'm')
+    thisName = 'kl' + str(kl).replace('.', 'p').replace('-', 'm') + '_kt' + str(kt).replace('.', 'p').replace('-', 'm') + '_cg0p0_c20p0_c2g0p0'
     fname_HM = ff + '/HighMass_Node_SM' + thisName + '/datacards/higgsCombineHighMass_Node_SM' + thisName + '.Asymptotic.mH125.root'
     fname_LM = ff + '/LowMass_Node_SM' + thisName + '/datacards/higgsCombineLowMass_Node_SM' + thisName + '.Asymptotic.mH125.root'
     fname = ff + '/CombinedCard_Node_SM' + thisName + '/higgsCombineCombinedCard_Node_SM'+ thisName + '.Asymptotic.mH125.root'
     tfile = TFile(fname, "READ")
     tfile_HM = TFile(fname_HM, "READ")
     tfile_LM = TFile(fname_LM, "READ")
-    thesePoints = str(kl) + ' ' + str(kt) + ' ' + str(cg) + ' ' + str(c2) + ' ' + str(c2g)
+    thesePoints = str(kl) + ' ' + str(kt) + ' 0.0 0.0 0.0'
     if tfile.IsZombie() == 1 or tfile_HM.IsZombie() == 1 or tfile_LM.IsZombie() == 1:
       not_worked.write(thesePoints+'\t isZombie \n')
       continue

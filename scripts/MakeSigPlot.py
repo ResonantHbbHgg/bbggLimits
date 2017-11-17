@@ -67,9 +67,9 @@ def main(argv):
 		var = workspace.var(ob)
 		data = data2D.reduce(RooArgSet(var))
 
-		label = "M(jj) [GeV]"
+		label = "m_{jj} [GeV]"
 		if 'mgg' in ob:
-			label = "M(#gamma#gamma) [GeV]"	
+			label = "m_{#gamma#gamma} [GeV]"	
 		MakeSigPlot(data, pdf, var, label, lumi, cat, analysis, doBands, Label+"_signal_fit_"+ob+"_cat"+str(CAT), bins[i], xmin[ob], xmax[ob], 1, DSCB)
 
 if __name__ == "__main__":

@@ -124,7 +124,7 @@ isolines = [0.01, 0.1, 1.0, 2., 5., 10., 20., 50.]
 xsfunc.SetContour(len(isolines), array('d', isolines))
 xsfunc.SetNpx(250)
 xsfunc.SetNpy(250)
-xsfunc.SetLineColor(kGray)
+xsfunc.SetLineColor(kBlack)
 xsfunc.SetLineStyle(3)
 xsfunc.SetLineWidth(1)
 
@@ -139,7 +139,9 @@ leg = TLegend(0.1, 0.05, 0.9, 0.17)
 leg.SetNColumns(3)
 leg.SetBorderSize(0)
 leg.SetFillStyle(0)
-#leg.SetHeader('pp#rightarrowHH#rightarrowb#bar{b}#gamma#gamma')
+leg.SetHeader('95% CL upper limits')
+
+#leg.SetHeader('c_{g} = c_{2} = c_{2g} = 0')
 
 SetGeneralStyle()
 c1 = TCanvas("c1", "c1", 900, 1000)
@@ -153,13 +155,18 @@ SetAxisTextSizes(hframe)
 
 lat = TLatex()
 lat.SetNDC()
-lat.SetTextAlign(12)
+lat.SetTextAlign(11)
 lat.SetTextSize(0.03)
 leg.SetTextSize(0.027)
-lat.DrawLatex(0.11,0.185,'pp#rightarrowHH#rightarrowb#bar{b}#gamma#gamma')
+lat.DrawLatex(0.15,0.182,'pp#rightarrowHH#rightarrow#gamma#gammab#bar{b}')
+
+lat.SetTextSize(0.025)
+lat.DrawLatex(0.50,0.182,'c_{g} = c_{2} = c_{2g} = 0')
+
+
 lat.SetTextAngle(-45)
 lat.SetTextSize(0.015)
-lat.SetTextColor(kGray)
+lat.SetTextColor(kGray+1)
 #isolines = [0.01, 0.1, 1.0, 2., 5., 10., 20., 50.]
 prop = 0.12
 stpx = (0.9-0.1)/(xmax - xmin)
@@ -195,9 +202,9 @@ for cc in contours:
     ccc.SetLineStyle(kDashed)
     ccc.SetLineWidth(3)
     ccc.Draw('same C')
-    if iccc == 0: leg.AddEntry(ccc, 'Expected 95% CL excl.', 'l')
-leg.AddEntry(band_1s_low, 'Expected #pm1#sigma', 'f')
-leg.AddEntry(pt_sm, 'Standard Model', 'p')
+    if iccc == 0: leg.AddEntry(ccc, 'Expected', 'l')
+leg.AddEntry(band_1s_low, 'Expected #pm1 std. deviation', 'f')
+leg.AddEntry(pt_sm, 'SM', 'p')
 pt_sm.Draw('p same')
 if opt.unblind:
   band_obs_upp.Draw('same F')
@@ -208,9 +215,9 @@ if opt.unblind:
       ccc.SetLineColor(kBlack)
       ccc.SetLineWidth(2)
       ccc.Draw('same C')
-leg.AddEntry(band_obs_upp, 'Observed 95% CL excl.', 'f')
-leg.AddEntry(band_2s_low, 'Expected #pm2#sigma', 'f')
-leg.AddEntry(hframe, 'c_{g} = c_{2} = c_{2g} = 0', '')
+leg.AddEntry(band_obs_upp, 'Observed', 'f')
+leg.AddEntry(band_2s_low, 'Expected #pm2 std. deviation', 'f')
+
 
 c1.Update()
 c1.cd()
@@ -237,7 +244,7 @@ for gr,gr in enumerate(myGraphs):
     c0.Update()
     gr.GetXaxis().SetTitle('#kappa_{#lambda}')
     gr.GetYaxis().SetTitle('#kappa_{t}')
-    gr.GetZaxis().SetTitle('95% C.L. Expected Limit [fb]')
+    gr.GetZaxis().SetTitle('Expected 95% upper limit [fb]')
     gr.GetZaxis().SetRangeUser(0., 5.)
     c0.Update()
     SetAxisTextSizes(gr)
@@ -264,7 +271,7 @@ if opt.unblind == True:
       cob.Update()
       gr.GetXaxis().SetTitle('#kappa_{#lambda}')
       gr.GetYaxis().SetTitle('#kappa_{t}')
-      gr.GetZaxis().SetTitle('95% C.L. Observed Limit [fb]')
+      gr.GetZaxis().SetTitle('Observed 95% upper limit [fb]')
       gr.GetZaxis().SetRangeUser(0., 5.)
       cob.Update()
       SetAxisTextSizes(gr)

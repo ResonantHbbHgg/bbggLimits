@@ -14,8 +14,8 @@ grav_1p0kpl = [4*x for x in grav_0p5kpl]
 
 gr_grav_0p5kpl = TGraph(len(masses), array('d', masses), array('d', grav_0p5kpl))
 gr_grav_1p0kpl = TGraph(len(masses), array('d', masses), array('d', grav_1p0kpl))
-grav_0p5kpl_leg = "Bulk Graviton, #kappa/M_{Pl} = 0.5"
-grav_1p0kpl_leg = "Bulk Graviton, #kappa/M_{Pl} = 1.0"
+grav_0p5kpl_leg = "#kappa/#bar{M_{Pl}} = 0.5"
+grav_1p0kpl_leg = "#kappa/#bar{M_{Pl}} = 1.0"
 
 #LR = 3 TeV
 #rad_3tev = [6.7, 6.62e+00, 6.17e+00, 2.53e+00, 1.30e+00, 7.87e-01, 5.06e-01, 4.11e-01, 3.40e-01, 2.34e-01]
@@ -24,10 +24,13 @@ rad_3tev_HH_pb = [2.48572, 2.52729, 2.51165, 2.45392, 2.36613, 2.23782, 2.08558,
 #rad_1tev = [60, 5.96e+01, 5.56e+01, 2.28e+01, 1.17e+01, 7.08e+00, 4.55e+00, 3.70e+00, 3.06e+00, 2.10e+00]
 rad_3tev = [0.0026*1000*x for x in rad_3tev_HH_pb]
 rad_1tev = [9*x for x in rad_3tev]
-rad_1tev_leg = "Bulk Radion, #Lambda_{R} = 1 TeV"
-rad_3tev_leg = "Bulk Radion, #Lambda_{R} = 3 TeV"
+rad_2tev = [9/4.*x for x in rad_3tev]
+rad_1tev_leg = "#Lambda_{R} = 1 TeV"
+rad_2tev_leg = "#Lambda_{R} = 2 TeV"
+rad_3tev_leg = "#Lambda_{R} = 3 TeV"
 
 gr_rad_1tev = TGraph(len(masses), array('d', masses), array('d', rad_1tev))
+gr_rad_2tev = TGraph(len(masses), array('d', masses), array('d', rad_2tev))
 gr_rad_3tev = TGraph(len(masses), array('d', masses), array('d', rad_3tev))
 
 gr_grav_0p5kpl.SetLineColor(kRed)
@@ -45,3 +48,7 @@ gr_rad_3tev.SetLineWidth(3)
 gr_rad_1tev.SetLineColor(kRed+3)
 gr_rad_1tev.SetLineStyle(2)
 gr_rad_1tev.SetLineWidth(3)
+
+gr_rad_2tev.SetLineColor(kRed+3)
+gr_rad_2tev.SetLineStyle(2)
+gr_rad_2tev.SetLineWidth(3)
