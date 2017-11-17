@@ -10,8 +10,8 @@ from HiggsAnalysis.bbggLimits.DefineScans import *
 gROOT.SetBatch()
 gStyle.SetOptStat(0)
 
-parser =  argparse.ArgumentParser(description='Limit Tree maker')
-parser.add_argument("-f", "--folder", dest="f", type=str)
+parser =  argparse.ArgumentParser(description='Benchmark plot maker')
+parser.add_argument("limdir")
 parser.add_argument("--unblind", dest="unblind", action='store_true', default=False)
 opt = parser.parse_args()
 
@@ -38,8 +38,8 @@ for ii in xrange(0, len(klJHEP)):
   # Use this one for Rafael's results: 
   #nodename = 'Node_SM'+'_'.join(['kl'+str(kl), 'kt' + str(kt), 'cg'+ str(cg), 'c2' + str(c2), 'c2g' + str(c2g)]).replace('.', 'p').replace('-', 'm')
 
-  nodename = "_".join(['ARW','kl',str(kl), 'kt',str(kt), 'cg',str(cg), 'c2',str(c2), 'c2g',str(c2g)]).replace('.', 'p').replace('-', 'm')
-  name = opt.f + '/CombinedCard_'+nodename  + '/higgsCombine_' + nodename + '.Asymptotic.mH125_1.root'
+  nodename = "_".join(['ARW','kl',str(float(kl)),'kt',str(float(kt)),'cg',str(float(cg)),'c2',str(float(c2)),'c2g',str(float(c2g))]).replace('.', 'p').replace('-', 'm')
+  name = opt.limdir + '/CombinedCard_'+nodename  + '/higgsCombine_' + nodename + '.Asymptotic.mH125_1.root'
 
   print name
   
@@ -146,8 +146,8 @@ leg.Draw("same")
 
 DrawCMSLabels(c0, '35.9')
 
-c0.SaveAs(opt.f+"/BenchmarkPlot.pdf")
-c0.SaveAs(opt.f+"/BenchmarkPlot.png")
+c0.SaveAs(opt.limdir+"/BenchmarkPlot.pdf")
+c0.SaveAs(opt.limdir+"/BenchmarkPlot.png")
 
 
 plots['0.500'].Print("all")

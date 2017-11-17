@@ -46,7 +46,7 @@ def parseNumList(string):
   return list(set(mylist))
 
 parser =  argparse.ArgumentParser(description='Limit Tree maker')
-parser.add_argument('-f', '--inputFile', dest="fname", type=str, default=None, required=True,
+parser.add_argument('-f', '--configFile', dest="fname", type=str, default=None, required=True,
                     help="Json config file")
 parser.add_argument('-o', '--outDir', dest="outDir", type=str, default=None,
                     help="Output directory (will be created).")

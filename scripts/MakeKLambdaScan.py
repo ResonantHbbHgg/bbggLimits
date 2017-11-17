@@ -32,12 +32,12 @@ def Compare(th, exp):
 
 
 parser =  argparse.ArgumentParser(description='Limit Tree maker')
-parser.add_argument("-f", "--folder", dest="f", type=str)
+parser.add_argument("limdir")
 parser.add_argument("--unblind", dest="unblind", action='store_true', default=False)
 parser.add_argument('-o', '--outFile', dest='outf', type=str, default="KLscanResult.root")
 opt = parser.parse_args()
 
-outfile = TFile(opt.f+'/'+opt.outf, 'RECREATE')
+outfile = TFile(opt.limdir+'/'+opt.outf, 'RECREATE')
 
 quantiles = ['0.025', '0.160', '0.500', '0.840', '0.975', '-1']
 lims = {}
@@ -51,11 +51,11 @@ for qt in quantiles:
 myKl = []
 notworked = open('klscan_notworked.txt', 'w+')
 for kl in scan_kl['kl']:
-  #  fname = opt.f + '/HighMass_Node_SMkl' + str(kl).replace('.', 'p').replace('-', 'm') + '_kt1p0_cg0p0_c20p0_c2g0p0/datacards/higgsCombineHighMass_Node_SMkl' + str(kl).replace('.', 'p').replace('-', 'm') + '_kt1p0_cg0p0_c20p0_c2g0p0.Asymptotic.mH125.root'
-  #fname = opt.f + '/CombinedCard_Node_SMkl' + str(kl).replace('.', 'p').replace('-', 'm') + '_kt1p0_cg0p0_c20p0_c2g0p0/higgsCombineCombinedCard_Node_SMkl' + str(kl).replace('.', 'p').replace('-', 'm') + '_kt1p0_cg0p0_c20p0_c2g0p0.Asymptotic.mH125.root'
+  #  fname = opt.limdir + '/HighMass_Node_SMkl' + str(kl).replace('.', 'p').replace('-', 'm') + '_kt1p0_cg0p0_c20p0_c2g0p0/datacards/higgsCombineHighMass_Node_SMkl' + str(kl).replace('.', 'p').replace('-', 'm') + '_kt1p0_cg0p0_c20p0_c2g0p0.Asymptotic.mH125.root'
+  #fname = opt.limdir + '/CombinedCard_Node_SMkl' + str(kl).replace('.', 'p').replace('-', 'm') + '_kt1p0_cg0p0_c20p0_c2g0p0/higgsCombineCombinedCard_Node_SMkl' + str(kl).replace('.', 'p').replace('-', 'm') + '_kt1p0_cg0p0_c20p0_c2g0p0.Asymptotic.mH125.root'
 
   pointStr = ('kl_' + str(kl) + '_kt_1p0_cg_0p0_c2_0p0_c2g_0p0').replace('.', 'p').replace('-', 'm')
-  fname = opt.f + '/CombinedCard_ARW_' + pointStr+'/higgsCombine_ARW_' + pointStr + '.Asymptotic.mH125_1.root'
+  fname = opt.limdir + '/CombinedCard_ARW_' + pointStr+'/higgsCombine_ARW_' + pointStr + '.Asymptotic.mH125_1.root'
 
   tfile = TFile(fname, "READ")
   if tfile.IsZombie() == 1:
@@ -170,8 +170,8 @@ c.RedrawAxis()
 
 DrawCMSLabels(c, '35.9')
 
-c.SaveAs(opt.f+'/'+opt.outf.replace(".root", ".pdf"))
-c.SaveAs(opt.f+'/'+opt.outf.replace(".root", ".png"))
+c.SaveAs(opt.limdir+'/'+opt.outf.replace(".root", ".pdf"))
+c.SaveAs(opt.limdir+'/'+opt.outf.replace(".root", ".png"))
 
 print 'Expected excluded range with kt = 1'
 Compare(nonresXSEC, plots['0.500'])

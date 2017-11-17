@@ -10,7 +10,20 @@ org_bashFile = '''
 #!/bin/bash
 cd HERE
 eval `scramv1 runtime -sh`
-pyLimits.py -f conf_default.json -o LIMS_L_OUTDIR EXTRA --overwrite -j1 -v5
+pyLimits.py -f JSONFILE -o LIMS_L_OUTDIR EXTRA --overwrite -j1 -v5
+'''
+# This is a script for running the limits of grid reweighting
+grid_bashFile = '''
+#!/bin/bash
+workDir=$1
+outDir=$2
+Point=$3
+Json=$4
+echo $workDir $outDir $Point
+cd $workDir
+ls
+eval `scramv1 runtime -sh`
+pyLimits.py -f $Json -o $outDir --points $Point -j1 -v2 --overwrite
 '''
 
 HERE = os.environ['PWD']
@@ -21,16 +34,18 @@ parser =  argparse.ArgumentParser(description='submit the limit to the batch')
 parser.add_argument('-t', '--type', dest="scanType", default=None, type=str, nargs='+',
                     choices=['JHEP', 'KL', 'KLKT', 'grid', 'manual'],
                     help = "Choose the type of limits to run")
+parser.add_argument('-f', '--configFile', dest="fname", type=str, default='conf_default.json', required=True,
+                    help="Json config file")
                     
 opt = parser.parse_args()
 
 
-def submitPoint(kl=1.0, kt=1.0, cg=0.0, c2=0.0, c2g=0.0):
-  pointStr = "_".join(['kl',str(kl),'kt',str(kt),'cg',str(cg),'c2',str(c2),'c2g',str(c2g)]).replace('.', 'p').replace('-', 'm')
+def submitPoint(kl=1, kt=1, cg=0, c2=0, c2g=0):
+  pointStr = "_".join(['kl',str(float(kl)),'kt',str(float(kt)),'cg',str(float(cg)),'c2',str(float(c2)),'c2g',str(float(c2g))]).replace('.', 'p').replace('-', 'm')
   extra = ' '.join([' --analyticalRW','--kl '+str(kl),'--kt '+str(kt),'--cg '+str(cg),'--c2 '+str(c2), '--c2g '+str(c2g),
                     '--extraLabel '+pointStr])
   
-  bashFile = org_bashFile.replace('HERE', HERE).replace('L_OUTDIR', OUTDIR).replace('EXTRA', extra)
+  bashFile = org_bashFile.replace('HERE', HERE).replace('L_OUTDIR', OUTDIR).replace('EXTRA', extra).replace('JSONFILE',opt.fname)
 
   bFile = open('/tmp/'+username+'/batch_'+pointStr+'.sh', "w+")
   bFile.write(bashFile)
@@ -79,8 +94,8 @@ if __name__ == "__main__":
   if "KLKT" in opt.scanType:
     for kl in scan_2d['kl']:
       for kt in scan_2d['kt']:
-          
-        kt = 1.0
+        if kt==1: continue # we have those already
+        if abs(kt) < 0.2: continue # we are not sensitive to those anyway
         cg = 0.0
         c2 = 0.0
         c2g = 0.0
@@ -94,21 +109,25 @@ if __name__ == "__main__":
   if 'manual' in opt.scanType:
     # Here we can run limits over specific points
     # Note: the limit trees for those points must exist
-    kt = 1
-    cg = 0
-    c2 = 0
-    c2g = 0
-            
-    print counter
-    counter += 1
-    print kl, kt, cg, c2, c2g
-    submitPoint(kl, kt, cg, c2, c2g)   
+    for kl in [12, 14, 14.4, 14.8, 15.2, 15.6, 16.4, 16.8, 17.2, 17.6]:
+      kt = 1
+      cg = 0
+      c2 = 0
+      c2g = 0
+      
+      print counter
+      counter += 1
+      print kl, kt, cg, c2, c2g
+      submitPoint(kl, kt, cg, c2, c2g)   
 
     
   if "grid" in opt.scanType:
+    bFile = open('/tmp/'+username+'/batch_grid.sh', "w+")
+    bFile.write()
+    bFile.close()
     counter = 0 
     for j in xrange(0,5):
-      command = ' '.join(['bsub -q 1nh','./scripts/batch_job_for_grid.sh',HERE,'GridLimits', str(j)]) 
+      command = ' '.join(['bsub -q 1nh','/tmp/'+username+'batch_grid.sh',HERE,'GridLimits', str(j), opt.fname]) 
       print counter
       counter += 1
       print command

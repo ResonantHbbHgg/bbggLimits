@@ -30,8 +30,8 @@ parser.add_argument('-t', '--type', dest="scanType", default=None, type=str,
 opt = parser.parse_args()
 
 
-def makeMyTreeGood(inPath, kl=1.0, kt=1.0, cg=0.0, c2=0.0, c2g=0.0):
-  pointStr = "_".join(['kl',str(kl),'kt',str(kt),'cg',str(cg),'c2',str(c2),'c2g',str(c2g)]).replace('.', 'p').replace('-', 'm')
+def makeMyTreeGood(inPath, kl=1, kt=1, cg=0, c2=0, c2g=0):
+  pointStr = "_".join(['kl',str(float(kl)),'kt',str(float(kt)),'cg',str(float(cg)),'c2',str(float(c2)),'c2g',str(float(c2g))]).replace('.', 'p').replace('-', 'm')
   fname = 'LT_NR_Nodes_All_merged_'+pointStr+'.root'
 
   outputFile = inPath + '/' + fname

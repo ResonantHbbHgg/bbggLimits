@@ -37,7 +37,7 @@ git clone git@github.com:cms-hh/Support.git
 cd ${CMSSW_BASE}/src/HiggsAnalysis/
 git clone  git@github.com:ResonantHbbHgg/bbggLimits.git
 cd ${CMSSW_BASE}/src/HiggsAnalysis/bbggLimits/
-scramv1 b # a lot of complaints about bbggHighMassFitter.cc (this is not used anymore, needs to be deleted)
+scramv1 b
 ```
 
 
@@ -81,8 +81,8 @@ where `fileName.root` is a an input Flat tree to be run over, and
 `pyLimitTreeMaker.py` and runs it over many input  files.
 
 
-More options for the `pyLimitTreeMaker.py` can be specified, 
-as can be seen [directly in the code](https://github.com/ResonantHbbHgg/bbggLimits/blob/10c319b013134e5bb15a561557f960dc2f1ea6b2/scripts/pyLimitTreeMaker.py#L11-L85)
+More options for the `pyLimitTreeMaker.py` can be specified. To see all of them look
+[directly in the code](https://github.com/ResonantHbbHgg/bbggLimits/blob/cc11d25a97392ee55116bac9d08b77f5f4128998/scripts/pyLimitTreeMaker.py#L11-L85).
 
 ### Non-resonant reweighted trees 
 In the non-resonant search, to get the limits at any parameter point of 5D space, we need
@@ -129,7 +129,7 @@ this case the logs should be found in your `/tmp/username/logs` and in the _mast
 
 We have another script to facilitate runing the limit for _benchmarks_,_kl_ and _kl-kt_ scans:  
 ```
-python scripts/runLimitsOnLSF.py -t [JHEP, KL, KLKT]
+python scripts/runLimitsOnLSF.py -f conf_default.json -t [JHEP, KL, KLKT]
 ```
 
 The above command should give you the limits identical to
@@ -138,17 +138,28 @@ The above command should give you the limits identical to
 Good luck!
 
 ### Scripts for making plots
-To make the non-resonant benchmark limit plot:  
+Make background fit plots for m(gg) and m(jj) in all categories:
 ```
-python scripts/MakeBenchmarksPlot.py -f LIMSDIR
+source scripts/MakeSMHHFullBkgPlots.sh LIMSDIR
+```
+
+In order make the non-resonant benchmark limit plot:  
+```
+python scripts/MakeBenchmarksPlot.py LIMSDIR
 ```
 where _LIMSDIR_ is a directory with the limits output.
 
 To get the *kl* scan plot:
 ```
-python scripts/MakeKLambdaScan.py -f LIMSDIR
+python scripts/MakeKLambdaScan.py LIMSDIR
 ```
 
+For *kl-kt* scan plot, we first need to gateher the results of all limits in a text file,
+and then run the plotting script:
+```
+python scripts/MakeKLKTScanTxtList.py LIMSDIR
+python scripts/MakeKLKTplot.py -l KLKT_Scan_List.txt -o outFile
+```
 PS. In order to reporduce the _EPS17_ results, follow the instructions here:
 [SmartScripts/README.md](SmartScripts/README.md)
 
