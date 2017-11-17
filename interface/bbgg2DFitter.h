@@ -129,30 +129,29 @@ class bbgg2DFitter {
    void SetVerbosityLevel(Int_t v) {_verbLvl=v;}
    void SetCut(TString cut) {_cut = cut;}
    void SetType(std::string tp) { _signalType = tp; }
-   RooArgSet* defineVariables(); //DONE
-   int AddSigData(float mass, TString signalfile); //DONE
-   std::vector<float> AddHigData(float mass, TString signalfile, int higgschannel, TString higName); //DONE
-   void AddBkgData(TString datafile); //DONE
-   void SigModelFit(float mass); //DONE
-   void HigModelFit(float mass, int higgschannel, TString higName); //DONE
-   RooFitResult* BkgModelFit(Bool_t m,bool h); //DONE
+   RooArgSet* defineVariables(bool s);
+   int AddSigData(float mass, TString signalfile); 
+   std::vector<float> AddHigData(float mass, TString signalfile, int higgschannel, TString higName); 
+   void AddBkgData(TString datafile); 
+   void SigModelFit(float mass); 
+   void HigModelFit(float mass, int higgschannel, TString higName); 
+   RooFitResult* BkgModelFit(Bool_t m,bool h); 
    RooFitResult* BkgModelFit(Bool_t m,bool h,std::vector<std::string>higgstrue,std::map<std::string,int>higgsNumber) {
-     return BkgModelFit(m, h);} //DONE
-   void MakePlots(float mass); //DONE
+     return BkgModelFit(m, h);} 
+   void MakePlots(float mass); 
    void SetFitStrategy( int st) { _fitStrategy = st; }
    void MakePlotsHiggs(float mass);
    void MakePlotsHiggs(float mass,std::vector<std::string>higgstrue,std::map<std::string,int>higgsNumber) {
      MakePlotsHiggs(mass);}
-   void MakeSigWS(std::string filename); //DONE
-   void MakeHigWS(std::string filename, int higgschannel, TString higName); //DONE
-   void MakeBkgWS(std::string filename); //DONE
+   void MakeSigWS(std::string filename); 
+   void MakeHigWS(std::string filename, int higgschannel, TString higName); 
+   void MakeBkgWS(std::string filename); 
    void MakeFitsForBias(std::string biasConfig, std::string outputFile);
    void DoARW() {_doARW = 1;}
-   // const char* filenameh0, const char* filenameh1, const char* filenameh2, const char* filenameh4);
   
-   void SetConstantParams(const RooArgSet* params); //DONE
-   void PrintWorkspace();// {_w->Print("v");}
-   TStyle * style(); //DONE
+   void SetConstantParams(const RooArgSet* params); 
+   void PrintWorkspace();
+   TStyle * style(); 
    void SetSigExpectedCats(int cat, float expec) {
      if(sigExpec.find(cat) != sigExpec.end() ){std::cout << "[SetSigExpectedCats] Cat already set!" << std::endl;} else { sigExpec[cat] = expec; }}
    void SetBkgExpectedCats(int cat, float expec) {

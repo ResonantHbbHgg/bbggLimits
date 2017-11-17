@@ -12,7 +12,7 @@ tempfile= '''
     "LTDIR" : "/src/HiggsAnalysis/bbggLimits/DIRNAME",
     "signal" : {
         "types" : ["Radion"],
-	"signalModelCard" : "/src/HiggsAnalysis/bbggLimits/LimitSetting/Models/models_2D_higgs.rs"
+	"signalModelCard" : "/src/HiggsAnalysis/bbggLimits/Models/models_2D_higgs.rs"
     },
     "other" : {
         "doDoubleSidedCB": 1,

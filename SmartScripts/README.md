@@ -1,5 +1,8 @@
 # Steps for full analysis
 
+In order to reproduce exactly the results put out for EPS-2017, checkout the *v2.1-goodbye-rafael* tag of this repository.
+Set up the environment from the main [README.md](README.md), then follow instructions below.
+
 ## Nonresonant Analysis
 
 #### 1) Make limit trees   

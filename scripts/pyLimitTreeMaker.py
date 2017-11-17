@@ -23,8 +23,6 @@ parser.add_argument('--KF', dest="KF", action="store_true", default=False,
                     help="Use Mtot_KF to cut on mass window")
 parser.add_argument('--MX', dest="MX", action="store_true", default=False,
                     help="Use MX to cut on mass window")
-parser.add_argument('-t', '--tilt', dest="tilt", action="store_true", default=False,
-                    help="Select tilted mass window")
 #normalization
 parser.add_argument('-s', '--scale', dest="scale", type=float, default=1,
                     help="Normalization (lumi*xsec/totEvs), 1 for data")
@@ -127,15 +125,14 @@ def setAndLoop(fname, options, outFile):
 
   LTM = bbggLTMaker(tr, options.isres)
 
-#mx usage 
+  # mx usage 
   LTM.SetMax( options.mtotMax )
   LTM.SetMin( options.mtotMin )
   LTM.IsMX( options.MX )
   LTM.IsKinFit( options.KF )
-  LTM.SetTilt( options.tilt )
-#normalization
+  # normalization
   LTM.SetNormalization( options.scale, options.NRscale )
-#categorization
+  # categorization
   LTM.DoNoCat( options.doNoCat )
   LTM.DoCatNonRes( options.doCatNonRes )
   LTM.DoCatHighMass( options.doCatHighMass )

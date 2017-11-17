@@ -17,7 +17,8 @@ git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsA
 cd HiggsAnalysis/CombinedLimit
 git fetch origin
 git checkout v6.3.1
-scramv1 b clean; scramv1 b # always make a clean build, as scram doesn't always see updates to src/LinkDef.h
+scramv1 b clean
+scramv1 b
 ```       
 
 #### Step 2: Get HH support stuff    
@@ -26,15 +27,15 @@ scramv1 b clean; scramv1 b # always make a clean build, as scram doesn't always 
 ```
 cd ${CMSSW_BASE}/src/
 git clone git@github.com:cms-hh/HHStatAnalysis.git
-scramv1 b HHStatAnalysis/AnalyticalModels #only build whats needed, no need Harvester (will keep complaining, though. If you want to compile the full HHStatAnalysis, also get CombineHarvester package.)
+scramv1 b HHStatAnalysis/AnalyticalModels
 cd ${CMSSW_BASE}/src/HHStatAnalysis
 git clone git@github.com:cms-hh/Support.git
 ```    
 
-#### Step 3: Get bbggTools    
+#### Step 3: Get bbggLimits code    
 ```
 cd ${CMSSW_BASE}/src/HiggsAnalysis/
-git clone -b dev-rafael-May8 git@github.com:ResonantHbbHgg/bbggLimits.git
+git clone  git@github.com:ResonantHbbHgg/bbggLimits.git
 cd ${CMSSW_BASE}/src/HiggsAnalysis/bbggLimits/
 scramv1 b # a lot of complaints about bbggHighMassFitter.cc (this is not used anymore, needs to be deleted)
 ```
@@ -49,41 +50,23 @@ makeAllTrees.py -x nonres [--NRW]
 
 ### Working examples
 
-Make non-res shape benchmark points trees (MVA based with 400 Mhh threshold):
+Make non-res shape benchmark points trees (MVA based with 350 M(HH) threshold):
 ```
-makeAllTrees.py -x nonres \   
--d /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/Regression_Data/Hadd \   
--s /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/Regression_Signal/Hadd/ \   
--f LT_NonRes_MVABased400Reg_ \   
---doCatMVA --MVAHMC0 0.960 --MVAHMC1 0.6 --MVALMC0 0.96 --MVALMC1 0.750 --massNR 400   
+makeAllTrees.py -x nonres -f LT_OutDir \  
+--doCatMVA --MVAHMC0 0.970 --MVAHMC1 0.600 --MVALMC0 0.985 --MVALMC1 0.600 --massNR 350 --LMLJBTC 0.55 --LMSJBTC 0.55
 ```   
-   
-Make non-res shape benchmark points trees (cut based with 400 Mhh threshold and cut on cos theta star):   
+You can aslo provide the locations of the flat trees if they are not the ones hardcoded in
+the script, via `-s`, `-d`, `-b` options. For example, to make the trees from single H, use: 
 ```
-makeAllTrees.py -x nonres \   
--d /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/newData_HHTagger/Hadd \   
--s /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/Signal_HHTagger400/Hadd/ \   
--f LT_NonRes_CatBased400CTS_ --massNR 400 --ctsCut 0.8   
-```   
-   
-Make resonant limit trees with low mass categorization:   
-```
-makeAllTrees.py -x res \   
--d /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/newData_HHTagger/Hadd \   
--s /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/Signal_HHTagger400/Hadd/ \   
--f LT_ResLMnW   
-```   
-   
-Make resonant limit trees with high mass categorization:   
-```
-makeAllTrees.py -x res \   
--d /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/newData_HHTagger/Hadd \   
--s /afs/cern.ch/work/r/rateixei/work/DiHiggs/flashgg_Moriond17/CMSSW_8_0_25/src/flashgg/bbggTools/test/RunJobs/Signal_HHTagger400/Hadd/ \   
--f LT_ResHM --highMassRes     
-```    
+makeAllTrees.py -x nonres -f LT_OutDir -s FlatT_SignalDir -d 0 \  
+--doCatMVA --MVAHMC0 0.970 --MVAHMC1 0.600 --MVALMC0 0.985 --MVALMC1 0.600 --massNR 350 --doSMHiggs --LMLJBTC 0.55 --LMSJBTC 0.55 --genDiPhotonFilte
+```  
+
+In order to re-produce the limit trees used for EPS17 results, follow instructions in
+[SmartScripts/README.md](SmartScripts/README.md).
 
 
-### Details 
+#### Details 
 The *C++ Loop* code to produce the Limit Trees is located at
 *src/bbggLTMaker.cc*. In order to run it over a single tree use the
 python script *scripts/pyLimitTreeMaker.py*, which exists in the
@@ -98,26 +81,39 @@ where `fileName.root` is a an input Flat tree to be run over, and
 `pyLimitTreeMaker.py` and runs it over many input  files.
 
 
-More options for the `pyLimitTreeMaker.py` can be specified:
-* `-f <input File>` or `-i <Text file with a List of Root files full paths>`
-* `-o  <output location>` - directory will be created.
-* `--min  <min mtot>`, `--max <max mtot>`
-* `--scale  <Lumi*CrossSection*SF/NEvts>` - scale; should be 1 for data.
-* `--photonCR`  - do photon control region.
-* `--KF`  - use Mtot_KF to cut on mass window.
-* `--MX` -  use MX to cut on mass window; choose either `--MX` or `--KF`!.
-* `--tilt`  - select tilted mass window.
-* `--doNoCat`  - no categorization, all is *cat0*.
-* `--btagWP <WP>` - set btagging working point for categories.
-* `--doCatMixed` -  do categories with mixed btagging;  Cat0: 2>low, Cat1: 1<low+1>high
-* `--singleCat`  - only one category, High Mass analysis.
-* `--doBVariation <VAR>`  - apply b-tagging SF factors: 0, 1 or -1.
-* `--doPhoVariation <VAR>`  - Apply photon SF factors: 0, 1 or -1.
-* `--cosThetaStar <VAR>`  - cut on CosTheta Star variable
+More options for the `pyLimitTreeMaker.py` can be specified, 
+as can be seen [directly in the code](https://github.com/ResonantHbbHgg/bbggLimits/blob/10c319b013134e5bb15a561557f960dc2f1ea6b2/scripts/pyLimitTreeMaker.py#L11-L85)
 
+### Set the Limits 
+Once the limit trees are produced, we would like to make the 2D fits in
+(m(gg), m(bb)) plane, for each category, and then run the limits.
 
-### Set the Limits
-In order to reporduce EPS17 results, follow instructions here:
-https://github.com/ResonantHbbHgg/bbggLimits/blob/master/SmartScripts/README.md
+The main functions to do the fits are implemented in `src/bbgg2DFitter.cc`.  The python
+scripts are needed to handle many different situations (resonant, non-resonant,
+re-weighting to various benchmark points, etc.). In order to run just one limit you need
+`scripts/pyLimits.py`. Minimal options for the *SM* point are:  
+``` 
+pyLimits.py -f conf_NonRes_EPS17.json -o outputDirName --nodes SM 
+```
+
+The above command must be run on _lxplus_, because the input root files are located on EOS
+(the path is specified in json config file).  
+The `pyLimits.py` script would call _runFullChain()_ method which is implemented in
+`python/LimitsUtil.py`.  So in fact, the [LimitsUtil.py](python/LimitsUtil.py) script is
+the base code which interacts with the functions in `bbgg2DFitter.cc`.  
+Using the `--nodes SM` option tells it to use the Limit Tree produced from a single SM MC
+sample.  Alternatively, one can do the re-weighting of the merged non-resonant
+samples and therefore increase the statistics of the SM signal. Analytical re-weighting was used for EPS17 results of 2016 data.  
+Run it like so: 
+``` 
+pyLimits.py -f conf_NonRes_EPS17.json -o outputDirName --analyticalRW
+```
+
+In case of problems it's useful to increase verbosity level with `-v 1(2,3)` option. In this case the logs should be found in your `/tmp/username/logs` and in the _master_ log, `outputDirName/mainLog_date-time.log`
+
+The above command should give you the limits identical to
+[the ones on SVN](https://svnweb.cern.ch/cern/wsvn/cmshcg/trunk/cadi/HIG-17-008/NonResonant/Benchmarks/CombinedCard_Node_SMkl1p0_kt1p0_cg0p0_c20p0_c2g0p0/result_2_L_CombinedCard_Node_SMkl1p0_kt1p0_cg0p0_c20p0_c2g0p0.log).
+In order to reporduce the rest of _EPS17_ results, follow the instructions here:
+[SmartScripts/README.md](SmartScripts/README.md)
 
 Good luck!

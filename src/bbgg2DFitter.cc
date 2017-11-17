@@ -1,7 +1,7 @@
 #define bbgg2DFitter_cxx
 #include "HiggsAnalysis/bbggLimits/interface/bbgg2DFitter.h"
 #include "HiggsAnalysis/bbggLimits/interface/bbggFittingTools.h"
-#include "HiggsAnalysis/bbggLimits/interface/Colors.h"
+//#include "HiggsAnalysis/bbggLimits/interface/Colors.h"
 #include "HiggsAnalysis/CombinedLimit/interface/RooMultiPdf.h"
 #include "HiggsAnalysis/CombinedLimit/interface/HZZ2L2QRooPdfs.h"
 //Boost
@@ -161,7 +161,7 @@ void bbgg2DFitter::Initialize(RooWorkspace* workspace, Int_t SigMass, float Lumi
 	   <<"\n "<<std::endl;
 }
 
-RooArgSet* bbgg2DFitter::defineVariables()
+RooArgSet* bbgg2DFitter::defineVariables(bool swithToSimpleWeight=false)
 {
   RooRealVar* mgg  = new RooRealVar("mgg","M(#gamma#gamma)",_minMggMassFit,_maxMggMassFit,"GeV");
   RooRealVar* mtot = new RooRealVar("mtot","M(#gamma#gammajj)",200,1600,"GeV");
@@ -169,15 +169,23 @@ RooArgSet* bbgg2DFitter::defineVariables()
   RooCategory* cut_based_ct = new RooCategory("cut_based_ct","event category 4") ;
   RooRealVar* evWeight = 0;
   RooRealVar* new_evWeight = 0;
+
+  TString tmp_wName(_wName.c_str());
+  // This is to address a specific issue when adding single Higgs samples, while running with --NRW option.
+  // In that case, for a signal sample we should take evWeight_NRW_%d, while for single higgs sample, we should use evWeight
+  if (swithToSimpleWeight)
+    tmp_wName="evWeight";
+  // --- //
+
   if (!_doARW)
-    evWeight = new RooRealVar(_wName.c_str(),"HqT x PUwei",-100000.,100000, "");
+    evWeight = new RooRealVar(tmp_wName,"HqT x PUwei",-100000.,100000, "");
   else
   {
     evWeight = new RooRealVar("evWeight","HqT x PUwei",-100000, 100000,"");
     new_evWeight = new RooRealVar("new_evWeight","HqT x PUwei x ARW",-100000,100000,"");
   }
 
-  //
+ 
   cut_based_ct->defineType("cat4_0",0);
   cut_based_ct->defineType("cat4_1",1);
   cut_based_ct->defineType("cat4_2",2);
@@ -204,12 +212,15 @@ RooArgSet* bbgg2DFitter::defineVariables()
 
 int bbgg2DFitter::AddSigData(float mass, TString signalfile)
 {
-  TFile sigFile(signalfile);
-  bool opened=sigFile.IsOpen();
+  if (_verbLvl>1) std::cout << "================= Add Signal========================== " << _wName.c_str() << " " << _doARW << " " << _nonResWeightIndex << std::endl;
+  if (_verbLvl>1) std::cout << " File to open:"<<signalfile  << std::endl;
+  TFile *sigFile = TFile::Open(signalfile);
+  bool opened=sigFile->IsOpen();
   if(opened==false) return -1;
-  TTree* sigTree = (TTree*)sigFile.Get("TCVARS");
-  
-  if (_verbLvl>1) std::cout << "================= Add Signal============================== " << _wName.c_str() << " " << _doARW << " " << _nonResWeightIndex << std::endl;
+  if (_verbLvl>1) std::cout << " TFile opened:"<<signalfile  << std::endl;
+
+  TTree* sigTree = (TTree*)sigFile->Get("TCVARS");
+
   //Luminosity
   RooRealVar lumi("lumi","lumi", _lumi);
   _w->import(lumi);
@@ -305,7 +316,13 @@ int bbgg2DFitter::AddSigData(float mass, TString signalfile)
 
 std::vector<float> bbgg2DFitter::AddHigData(float mass, TString signalfile, int higgschannel, TString higName)
 {
-  RooArgSet* ntplVars = defineVariables();
+  if (_verbLvl>1) {
+    std::cout << "================= Adding Single Higgs ==========================" <<std::endl;
+    std::cout<<" \t mass: "<<mass<<" signalfile="<<signalfile<<" higgschannel="<<higgschannel<<" higName="<<higName<<std::endl;
+  }
+  
+  RooArgSet* ntplVars = defineVariables(1);
+  
   TFile higFile(signalfile);
   TTree* higTree = (TTree*) higFile.Get("TCVARS");
   if(higTree==nullptr)
