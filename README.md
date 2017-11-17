@@ -62,8 +62,7 @@ makeAllTrees.py -x nonres -f LT_OutDir -s FlatT_SignalDir -d 0 \
 --doCatMVA --MVAHMC0 0.970 --MVAHMC1 0.600 --MVALMC0 0.985 --MVALMC1 0.600 --massNR 350 --doSMHiggs --LMLJBTC 0.55 --LMSJBTC 0.55 --genDiPhotonFilte
 ```  
 
-
-Once 
+ 
 In order to re-produce the limit trees used for EPS17 results, follow instructions in
 [SmartScripts/README.md](SmartScripts/README.md).
 
@@ -76,7 +75,6 @@ python script *scripts/pyLimitTreeMaker.py*, which exists in the
 ```
 pyLimitTreeMaker.py -f fileName.root -o outDir
 ```
-
 where `fileName.root` is a an input Flat tree to be run over, and
 `outDir` is where the output trees will be created. The
 `makeAllTrees.py` mentioned in the beginning utilizes the
@@ -93,7 +91,7 @@ to reweight the signal sample to that point.  To do that we have a script,
 the production of those reweighted trees, we have another script which does everything on
 batch, `scripts/ArwTreesOnLSF.py`. For example, to make trees for *kl* scan run:
 ```
-ArwTreesOnLSF.py -t KL
+python scripts/ArwTreesOnLSF.py -t KL
 ```
 
 
@@ -131,7 +129,7 @@ this case the logs should be found in your `/tmp/username/logs` and in the _mast
 
 We have another script to facilitate runing the limit for _benchmarks_,_kl_ and _kl-kt_ scans:  
 ```
-runLimitsOnLSF.py -t [JHEP, KL, KLKT]
+python scripts/runLimitsOnLSF.py -t [JHEP, KL, KLKT]
 ```
 
 The above command should give you the limits identical to
@@ -142,9 +140,14 @@ Good luck!
 ### Scripts for making plots
 To make the non-resonant benchmark limit plot:  
 ```
- MakeBenchmarksPlot.py -f LIMSDIR
+python scripts/MakeBenchmarksPlot.py -f LIMSDIR
 ```
 where _LIMSDIR_ is a directory with the limits output.
+
+To get the *kl* scan plot:
+```
+python scripts/MakeKLambdaScan.py -f LIMSDIR
+```
 
 PS. In order to reporduce the _EPS17_ results, follow the instructions here:
 [SmartScripts/README.md](SmartScripts/README.md)

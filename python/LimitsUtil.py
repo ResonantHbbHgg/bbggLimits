@@ -38,7 +38,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     LTDir_type = Params['LTDIR']
     if '/store' in Params['LTDIR']:
       LTDir_type = 'root://eoscms//eos/cms'+Params['LTDIR']
-  
+
   signalModelCard = os.getenv("CMSSW_BASE")+Params['signal']['signalModelCard']
   lumi = 35.87 # Only used for plot produced by bbgg2Dfitter
   energy = str(Params['other']["energy"])
@@ -75,7 +75,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
   if NCAT > 3:
     procLog.error("Error NCAT>3!")
     return __BAD__
-  
+
   signalTypes = Params['signal']['types']
 
   if point!=None and NRgridPoint!=-1:
@@ -92,7 +92,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     return __BAD__
 
   print "Label=",Label
-  
+
   sigCat = 0
   isRes = 0
   if point==None:
@@ -199,11 +199,11 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     mass = 125.0
     if opt.verb>0:
       procLog.info('Signal File:\n'+LTDir+thisSignalFile)
-      
+
     if not os.path.isfile(LTDir+thisSignalFile):
       print 'File does not exist: ', LTDir+thisSignalFile
       return __BAD__
-    
+
     openStatus = theFitter.AddSigData( mass, str(LTDir+thisSignalFile))
     if openStatus==-1:
       procLog.error('There is a problem with openStatus')
@@ -223,7 +223,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     procLog.info("\t SIGNAL'S WORKSPACE DONE. Node=%r, GridPoint=%r, type=%r", point,NRgridPoint,t)
     if opt.verb>0: p3 = printTime(p2,start,procLog)
 
-    if drawSignalFit: 
+    if drawSignalFit:
       theFitter.MakePlots( mass)
       procLog.info("\t SIGNAL'S PLOT DONE. Node=%r, GridPoint=%r, type=%r", point,NRgridPoint,t)
       if opt.verb>0: p4 = printTime(p3,start,procLog)
@@ -239,7 +239,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
         if opt.verb>1:
           procLog.debug('iht = %r, ht = %r, HT = %r' % (iht,ht,HT))
         higFileName = str(LTDir)+"/LT_output_"+str(ht)+".root"
-        
+
         exphig = theFitter.AddHigData( mass,higFileName,iht, str(HT))
         theFitter.HigModelFit(mass,iht, str(HT) )
         theFitter.MakeHigWS(str('hhbbgg.')+str(HT), iht, str(HT))
@@ -280,7 +280,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     if doBias:
       createDir(newFolder+'/bias',procLog)
       theFitter.MakeFitsForBias(str(os.getenv("CMSSW_BASE")+'/src/HiggsAnalysis/bbggLimits/'+biasConfig), str(newFolder+'/bias/biasWorkspace.root'))
-      
+
     procLog.info("\t BIAS FITS DONE. Node=%r, GridPoint=%r, type=%r", point,NRgridPoint,t)
     if opt.verb>0: p7 = printTime(p6,start,procLog)
 
@@ -332,7 +332,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
           print PID, "IM HERE7"
           runCombine(newFolder+"/datacards/", doBlinding, procLog, combineOpt, Combinelxbatch, t+Label)
 
-    
+
 
     # End of loop over Types
   ## <-- indent
@@ -347,31 +347,14 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     newDir = baseFolder+'/CombinedCard'+Label
     createDir(newDir,procLog)
 
-    #combCard_pre = newDir+'/hhbbgg_13TeV_DataCard_pre.txt'
     combCard = newDir+'/hhbbgg_13TeV_DataCard.txt'
     os.system("combineCards.py "+ cardsToMerge + " > " + combCard)
 
     # Now we actually need to fix the combined card
     for t in signalTypes:
-      #  strReplace = baseFolder+'/'+t+Label+'/datacards/'
-      strReplace = baseFolder+'/'+t+Label+'/datacards/'+os.getenv("CMSSW_BASE")+'/src/HiggsAnalysis/bbggLimits/' 
+      strReplace = baseFolder+'/'+t+Label+'/datacards/'+os.getenv("CMSSW_BASE")+'/src/HiggsAnalysis/bbggLimits/'
       os.system("sed -i 's|"+strReplace+"||g' "+combCard)
       print "String to replace:", strReplace
-      
-    #newCard = ''
-    #for t in signalTypes:
-    #  strReplace = baseFolder+'/'+t+Label+'/datacards/'
-    #  newCard += '## replacing ' +strReplace+ ' for nothing \n'
-    #with open(combCard_pre,'r') as f:
-    #  for line in f:
-    #    myString = line
-    #    for t in signalTypes:
-    #      myString = myString.replace(baseFolder+'/'+t+Label+'/datacards/', '')
-    #    newCard += myString + '\n'
-
-    #newCombCard = open(combCard, 'w')
-    #newCombCard.write(newCard)
-    #newCombCard.close()
 
     if doCombine:
       if Combinelxbatch:
