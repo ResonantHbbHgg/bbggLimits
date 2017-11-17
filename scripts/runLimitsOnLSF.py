@@ -25,9 +25,8 @@ parser.add_argument('-t', '--type', dest="scanType", default=None, type=str, nar
 opt = parser.parse_args()
 
 
-def submitPoint(kl, kt, cg, c2, c2g):
-  pointStr = "_".join(['kl',str(kl), 'kt',str(kt), 'cg',str(cg), 'c2',str(c2), 'c2g',str(c2g)]).replace('.', 'p').replace('-', 'm')
-
+def submitPoint(kl=1.0, kt=1.0, cg=0.0, c2=0.0, c2g=0.0):
+  pointStr = "_".join(['kl',str(kl),'kt',str(kt),'cg',str(cg),'c2',str(c2),'c2g',str(c2g)]).replace('.', 'p').replace('-', 'm')
   extra = ' '.join([' --analyticalRW','--kl '+str(kl),'--kt '+str(kt),'--cg '+str(cg),'--c2 '+str(c2), '--c2g '+str(c2g),
                     '--extraLabel '+pointStr])
   
@@ -66,7 +65,7 @@ if __name__ == "__main__":
 
 
   if "KL" in opt.scanType:
-    for kl in [float(i)/(2.5) for i in range(-50,51)]:
+    for kl in scan_kl['kl']:
       kt = 1.0
       cg = 0.0
       c2 = 0.0
@@ -77,19 +76,35 @@ if __name__ == "__main__":
       print kl, kt, cg, c2, c2g
       submitPoint(kl, kt, cg, c2, c2g)   
 
+  if "KLKT" in opt.scanType:
+    for kl in scan_2d['kl']:
+      for kt in scan_2d['kt']:
+          
+        kt = 1.0
+        cg = 0.0
+        c2 = 0.0
+        c2g = 0.0
+            
+        print counter
+        counter += 1
+        print kl, kt, cg, c2, c2g
+        submitPoint(kl, kt, cg, c2, c2g)   
+
+        
   if 'manual' in opt.scanType:
-    # Here run limit over specific points
+    # Here we can run limits over specific points
     # Note: the limit trees for those points must exist
-    kt = 1.0
-    cg = 0.0
-    c2 = 0.0
-    c2g = 0.0
+    kt = 1
+    cg = 0
+    c2 = 0
+    c2g = 0
             
     print counter
     counter += 1
     print kl, kt, cg, c2, c2g
     submitPoint(kl, kt, cg, c2, c2g)   
 
+    
   if "grid" in opt.scanType:
     counter = 0 
     for j in xrange(0,5):

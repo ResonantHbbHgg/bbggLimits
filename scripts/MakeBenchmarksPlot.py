@@ -12,9 +12,9 @@ gStyle.SetOptStat(0)
 
 parser =  argparse.ArgumentParser(description='Limit Tree maker')
 parser.add_argument("-f", "--folder", dest="f", type=str)
-parser.add_argument('-l', '--lumi', dest='lumi', type=str, default='35.9')
 parser.add_argument("--unblind", dest="unblind", action='store_true', default=False)
 opt = parser.parse_args()
+
 
 myLineHeight = 0.02
 myLineWidth = 0.05

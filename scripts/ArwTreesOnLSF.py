@@ -30,7 +30,7 @@ parser.add_argument('-t', '--type', dest="scanType", default=None, type=str,
 opt = parser.parse_args()
 
 
-def makeMyTreeGood(inPath, kl, kt, cg, c2, c2g):
+def makeMyTreeGood(inPath, kl=1.0, kt=1.0, cg=0.0, c2=0.0, c2g=0.0):
   pointStr = "_".join(['kl',str(kl),'kt',str(kt),'cg',str(cg),'c2',str(c2),'c2g',str(c2g)]).replace('.', 'p').replace('-', 'm')
   fname = 'LT_NR_Nodes_All_merged_'+pointStr+'.root'
 
@@ -78,19 +78,30 @@ if __name__ == "__main__":
       print 'Making trees for KL scan, ', cc
       for kl in scan_kl['kl']:
         print '\t kl = ', kl
-        kt = 1
-        cg = 0
-        c2 = 0
-        c2g = 0
+        kt = 1.0
+        cg = 0.0
+        c2 = 0.0
+        c2g = 0.0
         makeMyTreeGood(cc, kl,kt,cg,c2,c2g)
+        
+  if 'KLKT' in opt.scanType:
+    for cc in case:
+      print 'Making trees for KLKT scan, ', cc
+      for kl in scan_2d['kl']:
+        for kt in scan_2d['kt']:
+          print '\t kl = ', kl, '\t kt = ', kt
+          cg = 0.0
+          c2 = 0.0
+          c2g = 0.0
+          makeMyTreeGood(cc, kl,kt,cg,c2,c2g)
         
   if 'manual' in opt.scanType:
     # Here make trees for specific points
     for cc in case:
-      kl = 1
-      kt = 1
-      cg = 0
-      c2 = 0
-      c2g = 0
+      kl = 1.0
+      kt = 1.0
+      cg = 0.0
+      c2 = 0.0
+      c2g = 0.0
       
       makeMyTreeGood(cc, kl,kt,cg,c2,c2g)
