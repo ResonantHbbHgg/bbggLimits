@@ -155,11 +155,15 @@ python scripts/MakeKLambdaScan.py LIMSDIR
 ```
 
 For *kl-kt* scan plot, we first need to gateher the results of all limits in a text file,
-and then run the plotting script:
+and then run the plotting script:  
 ```
-python scripts/MakeKLKTScanTxtList.py LIMSDIR
-python scripts/MakeKLKTplot.py -l KLKT_Scan_List.txt -o outFile
-```
+python scripts/MakeKLKTScanTxtList.py LIMSDIR [-s]
+python scripts/MakeKLKTplot.py -l LIMSDIR/KLKT_Scan_List.txt
+```  
+Here, `-s` option can be used if only limits for `kt>0` are produced. In this case the
+plot is simply drawn symmetricly over (0,0) point in (kl,kt) coordinates.
+
+
 PS. In order to reporduce the _EPS17_ results, follow the instructions here:
 [SmartScripts/README.md](SmartScripts/README.md)
 

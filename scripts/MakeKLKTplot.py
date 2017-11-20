@@ -10,7 +10,7 @@ gROOT.SetBatch()
 parser =  argparse.ArgumentParser(description='Limit Tree maker')
 parser.add_argument("-u", '--unblind', dest='unblind', action='store_true', default=False)
 parser.add_argument("-l", '--limitsFile', dest="lims", type=str, nargs='+')
-parser.add_argument('-o', '--outFile', dest='outf', type=str)
+parser.add_argument('-o', '--outFile', dest='outf', type=str, default='KLKT')
 parser.add_argument('--funkyColor', dest='funky', action='store_true', default=False)
 opt = parser.parse_args()
 
@@ -25,7 +25,9 @@ for ff in opt.lims:
 
 myGraphs =  readTxt(opt.lims)
 
-outf = TFile(opt.outf, 'RECREATE')
+outFile = opt.lims[0].split('/')[0]+'/'+opt.outf
+outf = TFile(outFile+'.root', 'RECREATE')
+
 outf.cd()
 graphs = {}
 contours = {}
@@ -227,8 +229,8 @@ c1.RedrawAxis()
 leg.Draw('same')
 
 DrawCMSLabels(c1, '35.9')
-c1.SaveAs("klktplot.pdf")
-c1.SaveAs("klktplot.png")
+c1.SaveAs(outFile+"_plot.pdf")
+c1.SaveAs(outFile+"_plot.png")
 
 
 c0 = TCanvas('c0', 'c0', 800, 600)
@@ -254,8 +256,8 @@ for gr,gr in enumerate(myGraphs):
     c0.Update()
     DrawCMSLabels(c0, '35.9')
     c0.Update()
-    c0.SaveAs('cen_lims.pdf')
-    c0.SaveAs('cen_lims.png')
+    c0.SaveAs(outFile+'_cen_lims.pdf')
+    c0.SaveAs(outFile+'_cen_lims.png')
     break
 
 if opt.unblind == True:
@@ -282,8 +284,8 @@ if opt.unblind == True:
       cob.Update()
       DrawCMSLabels(cob, '35.9')
       cob.Update()
-      cob.SaveAs('obs_lims.pdf')
-      cob.SaveAs('obs_lims.png')
+      cob.SaveAs(outFile+'_obs_lims.pdf')
+      cob.SaveAs(outFile+'_obs_lims.png')
       break
 
 outf.Close()

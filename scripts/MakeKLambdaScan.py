@@ -62,7 +62,7 @@ for qt in quantiles:
 
 
 myKl = []
-notworked = open('klscan_notworked.txt', 'w+')
+notworked = open(opt.limdir+'/klscan_notworked.txt', 'w+')
 for kl in scan_kl['kl']:
   #  fname = opt.limdir + '/HighMass_Node_SMkl' + str(kl).replace('.', 'p').replace('-', 'm') + '_kt1p0_cg0p0_c20p0_c2g0p0/datacards/higgsCombineHighMass_Node_SMkl' + str(kl).replace('.', 'p').replace('-', 'm') + '_kt1p0_cg0p0_c20p0_c2g0p0.Asymptotic.mH125.root'
   #fname = opt.limdir + '/CombinedCard_Node_SMkl' + str(kl).replace('.', 'p').replace('-', 'm') + '_kt1p0_cg0p0_c20p0_c2g0p0/higgsCombineCombinedCard_Node_SMkl' + str(kl).replace('.', 'p').replace('-', 'm') + '_kt1p0_cg0p0_c20p0_c2g0p0.Asymptotic.mH125.root'
