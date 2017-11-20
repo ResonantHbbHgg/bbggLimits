@@ -129,7 +129,7 @@ this case the logs should be found in your `/tmp/username/logs` and in the _mast
 
 We have another script to facilitate runing the limit for _benchmarks_,_kl_ and _kl-kt_ scans:  
 ```
-python scripts/runLimitsOnLSF.py -f conf_default.json -t [JHEP, KL, KLKT]
+python scripts/runLimitsOnLSF.py -f conf_default.json -t [JHEP, KL, KLKT] [-o OutDir]
 ```
 
 The above command should give you the limits identical to

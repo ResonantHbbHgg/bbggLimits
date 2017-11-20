@@ -10,7 +10,7 @@ org_bashFile = '''
 #!/bin/bash
 cd HERE
 eval `scramv1 runtime -sh`
-pyLimits.py -f JSONFILE -o LIMS_L_OUTDIR EXTRA --overwrite -j1 -v5
+pyLimits.py -f JSONFILE -o LOUTDIR EXTRA --overwrite -j1 -v5
 '''
 # This is a script for running the limits of grid reweighting
 grid_bashFile = '''
@@ -27,7 +27,6 @@ pyLimits.py -f $Json -o $outDir --points $Point -j1 -v2 --overwrite
 '''
 
 HERE = os.environ['PWD']
-OUTDIR = 'NewHope'
 
 import argparse
 parser =  argparse.ArgumentParser(description='submit the limit to the batch')
@@ -36,16 +35,17 @@ parser.add_argument('-t', '--type', dest="scanType", default=None, type=str, nar
                     help = "Choose the type of limits to run")
 parser.add_argument('-f', '--configFile', dest="fname", type=str, default='conf_default.json', required=True,
                     help="Json config file")
+parser.add_argument('-o', '--outDir', dest="outDir", type=str, default='LIMS_NewHope',
+                    help="Output directory for my limits")
                     
 opt = parser.parse_args()
-
 
 def submitPoint(kl=1, kt=1, cg=0, c2=0, c2g=0):
   pointStr = "_".join(['kl',str(float(kl)),'kt',str(float(kt)),'cg',str(float(cg)),'c2',str(float(c2)),'c2g',str(float(c2g))]).replace('.', 'p').replace('-', 'm')
   extra = ' '.join([' --analyticalRW','--kl '+str(kl),'--kt '+str(kt),'--cg '+str(cg),'--c2 '+str(c2), '--c2g '+str(c2g),
                     '--extraLabel '+pointStr])
   
-  bashFile = org_bashFile.replace('HERE', HERE).replace('L_OUTDIR', OUTDIR).replace('EXTRA', extra).replace('JSONFILE',opt.fname)
+  bashFile = org_bashFile.replace('HERE', HERE).replace('LOUTDIR', opt.outDir).replace('EXTRA', extra).replace('JSONFILE',opt.fname)
 
   bFile = open('/tmp/'+username+'/batch_'+pointStr+'.sh', "w+")
   bFile.write(bashFile)
@@ -95,7 +95,8 @@ if __name__ == "__main__":
     for kl in scan_2d['kl']:
       for kt in scan_2d['kt']:
         if kt==1: continue # we have those already
-        if abs(kt) < 0.2: continue # we are not sensitive to those anyway
+        if kt <= 0: continue
+        ### 
         cg = 0.0
         c2 = 0.0
         c2g = 0.0
@@ -109,7 +110,7 @@ if __name__ == "__main__":
   if 'manual' in opt.scanType:
     # Here we can run limits over specific points
     # Note: the limit trees for those points must exist
-    for kl in [12, 14, 14.4, 14.8, 15.2, 15.6, 16.4, 16.8, 17.2, 17.6]:
+    for kl in [12.12]:
       kt = 1
       cg = 0
       c2 = 0
