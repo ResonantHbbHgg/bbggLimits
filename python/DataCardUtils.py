@@ -1,40 +1,45 @@
-import os,sys,json,time,re
-import logging
-from shutil import copy
+import os,sys,string
 
-def DataCardMaker_wHiggs(Folder, nCats, signalExp, observed, higgsExp, HType):
+def DataCardMaker_wHiggs(Folder, nCats, signalExp, observed, higgsExp, HType, scaleSingleHiggs=False, kl=1.0, kt=1.0):
   if HType=="HighMass":
     inputDatacardName = os.getenv("CMSSW_BASE")+'/src/HiggsAnalysis/bbggLimits/Models/NonResDatacardModel_HM_wHiggs.txt'
   else:
     inputDatacardName = os.getenv("CMSSW_BASE")+'/src/HiggsAnalysis/bbggLimits/Models/NonResDatacardModel_LM_wHiggs.txt'
 
-  inputDatacard = open(inputDatacardName, 'r')
-  outputDatacard = open(Folder+'/datacards/hhbbgg_13TeV_DataCard.txt', 'w')
-  outToWrite = ''
-  for line in inputDatacard:
-    outTemp = line
-    ##workspaces
-    outTemp = outTemp.replace("INPUTBKGLOC", Folder + '/workspaces/hhbbgg.inputbkg_13TeV.root')
-    outTemp = outTemp.replace("INPUTSIGLOC", Folder + '/workspaces/hhbbgg.mH125_13TeV.inputsig.root')
-    ##observed
-    outTemp = outTemp.replace("OBSCAT0", '{:.0f}'.format(float(str(observed.split(',')[0]))))
-    outTemp = outTemp.replace("OBSCAT1", '{:.0f}'.format(float(str(observed.split(',')[1]))))
-    ##expected signal
-    outTemp = outTemp.replace("SIGCAT0", str(signalExp.split(',')[0]))
-    outTemp = outTemp.replace("SIGCAT1", str(signalExp.split(',')[1]))
-    ## higgs
-    for hty in higgsExp:
-      upper_hty = hty.upper()
-      #location
-      outTemp = outTemp.replace("INPUT"+upper_hty+"LOC", Folder + '/workspaces/hhbbgg.'+hty+'.inputhig.root')
-      #exp
-      outTemp = outTemp.replace(upper_hty+"C0", str(higgsExp[hty][0]))
-      outTemp = outTemp.replace(upper_hty+"C1", str(higgsExp[hty][1]))
-    outToWrite += outTemp
-  outputDatacard.write(outToWrite)
-  outputDatacard.close()
-      
+  outToWrite=''
+  with open(inputDatacardName, 'r') as cardTemp:
+    outToWrite = cardTemp.read()
 
+  #print outToWrite
+  outToWrite = outToWrite.replace("INPUTBKGLOC", str(Folder + '/workspaces/hhbbgg.inputbkg_13TeV.root'))
+  outToWrite = outToWrite.replace("INPUTSIGLOC", str(Folder + '/workspaces/hhbbgg.mH125_13TeV.inputsig.root'))
+  ##observed
+  #print observed.split(',')
+  outToWrite = outToWrite.replace("OBSCAT0", str('%.0f'%float(observed.split(',')[0])))
+  outToWrite = outToWrite.replace("OBSCAT1", '%.0f'%float(observed.split(',')[1]))
+  #print outToWrite
+  ##expected signal
+  outToWrite = outToWrite.replace("SIGCAT0", str(signalExp.split(',')[0]))
+  outToWrite = outToWrite.replace("SIGCAT1", str(signalExp.split(',')[1]))
+  ## higgs
+  HigScale = 1.0
+  for hty in higgsExp:
+    
+    if scaleSingleHiggs:
+      if hty in ['ggh','tth']:
+        HigScale = kt*kt
+        # print 'Scaling ', hty, 'yileds by', HigScale, 'in ', HType
+        
+    upper_hty = hty.upper()
+    #location
+    outToWrite = outToWrite.replace("INPUT"+upper_hty+"LOC", Folder + '/workspaces/hhbbgg.'+hty+'.inputhig.root')
+    #exp
+    outToWrite = outToWrite.replace(upper_hty+"C0", str(HigScale*higgsExp[hty][0]))
+    outToWrite = outToWrite.replace(upper_hty+"C1", str(HigScale*higgsExp[hty][1]))
+    
+  with open(Folder+'/datacards/hhbbgg_13TeV_DataCard.txt', 'w') as outputDatacard:
+    outputDatacard.write(outToWrite)
+      
 def DataCardMaker(Folder, nCats, signalExp, observed, isRes = 0, HType=0):
   if isRes == 0 and nCats == 1:
     print 'Resonant needs two cats!'

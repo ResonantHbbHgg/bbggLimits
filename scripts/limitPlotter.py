@@ -15,7 +15,8 @@ parser.add_argument("-c", dest="combineOpt", type=int, default=1,
                     help="Pick which limits to plot. 1-Asymptotic; 2 - Asymptotic with adaptive asimov; 3 - HybridNew")
 parser.add_argument('-d', '--dir', dest="inDir", type=str, default=None, required=True,
                     help="Input directory")
-parser.add_argument('-x', choices=['res','nodes','grid','lambda','yt','c2_1','c2_2','cg_1','cg_2','bench'], required=True, default=None,
+parser.add_argument('-x', choices=['res','nodes','grid','lambda','yt','c2_1','c2_2','cg_1','cg_2','bench','klkt'],
+                    required=True, default=None,
                     help = "Choose which Limit plot to make.")
 parser.add_argument("--log", dest="log", action="store_true", default=False,
                     help="Make log scale (in y)")
@@ -37,7 +38,7 @@ def filterMyPoints(x, fixedVals=None):
   if fixedVals==None:
     fixedVals = {'yt':1, 'c2':0, 'cg':0, 'c2g':0}
 
-  
+
   for key, value in fixedVals.iteritems():
     if key=='cg' and value=='-c2g':
       # This is a special case. Lets take care of it:
@@ -66,6 +67,11 @@ def getValuesFromFile(fname):
 
   res = []
   tree = f.Get("limit")
+  if tree==None:
+    if opt.verb>0:
+      print "The limit tree in the file does not exist.. Just skip this point!"
+    return None
+
   for i,l in enumerate(tree):
     # print i, l, l.limit
     if i==0: res.append(float(l.limit))
@@ -144,6 +150,11 @@ if __name__ == "__main__":
   cgPoints_2 = pg.getPoints(filterMyPoints, gridMap, filt)
   print 'Cg_2 points:\n', cgPoints_2
 
+  filt = {'c2':0, 'cg':0, 'c2g':0}
+  klktPoints = pg.getPoints(filterMyPoints, gridMap, filt)
+  print 'kt-kl points:\n', klktPoints
+  klktScanList = ''
+
   #gROOT.LoadMacro("./CMS_lumi.C")
   tdr.setTDRStyle()
   tdrStyle.SetTitleSize(0.054, "Y")
@@ -201,7 +212,9 @@ if __name__ == "__main__":
       exp2SigHi.append(l[4])
       if not opt.blind:
         obs.append(l[5])
-
+      else:
+        obs.append(0)
+        
       if opt.verb>0:
         print n,l
 
@@ -228,6 +241,8 @@ if __name__ == "__main__":
       exp2SigHi.append(l[4])
       if not opt.blind:
         obs.append(l[5])
+      else:
+        obs.append(0)
 
       if opt.verb>0:
         print n,l
@@ -237,7 +252,8 @@ if __name__ == "__main__":
 
   else:
     print 'Making limit plot for 0-1518 grid points'
-
+    
+    count=0
     for n in xrange(0,1519):
 
       if opt.x=='lambda' and n not in lambdaPoints:
@@ -252,7 +268,9 @@ if __name__ == "__main__":
         continue
       if opt.x=='cg_2' and n not in cgPoints_2:
         continue
-      
+      if opt.x=='klkt' and n not in klktPoints:
+        continue
+
       if n==324:
         print " This is SM point. It does not exist in the weights."
         print "\t We take it from the Nodes"
@@ -278,6 +296,8 @@ if __name__ == "__main__":
       exp2SigHi.append(l[4])
       if not opt.blind:
         obs.append(l[5])
+      else:
+        obs.append(0)
 
       if opt.x=='grid':
         xAxis.append(float(n))
@@ -290,17 +310,43 @@ if __name__ == "__main__":
         xAxis.append(float(pg.getParametersFromPoint(n,gridMap,True)['c2']))
       if opt.x in ['cg_1','cg_2']:
         xAxis.append(float(pg.getParametersFromPoint(n,gridMap,True)['cg']))
-
+      if opt.x in 'klkt':
+        klktScanList += ' '.join([str(count), str(pg.getParametersFromPoint(n,gridMap,True)['lambda']),
+                                  str(pg.getParametersFromPoint(n,gridMap,True)['yt']),
+                                  str(l[2]), str(l[5]), str(l[3]), str(l[1]), str(l[4]), str(l[0]), '\n'])
+        count+=1
+        # Add symmetric values:
+        klktScanList += ' '.join([str(count), str(-pg.getParametersFromPoint(n,gridMap,True)['lambda']),
+                                  str(-pg.getParametersFromPoint(n,gridMap,True)['yt']),
+                                  str(l[2]), str(l[5]), str(l[3]), str(l[1]), str(l[4]), str(l[0]), '\n'])
+        count+=1
+    
       try:
         theo.append(pg.getCrossSectionForPoint(n, gridMap)[0]*br)
       except:
         print 'Exception on getCrossSectionForPoint(). Point=', n
         theo.append(0)
-        
+
       xErr.append(0.5)
 
-
-
+  if opt.x=='klkt':
+    # Adding fake values at the edges to make plotting script work:
+    for kl in [-20, 20]:
+      for kt in np.linspace(-2.5, 2.5, 11):
+        klktScanList += ' '.join([str(count), str(kl), str(kt), '3.0 4.0 5.0 3.0 6.0 2.0 \n'])
+        count+=1
+    for kt in [-2.5, 2.5]:
+      for kl in np.linspace(-20, 20, 11):
+        klktScanList += ' '.join([str(count), str(kl), str(kt), '3.0 4.0 5.0 3.0 6.0 2.0 \n'])
+        count+=1
+    outList = open("KlKtList.txt", "w+")
+    outList.write(klktScanList)
+    outList.close()
+    if opt.blind:
+      os.system("python scripts/MakeKLKTplot.py --limitsFile KlKtList.txt --outFile KlKtList.root")
+    else:
+      os.system("python scripts/MakeKLKTplot.py --limitsFile KlKtList.txt --outFile KlKtList.root --unblind")
+    
   if len(xAxis) == 0:
     print 'There are no points to plot! Exiting...'
     sys.exit(0)
@@ -330,7 +376,7 @@ if __name__ == "__main__":
   exp2SigHiErr_Array  = np.array([b-a for a,b in zip(expMean,exp2SigHi)])
 
   print expMean
-  
+
   mg = TMultiGraph()
   mg.SetTitle('')
 
@@ -341,7 +387,7 @@ if __name__ == "__main__":
   observed = TGraphAsymmErrors(nPoints,xAxis_Array,obs_Array,zeros_Array,zeros_Array,zeros_Array,zeros_Array)
 
   theory = TGraphAsymmErrors(nPoints,xAxis_Array,theo_Array,zeros_Array,zeros_Array,zeros_Array,zeros_Array)
-  
+
   if opt.x=='grid':
     # Make a JSON file
     limDict = {}
@@ -368,8 +414,6 @@ if __name__ == "__main__":
     with open('limits_grid.json', 'w') as fp:
       json.dump(limDict, fp, sort_keys=True, indent=4)
 
-
-  
   if opt.x=='grid':
     twoSigma.SetLineColor(kYellow)
     twoSigma.SetLineWidth(1)
@@ -459,7 +503,7 @@ if __name__ == "__main__":
       thFunc.SetLineWidth(2)
       thFunc.SetLineColor(kRed+2)
       thFunc.Draw('L same')
- 
+
   mg.SetMinimum(0)
 
   if opt.x=='nodes':
@@ -519,6 +563,7 @@ if __name__ == "__main__":
     leg.AddEntry(twoSigma,"Expected #pm 2#sigma", "f")
 
   leg.Draw()
+
 
   if opt.log:
     mg.SetMinimum(0.03)

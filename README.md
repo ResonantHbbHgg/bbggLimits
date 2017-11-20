@@ -37,7 +37,7 @@ git clone git@github.com:cms-hh/Support.git
 cd ${CMSSW_BASE}/src/HiggsAnalysis/
 git clone  git@github.com:ResonantHbbHgg/bbggLimits.git
 cd ${CMSSW_BASE}/src/HiggsAnalysis/bbggLimits/
-scramv1 b # a lot of complaints about bbggHighMassFitter.cc (this is not used anymore, needs to be deleted)
+scramv1 b
 ```
 
 
@@ -62,6 +62,7 @@ makeAllTrees.py -x nonres -f LT_OutDir -s FlatT_SignalDir -d 0 \
 --doCatMVA --MVAHMC0 0.970 --MVAHMC1 0.600 --MVALMC0 0.985 --MVALMC1 0.600 --massNR 350 --doSMHiggs --LMLJBTC 0.55 --LMSJBTC 0.55 --genDiPhotonFilte
 ```  
 
+ 
 In order to re-produce the limit trees used for EPS17 results, follow instructions in
 [SmartScripts/README.md](SmartScripts/README.md).
 
@@ -74,15 +75,25 @@ python script *scripts/pyLimitTreeMaker.py*, which exists in the
 ```
 pyLimitTreeMaker.py -f fileName.root -o outDir
 ```
-
 where `fileName.root` is a an input Flat tree to be run over, and
 `outDir` is where the output trees will be created. The
 `makeAllTrees.py` mentioned in the beginning utilizes the
 `pyLimitTreeMaker.py` and runs it over many input  files.
 
 
-More options for the `pyLimitTreeMaker.py` can be specified, 
-as can be seen [directly in the code](https://github.com/ResonantHbbHgg/bbggLimits/blob/10c319b013134e5bb15a561557f960dc2f1ea6b2/scripts/pyLimitTreeMaker.py#L11-L85)
+More options for the `pyLimitTreeMaker.py` can be specified. To see all of them look
+[directly in the code](https://github.com/ResonantHbbHgg/bbggLimits/blob/cc11d25a97392ee55116bac9d08b77f5f4128998/scripts/pyLimitTreeMaker.py#L11-L85).
+
+### Non-resonant reweighted trees 
+In the non-resonant search, to get the limits at any parameter point of 5D space, we need
+to reweight the signal sample to that point.  To do that we have a script,
+`scripts/MakeARWTree.py`. Have a look at it to understand what it does. Then, to simplify
+the production of those reweighted trees, we have another script which does everything on
+batch, `scripts/ArwTreesOnLSF.py`. For example, to make trees for *kl* scan run:
+```
+python scripts/ArwTreesOnLSF.py -t KL
+```
+
 
 ### Set the Limits 
 Once the limit trees are produced, we would like to make the 2D fits in
@@ -93,27 +104,62 @@ scripts are needed to handle many different situations (resonant, non-resonant,
 re-weighting to various benchmark points, etc.). In order to run just one limit you need
 `scripts/pyLimits.py`. Minimal options for the *SM* point are:  
 ``` 
-pyLimits.py -f conf_NonRes_EPS17.json -o outputDirName --nodes SM 
-```
-
-The above command must be run on _lxplus_, because the input root files are located on EOS
-(the path is specified in json config file).  
+pyLimits.py -f conf_default.json -o outputDirName --nodes SM 
+```  
+*Important*: one has to specify the location of the inpot limit trees in
+`conf_default.json` file.  The above command must be run on _lxplus_, if the input root
+files are located on EOS.  
 The `pyLimits.py` script would call _runFullChain()_ method which is implemented in
 `python/LimitsUtil.py`.  So in fact, the [LimitsUtil.py](python/LimitsUtil.py) script is
 the base code which interacts with the functions in `bbgg2DFitter.cc`.  
+
 Using the `--nodes SM` option tells it to use the Limit Tree produced from a single SM MC
-sample.  Alternatively, one can do the re-weighting of the merged non-resonant
-samples and therefore increase the statistics of the SM signal. Analytical re-weighting was used for EPS17 results of 2016 data.  
-Run it like so: 
-``` 
-pyLimits.py -f conf_NonRes_EPS17.json -o outputDirName --analyticalRW
+sample.  
+Alternatively, one can do the limit os the re-weighted samples of the merged non-resonant
+samples. (For the SM point this allows to increase the statistics of the signal
+sample. Such re-weighting was used for EPS17 results of 2016 data.)  
+Run it like so:  
+```
+pyLimits.py -f conf_default.json -o outputDirName --analyticalRW
+```
+In case of problems it's useful to increase verbosity level with `-v 1(2,3)` option. In
+this case the logs should be found in your `/tmp/username/logs` and in the _master_ log,
+`outputDirName/mainLog_date-time.log`
+
+
+We have another script to facilitate runing the limit for _benchmarks_,_kl_ and _kl-kt_ scans:  
+```
+python scripts/runLimitsOnLSF.py -f conf_default.json -t [JHEP, KL, KLKT] [-o OutDir]
 ```
 
-In case of problems it's useful to increase verbosity level with `-v 1(2,3)` option. In this case the logs should be found in your `/tmp/username/logs` and in the _master_ log, `outputDirName/mainLog_date-time.log`
-
 The above command should give you the limits identical to
-[the ones on SVN](https://svnweb.cern.ch/cern/wsvn/cmshcg/trunk/cadi/HIG-17-008/NonResonant/Benchmarks/CombinedCard_Node_SMkl1p0_kt1p0_cg0p0_c20p0_c2g0p0/result_2_L_CombinedCard_Node_SMkl1p0_kt1p0_cg0p0_c20p0_c2g0p0.log).
-In order to reporduce the rest of _EPS17_ results, follow the instructions here:
-[SmartScripts/README.md](SmartScripts/README.md)
+[the ones on SVN](https://svnweb.cern.ch/cern/wsvn/cmshcg/trunk/cadi/HIG-17-008/NonResonant/Benchmarks/).
 
 Good luck!
+
+### Scripts for making plots
+Make background fit plots for m(gg) and m(jj) in all categories:
+```
+source scripts/MakeSMHHFullBkgPlots.sh LIMSDIR
+```
+
+In order make the non-resonant benchmark limit plot:  
+```
+python scripts/MakeBenchmarksPlot.py LIMSDIR
+```
+where _LIMSDIR_ is a directory with the limits output.
+
+To get the *kl* scan plot:
+```
+python scripts/MakeKLambdaScan.py LIMSDIR
+```
+
+For *kl-kt* scan plot, we first need to gateher the results of all limits in a text file,
+and then run the plotting script:
+```
+python scripts/MakeKLKTScanTxtList.py LIMSDIR
+python scripts/MakeKLKTplot.py -l KLKT_Scan_List.txt -o outFile
+```
+PS. In order to reporduce the _EPS17_ results, follow the instructions here:
+[SmartScripts/README.md](SmartScripts/README.md)
+

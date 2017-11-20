@@ -46,7 +46,7 @@ def parseNumList(string):
   return list(set(mylist))
 
 parser =  argparse.ArgumentParser(description='Limit Tree maker')
-parser.add_argument('-f', '--inputFile', dest="fname", type=str, default=None, required=True,
+parser.add_argument('-f', '--configFile', dest="fname", type=str, default=None, required=True,
                     help="Json config file")
 parser.add_argument('-o', '--outDir', dest="outDir", type=str, default=None,
                     help="Output directory (will be created).")
@@ -136,7 +136,7 @@ if __name__ == "__main__":
   mainLog.info(pformat(opt))
 
   createDir('/tmp/'+__username__+'/PIDs/',mainLog,True)
-  createDir('/tmp/'+__username__+'/logs/',mainLog,True)
+  createDir(baseFolder+'/logs/',mainLog,True)
 
   res_Masses = []
   if opt.mass!=None:
@@ -217,7 +217,7 @@ if __name__ == "__main__":
         j, res = r.pop(0)
         procCheckT = time.time()
         procRes = res.get(opt.timeout)
-        mainLog.info('%d Job %s has been finished. Was waiting only for %f Seconds.' % (procRes, j, time.time()-procCheckT))
+        mainLog.info('%d Job %s has finished. Was waiting only for %f Seconds.' % (procRes, j, time.time()-procCheckT))
 
       except Exception as e:
         mainLog.warning("We have reached an exception related to %s" % (str(e)))
