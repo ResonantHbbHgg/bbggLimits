@@ -139,15 +139,19 @@ Good luck!
 
 ### Scripts for making plots
 Make background fit plots for m(gg) and m(jj) in all categories:
-```
+```  
 source scripts/MakeSMHHFullBkgPlots.sh LIMSDIR
+```  
+where _LIMSDIR_ is a directory with the limits output. Similarly, for the signal shape (SM
+point), run:  
 ```
+python scripts/MakeSigPlotSimple.py LIMSDIR
+```  
 
 In order make the non-resonant benchmark limit plot:  
 ```
 python scripts/MakeBenchmarksPlot.py LIMSDIR
 ```
-where _LIMSDIR_ is a directory with the limits output.
 
 To get the *kl* scan plot:
 ```

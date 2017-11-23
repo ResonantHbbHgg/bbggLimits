@@ -1,7 +1,7 @@
 from ROOT import *
 import os,sys,json,time,re
 import logging
-from shutil import copy
+from shutil import copy,copy2
 from pprint import pformat
 from multiprocessing import Pool, TimeoutError, current_process
 from HiggsAnalysis.bbggLimits.DataCardUtils import *
@@ -355,6 +355,19 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
       strReplace = baseFolder+'/'+t+Label+'/datacards/'+os.getenv("CMSSW_BASE")+'/src/HiggsAnalysis/bbggLimits/'
       os.system("sed -i 's|"+strReplace+"||g' "+combCard)
       print "String to replace:", strReplace
+
+    if scaleSingleHiggs:
+      ktScaled = newDir+'/kt_scaled_hhbbgg_13TeV_DataCard.txt'
+      copy2(combCard, ktScaled)
+      with open(ktScaled, "a") as myfile:
+        HigScale = opt.ARW_kt*opt.ARW_kt
+        appendString = '\n'
+        appendString+= '\n h_norm_ggh rateParam * ggh %.4f' % HigScale
+        appendString+= '\n nuisance edit freeze h_norm_ggh'
+        appendString+= '\n h_norm_tth rateParam * tth %.4f' % HigScale
+        appendString+= '\n nuisance edit freeze h_norm_ggh'
+        myfile.write(appendString)
+
 
     if doCombine:
       if Combinelxbatch:

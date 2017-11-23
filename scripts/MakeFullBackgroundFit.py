@@ -29,7 +29,7 @@ def MakeFullBackgroundPdf(bkg_pdf, bkg_norm, hig_pdfs, hig_norms):
 gSystem.Load("libHiggsAnalysisCombinedLimit.so")
 gROOT.SetBatch(kTRUE)
 
-parser =  argparse.ArgumentParser(description='Limit Tree maker')
+parser =  argparse.ArgumentParser(description='Background fit plot maker')
 parser.add_argument('-i', '--inputFile', dest="dname", type=str, default=None, required=True)
 parser.add_argument('-o', '--outFile', dest="outf", type=str, default=".")
 parser.add_argument('-L', '--lumi', dest='lumi', type=str, default='35.9')

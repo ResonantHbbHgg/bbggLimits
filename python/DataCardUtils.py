@@ -1,6 +1,6 @@
 import os,sys,string
 
-def DataCardMaker_wHiggs(Folder, nCats, signalExp, observed, higgsExp, HType, scaleSingleHiggs=False, kl=1.0, kt=1.0):
+def DataCardMaker_wHiggs(Folder, nCats, signalExp, observed, higgsExp, HType):
   if HType=="HighMass":
     inputDatacardName = os.getenv("CMSSW_BASE")+'/src/HiggsAnalysis/bbggLimits/Models/NonResDatacardModel_HM_wHiggs.txt'
   else:
@@ -22,20 +22,13 @@ def DataCardMaker_wHiggs(Folder, nCats, signalExp, observed, higgsExp, HType, sc
   outToWrite = outToWrite.replace("SIGCAT0", str(signalExp.split(',')[0]))
   outToWrite = outToWrite.replace("SIGCAT1", str(signalExp.split(',')[1]))
   ## higgs
-  HigScale = 1.0
   for hty in higgsExp:
-    
-    if scaleSingleHiggs:
-      if hty in ['ggh','tth']:
-        HigScale = kt*kt
-        # print 'Scaling ', hty, 'yileds by', HigScale, 'in ', HType
-        
     upper_hty = hty.upper()
     #location
     outToWrite = outToWrite.replace("INPUT"+upper_hty+"LOC", Folder + '/workspaces/hhbbgg.'+hty+'.inputhig.root')
     #exp
-    outToWrite = outToWrite.replace(upper_hty+"C0", str(HigScale*higgsExp[hty][0]))
-    outToWrite = outToWrite.replace(upper_hty+"C1", str(HigScale*higgsExp[hty][1]))
+    outToWrite = outToWrite.replace(upper_hty+"C0", str(higgsExp[hty][0]))
+    outToWrite = outToWrite.replace(upper_hty+"C1", str(higgsExp[hty][1]))
     
   with open(Folder+'/datacards/hhbbgg_13TeV_DataCard.txt', 'w') as outputDatacard:
     outputDatacard.write(outToWrite)

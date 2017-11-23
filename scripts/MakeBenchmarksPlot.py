@@ -12,7 +12,7 @@ gStyle.SetOptStat(0)
 
 parser =  argparse.ArgumentParser(description='Benchmark plot maker')
 parser.add_argument("limdir")
-parser.add_argument("--unblind", dest="unblind", action='store_true', default=False)
+parser.add_argument('-u',"--unblind", dest="unblind", action='store_true', default=False)
 opt = parser.parse_args()
 
 
