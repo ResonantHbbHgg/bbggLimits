@@ -31,10 +31,10 @@ if __name__ == "__main__":
         ccat = c
         if c in [0,1]:
             D_MCAT = D_LM
-            analysis=name+'|Low mass region'
+            analysis=name+'|Low-mass region'
         else:
             D_MCAT = D_HM
-            analysis=name+'|High mass region'
+            analysis=name+'|High-mass region'
             if c == 2:
                 ccat = 0
             if c == 3:
@@ -59,4 +59,4 @@ if __name__ == "__main__":
             label_ax = "m_{jj} [GeV]"
             if 'mgg' in ob:
                 label_ax = "m_{#gamma#gamma} [GeV]"
-            MakeSigPlot(data, pdf, var, label_ax, lumi, str(c), analysis, doBands, Label+"_signal_fit_"+ob+"_cat"+str(c), bins[i], xmin[ob], xmax[ob], 1, DSCB)
+            MakeSigPlot(data, pdf, var, label_ax, lumi, str(c), analysis, doBands, Label+"_signal_fit_"+ob+"_cat"+str(c), bins[i], xmin[ob], xmax[ob], 1, DSCB, outPath=opt.limdir)

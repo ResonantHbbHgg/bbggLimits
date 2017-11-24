@@ -30,8 +30,8 @@ HMMP_FACT=100
 LMHP_FACT=100
 LMMP_FACT=1000
 
-HMTEXT="#font[61]{pp#rightarrowHH#rightarrowb#bar{b}#gamma#gamma}|High mass region"
-LMTEXT="#font[61]{pp#rightarrowHH#rightarrowb#bar{b}#gamma#gamma}|Low mass region"
+HMTEXT="#font[61]{pp#rightarrowHH#rightarrowb#bar{b}#gamma#gamma}|High-mass region"
+LMTEXT="#font[61]{pp#rightarrowHH#rightarrowb#bar{b}#gamma#gamma}|Low-mass region"
 
 python scripts/MakeFullBackgroundFit.py -i ${INFILE} -o ${OUTFILE_HM} \
 --signalNormalization ${HMHP_NORM} ${HMMP_NORM} \

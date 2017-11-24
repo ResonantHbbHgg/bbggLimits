@@ -1,6 +1,6 @@
 # Package for computing limits for the Run II analyses
 
-## Instalation
+## Installation
 First, setup the environment with the Higgs Combination tools: https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideHiggsAnalysisCombinedLimit  
 Currently working with 74X (check latest on HiggsCombine twiki).   
 
@@ -55,7 +55,7 @@ Make non-res shape benchmark points trees (MVA based with 350 M(HH) threshold):
 makeAllTrees.py -x nonres -f LT_OutDir \  
 --doCatMVA --MVAHMC0 0.970 --MVAHMC1 0.600 --MVALMC0 0.985 --MVALMC1 0.600 --massNR 350 --LMLJBTC 0.55 --LMSJBTC 0.55
 ```   
-You can aslo provide the locations of the flat trees if they are not the ones hardcoded in
+You can also provide the locations of the flat trees if they are not the ones hard-coded in
 the script, via `-s`, `-d`, `-b` options. For example, to make the trees from single H, use: 
 ```
 makeAllTrees.py -x nonres -f LT_OutDir -s FlatT_SignalDir -d 0 \  
@@ -86,7 +86,7 @@ More options for the `pyLimitTreeMaker.py` can be specified. To see all of them 
 
 ### Non-resonant reweighted trees 
 In the non-resonant search, to get the limits at any parameter point of 5D space, we need
-to reweight the signal sample to that point.  To do that we have a script,
+to reweigh the signal sample to that point.  To do that we have a script,
 `scripts/MakeARWTree.py`. Have a look at it to understand what it does. Then, to simplify
 the production of those reweighted trees, we have another script which does everything on
 batch, `scripts/ArwTreesOnLSF.py`. For example, to make trees for *kl* scan run:
@@ -104,9 +104,9 @@ scripts are needed to handle many different situations (resonant, non-resonant,
 re-weighting to various benchmark points, etc.). In order to run just one limit you need
 `scripts/pyLimits.py`. Minimal options for the *SM* point are:  
 ``` 
-pyLimits.py -f conf_default.json -o outputDirName --nodes SM 
+pyLimits.py -f conf_default.json -o outDir --nodes SM 
 ```  
-*Important*: one has to specify the location of the inpot limit trees in
+*Important*: one has to specify the location of the input limit trees in
 `conf_default.json` file.  The above command must be run on _lxplus_, if the input root
 files are located on EOS.  
 The `pyLimits.py` script would call _runFullChain()_ method which is implemented in
@@ -115,21 +115,21 @@ the base code which interacts with the functions in `bbgg2DFitter.cc`.
 
 Using the `--nodes SM` option tells it to use the Limit Tree produced from a single SM MC
 sample.  
-Alternatively, one can do the limit os the re-weighted samples of the merged non-resonant
+Alternatively, one can do the limit on the re-weighted samples of the merged non-resonant
 samples. (For the SM point this allows to increase the statistics of the signal
 sample. Such re-weighting was used for EPS17 results of 2016 data.)  
 Run it like so:  
 ```
-pyLimits.py -f conf_default.json -o outputDirName --analyticalRW
+pyLimits.py -f conf_default.json -o outDir --analyticalRW
 ```
 In case of problems it's useful to increase verbosity level with `-v 1(2,3)` option. In
-this case the logs should be found in your `/tmp/username/logs` and in the _master_ log,
-`outputDirName/mainLog_date-time.log`
+this case the logs should be found in your `outDir/logs` and in the _master_ log,
+`outDir/mainLog_date-time.log`
 
 
-We have another script to facilitate runing the limit for _benchmarks_,_kl_ and _kl-kt_ scans:  
+We have another script to facilitate running the limit for _benchmarks_,_kl_ and _kl-kt_ scans:  
 ```
-python scripts/runLimitsOnLSF.py -f conf_default.json -t [JHEP, KL, KLKT] [-o OutDir]
+python scripts/runLimitsOnLSF.py -f conf_default.json -t [JHEP, KL, KLKT] [-o outDir]
 ```
 
 The above command should give you the limits identical to
@@ -158,16 +158,16 @@ To get the *kl* scan plot:
 python scripts/MakeKLambdaScan.py LIMSDIR
 ```
 
-For *kl-kt* scan plot, we first need to gateher the results of all limits in a text file,
+For *kl-kt* scan plot, we first need to gather the results of all limits in a text file,
 and then run the plotting script:  
 ```
 python scripts/MakeKLKTScanTxtList.py LIMSDIR [-s]
 python scripts/MakeKLKTplot.py -l LIMSDIR/KLKT_Scan_List.txt
 ```  
 Here, `-s` option can be used if only limits for `kt>0` are produced. In this case the
-plot is simply drawn symmetricly over (0,0) point in (kl,kt) coordinates.
+plot is simply drawn symmetrically over (0,0) point in (kl,kt) coordinates.
 
 
-PS. In order to reporduce the _EPS17_ results, follow the instructions here:
+PS. In order to reproduce the _EPS17_ results, follow the instructions here:
 [SmartScripts/README.md](SmartScripts/README.md)
 

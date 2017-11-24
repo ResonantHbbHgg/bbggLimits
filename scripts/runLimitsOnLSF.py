@@ -97,8 +97,8 @@ if __name__ == "__main__":
     c2g = 0.0
     for kl in scan_2d['kl']:
       for kt in scan_2d['kt']:
-        if kt==1: continue # we have those already
-        if kt <= 0: continue
+    
+        if kt <= 0: continue # Because they are symmetric!
             
         print counter
         counter += 1
