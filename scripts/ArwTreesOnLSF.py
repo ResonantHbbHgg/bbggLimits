@@ -75,33 +75,32 @@ if __name__ == "__main__":
 
   if 'KL' in opt.scanType:
     for cc in case:
+      kt = 1.0
+      cg = 0.0
+      c2 = 0.0
+      c2g = 0.0
       print 'Making trees for KL scan, ', cc
       for kl in scan_kl['kl']:
         print '\t kl = ', kl
-        kt = 1.0
-        cg = 0.0
-        c2 = 0.0
-        c2g = 0.0
         makeMyTreeGood(cc, kl,kt,cg,c2,c2g)
         
   if 'KLKT' in opt.scanType:
     for cc in case:
+      cg = 0.0
+      c2 = 0.0
+      c2g = 0.0
       print 'Making trees for KLKT scan, ', cc
       for kl in scan_2d['kl']:
         for kt in scan_2d['kt']:
           print '\t kl = ', kl, '\t kt = ', kt
-          cg = 0.0
-          c2 = 0.0
-          c2g = 0.0
           makeMyTreeGood(cc, kl,kt,cg,c2,c2g)
         
   if 'manual' in opt.scanType:
     # Here make trees for specific points
     for cc in case:
-      kl = 1.0
-      kt = 1.0
       cg = 0.0
       c2 = 0.0
       c2g = 0.0
-      
-      makeMyTreeGood(cc, kl,kt,cg,c2,c2g)
+      for kl in [1.0, 4.4]:
+        for kt in [float(i)/(4) for i in range(-10,11)]:
+          makeMyTreeGood(cc, kl,kt,cg,c2,c2g)

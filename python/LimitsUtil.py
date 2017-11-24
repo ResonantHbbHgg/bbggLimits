@@ -1,7 +1,7 @@
 from ROOT import *
 import os,sys,json,time,re
 import logging
-from shutil import copy
+from shutil import copy,copy2
 from pprint import pformat
 from multiprocessing import Pool, TimeoutError, current_process
 from HiggsAnalysis.bbggLimits.DataCardUtils import *
@@ -314,7 +314,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     elif addHiggs == 0:
       DataCardMaker(str(myLoc), NCAT, sigExpStr, bkgObsStr, isRes, t)
     else:
-      DataCardMaker_wHiggs(str(myLoc), NCAT, sigExpStr, bkgObsStr, higgsExp, t, scaleSingleHiggs, opt.ARW_kl, opt.ARW_kt)
+      DataCardMaker_wHiggs(str(myLoc), NCAT, sigExpStr, bkgObsStr, higgsExp, t)
 
     procLog.info("\t DATACARD DONE. Node/Mass=%r, GridPoint=%r, type=%r", point,NRgridPoint,t)
     if opt.verb>0: p8 = printTime(p7,start,procLog)
@@ -356,6 +356,19 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
       os.system("sed -i 's|"+strReplace+"||g' "+combCard)
       print "String to replace:", strReplace
 
+    if opt.analyticalRW:
+      # Make another datacard, with entries for kt-reweihgting of single Higgs background
+      ktScaled = newDir+'/kt_scaled_hhbbgg_13TeV_DataCard.txt'
+      copy2(combCard, ktScaled)
+      with open(ktScaled, "a") as myfile:
+        HigScale = opt.ARW_kt*opt.ARW_kt
+        appendString = '\n \n'
+        appendString+= 'h_norm_ggh rateParam * ggh %.4f \n' % HigScale
+        appendString+= 'nuisance edit freeze h_norm_ggh \n'
+        appendString+= 'h_norm_tth rateParam * tth %.4f \n' % HigScale
+        appendString+= 'nuisance edit freeze h_norm_tth \n'
+        myfile.write(appendString)
+        
     if doCombine:
       if Combinelxbatch:
         print PID, "IM HERE6"
@@ -368,7 +381,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
           # If combineOpt==4: run all of them at once
           if combineOpt!=4 and method!=combineOpt: continue
           try:
-            combStatus = runCombine(newDir, doBlinding, procLog, method, Combinelxbatch, Label)
+            combStatus = runCombine(newDir, doBlinding, procLog, method, Combinelxbatch, Label, scaleSingleHiggs)
           except:
             return __BAD__
           procLog.info("\t COMBINE with Option=%r is DONE. Node=%r, GridPoint=%r, type=%r \n \t Status = %r",

@@ -17,8 +17,8 @@ mv MaxLikelihoodFitResult.root ${LIMFOLDER}/${CombDir}/
 ## 2) Make plots with fit
 
 INFILE=${LIMFOLDER}/${CombDir}/MaxLikelihoodFitResult.root
-OUTFILE_HM=FullBkgPlot_HM
-OUTFILE_LM=FullBkgPlot_LM
+OUTFILE_HM=${LIMFOLDER}/FullBkgPlot_HM
+OUTFILE_LM=${LIMFOLDER}/FullBkgPlot_LM
 #all four below to be taken from the datacard (signal rate)*33.49*0.0026
 HMHP_NORM=0.37697
 HMMP_NORM=0.35948
@@ -30,8 +30,8 @@ HMMP_FACT=100
 LMHP_FACT=100
 LMMP_FACT=1000
 
-HMTEXT="#font[61]{pp#rightarrowHH#rightarrowb#bar{b}#gamma#gamma}|High mass region"
-LMTEXT="#font[61]{pp#rightarrowHH#rightarrowb#bar{b}#gamma#gamma}|Low mass region"
+HMTEXT="#font[61]{pp#rightarrowHH#rightarrowb#bar{b}#gamma#gamma}|High-mass region"
+LMTEXT="#font[61]{pp#rightarrowHH#rightarrowb#bar{b}#gamma#gamma}|Low-mass region"
 
 python scripts/MakeFullBackgroundFit.py -i ${INFILE} -o ${OUTFILE_HM} \
 --signalNormalization ${HMHP_NORM} ${HMMP_NORM} \

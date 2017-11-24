@@ -16,15 +16,13 @@ errUp =  7.293147e+00/100 # theoretical uncertainty on HH cross section from YR4
 errDo =  8.408329e+00/100 # theoretical uncertainty on HH cross section from YR4
 
 
-
 #coefxmin = (A13tev[0]+16*A13tev[2]+4*A13tev[6])
 #Observed/Expected 3.07490022078 Th 3.0520579135 klambda -7.34
 #Observed/Expected 4.29277026057 Th 4.33557538187 klambda 8.02
 #coefxmin  kt = 0.411199557203*Lambda corresponds to the minimum of the cross section
-print abs(-3.1)
 
-
-def functionGF(kl,kt,c2,cg,c2g,A): return A[0]*kt**4 + A[1]*c2**2 + (A[2]*kt**2 + A[3]*cg**2)*kl**2  + A[4]*c2g**2 + ( A[5]*c2 + A[6]*kt*kl )*kt**2  + (A[7]*kt*kl + A[8]*cg*kl )*c2 + A[9]*c2*c2g  + (A[10]*cg*kl + A[11]*c2g)*kt**2+ (A[12]*kl*cg + A[13]*c2g )*kt*kl + A[14]*cg*c2g*kl
+def functionGF(kl,kt,c2,cg,c2g,A):
+  return A[0]*kt**4 + A[1]*c2**2 + (A[2]*kt**2 + A[3]*cg**2)*kl**2 + A[4]*c2g**2 + ( A[5]*c2 + A[6]*kt*kl )*kt**2  + (A[7]*kt*kl + A[8]*cg*kl )*c2 + A[9]*c2*c2g  + (A[10]*cg*kl + A[11]*c2g)*kt**2+ (A[12]*kl*cg + A[13]*c2g )*kt*kl + A[14]*cg*c2g*kl
 
 def Compare(th, exp):
   isless = 0
@@ -43,10 +41,9 @@ def Compare(th, exp):
       Range.append(xx)
     
 
-
 parser =  argparse.ArgumentParser(description='Limit Tree maker')
 parser.add_argument("limdir")
-parser.add_argument("--unblind", dest="unblind", action='store_true', default=False)
+parser.add_argument('-u',"--unblind", dest="unblind", action='store_true', default=False)
 parser.add_argument('-o', '--outFile', dest='outf', type=str, default="KLscanResult.root")
 opt = parser.parse_args()
 
@@ -62,7 +59,7 @@ for qt in quantiles:
 
 
 myKl = []
-notworked = open('klscan_notworked.txt', 'w+')
+notworked = open(opt.limdir+'/klscan_notworked.txt', 'w+')
 for kl in scan_kl['kl']:
   #  fname = opt.limdir + '/HighMass_Node_SMkl' + str(kl).replace('.', 'p').replace('-', 'm') + '_kt1p0_cg0p0_c20p0_c2g0p0/datacards/higgsCombineHighMass_Node_SMkl' + str(kl).replace('.', 'p').replace('-', 'm') + '_kt1p0_cg0p0_c20p0_c2g0p0.Asymptotic.mH125.root'
   #fname = opt.limdir + '/CombinedCard_Node_SMkl' + str(kl).replace('.', 'p').replace('-', 'm') + '_kt1p0_cg0p0_c20p0_c2g0p0/higgsCombineCombinedCard_Node_SMkl' + str(kl).replace('.', 'p').replace('-', 'm') + '_kt1p0_cg0p0_c20p0_c2g0p0.Asymptotic.mH125.root'

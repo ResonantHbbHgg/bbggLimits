@@ -80,11 +80,11 @@ if __name__ == "__main__":
 
 
   if "KL" in opt.scanType:
+    kt = 1.0
+    cg = 0.0
+    c2 = 0.0
+    c2g = 0.0
     for kl in scan_kl['kl']:
-      kt = 1.0
-      cg = 0.0
-      c2 = 0.0
-      c2g = 0.0
             
       print counter
       counter += 1
@@ -92,14 +92,13 @@ if __name__ == "__main__":
       submitPoint(kl, kt, cg, c2, c2g)   
 
   if "KLKT" in opt.scanType:
+    cg = 0.0
+    c2 = 0.0
+    c2g = 0.0
     for kl in scan_2d['kl']:
       for kt in scan_2d['kt']:
-        if kt==1: continue # we have those already
-        if kt <= 0: continue
-        ### 
-        cg = 0.0
-        c2 = 0.0
-        c2g = 0.0
+    
+        if kt <= 0: continue # Because they are symmetric!
             
         print counter
         counter += 1
@@ -110,16 +109,15 @@ if __name__ == "__main__":
   if 'manual' in opt.scanType:
     # Here we can run limits over specific points
     # Note: the limit trees for those points must exist
-    for kl in [12.12]:
-      kt = 1
-      cg = 0
-      c2 = 0
-      c2g = 0
-      
-      print counter
-      counter += 1
-      print kl, kt, cg, c2, c2g
-      submitPoint(kl, kt, cg, c2, c2g)   
+      cg = 0.0
+      c2 = 0.0
+      c2g = 0.0
+      for kl in [1.0, 4.4]:
+        for kt in [float(i)/(4) for i in range(-10,11)]:
+          print counter
+          counter += 1
+          print kl, kt, cg, c2, c2g
+          submitPoint(kl, kt, cg, c2, c2g)   
 
     
   if "grid" in opt.scanType:

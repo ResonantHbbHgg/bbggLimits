@@ -7,7 +7,7 @@ import getpass
 username = getpass.getuser()
 
 
-def runCombine(inDir, doBlind, log, combineOpt = 1, Combinelxbatch = 0, Label = None):
+def runCombine(inDir, doBlind, log, combineOpt = 1, Combinelxbatch = 0, Label = None, scaleSingleHiggs=False):
   log.info('Running combine tool.  Dir: %s Blinded: %r', inDir, doBlind)
   log.debug('inDir should be the immediate directory where the card is located')
   if Combinelxbatch:
@@ -30,9 +30,12 @@ def runCombine(inDir, doBlind, log, combineOpt = 1, Combinelxbatch = 0, Label = 
     log.error('This option is not supported: %r', combineOpt)
     return __BAD__
 
-
-  cardName = inDir+"/hhbbgg_13TeV_DataCard.txt"
-  resFile  = inDir+"/result_"+str(combineOpt)+".log"
+  if scaleSingleHiggs:
+    cardName = inDir+"/kt_scaled_hhbbgg_13TeV_DataCard.txt"
+    resFile  = inDir+"/kt_scaled_result_"+str(combineOpt)+".log"
+  else:
+    cardName = inDir+"/hhbbgg_13TeV_DataCard.txt"
+    resFile  = inDir+"/result_"+str(combineOpt)+".log"
 
 
   command1 = ' '.join(['combine -M', combineMethod,'-m 125 -n',Label,blinded,cardName,">",resFile,"2>&1"])
