@@ -65,10 +65,15 @@ CMS_Bkg_cat2_norm flatParam # Normalization uncertainty on background slope
 CMS_Bkg_cat3_norm flatParam # Normalization uncertainty on background slope
 
 #Higgs TH
-theory_ggHN3LO lnN              -       -       1.039   -       -       -       -       -       -       1.039   -       -       -       -
-pdf            lnN              -       -       1.032   1.036   1.016   0.76/1.20       0.997/1.004     -       -       1.032   1.036   1.016   0.76/1.20       0.997/1.004
-QCD_scale      lnN           -       -       -       0.918/1.058     0.969/1.038     -       1.021   -       -       -       0.918/1.058     0.969/1.038     -       1.021
+theory_ggHN3LO lnN	-       -       1.039   -	-       -       -       -       -       1.039   -       -       -       -
 theory_bbH_scale lnN            -	- 	- 	-		-		0.76/1.20 	- 	- 	- 	- 	- 	- 	0.76/1.20 	-
+
+pdf lnN		 -	-	1.032	1.036	1.016	0.76/1.20	0.997/1.004	-       -       1.032   1.036   1.016   0.76/1.20	0.997/1.004
+
+QCDscale_tth   lnN	-       -       -       0.918/1.058     -     		-		-   	-       -       -       0.918/1.058	-	-	-
+QCDscale_vh    lnN	-       -       -       -		0.969/1.038     -       	-	-	-	-	-		0.969/1.038	-	-
+QCDscale_vbf   lnN      -       -       -	-		-		-		1.021	-	-	-	-		-		-	1.021
+
 
 #Curve Shape params
 CMS_hhbbgg_13TeV_mgg_bkg_slope1_cat2 flatParam
