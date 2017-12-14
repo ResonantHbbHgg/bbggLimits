@@ -363,8 +363,8 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
       with open(ktScaled, "a") as myfile:
         HigScale = opt.ARW_kt*opt.ARW_kt
         appendString = '\n \n'
-        #appendString+= 'h_norm_ggh rateParam * ggh %.4f \n' % HigScale
-        #appendString+= 'nuisance edit freeze h_norm_ggh \n'
+        appendString+= 'h_norm_ggh rateParam * ggh %.4f \n' % HigScale
+        appendString+= 'nuisance edit freeze h_norm_ggh \n'
         appendString+= 'h_norm_tth rateParam * tth %.4f \n' % HigScale
         appendString+= 'nuisance edit freeze h_norm_tth \n'
         myfile.write(appendString)
