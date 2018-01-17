@@ -56,10 +56,11 @@ makeAllTrees.py -x nonres -f LT_OutDir \
 --doCatMVA --MVAHMC0 0.970 --MVAHMC1 0.600 --MVALMC0 0.985 --MVALMC1 0.600 --massNR 350 --LMLJBTC 0.55 --LMSJBTC 0.55
 ```   
 You can also provide the locations of the flat trees if they are not the ones hard-coded in
-the script, via `-s`, `-d`, `-b` options. For example, to make the trees from single H, use: 
+the script, via `-s`, `-d` options.  
+In order to make the trees from the single Higgs samples, use `--doSMHiggs` option, and don't run over data (`-d 0`): 
 ```
-makeAllTrees.py -x nonres -f LT_OutDir -s FlatT_SignalDir -d 0 \  
---doCatMVA --MVAHMC0 0.970 --MVAHMC1 0.600 --MVALMC0 0.985 --MVALMC1 0.600 --massNR 350 --doSMHiggs --LMLJBTC 0.55 --LMSJBTC 0.55 --genDiPhotonFilte
+makeAllTrees.py -x nonres -f LT_OutDir -d 0 --doSMHiggs --genDiPhotonFilter \  
+--doCatMVA --MVAHMC0 0.970 --MVAHMC1 0.600 --MVALMC0 0.985 --MVALMC1 0.600 --massNR 350  --LMLJBTC 0.55 --LMSJBTC 0.55
 ```  
 
  
@@ -127,13 +128,13 @@ this case the logs should be found in your `outDir/logs` and in the _master_ log
 `outDir/mainLog_date-time.log`
 
 
-We have another script to facilitate running the limit for _benchmarks_,_kl_ and _kl-kt_ scans:  
+We have another script to facilitate running the limit for _benchmarks_, _kl_ and _kl-kt_ scans:  
 ```
 python scripts/runLimitsOnLSF.py -f conf_default.json -t [JHEP, KL, KLKT] [-o outDir]
 ```
 
 The above command should give you the limits identical to
-[the ones on SVN](https://svnweb.cern.ch/cern/wsvn/cmshcg/trunk/cadi/HIG-17-008/NonResonant/Benchmarks/).
+[the ones on SVN](https://svnweb.cern.ch/cern/wsvn/cmshcg/trunk/cadi/HIG-17-008/NonResonant/Paper_v14/).
 
 Good luck!
 
