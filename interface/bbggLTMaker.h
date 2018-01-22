@@ -246,10 +246,11 @@ public :
    BTagCalibrationReader* l_reader_loose_up;
    BTagCalibrationReader* l_reader_loose_down;
 
-   BTagCalibrationReader* b_diffreader_tight;
-   BTagCalibrationReader* c_diffreader_tight;
-   BTagCalibrationReader* l_diffreader_tight;
+   //BTagCalibrationReader* b_diffreader_tight;
+   //BTagCalibrationReader* c_diffreader_tight;
+   //BTagCalibrationReader* l_diffreader_tight;
 
+   BTagCalibrationReader* btag_reader;
 
    bbggLTMaker(TTree *tree=0, bool IsRes=0);
    virtual ~bbggLTMaker();
@@ -297,9 +298,6 @@ public :
    void SetMassThreshold(float par){ massThreshold = par;}
    void SetupTriggerSF(TString trig_file);
    float TriggerSF(LorentzVector lpho, float lr9, LorentzVector spho, float sr9, int var);
-
-   void BTagDiffSetup(TString btagfile, TString effsfile, TString diffOpt);
-   double BTagDiffWeight(bbggLTMaker::LorentzVector jet1, int flavour1, float bdis);
 
    void SetLowMassLeadingJetBtagCut ( double LMLJBTC ) { LowMassLeadingJetBtagCut = LMLJBTC;}
    void SetHighMassLeadingJetBtagCut ( double HMLJBTC ) { HighMassLeadingJetBtagCut = HMLJBTC;}

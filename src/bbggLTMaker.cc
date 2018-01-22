@@ -10,15 +10,6 @@ bool DEBUG = 0;
 
 void bbggLTMaker::Loop()
 {
-  //   In a ROOT session, you can do:
-  //      Root > .L bbggLTMaker.C
-  //      Root > bbggLTMaker t
-  //      Root > t.GetEntry(12); // Fill t data members with entry number 12
-  //      Root > t.Show();       // Show values of entry 12
-  //      Root > t.Show(16);     // Read and show values of entry 16
-  //      Root > t.Loop();       // Loop on all entries
-  //
-
   o_evt = 0;
   o_run = 0;
 
@@ -40,7 +31,6 @@ void bbggLTMaker::Loop()
   o_jt1diffweight = -99;
   o_jt2diffweight = -99;
   o_diffweight = -99;
-  //   btmap = 0;
 
   std::cout << "Output file name: " << outFileName << std::endl;
   std::cout << "Options:\n\t Mtot min: " << mtotMin << "\n\t Mtot max: " <<  mtotMax << "\n\t isPhotonCR: " << photonCR
@@ -56,8 +46,7 @@ void bbggLTMaker::Loop()
   outTree->Branch("phoevWeight", &o_phoevWeight, "o_phoevWeight/D");
   outTree->Branch("mjj", &o_bbMass, "o_bbMass/D");
   outTree->Branch("mgg", &o_ggMass, "o_ggMass/D");
-  outTree->Branch("mtot", &o_bbggMass, "o_bbggMass/D"); //
-  //outTree->Branch("btmap", &btmap);
+  outTree->Branch("mtot", &o_bbggMass, "o_bbggMass/D");
   outTree->Branch("jet1PT", &jet1PT, "jet1PT/D");
   outTree->Branch("jet2PT", &jet2PT, "jet2PT/D");
   outTree->Branch("jet1ETA", &jet1ETA, "jet1ETA/D");
@@ -77,7 +66,7 @@ void bbggLTMaker::Loop()
   outTree->Branch("gen_cosTheta", &gen_cosTheta, "gen_cosTheta/D");
 
   if (doNonResWeights){
-    //outTree->Branch("NRWeights", o_NRWeights, "o_NRWeights[1507]/F");
+
     for (UInt_t n=0; n<NRWTOT; n++)
       outTree->Branch(Form("evWeight_NRW_%d",n), &o_NRWeights[n], Form("o_evWeight_NRW_%d/F",n));
   }
@@ -134,12 +123,13 @@ void bbggLTMaker::Loop()
   //setup btag weight
   if(bVariation > -100){
     cout << "Btagging SF variation: " << bVariation << endl;
-    TString bSF_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/BTag/btagScaleFactors.txt");
+    TString bSF_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/BTag/CSVv2.csv");
+    //TString bSF_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/BTag/btagScaleFactors.txt");
     cout << "bSF file: " << bSF_file << endl;
     TString bEffs_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/BTag/btagEffs.root");
     cout << "bEffs file: " << bEffs_file << endl;
     bbggLTMaker::BTagSetup(bSF_file, bEffs_file);
-    bbggLTMaker::BTagDiffSetup(bSF_file, bEffs_file, myDiffOpt);
+    btag_reader = new BTagCalibrationReader(calib, BTagEntry::OP_RESHAPING, "iterativefit", std::string(myDiffOpt.Data()));
     cout << "btagging differential: " << bEffs_file << " " << myDiffOpt << std::endl;
   }
 
@@ -237,10 +227,12 @@ void bbggLTMaker::Loop()
     o_category = 2;
 
     //Calculate b-tagging scale factors
-    if(bVariation > -100) btmap = bbggLTMaker::BTagWeight(*leadingJet, leadingJet_hadFlavour, *subleadingJet, subleadingJet_hadFlavour, bVariation);
+    //if(bVariation > -100) btmap = bbggLTMaker::BTagWeight(*leadingJet, leadingJet_hadFlavour, *subleadingJet, subleadingJet_hadFlavour, bVariation);
     double btagweight = -99;
     if(bVariation < -100) btagweight = 1;
+
     if(bVariation > -100) {
+      /* -->>This is no longer used
        double bt1 = 1, bt2 = 1;
        if( leadingJet_bDis < 0.436) bt1 = (1 - btmap[0].first*btmap[0].second)/(1-btmap[0].second);
        if( leadingJet_bDis > 0.436 && leadingJet_bDis < 0.8 ) bt1 = (btmap[0].first*btmap[0].second - btmap[1].first*btmap[1].second)/(btmap[0].second - btmap[1].second);
@@ -253,44 +245,72 @@ void bbggLTMaker::Loop()
        if( subleadingJet_bDis > 0.92) bt2 = btmap[5].first;
 
        btagweight = bt1*bt2;
+       <<-- */
 
-       if( leadingJet_hadFlavour == 5) {
-         if(DEBUG) std::cout << "Leading Jet pt " << leadingJet->Pt() << " " << leadingJet->Eta() << " " << leadingJet_hadFlavour << " " << leadingJet_bDis << std::endl;
-         o_jt1diffweight = bbggLTMaker::BTagDiffWeight(*leadingJet, leadingJet_hadFlavour, leadingJet_bDis);
-       }
-       else if (TString(myDiffOpt).Contains(TString("central"))) {
-         if(DEBUG) std::cout << "Leading Jet pt " << leadingJet->Pt() << " " << leadingJet->Eta() << " " << leadingJet_hadFlavour << " " << leadingJet_bDis << std::endl;
-         o_jt1diffweight = bbggLTMaker::BTagDiffWeight(*leadingJet, leadingJet_hadFlavour, leadingJet_bDis);
-       }
-       else {
-         o_jt1diffweight = 1;
-       }
 
-       if( subleadingJet_hadFlavour == 5) {
-         if(DEBUG) std::cout << "Leading Jet pt " << subleadingJet->Pt() << " " << subleadingJet->Eta() << " " << subleadingJet_hadFlavour << " " << subleadingJet_bDis << std::endl;
-         o_jt2diffweight = bbggLTMaker::BTagDiffWeight(*subleadingJet, subleadingJet_hadFlavour, subleadingJet_bDis);
-       }
-       else if (TString(myDiffOpt).Contains(TString("central"))) {
-         if(DEBUG) std::cout << "SubLeading Jet pt " << subleadingJet->Pt() << " " << subleadingJet->Eta() << " " << subleadingJet_hadFlavour << " " << subleadingJet_bDis << std::endl;
-         o_jt2diffweight = bbggLTMaker::BTagDiffWeight(*subleadingJet, subleadingJet_hadFlavour, subleadingJet_bDis);
-       }
-       else {
-         o_jt2diffweight = 1;
-       }
+      // Code implementation following examples at:
+      // https://twiki.cern.ch/twiki/bin/viewauth/CMS/BTagShapeCalibration
 
-/*
-       if(DEBUG) std::cout << "SubLeading Jet pt " << subleadingJet->Pt() << " " << subleadingJet->Eta() << " " << subleadingJet_hadFlavour << " " << subleadingJet_bDis << std::endl;
-       o_jt2diffweight = bbggLTMaker::BTagDiffWeight(*subleadingJet, subleadingJet_hadFlavour, subleadingJet_bDis);
-*/
-       o_diffweight =  o_jt1diffweight*o_jt2diffweight;
+      o_diffweight = 1.0;
 
-//       std::cout << o_jt1diffweight << "\t" << o_jt2diffweight << std::endl;
-       if(o_jt1diffweight < 0 || o_jt1diffweight > 10) {
-         std::cout << "o_jt1diffweight: " << o_jt1diffweight << " jet pt: " << leadingJet->Pt() << " jet eta: " << leadingJet->Eta() << " jet flavor: " << leadingJet_hadFlavour << std::endl;
-       }
-       if(o_jt2diffweight < 0 || o_jt2diffweight > 10) {
-         std::cout << "o_jt2diffweight: " << o_jt2diffweight << " jet pt: " << subleadingJet->Pt() << " jet eta: " << subleadingJet->Eta() << " jet flavor: " << subleadingJet_hadFlavour << std::endl;
-       }
+      for (int j=0; j<1; j++){
+	double pt,eta, csv;
+	int flavor;
+	if (j==0){
+	  pt  = leadingJet->Pt();
+	  eta = leadingJet->Eta();
+	  flavor = leadingJet_hadFlavour;
+	  csv = leadingJet_bDis;
+	}
+	else {
+	  pt  = subleadingJet->Pt();
+	  eta = subleadingJet->Eta();
+	  flavor = subleadingJet_hadFlavour;
+	  csv = subleadingJet_bDis;
+	}
+	if( csv < 0.0 ) csv = -0.05;
+	if( csv > 1.0 ) csv = 1.0;
+	if( pt > 1000 ) pt = 999.;
+	
+	bool isBFlav = false;
+	bool isCFlav = false;
+	bool isLFlav = false;
+	if( abs(flavor)==5 )      isBFlav = true;
+	else if( abs(flavor)==4 ) isCFlav = true;
+	else                      isLFlav = true;
+
+	double my_jet_sf = 1.;
+
+	BTagEntry::JetFlavor jf = BTagEntry::FLAV_UDSG;
+	if( isBFlav )        jf = BTagEntry::FLAV_B;
+	else if( isCFlav )   jf = BTagEntry::FLAV_C;
+	else                 jf = BTagEntry::FLAV_UDSG;
+
+	
+	if( myDiffOpt.Contains("central") )     my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.Contains("up_jes") )              my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.Contains("down_jes") )            my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.Contains("up_lf") && isBFlav )    my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.Contains("down_lf") && isBFlav )  my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.Contains("up_hf") && isLFlav )    my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.Contains("down_hf") && isLFlav )  my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.Contains("up_hfstats1") && isBFlav )   my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.Contains("down_hfstats1") && isBFlav ) my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.Contains("up_hfstats2") && isBFlav )   my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.Contains("down_hfstats2") && isBFlav ) my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.Contains("up_lfstats1") && isLFlav )   my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.Contains("down_lfstats1") && isLFlav ) my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.Contains("up_lfstats2") && isLFlav )   my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.Contains("down_lfstats2") && isLFlav ) my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.Contains("up_cferr1") && isCFlav )     my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.Contains("down_cferr1") && isCFlav )   my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.Contains("up_cferr2") && isCFlav )     my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.Contains("down_cferr2") && isCFlav )   my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else my_jet_sf = 1;
+	
+	if (my_jet_sf < 0 || my_jet_sf > 10) my_jet_sf = 1.;
+	o_diffweight *= my_jet_sf;
+      }
     }
 
     if(doCatNonRes)
@@ -504,30 +524,6 @@ void bbggLTMaker::BTagSetup(TString btagfile, TString effsfile)
   l_eff_tight = (TH2F*) effsFile->Get("l_eff_tight");
   l_eff_loose = (TH2F*) effsFile->Get("l_eff_loose");
 }
-
-void bbggLTMaker::BTagDiffSetup(TString btagfile, TString effsfile, TString diffOpt)
-{
-//  calibdiff = new BTagCalibration("CSVv2", btagfile.Data());
-  b_diffreader_tight = new BTagCalibrationReader(calib, BTagEntry::OP_RESHAPING, "iterativefit", std::string(diffOpt.Data()));
-  c_diffreader_tight = new BTagCalibrationReader(calib, BTagEntry::OP_RESHAPING, "iterativefit", std::string(diffOpt.Data()));
-  l_diffreader_tight = new BTagCalibrationReader(calib, BTagEntry::OP_RESHAPING, "iterativefit", std::string(diffOpt.Data()));
-
-}
-
-double bbggLTMaker::BTagDiffWeight(bbggLTMaker::LorentzVector jet1, int flavour1, float bdis)
-{
-  float myWeight = -99;
-  if(flavour1 == 5){
-    myWeight = b_diffreader_tight->eval(BTagEntry::FLAV_B, jet1.Eta(), jet1.Pt(), bdis);
-  } else if (flavour1==4) {
-    myWeight = c_diffreader_tight->eval(BTagEntry::FLAV_C, jet1.Eta(), jet1.Pt(), bdis);
-  } else {
-    myWeight = l_diffreader_tight->eval(BTagEntry::FLAV_UDSG, jet1.Eta(), jet1.Pt(), bdis);
-  }
-//  std::cout << "FLAVOUR " << flavour1 << "\t" << myWeight << std::endl;
-  return myWeight;
-} 
-
 
 std::vector<std::pair<double,float>> bbggLTMaker::BTagWeight(bbggLTMaker::LorentzVector jet1, int flavour1, bbggLTMaker::LorentzVector jet2, int flavour2, int variation)
 {

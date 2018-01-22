@@ -24,7 +24,7 @@ import argparse
 
 parser =  argparse.ArgumentParser(description='submit the tree maker to the batch')
 parser.add_argument('-t', '--type', dest="scanType", default=None, type=str,
-                    choices=['JHEP', 'KL', 'KLKT', 'manual'],
+                    choices=['JHEP', 'KL', 'KLKT', 'manual', 'SM'],
                     help = "Choose the type Trees to produce")
 
 opt = parser.parse_args()
@@ -60,6 +60,11 @@ if __name__ == "__main__":
   print "This is the __main__ part"
 
   from HiggsAnalysis.bbggLimits.DefineScans import *
+  
+  if 'SM' in opt.scanType:
+    for cc in case:
+      makeMyTreeGood(cc)
+      
 
   if 'JHEP' in opt.scanType:
     for cc in case:

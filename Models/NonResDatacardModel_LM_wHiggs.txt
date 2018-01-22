@@ -48,9 +48,31 @@ CMS_eff_DiphoTrig lnN   1.020   -       1.020   1.020   1.020   1.020   1.020   
 CMS_eff_PhoID lnN       1.010   -       1.010   1.010   1.010   1.010   1.010   1.010   -       1.010   1.010   1.010   1.010   1.010
 CMS_eff_JetSel lnN      1.005   -       1.005   1.005   1.005   1.005   1.005   1.005   -       1.005   1.005   1.005   1.005   1.005
 CMS_eff_mxCat   lnN     1.005/0.995     -       1.005/0.995     1.005/0.995     1.005/0.995     1.005/0.995     1.005/0.995     1.005/0.995     -       1.005/0.995     -       1.005/0.995     1.005/0.995     1.005/0.995     1.005/0.995     1.005/0.995     0.995/0.995
-CMS_eff_cats lnN        1.05/0.95       -       1.05/0.95       1.05/0.95       1.05/0.95       1.05/0.95       1.05/0.95       0.98/1.02       -       0.98/1.02       0.98/1.02       0.98/1.02       0.98/1.02       0.98/1.02
+#CMS_eff_cats lnN        1.05/0.95       -       1.05/0.95       1.05/0.95       1.05/0.95       1.05/0.95       1.05/0.95       0.98/1.02       -       0.98/1.02       0.98/1.02       0.98/1.02       0.98/1.02       0.98/1.02
 
-#Shape
+#Higgs TH
+theory_ggHN3LO lnN		-	-	1.039	-	-	-	-	-       -       1.039   -       -       -       -
+theory_bbH_scale lnN            -	- 	- 	-		-		0.76/1.20 	- 	- 	- 	- 	- 	- 	0.76/1.20 	-
+
+pdf lnN		 -	-	1.032	1.036	1.016	0.76/1.20	0.997/1.004	-       -       1.032   1.036   1.016   0.76/1.20	0.997/1.004
+
+QCDscale_tth   lnN	-       -       -       0.918/1.058     -     		-		-   	-       -       -       0.918/1.058	-		-	-
+QCDscale_vh    lnN	-       -       -       -		0.969/1.038     -       	-	-	-	-	-		0.969/1.038	-	-
+QCDscale_vbf   lnN      -       -       -	-		-		-		1.021	-	-	-	-		-		-	1.021
+
+# B-tagging
+
+CMS_btag_jes lnN 	 	1.008 	- 	1.119 	1.004 	1.003 	1.025 	1.114 	1.024 	- 	0.851/1.149 	0.968/1.032 	0.913/1.087 	0.971/1.029 	0.866/1.134
+CMS_btag_lf lnN 	 	1.025 	- 	1.062 	1.023 	1.029 	1.025 	1.050 	1.022 	- 	0.887/1.113 	0.972/1.028 	0.940/1.060 	0.976/1.024 	0.910/1.090
+CMS_btag_hf lnN 	 	1.067 	- 	1.070 	1.056 	1.083 	1.066 	1.053 	1.010 	- 	0.879/1.121 	0.987/1.013 	0.952/1.048 	0.978/1.022 	0.925/1.075
+CMS_btag_hfstats1 lnN 	 	1.025 	- 	1.063 	1.021 	1.023 	1.019 	1.052 	1.024 	- 	0.887/1.113 	0.970/1.030 	0.938/1.062 	0.977/1.023 	0.910/1.090
+CMS_btag_hfstats2 lnN 	 	1.019 	- 	1.063 	1.018 	1.021 	1.016 	1.052 	1.022 	- 	0.887/1.113 	0.971/1.029 	0.939/1.061 	0.978/1.022 	0.910/1.090
+CMS_btag_lfstats1 lnN 	 	1.038 	- 	1.079 	1.037 	1.039 	1.032 	1.085 	1.023 	- 	0.848/1.152 	0.972/1.028 	0.920/1.080 	0.976/1.024 	0.876/1.124
+CMS_btag_lfstats2 lnN 	 	1.040 	- 	1.055 	1.040 	1.041 	1.035 	1.056 	1.026 	- 	0.885/1.115 	0.974/1.026 	0.933/1.067 	0.975/1.025 	0.898/1.102
+CMS_btag_cferr1 lnN 	 	1.066 	- 	1.016 	1.054 	1.081 	1.051 	1.027 	1.007 	- 	0.898/1.102 	0.976/1.024 	0.946/1.054 	0.988/1.012 	0.926/1.074
+CMS_btag_cferr2 lnN 	 	1.066 	- 	1.017 	1.052 	1.080 	1.051 	1.012 	1.006 	- 	0.893/1.107 	0.997/1.003 	0.951/1.049 	0.990/1.010 	0.920/1.080
+
+#Signal Shape
 CMS_hgg_sig_m0_absShift_cat0 param 1 0.005 # displacement of the dipho mean error = sqrt(0.4^ 2 + 0.2^ 2) 
 CMS_hgg_sig_sigmaScale_cat0 param 1 0.05 # optimistic estimate of resolution uncertainty 
 CMS_hbb_sig_m0_absShift_cat0 param 1 0.01 # displacement of the dijet mean error 
@@ -63,16 +85,6 @@ CMS_hbb_sig_sigmaScale_cat1 param 1 0.05 # optimistic estimate of resolution unc
 #Curve Normalization params
 CMS_Bkg_cat0_norm flatParam # Normalization uncertainty on background slope
 CMS_Bkg_cat1_norm flatParam # Normalization uncertainty on background slope
-
-#Higgs TH
-theory_ggHN3LO lnN		-	-	1.039	-	-	-	-	-       -       1.039   -       -       -       -
-theory_bbH_scale lnN            -	- 	- 	-		-		0.76/1.20 	- 	- 	- 	- 	- 	- 	0.76/1.20 	-
-
-pdf lnN		 -	-	1.032	1.036	1.016	0.76/1.20	0.997/1.004	-       -       1.032   1.036   1.016   0.76/1.20	0.997/1.004
-
-QCDscale_tth   lnN	-       -       -       0.918/1.058     -     		-		-   	-       -       -       0.918/1.058	-		-	-
-QCDscale_vh    lnN	-       -       -       -		0.969/1.038     -       	-	-	-	-	-		0.969/1.038	-	-
-QCDscale_vbf   lnN      -       -       -	-		-		-		1.021	-	-	-	-		-		-	1.021
 
 #Curve Shape params
 CMS_hhbbgg_13TeV_mgg_bkg_slope1_cat0 flatParam
