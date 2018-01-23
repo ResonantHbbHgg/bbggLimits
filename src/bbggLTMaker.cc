@@ -123,9 +123,9 @@ void bbggLTMaker::Loop()
   //setup btag weight
   if(bVariation > -100){
     cout << "Btagging SF variation: " << bVariation << endl;
-    TString bSF_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/BTag/CSVv2_Moriond17_G_H.csv");
+    //TString bSF_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/BTag/CSVv2_Moriond17_G_H.csv");
     //TString bSF_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/BTag/CSVv2.csv");
-    //TString bSF_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/BTag/btagScaleFactors.txt");
+    TString bSF_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/BTag/btagScaleFactors.txt");
     cout << "bSF file: " << bSF_file << endl;
     TString bEffs_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/BTag/btagEffs.root");
     cout << "bEffs file: " << bEffs_file << endl;
