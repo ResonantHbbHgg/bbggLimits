@@ -13,7 +13,7 @@ for m in ['HighMass', 'LowMass']:
     print 3*"*"
     print
     
-    fileName = 'LIMS_BTAG_central/'+m+tag+'/datacards/hhbbgg_13TeV_DataCard.txt'
+    fileName = 'LIMS_NewBTag_central/'+m+tag+'/datacards/hhbbgg_13TeV_DataCard.txt'
     names = None
     central= None
     with open(fileName) as fp:
@@ -40,7 +40,7 @@ for m in ['HighMass', 'LowMass']:
         yields = {}
         for var in ['up', 'down']:
             s = var+'_'+sy
-            fileName = 'LIMS_BTAG_'+s+'/'+m+tag+'/datacards/hhbbgg_13TeV_DataCard.txt'
+            fileName = 'LIMS_NewBTag_'+s+'/'+m+tag+'/datacards/hhbbgg_13TeV_DataCard.txt'
             with open(fileName) as fp:
                 line = fp.readline()
                 cnt = 1
@@ -71,7 +71,7 @@ for m in ['HighMass', 'LowMass']:
                 outSys += ' \t-'
             else:
                 #outSys += ' \t%.3f/%.3f' % (dn[i], up[i])
-                if i <8:
+                if i < 7:
                     outSys += ' \t%.3f' % (1+sys_avg[i])
                 else:
                     outSys += ' \t%.3f/%.3f' % (1-sys_avg[i], 1+sys_avg[i])

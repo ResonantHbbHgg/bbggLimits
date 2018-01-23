@@ -6,7 +6,7 @@
 #include "CondFormats/BTauObjects/interface/BTagCalibration.h"
 #include "CondFormats/BTauObjects/interface/BTagCalibrationReader.h"
 
-bool DEBUG = 1;
+bool DEBUG = 0;
 
 void bbggLTMaker::Loop()
 {
@@ -123,9 +123,9 @@ void bbggLTMaker::Loop()
   //setup btag weight
   if(bVariation > -100){
     cout << "Btagging SF variation: " << bVariation << endl;
-    TString bSF_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/BTag/CSVv2_Moriond17_G_H.csv");
+    //TString bSF_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/BTag/CSVv2_Moriond17_G_H.csv");
     //TString bSF_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/BTag/CSVv2.csv");
-    //TString bSF_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/BTag/btagScaleFactors.txt");
+    TString bSF_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/BTag/btagScaleFactors.txt");
     cout << "bSF file: " << bSF_file << endl;
     TString bEffs_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/BTag/btagEffs.root");
     cout << "bEffs file: " << bEffs_file << endl;
@@ -287,27 +287,28 @@ void bbggLTMaker::Loop()
 	else if( isCFlav )   jf = BTagEntry::FLAV_C;
 	else                 jf = BTagEntry::FLAV_UDSG;
 
-	if(DEBUG) cout<<"syst:"<<myDiffOpt<<"  Jet flavour: "<<jf<<" Pt="<<pt<<"  eta="<<eta<<"  csv="<<csv<<endl;	
+	if(DEBUG) cout<<"syst:"<<myDiffOpt<<"  Jet flavour: "<<flavor<<" jf="<<jf<<"  Pt="<<pt<<"  eta="<<eta<<"  csv="<<csv<<endl;	
 	
-	if( myDiffOpt.Contains("central") )     my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
-	else if( myDiffOpt.Contains("up_jes") )              my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
-	else if( myDiffOpt.Contains("down_jes") )            my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
-	else if( myDiffOpt.Contains("up_lf") && isBFlav )    my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
-	else if( myDiffOpt.Contains("down_lf") && isBFlav )  my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
-	else if( myDiffOpt.Contains("up_hf") && isLFlav )    my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
-	else if( myDiffOpt.Contains("down_hf") && isLFlav )  my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
-	else if( myDiffOpt.Contains("up_hfstats1") && isBFlav )   my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
-	else if( myDiffOpt.Contains("down_hfstats1") && isBFlav ) my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
-	else if( myDiffOpt.Contains("up_hfstats2") && isBFlav )   my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
-	else if( myDiffOpt.Contains("down_hfstats2") && isBFlav ) my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
-	else if( myDiffOpt.Contains("up_lfstats1") && isLFlav )   my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
-	else if( myDiffOpt.Contains("down_lfstats1") && isLFlav ) my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
-	else if( myDiffOpt.Contains("up_lfstats2") && isLFlav )   my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
-	else if( myDiffOpt.Contains("down_lfstats2") && isLFlav ) my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
-	else if( myDiffOpt.Contains("up_cferr1") && isCFlav )     my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
-	else if( myDiffOpt.Contains("down_cferr1") && isCFlav )   my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
-	else if( myDiffOpt.Contains("up_cferr2") && isCFlav )     my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
-	else if( myDiffOpt.Contains("down_cferr2") && isCFlav )   my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	if( myDiffOpt.EqualTo("central") )     my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.EqualTo("up_jes") && !isCFlav)        my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.EqualTo("down_jes") && !isCFlav)      my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.EqualTo("up_lf") && isBFlav )         my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.EqualTo("down_lf") && isBFlav )       my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.EqualTo("up_hf") && isLFlav )         my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.EqualTo("down_hf") && isLFlav )       my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.EqualTo("up_hfstats1") && isBFlav )   my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.EqualTo("down_hfstats1") && isBFlav ) my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.EqualTo("up_hfstats2") && isBFlav )   my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.EqualTo("down_hfstats2") && isBFlav ) my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.EqualTo("up_lfstats1") && isLFlav )   my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.EqualTo("down_lfstats1") && isLFlav ) my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.EqualTo("up_lfstats2") && isLFlav )   my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.EqualTo("down_lfstats2") && isLFlav ) my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.EqualTo("up_cferr1") && isCFlav )     my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.EqualTo("down_cferr1") && isCFlav )   my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.EqualTo("up_cferr2") && isCFlav )     my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	else if( myDiffOpt.EqualTo("down_cferr2") && isCFlav )   my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
+	
 	else my_jet_sf = 1;
 	
 	if (my_jet_sf < 0 || my_jet_sf > 10) my_jet_sf = 1.;
