@@ -71,7 +71,10 @@ if 'nonres' in opt.x:
 
   if opt.doSMHiggs:
     nodes = SMHiggsSamples.SMHiggsNodes
-    Signals = opt.signalDir + '/THENODE'
+    if opt.signalDir is None:
+      Signals = "root://eoscms//eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/May2_Mjj70to190_NewCatMVA/EGML_Background_Mjj70_NewMVA/Hadd/THENODE"
+    else:
+      Signals = opt.signalDir + '/THENODE'
 
 
   DataFiles = "/DoubleEG.root"

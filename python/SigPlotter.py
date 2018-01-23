@@ -169,8 +169,8 @@ def MakeSigPlot(data, pdf, var, label, lumi, cat, analysis, doBands, fname, binn
 		meanName = str(var.GetName()) + "_hig_m0_"+iHiggs+"_cat"+str(cat)
 		thisMean = pdf.getParameters(data).getRealValue(meanName)
 	if thisMean != 0:
-		leg.AddEntry(sigmas[0], "#mu = "+ str("%.2f" % thisMean)+ " GeV", "l")
-		leg.AddEntry(sigmas[1], "#sigma_{Eff} = "+str("%.2f" % getEffSigma(var, pdf, Xmin, Xmax)) + " GeV", "l")
+		leg.AddEntry(sigmas[0], "#mu = "+ str("%.1f" % thisMean)+ " GeV", "l")
+		leg.AddEntry(sigmas[1], "#sigma_{Eff} = "+str("%.1f" % getEffSigma(var, pdf, Xmin, Xmax)) + " GeV", "l")
 	leg.Draw()
 	DrawCMSLabels(c, '')
 	c.SaveAs(outPath+'/'+fname+".pdf")

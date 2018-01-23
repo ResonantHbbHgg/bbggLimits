@@ -11,7 +11,7 @@
         "energy" : "13TeV",
         "higgsMass" : 125.0,
         "addHiggs" : 1,
-        "scaleSingleHiggs" : 1,
+        "scaleSingleHiggs" : 0,
         "doBlinding" : 0,
         "doBands" : 0,
         "ncat" : 2,
