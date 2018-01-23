@@ -6,7 +6,7 @@
 #include "CondFormats/BTauObjects/interface/BTagCalibration.h"
 #include "CondFormats/BTauObjects/interface/BTagCalibrationReader.h"
 
-bool DEBUG = 0;
+bool DEBUG = 1;
 
 void bbggLTMaker::Loop()
 {
@@ -123,7 +123,8 @@ void bbggLTMaker::Loop()
   //setup btag weight
   if(bVariation > -100){
     cout << "Btagging SF variation: " << bVariation << endl;
-    TString bSF_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/BTag/CSVv2.csv");
+    TString bSF_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/BTag/CSVv2_Moriond17_G_H.csv");
+    //TString bSF_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/BTag/CSVv2.csv");
     //TString bSF_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/BTag/btagScaleFactors.txt");
     cout << "bSF file: " << bSF_file << endl;
     TString bEffs_file = TString(std::getenv("CMSSW_BASE")) + TString("/src/HiggsAnalysis/bbggLimits/Weights/BTag/btagEffs.root");
@@ -253,7 +254,7 @@ void bbggLTMaker::Loop()
 
       o_diffweight = 1.0;
 
-      for (int j=0; j<1; j++){
+      for (int j=0; j<2; j++){
 	double pt,eta, csv;
 	int flavor;
 	if (j==0){
@@ -286,6 +287,7 @@ void bbggLTMaker::Loop()
 	else if( isCFlav )   jf = BTagEntry::FLAV_C;
 	else                 jf = BTagEntry::FLAV_UDSG;
 
+	if(DEBUG) cout<<"syst:"<<myDiffOpt<<"  Jet flavour: "<<jf<<" Pt="<<pt<<"  eta="<<eta<<"  csv="<<csv<<endl;	
 	
 	if( myDiffOpt.Contains("central") )     my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
 	else if( myDiffOpt.Contains("up_jes") )              my_jet_sf = btag_reader->eval(jf, eta, pt, csv);
