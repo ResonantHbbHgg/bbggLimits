@@ -70,11 +70,11 @@ for m in ['HighMass', 'LowMass']:
             if i in [1, 8]:
                 outSys += ' \t-'
             else:
-                #outSys += ' \t%.3f/%.3f' % (dn[i], up[i])
-                if i < 7:
-                    outSys += ' \t%.3f' % (1+sys_avg[i])
-                else:
-                    outSys += ' \t%.3f' % (1-sys_avg[i])
+                outSys += ' \t%.3f/%.3f' % (dn[i], up[i])
+                #if i < 7:
+                #    outSys += ' \t%.3f' % (1+sys_avg[i])
+                #else:
+                #    outSys += ' \t%.3f' % (1-sys_avg[i])
 
         #print "\n ** Final for this syst:", sy, m
         print outSys
