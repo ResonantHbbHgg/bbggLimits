@@ -8,10 +8,15 @@ Set up the environment from the main [README.md](README.md), then follow instruc
 #### 0) Repeat HIG-17-008
 
 svn co -N svn+ssh://mgouzevi@svn.cern.ch/reps/cmshcg/trunk/ SVNREP
+
 cd SVNREP/
+
 svn update -N cadi
+
 svn update cadi/HIG-17-008
+
 cd cadi/HIG-17-008/
+
 combine -M Asymptotic LIMS_Paper_v14/CombinedCard_ARW_kl_1p0_kt_1p0_cg_0p0_c2_0p0_c2g_0p0/hhbbgg_13TeV_DataCard.txt
 
 #### 1) Make limit trees   
