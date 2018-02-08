@@ -101,14 +101,10 @@ CMS_btag_cferr1 lnN 	 	1.043/1.035 	- 	1.026/0.912 	1.056/0.974 	1.087/0.979 	1.
 CMS_btag_cferr2 lnN 	 	1.038/1.039 	- 	0.956/0.961 	1.011/1.006 	1.024/1.023 	0.981/1.026 	0.972/0.977 	0.992/0.991 	- 	0.920/0.912 	0.992/0.983 	0.935/0.922 	1.012/1.007 	0.923/0.915
 
 #Signal Shape
-CMS_hgg_sig_m0_absShift_cat2 param 1 0.005 # displacement of the dipho mean error = sqrt(0.4^ 2 + 0.2^ 2) 
-CMS_hgg_sig_sigmaScale_cat2 param 1 0.05 # optimistic estimate of resolution uncertainty 
-CMS_hbb_sig_m0_absShift_cat2 param 1 0.01 # displacement of the dijet mean error 
-CMS_hbb_sig_sigmaScale_cat2 param 1 0.05 # optimistic estimate of resolution uncertainty 
-CMS_hgg_sig_m0_absShift_cat3 param 1 0.005 # displacement of the dipho mean error = sqrt(0.4^ 2 + 0.2^ 2) 
-CMS_hgg_sig_sigmaScale_cat3 param 1 0.05 # optimistic estimate of resolution uncertainty 
-CMS_hbb_sig_m0_absShift_cat3 param 1 0.01 # displacement of the dijet mean error 
-CMS_hbb_sig_sigmaScale_cat3 param 1 0.05 # optimistic estimate of resolution uncertainty 
+CMS_hgg_sig_m0_absShift param 1 0.005 # displacement of the dipho mean error = sqrt(0.4^ 2 + 0.2^ 2) 
+CMS_hgg_sig_sigmaScale param 1 0.05 # optimistic estimate of resolution uncertainty 
+CMS_hbb_sig_m0_absShift param 1 0.01 # displacement of the dijet mean error 
+CMS_hbb_sig_sigmaScale param 1 0.05 # optimistic estimate of resolution uncertainty 
 
 #Curve Normalization params
 CMS_Bkg_cat2_norm flatParam # Normalization uncertainty on background slope

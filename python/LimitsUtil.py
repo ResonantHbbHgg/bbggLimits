@@ -37,7 +37,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
   if '/tmp' in Params['LTDIR'] or '/store' in Params['LTDIR'] or '/afs' in Params['LTDIR']:
     LTDir_type = Params['LTDIR']
     if '/store' in Params['LTDIR']:
-      LTDir_type = 'root://eoscms//eos/cms'+Params['LTDIR']
+      LTDir_type = '/eos/cms'+Params['LTDIR']
 
   signalModelCard = os.getenv("CMSSW_BASE")+Params['signal']['signalModelCard']
   lumi = 35.87 # Only used for plot produced by bbgg2Dfitter
