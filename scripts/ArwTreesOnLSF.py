@@ -5,8 +5,8 @@ import getpass
 username = getpass.getuser()
 cwd = os.getcwd()
 
-D_HM = "/afs/cern.ch/user/a/andrey/work/hh/NewHope_HighMass/"
-D_LM = "/afs/cern.ch/user/a/andrey/work/hh/NewHope_LowMass"
+D_HM = "/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LT_PhoSmearFix_HighMass"
+D_LM = "/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LT_PhoSmearFix_LowMass"
 
 FILE = "/LT_output_GluGluToHHTo2B2G_AllNodes.root"
 
