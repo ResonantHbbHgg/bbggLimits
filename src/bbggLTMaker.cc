@@ -444,7 +444,8 @@ void bbggLTMaker::Loop()
     if( fabs(CosThetaStar_CS) > fabs(cosThetaStarCutHigh) ) continue;
 
     // Put Run number and event number in the file
-    f_event_dump<<run<<" "<<event<<endl;
+    if (o_category != -1)
+      f_event_dump<<run<<" "<<event<<endl;
 
     outTree->Fill();
   }

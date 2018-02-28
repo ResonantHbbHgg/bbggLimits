@@ -17,7 +17,7 @@ scan_2d_fix = {
 
 #1D scan in kappa lambda
 scan_kl = {
-'kl': [float(i)/(2.5) for i in range(-50,51)],
+'kl': [float(i)/(10.0) for i in range(-200,201)],
 'kt': [1.0],
 'cg': [0.0],
 'c2': [0.0],
