@@ -402,12 +402,6 @@ void bbggLTMaker::Loop()
     // ----------------
     // -- Weights for Non-Res samples are added here
     //------------------------------
-
-    // Lumi, devided by the Total number of events in nodes 2-13.
-    // This is needed because those nodes must be merged later for NonRes weighting.
-    // BAD that it's hardcoded, need to set as parameter.
-    // Float_t S = 2.7/597400;
-    
     
     if (doNonResWeights){
       //std::cout << "Doing Non-Resonant Signal weights " << std::endl;
@@ -438,7 +432,7 @@ void bbggLTMaker::Loop()
     // ---------------------------
     
     
-    //      std::cout << "cosThetaStarCutCats: " << cosThetaStarCutCats << " - - " << cosThetaStarCut << "  - -  " << o_category << std::endl;
+    //    std::cout << "cosThetaStarCutCats: " << cosThetaStarCutCats << " - - " << cosThetaStarCut << "  - -  " << o_category << std::endl;
     //    if( o_category == 1  && cosThetaStarCutCats > 0 && fabs(CosThetaStar) > fabs(cosThetaStarCut)) continue;
     //    if( o_category == 0  && cosThetaStarCutCats == 2 && fabs(CosThetaStar) > fabs(cosThetaStarCut)) continue;
     if( fabs(CosThetaStar_CS) > fabs(cosThetaStarCutHigh) ) continue;
