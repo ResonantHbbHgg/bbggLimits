@@ -47,16 +47,13 @@ def submitPoint(kl=1, kt=1, cg=0, c2=0, c2g=0):
   
   bashFile = org_bashFile.replace('HERE', HERE).replace('LOUTDIR', opt.outDir).replace('EXTRA', extra).replace('JSONFILE',opt.fname)
 
-  bFile = open('/tmp/'+username+'/batch_'+pointStr+'.sh', "w+")
-  bFile.write(bashFile)
-  bFile.close()
-  command = 'chmod a+rwx ' + '/tmp/'+username+'/batch_'+pointStr+'.sh'
-  os.system(command)
-  
-  command = "bsub -q 1nh -J batch_" + pointStr  + " < /tmp/"+username+"/batch_" + pointStr + '.sh'
 
-  print command
-  os.system(command)
+  with tempfile.NamedTemporaryFile(dir='/tmp/'+username, prefix='batch_LIM_'+pointStr, suffix='.sh', delete=False) as bFile:
+    bFile.write(bashFile)
+    bFile.flush()
+    command = "bsub -q 8nm -J batch_LIM_" + pointStr+ " < " + bFile.name
+    print command
+    os.system(command)
      
 
 if __name__ == "__main__":
