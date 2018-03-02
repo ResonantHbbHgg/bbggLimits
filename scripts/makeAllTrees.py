@@ -139,11 +139,13 @@ if 'nonres' in opt.x:
     os.system("hadd %s/LT_NR_Nodes_2to13_merged.root %s/LT_output_GluGluToHHTo2B2G_node_[1-9]*.root"%(directory+"_LowMass",  directory+"_LowMass"))
   
   if opt.dataDir != "0":
-    print "DOING LowMassCat Data"
+    print "DOING LowMassCat Data:"
     command = "pyLimitTreeMaker.py -f " + Data + " -o " +   directory+"_LowMass" + " --min 0 --max " + opt.massNR + " --scale 1." + postFix + doPhotonControlRegion
+    print command
     os.system(command)
     print "DOING HighMassCat Data"
     command = "pyLimitTreeMaker.py -f " + Data + " -o " +   directory+"_HighMass" + " --min " + opt.massNR + " --max 35000 --scale 1." + postFix + doPhotonControlRegion 
+    print command
     os.system(command)
 
 elif 'res' in opt.x:

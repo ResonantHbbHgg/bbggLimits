@@ -36,6 +36,8 @@ void bbggLTMaker::Loop()
   std::cout << "Options:\n\t Mtot min: " << mtotMin << "\n\t Mtot max: " <<  mtotMax << "\n\t isPhotonCR: " << photonCR
 	    << "\n\t Normalization: " << normalization << std::endl;
 
+  f_event_dump.open(outFileName+".event_dump.txt",ofstream::out);
+  
   outFile = new TFile(outFileName.c_str(), "RECREATE");
   outTree = new TTree("TCVARS", "Limit tree for HH->bbgg analyses");
   outTree->Branch("cut_based_ct", &o_category, "o_category/I"); //0: 2btag, 1: 1btag
@@ -200,17 +202,22 @@ void bbggLTMaker::Loop()
 
     o_preweight = genTotalWeight*normalization;
     o_bbMass = dijetCandidate->M();
-    o_ggMass = diphotonCandidate->M();
-    o_bbggMass = diHiggsCandidate->M();
+    o_ggMass = (*leadingPhoton + *subleadingPhoton).M();
+    o_bbggMass = (*dijetCandidate + *leadingPhoton + *subleadingPhoton).M();
     o_ljet_bdis = leadingJet_bDis;
     o_sjet_bdis = subleadingJet_bDis;
     o_isSignal = isSignal;
     o_HHTagger = HHTagger;
 
+    //Double_t mmm = diHiggsCandidate->M();
+    //if( jentry%200 == 0 )
+    // std::cout << "Entry #" << jentry << "  run="<<run<<" event="<<event
+    //		<<"   diHigg="<<mmm<<"  (diJe+pho+pho)="<<o_bbggMass<<endl;
+
     if(doKinFit)
       o_bbggMass = diHiggsCandidate_KF->M();
     if(doMX)
-      o_bbggMass = diHiggsCandidate->M() - dijetCandidate->M() - diphotonCandidate->M() + 250.;
+      o_bbggMass = o_bbggMass - o_bbMass - o_ggMass + 250.;
 
     //mtot cut
     if(o_bbggMass < mtotMin || o_bbggMass > mtotMax) continue;
@@ -316,19 +323,18 @@ void bbggLTMaker::Loop()
       }
     }
 
-    if(doCatNonRes)
-    {
-//       if ( o_category == 2 && leadingJet_bDis > btagWP_tight && subleadingJet_bDis > btagWP_tight) o_category = 0;
-//       if ( o_category == 2 && leadingJet_bDis > btagWP_loose  && leadingJet_bDis < btagWP_tight && subleadingJet_bDis > btagWP_tight) o_category = 1;
-//       if ( o_category == 2 && subleadingJet_bDis > btagWP_loose  && subleadingJet_bDis < btagWP_tight && leadingJet_bDis > btagWP_tight) o_category = 1;
-//       if ( o_category == 2 ) o_category = -1;
-       if ( o_category == 2 && leadingJet_bDis > btagWP_medium && subleadingJet_bDis > btagWP_medium) o_category = 0;
-       if ( o_category == 2 && leadingJet_bDis > btagWP_medium ) o_category = 1;
-       if ( o_category == 2 && subleadingJet_bDis > btagWP_medium ) o_category = 1;
-       if ( o_category == 2 && leadingJet_bDis < btagWP_medium && subleadingJet_bDis < btagWP_medium ) o_category = -1;
+    if(doCatNonRes) {
+      //       if ( o_category == 2 && leadingJet_bDis > btagWP_tight && subleadingJet_bDis > btagWP_tight) o_category = 0;
+      //       if ( o_category == 2 && leadingJet_bDis > btagWP_loose  && leadingJet_bDis < btagWP_tight && subleadingJet_bDis > btagWP_tight) o_category = 1;
+      //       if ( o_category == 2 && subleadingJet_bDis > btagWP_loose  && subleadingJet_bDis < btagWP_tight && leadingJet_bDis > btagWP_tight) o_category = 1;
+      //       if ( o_category == 2 ) o_category = -1;
+      if ( o_category == 2 && leadingJet_bDis > btagWP_medium && subleadingJet_bDis > btagWP_medium) o_category = 0;
+      if ( o_category == 2 && leadingJet_bDis > btagWP_medium ) o_category = 1;
+      if ( o_category == 2 && subleadingJet_bDis > btagWP_medium ) o_category = 1;
+      if ( o_category == 2 && leadingJet_bDis < btagWP_medium && subleadingJet_bDis < btagWP_medium ) o_category = -1;
     }
     else if (doCatLowMass)
-    {
+      {
        if (o_category == 2 && (leadingJet_bDis > btagWP_tight && subleadingJet_bDis > btagWP_loose)) o_category = 0;
        if (o_category == 2 && (subleadingJet_bDis > btagWP_tight && leadingJet_bDis > btagWP_loose)) o_category = 0;
        if (o_category == 2 && (leadingJet_bDis > btagWP_tight && subleadingJet_bDis < btagWP_loose)) o_category = 1;
@@ -392,16 +398,10 @@ void bbggLTMaker::Loop()
     jet1ETA = leadingJet->eta();
     jet2ETA = subleadingJet->eta();
 
-
+    
     // ----------------
     // -- Weights for Non-Res samples are added here
     //------------------------------
-
-    // Lumi, devided by the Total number of events in nodes 2-13.
-    // This is needed because those nodes must be merged later for NonRes weighting.
-    // BAD that it's hardcoded, need to set as parameter.
-    // Float_t S = 2.7/597400;
-    
     
     if (doNonResWeights){
       //std::cout << "Doing Non-Resonant Signal weights " << std::endl;
@@ -430,14 +430,16 @@ void bbggLTMaker::Loop()
     // ---------------------------
     // Finished with Non-Res weights
     // ---------------------------
-
-
-
     
-    //      std::cout << "cosThetaStarCutCats: " << cosThetaStarCutCats << " - - " << cosThetaStarCut << "  - -  " << o_category << std::endl;
-//    if( o_category == 1  && cosThetaStarCutCats > 0 && fabs(CosThetaStar) > fabs(cosThetaStarCut)) continue;
-//    if( o_category == 0  && cosThetaStarCutCats == 2 && fabs(CosThetaStar) > fabs(cosThetaStarCut)) continue;
+    
+    //    std::cout << "cosThetaStarCutCats: " << cosThetaStarCutCats << " - - " << cosThetaStarCut << "  - -  " << o_category << std::endl;
+    //    if( o_category == 1  && cosThetaStarCutCats > 0 && fabs(CosThetaStar) > fabs(cosThetaStarCut)) continue;
+    //    if( o_category == 0  && cosThetaStarCutCats == 2 && fabs(CosThetaStar) > fabs(cosThetaStarCut)) continue;
     if( fabs(CosThetaStar_CS) > fabs(cosThetaStarCutHigh) ) continue;
+
+    // Put Run number and event number in the file
+    if (o_category != -1)
+      f_event_dump<<run<<" "<<event<<endl;
 
     outTree->Fill();
   }

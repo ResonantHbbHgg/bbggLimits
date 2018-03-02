@@ -1,10 +1,3 @@
-//////////////////////////////////////////////////////////
-// This class has been automatically generated on
-// Mon Mar 14 14:41:41 2016 by ROOT version 5.34/18
-// from TTree bbggLTMaker/Flat tree for HH->bbgg analyses (after pre selection)
-// found on file: /afs/cern.ch/work/r/rateixei/work/DiHiggs/flg76X/CMSSW_7_6_3/src/flashgg/bbggTools/test/RunJobs/mva_sig/Hadd/output_GluGluToRadionToHHTo2B2G_M-300_narrow_13TeV-madgraph.root
-//////////////////////////////////////////////////////////
-
 #ifndef bbggLTMaker_h
 #define bbggLTMaker_h
 
@@ -14,6 +7,8 @@
 #include <TSelector.h>
 #include <TH2F.h>
 #include <TH3F.h>
+#include <iostream>
+#include <fstream>
 
 // Header file for the classes stored in the TTree if any.
 #include <vector>
@@ -43,6 +38,9 @@ public :
 //   Output file and tree
    TTree *outTree;
    TFile *outFile;
+   
+   ofstream f_event_dump;
+   
 
    ULong64_t o_evt;
    UInt_t o_run;
@@ -360,9 +358,10 @@ bbggLTMaker::~bbggLTMaker()
 {
    if (!fChain) return;
    delete fChain->GetCurrentFile();
-//   photonidFile->Close();
-//   csevFile->Close();
-//   effsFile->Close();
+   f_event_dump.close();
+   //   photonidFile->Close();
+   //   csevFile->Close();
+   //   effsFile->Close();
 }
 
 Int_t bbggLTMaker::GetEntry(Long64_t entry)
@@ -422,6 +421,9 @@ void bbggLTMaker::Init(TTree *tree)
    fChain = tree;
    //   fChain->SetMakeClass(1);
 
+
+   fChain->SetBranchAddress("run", &run, &b_run);
+   fChain->SetBranchAddress("event", &event, &b_event);
 
    fChain->SetBranchAddress("gen_mHH", &gen_mHH, &b_gen_mHH);
    fChain->SetBranchAddress("gen_cosTheta", &gen_cosTheta, &b_gen_cosTheta);
