@@ -6,8 +6,8 @@ import tempfile
 username = getpass.getuser()
 cwd = os.getcwd()
 
-D_HM = "/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LT_EventDump_HighMass"
-D_LM = "/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LT_EventDump_LowMass"
+D_HM = "/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LT_StrikeBack_HighMass"
+D_LM = "/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LT_StrikeBack_LowMass"
 
 FILE = "/LT_output_GluGluToHHTo2B2G_AllNodes.root"
 
@@ -46,7 +46,7 @@ def makeMyTreeGood(inPath, kl=1, kt=1, cg=0, c2=0, c2g=0):
   #     print command
 
   batch = org_batch.replace("COMMAND", command).replace("CWD", cwd)
-  
+
   with tempfile.NamedTemporaryFile(dir='/tmp/'+username, prefix='batch_LT_'+pointStr, suffix='.sh', delete=False) as bFile:
     bFile.write(batch)
     bFile.flush()
@@ -58,11 +58,11 @@ if __name__ == "__main__":
   print "This is the __main__ part"
 
   from HiggsAnalysis.bbggLimits.DefineScans import *
-  
+
   if 'SM' in opt.scanType:
     for cc in case:
       makeMyTreeGood(cc)
-      
+
 
   if 'JHEP' in opt.scanType:
     for cc in case:
@@ -86,7 +86,7 @@ if __name__ == "__main__":
       for kl in scan_kl['kl']:
         print '\t kl = ', kl
         makeMyTreeGood(cc, kl,kt,cg,c2,c2g)
-        
+
   if 'KLKT' in opt.scanType:
     for cc in case:
       cg = 0.0
@@ -97,7 +97,7 @@ if __name__ == "__main__":
         for kt in scan_2d['kt']:
           print '\t kl = ', kl, '\t kt = ', kt
           makeMyTreeGood(cc, kl,kt,cg,c2,c2g)
-        
+
   if 'manual' in opt.scanType:
     # Here make trees for specific points
     for cc in case:

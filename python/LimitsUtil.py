@@ -144,6 +144,8 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
   # ParamsForFits = {'SM': massCuts, 'box': massCuts}
 
   SignalFile = "/LT_output_GluGluToHHTo2B2G_node_"+str(point)+"_13TeV-madgraph.root"
+  if "LT_StrikeBack" in LTDir_type:
+      SignalFile = "/LT_output_GluGluToHHTo2B2G_node_"+str(point)+"_13TeV-madgraph_0.root"
   if isRes:
     SignalFile = "/LT_output_GluGluToTYPEToHHTo2B2G_M-"+str(point)+"_narrow_13TeV-madgraph.root"
 

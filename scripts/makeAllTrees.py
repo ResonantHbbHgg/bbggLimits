@@ -62,11 +62,14 @@ if 'nonres' in opt.x:
   nodes = [ ["box", 50000], ["SM", 50000], [2, 49600], [3, 50000], [4, 50000], [5, 50000], [6, 50000],
             [7, 50000], [8, 50000], [9, 49600], [10, 49800], [11, 50000], [12, 50000], [13, 50000] ]
   
-  # APZ trees:
+
   SignalFiles = "/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph.root"
   if opt.signalDir is None:
     Signals = "root://eoscms//eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/May2_Mjj70to190_NewCatMVA/EGML_Signal_GEN/Hadd/" + SignalFiles
   else:
+    if 'Mar42018_ForPubli' in opt.signalDir:
+      SignalFiles = "/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph_0.root" #(different name: added _0)
+      
     Signals = opt.signalDir + SignalFiles
 
   if opt.doSMHiggs:
