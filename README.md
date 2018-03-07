@@ -127,7 +127,6 @@ In case of problems it's useful to increase verbosity level with `-v 1(2,3)` opt
 this case the logs should be found in your `outDir/logs` and in the _master_ log,
 `outDir/mainLog_date-time.log`
 
-
 We have another script to facilitate running the limit for _benchmarks_, _kl_ and _kl-kt_ scans:  
 ```
 python scripts/runLimitsOnLSF.py -f conf_default.json -t [JHEP, KL, KLKT] [-o outDir]
