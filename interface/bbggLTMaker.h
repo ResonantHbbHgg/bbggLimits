@@ -58,6 +58,7 @@ public :
    Double_t        o_bbMass;
    Double_t        o_ggMass;
    Double_t        o_bbggMass;
+   Double_t        o_met;
    Double_t        o_phoevWeight;
    Double_t        o_ljet_bdis;
    Double_t        o_sjet_bdis;
@@ -129,6 +130,7 @@ public :
    LorentzVector    *dijetCandidate_KF;
    LorentzVector    *diHiggsCandidate;
    LorentzVector    *diHiggsCandidate_KF;
+   LorentzVector    *MET;
    Float_t	    CosThetaStar;
    Float_t	    CosThetaStar_CS;
    Float_t          HHTagger;
@@ -142,7 +144,8 @@ public :
    Int_t	subleadingJet_flavour;
    Int_t	leadingJet_hadFlavour;
    Int_t	subleadingJet_hadFlavour;
-   std::vector<std::pair<double,float>> btmap;
+   Int_t        njets;
+   //std::vector<std::pair<double,float>> btmap;
    TString myDiffOpt;
 
    Double_t gen_mHH, gen_cosTheta;
@@ -179,6 +182,8 @@ public :
    TBranch        *b_dijetCandidate_KF;   //!
    TBranch        *b_diHiggsCandidate;   //!
    TBranch        *b_diHiggsCandidate_KF;   //!
+   TBranch        *b_MET;   //!
+   TBranch        *b_njets;
    TBranch	  *b_isSignal;	//!
    TBranch	  *b_isPhotonCR;  //!
    TBranch	  *b_leadingJet_flavour;
@@ -351,6 +356,7 @@ bbggLTMaker::bbggLTMaker(TTree *tree, bool IsRes) : fChain(0)
    HighMassLeadingJetBtagCut = -10;
    LowMassSubLeadingJetBtagCut = -10;
    HighMassSubLeadingJetBtagCut = -10;
+   njets = 0;
    Init(tree);
 }
 
@@ -405,6 +411,7 @@ void bbggLTMaker::Init(TTree *tree)
    subleadingJet_KF = 0;
    dijetCandidate_KF = 0;
    diHiggsCandidate_KF = 0;
+   MET = 0;
    genWeights = 0;
    leadingPhotonID = 0;
    leadingPhotonISO = 0;
@@ -450,6 +457,8 @@ void bbggLTMaker::Init(TTree *tree)
    fChain->SetBranchAddress("dijetCandidate_KF", &dijetCandidate_KF, &b_dijetCandidate_KF);
    fChain->SetBranchAddress("diHiggsCandidate", &diHiggsCandidate, &b_diHiggsCandidate);
    fChain->SetBranchAddress("diHiggsCandidate_KF", &diHiggsCandidate_KF, &b_diHiggsCandidate_KF);
+   fChain->SetBranchAddress("MET", &MET, &b_MET);
+   fChain->SetBranchAddress("njets", &njets, &b_njets);
    fChain->SetBranchAddress("isSignal", &isSignal, &b_isSignal);
    fChain->SetBranchAddress("isPhotonCR", &isPhotonCR, &b_isPhotonCR);
    fChain->SetBranchAddress("leadingJet_flavour", &leadingJet_flavour, &b_leadingJet_flavour);
