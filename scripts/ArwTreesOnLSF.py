@@ -2,11 +2,12 @@
 
 import os.path
 import getpass
+import tempfile
 username = getpass.getuser()
 cwd = os.getcwd()
 
-D_HM = "/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LT_EventDump_HighMass"
-D_LM = "/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LT_EventDump_LowMass"
+D_HM = "/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LT_StrikeBack_HighMass"
+D_LM = "/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LT_StrikeBack_LowMass"
 
 FILE = "/LT_output_GluGluToHHTo2B2G_AllNodes.root"
 
@@ -39,32 +40,29 @@ def makeMyTreeGood(inPath, kl=1, kt=1, cg=0, c2=0, c2g=0):
     print 'FILE ALREADY EXISTS, JUMPING..', kl, kt, cg, c2, c2g
     return
   else:
-    print 'FILE DOESNT EXIST:', kl, kt, cg, c2, c2g
+    print 'FILE DOESNT EXIST:', kl, kt, cg, c2, c2g, 'in', inPath
 
   command = 'python scripts/MakeARWTree.py -f ' + inPath+FILE + ' -o ' + outputFile + ' --kl ' + str(kl) + ' --kt ' + str(kt) + ' --cg ' + str(cg) + ' --c2 ' + str(c2) + ' --c2g ' + str(c2g) + '  '
   #     print command
 
   batch = org_batch.replace("COMMAND", command).replace("CWD", cwd)
 
-  bFile = open('/tmp/'+username+'/batch_LT_'+pointStr+'.sh', "w+")
-  bFile.write(batch)
-  bFile.close()
-  command = 'chmod a+rwx ' + '/tmp/'+username+'/batch_LT_'+pointStr+'.sh'
-  os.system(command)
-  command = "bsub -q 8nm -J batch_LT_" + pointStr+ " < /tmp/"+username+"/batch_LT_" + pointStr+'.sh'
-
-  os.system(command)
-
+  with tempfile.NamedTemporaryFile(dir='/tmp/'+username, prefix='batch_LT_'+pointStr, suffix='.sh', delete=False) as bFile:
+    bFile.write(batch)
+    bFile.flush()
+    command = "bsub -q 8nm -J batch_LT_" + pointStr+ " < " + bFile.name
+    print command
+    os.system(command)
 
 if __name__ == "__main__":
   print "This is the __main__ part"
 
   from HiggsAnalysis.bbggLimits.DefineScans import *
-  
+
   if 'SM' in opt.scanType:
     for cc in case:
       makeMyTreeGood(cc)
-      
+
 
   if 'JHEP' in opt.scanType:
     for cc in case:
@@ -88,7 +86,7 @@ if __name__ == "__main__":
       for kl in scan_kl['kl']:
         print '\t kl = ', kl
         makeMyTreeGood(cc, kl,kt,cg,c2,c2g)
-        
+
   if 'KLKT' in opt.scanType:
     for cc in case:
       cg = 0.0
@@ -99,7 +97,7 @@ if __name__ == "__main__":
         for kt in scan_2d['kt']:
           print '\t kl = ', kl, '\t kt = ', kt
           makeMyTreeGood(cc, kl,kt,cg,c2,c2g)
-        
+
   if 'manual' in opt.scanType:
     # Here make trees for specific points
     for cc in case:

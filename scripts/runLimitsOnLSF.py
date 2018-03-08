@@ -3,6 +3,7 @@
 from ROOT import *
 import os,sys
 import getpass
+import tempfile
 username = getpass.getuser()
 
 # This is a command to run for Analytical reweighted limit:
@@ -37,27 +38,24 @@ parser.add_argument('-f', '--configFile', dest="fname", type=str, default='conf_
                     help="Json config file")
 parser.add_argument('-o', '--outDir', dest="outDir", type=str, default='LIMS_NewHope',
                     help="Output directory for my limits")
-                    
+
 opt = parser.parse_args()
 
 def submitPoint(kl=1, kt=1, cg=0, c2=0, c2g=0):
   pointStr = "_".join(['kl',str(float(kl)),'kt',str(float(kt)),'cg',str(float(cg)),'c2',str(float(c2)),'c2g',str(float(c2g))]).replace('.', 'p').replace('-', 'm')
   extra = ' '.join([' --analyticalRW','--kl '+str(kl),'--kt '+str(kt),'--cg '+str(cg),'--c2 '+str(c2), '--c2g '+str(c2g),
                     '--extraLabel '+pointStr])
-  
+
   bashFile = org_bashFile.replace('HERE', HERE).replace('LOUTDIR', opt.outDir).replace('EXTRA', extra).replace('JSONFILE',opt.fname)
 
-  bFile = open('/tmp/'+username+'/batch_'+pointStr+'.sh', "w+")
-  bFile.write(bashFile)
-  bFile.close()
-  command = 'chmod a+rwx ' + '/tmp/'+username+'/batch_'+pointStr+'.sh'
-  os.system(command)
-  
-  command = "bsub -q 1nh -J batch_" + pointStr  + " < /tmp/"+username+"/batch_" + pointStr + '.sh'
 
-  print command
-  os.system(command)
-     
+  with tempfile.NamedTemporaryFile(dir='/tmp/'+username, prefix='batch_LIM_'+pointStr, suffix='.sh', delete=False) as bFile:
+    bFile.write(bashFile)
+    bFile.flush()
+    command = "bsub -q 1nh -J batch_LIM_" + pointStr+ " < " + bFile.name
+    print command
+    os.system(command)
+
 
 if __name__ == "__main__":
   print "This is the __main__ part"
@@ -72,11 +70,11 @@ if __name__ == "__main__":
       cg = cgJHEP[ii]
       c2 = c2JHEP[ii]
       c2g =c2gJHEP[ii]
-      
+
       print counter
       counter += 1
       print kl, kt, cg, c2, c2g
-      submitPoint(kl, kt, cg, c2, c2g)   
+      submitPoint(kl, kt, cg, c2, c2g)
 
 
   if "KL" in opt.scanType:
@@ -85,11 +83,11 @@ if __name__ == "__main__":
     c2 = 0.0
     c2g = 0.0
     for kl in scan_kl['kl']:
-            
+
       print counter
       counter += 1
       print kl, kt, cg, c2, c2g
-      submitPoint(kl, kt, cg, c2, c2g)   
+      submitPoint(kl, kt, cg, c2, c2g)
 
   if "KLKT" in opt.scanType:
     cg = 0.0
@@ -97,15 +95,15 @@ if __name__ == "__main__":
     c2g = 0.0
     for kl in scan_2d['kl']:
       for kt in scan_2d['kt']:
-    
+
         if kt <= 0: continue # Because they are symmetric!
-            
+
         print counter
         counter += 1
         print kl, kt, cg, c2, c2g
-        submitPoint(kl, kt, cg, c2, c2g)   
+        submitPoint(kl, kt, cg, c2, c2g)
 
-        
+
   if 'manual' in opt.scanType:
     # Here we can run limits over specific points
     # Note: the limit trees for those points must exist
@@ -117,18 +115,17 @@ if __name__ == "__main__":
           print counter
           counter += 1
           print kl, kt, cg, c2, c2g
-          submitPoint(kl, kt, cg, c2, c2g)   
+          submitPoint(kl, kt, cg, c2, c2g)
 
-    
+
   if "grid" in opt.scanType:
     bFile = open('/tmp/'+username+'/batch_grid.sh', "w+")
     bFile.write()
     bFile.close()
-    counter = 0 
+    counter = 0
     for j in xrange(0,5):
-      command = ' '.join(['bsub -q 1nh','/tmp/'+username+'batch_grid.sh',HERE,'GridLimits', str(j), opt.fname]) 
+      command = ' '.join(['bsub -q 1nh','/tmp/'+username+'batch_grid.sh',HERE,'GridLimits', str(j), opt.fname])
       print counter
       counter += 1
       print command
       os.system(command)
-      

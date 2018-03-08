@@ -211,9 +211,10 @@ void bbggLTMaker::Loop()
 
     //Double_t mmm = diHiggsCandidate->M();
     //if( jentry%200 == 0 )
-    // std::cout << "Entry #" << jentry << "  run="<<run<<" event="<<event
+    //if (abs(mmm-o_bbggMass)/o_bbggMass > 0.001)
+    //std::cout << "Entry #" << jentry << "  run="<<run<<" event="<<event
     //		<<"   diHigg="<<mmm<<"  (diJe+pho+pho)="<<o_bbggMass<<endl;
-
+    
     if(doKinFit)
       o_bbggMass = diHiggsCandidate_KF->M();
     if(doMX)

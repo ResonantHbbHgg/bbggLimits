@@ -375,8 +375,8 @@ void bbgg2DFitter::AddBkgData(TString datafile)
 {
   //Define variables
   RooArgSet* ntplVars = bbgg2DFitter::defineVariables();
-  RooRealVar weightVar("weightVar","",1,0,1000);
-  weightVar.setVal(1.);
+  //RooRealVar weightVar("weightVar","",1,0,1000);
+  //weightVar.setVal(1.);
   TFile dataFile(datafile);
   TTree* dataTree = (TTree*) dataFile.Get("TCVARS");
   if(dataTree==nullptr)
@@ -391,14 +391,26 @@ void bbgg2DFitter::AddBkgData(TString datafile)
   RooDataSet* dataToPlot[_NCAT];
   TString cut0 = "&& 1>0";
   TString cut1 = "&& 1>0";
-  if (_verbLvl>1) std::cout<<"================= Add Bkg ==============================="<<std::endl;
 
+  
+  if (_verbLvl>1) std::cout<<"================= Add Bkg ==============================="<<std::endl;
+  if (_verbLvl>1) {
+    std::cout<<"\t Total events in root file: "<<Data.sumEntries()<<std::endl;
+    std::cout<<"\t reduce to category 0: "<<Data.reduce("cut_based_ct==0")->sumEntries()
+	     <<"  From the original Tree: "<<dataTree->GetEntries("cut_based_ct==0")<<std::endl;    
+    std::cout<<"\t reduce to category 1: "<<Data.reduce("cut_based_ct==1")->sumEntries() 
+	     <<"  From the original Tree: "<<dataTree->GetEntries("cut_based_ct==1")<<std::endl;    
+    
+  }
+    
   for( int i=0; i<_NCAT; ++i)
     {
 
       dataToFit[i] = (RooDataSet*) Data.reduce(RooArgList(*_w->var("mgg"),*_w->var("mjj")),_cut+TString::Format(" && cut_based_ct==%d",i));
 
       this->SetObservedCats(i, dataToFit[i]->sumEntries());
+
+      if (_verbLvl>1) std::cout<<"\t categ="<<i<<"  events="<<dataToFit[i]->sumEntries()<<std::endl;
 
       if(_doblinding)
 	dataToPlot[i] = (RooDataSet*) Data.reduce(RooArgList(*_w->var("mgg"),*_w->var("mjj")),_cut+TString::Format(" && cut_based_ct==%d",i)+cut0);
@@ -1651,10 +1663,13 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs)
     if(_fitStrategy==1)  data_h11= (TH1*) data[c]->createHistogram("mgg", 60);
 
     if (_verbLvl>1) {
+      std::cout<<"\t categ="<<c<<std::endl;
       if(_doblinding==0 && _fitStrategy==2) std::cout << "########NUMBER OF OBSERVED EVENTSSSS::: " << data_h2->Integral() << std::endl;
       if(_doblinding==0 && _fitStrategy==1) std::cout << "########NUMBER OF OBSERVED EVENTSSSS::: " << data_h11->Integral() << std::endl;
+      std::cout<<"\t sumEntries()="<<data[c]->sumEntries()<<std::endl;
     }
-      int nEvtsObs = -1;
+
+    int nEvtsObs = -1;
     if(_fitStrategy == 2) nEvtsObs = data_h2->Integral();
     if(_fitStrategy == 1) nEvtsObs = data_h11->Integral();
 
