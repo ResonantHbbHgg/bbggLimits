@@ -67,7 +67,7 @@ if 'nonres' in opt.x:
   if opt.signalDir is None:
     Signals = "root://eoscms//eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/May2_Mjj70to190_NewCatMVA/EGML_Signal_GEN/Hadd/" + SignalFiles
   else:
-    if 'Mar42018_ForPubli' in opt.signalDir:
+    if 'ForPubli' in opt.signalDir:
       SignalFiles = "/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph_0.root" #(different name: added _0)
       
     Signals = opt.signalDir + SignalFiles

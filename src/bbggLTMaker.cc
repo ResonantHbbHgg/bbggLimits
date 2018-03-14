@@ -217,9 +217,9 @@ void bbggLTMaker::Loop()
     //		<<"   diHigg="<<mmm<<"  (diJe+pho+pho)="<<o_bbggMass<<endl;
 
     o_met = MET->Pt();
-    if( jentry%200 == 0 )
-      std::cout << "Entry #" << jentry << "  run="<<run<<" event="<<event
-		<<"  Met = "<<o_met<<"  njets="<<njets<<std::endl;
+    //if( jentry%200 == 0 )
+    // std::cout << "Entry #" << jentry << "  run="<<run<<" event="<<event
+    //		<<"  Met = "<<o_met<<"  njets="<<njets<<std::endl;
 
     // Removing ttbar contributions
     if (o_met > 100 || njets>=6) continue;

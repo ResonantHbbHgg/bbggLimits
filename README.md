@@ -63,10 +63,11 @@ makeAllTrees.py -x nonres -f LT_OutDir -d 0 --doSMHiggs --genDiPhotonFilter \
 --doCatMVA --MVAHMC0 0.970 --MVAHMC1 0.600 --MVALMC0 0.985 --MVALMC1 0.600 --massNR 350  --LMLJBTC 0.55 --LMSJBTC 0.55
 ```  
 
- 
-In order to re-produce the limit trees used for EPS17 results, follow instructions in
-[SmartScripts/README.md](SmartScripts/README.md).
-
+Before we can proceed furthed, some `hadd`ing needs to be done:
+```
+for m in LowMass HighMass; do hadd -f LT_OutDir_${m}/LT_output_bbHToGG_M-125_13TeV_amcatnlo.root LT_OutDir_${m}/LT_output_bbHToGG_M-125_4FS_yb*.root; done
+for m in LowMass HighMass; do hadd -f LT_OutDir_${m}/LT_output_GluGluToHHTo2B2G_AllNodes.root LT_OutDir_${m}/LT_output_GluGluToHHTo2B2G_node_*.root; done
+```  
 
 #### Details 
 The *C++ Loop* code to produce the Limit Trees is located at
@@ -81,9 +82,9 @@ where `fileName.root` is a an input Flat tree to be run over, and
 `makeAllTrees.py` mentioned in the beginning utilizes the
 `pyLimitTreeMaker.py` and runs it over many input  files.
 
-
 More options for the `pyLimitTreeMaker.py` can be specified. To see all of them look
 [directly in the code](https://github.com/ResonantHbbHgg/bbggLimits/blob/cc11d25a97392ee55116bac9d08b77f5f4128998/scripts/pyLimitTreeMaker.py#L11-L85).
+
 
 ### Non-resonant reweighted trees 
 In the non-resonant search, to get the limits at any parameter point of 5D space, we need
