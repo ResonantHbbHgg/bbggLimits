@@ -49,6 +49,7 @@ void bbggLTMaker::Loop()
   outTree->Branch("mjj", &o_bbMass, "o_bbMass/D");
   outTree->Branch("mgg", &o_ggMass, "o_ggMass/D");
   outTree->Branch("mtot", &o_bbggMass, "o_bbggMass/D");
+  outTree->Branch("met", &o_met, "o_met/D");
   outTree->Branch("jet1PT", &jet1PT, "jet1PT/D");
   outTree->Branch("jet2PT", &jet2PT, "jet2PT/D");
   outTree->Branch("jet1ETA", &jet1ETA, "jet1ETA/D");
@@ -214,6 +215,14 @@ void bbggLTMaker::Loop()
     //if (abs(mmm-o_bbggMass)/o_bbggMass > 0.001)
     //std::cout << "Entry #" << jentry << "  run="<<run<<" event="<<event
     //		<<"   diHigg="<<mmm<<"  (diJe+pho+pho)="<<o_bbggMass<<endl;
+
+    o_met = MET->Pt();
+    //if( jentry%200 == 0 )
+    // std::cout << "Entry #" << jentry << "  run="<<run<<" event="<<event
+    //		<<"  Met = "<<o_met<<"  njets="<<njets<<std::endl;
+
+    // Removing ttbar contributions
+    //if (o_met > 100 || njets>=6) continue;
     
     if(doKinFit)
       o_bbggMass = diHiggsCandidate_KF->M();
