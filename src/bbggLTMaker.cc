@@ -222,7 +222,7 @@ void bbggLTMaker::Loop()
     //		<<"  Met = "<<o_met<<"  njets="<<njets<<std::endl;
 
     // Removing ttbar contributions
-    if (o_met > 100 || njets>=6) continue;
+    //if (o_met > 100 || njets>=6) continue;
     
     if(doKinFit)
       o_bbggMass = diHiggsCandidate_KF->M();
