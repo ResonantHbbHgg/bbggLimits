@@ -48,7 +48,7 @@ In order to make limit trees from all samples use these script:
 makeAllTrees.py -x nonres [--NRW]
 ```
 
-### Working examples
+### Working examples (non-resonant case)
 
 Make non-res shape benchmark points trees (MVA based with 350 M(HH) threshold):
 ```
@@ -63,7 +63,7 @@ makeAllTrees.py -x nonres -f LT_OutDir -d 0 --doSMHiggs --genDiPhotonFilter \
 --doCatMVA --MVAHMC0 0.970 --MVAHMC1 0.600 --MVALMC0 0.985 --MVALMC1 0.600 --massNR 350  --LMLJBTC 0.55 --LMSJBTC 0.55
 ```  
 
-Before we can proceed furthed, some `hadd`ing needs to be done:
+Before we can proceed further with setting the limits, some `hadd`ing needs to be done:
 ```
 for m in LowMass HighMass; do hadd -f LT_OutDir_${m}/LT_output_bbHToGG_M-125_13TeV_amcatnlo.root LT_OutDir_${m}/LT_output_bbHToGG_M-125_4FS_yb*.root; done
 for m in LowMass HighMass; do hadd -f LT_OutDir_${m}/LT_output_GluGluToHHTo2B2G_AllNodes.root LT_OutDir_${m}/LT_output_GluGluToHHTo2B2G_node_*.root; done
@@ -171,4 +171,35 @@ plot is simply drawn symmetrically over (0,0) point in (kl,kt) coordinates.
 
 PS. In order to reproduce the _EPS17_ results, follow the instructions here:
 [SmartScripts/README.md](SmartScripts/README.md)
+
+
+
+### Working examples for Resonant case
+
+Similarly to the non-resonant case, we first need to create the limit trees with
+categorization and then run the limits.  Below are the commands needed to make the limit
+trees.
+
+For low masses:
+```shell
+  do echo ${s};  
+    for m in 250 260 270 280 300 320 350 400 450 500 550 600;  
+	  do echo ${s} ${m};  
+	  python scripts/makeAllTrees.py -x res -d /eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/Mar82018_ForPubli_RafStyle/Data/Hadd/ -s /eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/Mar82018_ForPubli_RafStyle/Signal/Hadd/ -f LT_ResOutDir_${m}_ --doCatMVA --MVAHMC0 0.700 --MVAHMC1 0.960 --MVALMC0 0.700 --MVALMC1 0.960 --massNR 500 --LMLJBTC 0.0 --LMSJBTC 0.0 --resMass ${m} --resType ${s};  
+	done;  
+done
+```
+
+For high masses (some nambers are different in the parameters wrt low masses):
+```shell
+for s in Radion BulkGraviton;  
+  do echo ${s};  
+  for m in 500 550 600 650 700 750 800 900;  
+    do echo ${s} ${m};  
+    python scripts/makeAllTrees.py -x res -d /eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/Mar82018_ForPubli_RafStyle/Data/Hadd/ -s /eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/Mar82018_ForPubli_RafStyle/Signal/Hadd/ -f LT_RES_Mar21_HighMass_${m}_ --doCatMVA --MVAHMC0 0.000 --MVAHMC1 0.500 --MVALMC0 0.000 --MVALMC1 0.500 --massNR 500 --LMLJBTC 0.0 --LMSJBTC 0.0 --resMass ${m} --resType ${s};  
+  done;  
+done
+```
+
+
 
