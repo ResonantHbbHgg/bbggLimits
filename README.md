@@ -182,12 +182,13 @@ trees.
 
 For low masses:
 ```shell
+for s in Radion BulkGraviton;
   do echo ${s};  
-    for m in 250 260 270 280 300 320 350 400 450 500 550 600;  
-	  do echo ${s} ${m};  
-	  python scripts/makeAllTrees.py -x res -d /eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/Mar82018_ForPubli_RafStyle/Data/Hadd/ -s /eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/Mar82018_ForPubli_RafStyle/Signal/Hadd/ -f LT_ResOutDir_${m}_ --doCatMVA --MVAHMC0 0.700 --MVAHMC1 0.960 --MVALMC0 0.700 --MVALMC1 0.960 --massNR 500 --LMLJBTC 0.0 --LMSJBTC 0.0 --resMass ${m} --resType ${s};  
+  for m in 250 260 270 280 300 320 350 400 450 500 550 600;  
+	do echo ${s} ${m};  
+	python scripts/makeAllTrees.py -x res -d /eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/Mar82018_ForPubli_RafStyle/Data/Hadd/ -s /eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/Mar82018_ForPubli_RafStyle/Signal/Hadd/ -f LT_ResOutDirOne_ --doCatMVA --MVAHMC0 0.960 --MVAHMC1 0.700 --MVALMC0 0.960 --MVALMC1 0.700 --massNR 500 --LMLJBTC 0.0 --LMSJBTC 0.0 --resMass ${m} --resType ${s};  
 	done;  
-done
+  done
 ```
 
 For high masses (some nambers are different in the parameters wrt low masses):
@@ -196,9 +197,9 @@ for s in Radion BulkGraviton;
   do echo ${s};  
   for m in 500 550 600 650 700 750 800 900;  
     do echo ${s} ${m};  
-    python scripts/makeAllTrees.py -x res -d /eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/Mar82018_ForPubli_RafStyle/Data/Hadd/ -s /eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/Mar82018_ForPubli_RafStyle/Signal/Hadd/ -f LT_RES_Mar21_HighMass_${m}_ --doCatMVA --MVAHMC0 0.000 --MVAHMC1 0.500 --MVALMC0 0.000 --MVALMC1 0.500 --massNR 500 --LMLJBTC 0.0 --LMSJBTC 0.0 --resMass ${m} --resType ${s};  
-  done;  
-done
+    python scripts/makeAllTrees.py -x res -d /eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/Mar82018_ForPubli_RafStyle/Data/Hadd/ -s /eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/Mar82018_ForPubli_RafStyle/Signal/Hadd/ -f LT_ResOutDirToo_ --doCatMVA --MVAHMC0 0.500 --MVAHMC1 0.000 --MVALMC0 0.500 --MVALMC1 0.000 --massNR 500 --LMLJBTC 0.0 --LMSJBTC 0.0 --resMass ${m} --resType ${s};  
+    done;  
+  done
 ```
 
 

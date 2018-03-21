@@ -148,7 +148,9 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
       SignalFile = "/LT_output_GluGluToHHTo2B2G_node_"+str(point)+"_13TeV-madgraph_0.root"
   if isRes:
     SignalFile = "/LT_output_GluGluToTYPEToHHTo2B2G_M-"+str(point)+"_narrow_13TeV-madgraph.root"
-
+    if "RES_Mar21" in LTDir_type:
+      SignalFile = "/LT_output_GluGluToTYPEToHHTo2B2G_M-"+str(point)+"_narrow_13TeV-madgraph_0.root"
+    
   if NRgridPoint >= 0:
     SignalFile = "/LT_NR_Nodes_2to13_merged.root"
 
@@ -252,7 +254,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
         procLog.debug("Done SM Higgs bzz")
 
     ddata = str(LTDir + '/LT_'+dataName+'.root')
-    ddata = ddata.replace("MASS", str(point))
+    ddata = ddata.replace("%MASS%", str(point))
 
     theFitter.AddBkgData(ddata)
     procLog.info("\t BKG ADDED. Node=%r, GridPoint=%r, type=%r, data file=%s", point,NRgridPoint,t,ddata)
