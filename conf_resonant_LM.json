@@ -1,0 +1,49 @@
+
+{
+    "LTDIR" : "/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LT_RES_Mar21_LowMass_TYPE",
+    "signal" : {
+	"types" : ["Radion", "BulkGraviton"],
+	"signalModelCard" : "/src/HiggsAnalysis/bbggLimits/Models/models_2D_higgs_mjj70.rs"
+    },
+    "other" : {
+        "doDoubleSidedCB": 1,
+        "Combinelxbatch" : 0,
+        "energy" : "13TeV",
+        "higgsMass" : 125.0,
+        "addHiggs" : 0,
+        "scaleSingleHiggs" : 0,
+        "doBlinding" : 0,
+        "doBands" : 0,
+        "ncat" : 2,
+        "doSingleLimit" : 0,
+        "drawSignalFit" : 0,
+        "drawBackgroundFit" : 0,
+        "useSigTheoryUnc" : 0,
+	"doBrazilianFlag" : false,
+	"runCombine" :true,
+	"combineOption" : 1,
+	"minMggMassFit" : 100,
+	"maxMggMassFit" : 180,
+	"minMjjMassFit"	: 70,
+	"maxMjjMassFit"	: 190,
+	"minSigFitMgg" :115,
+	"maxSigFitMgg" :135,
+	"minSigFitMjj" :70,
+	"maxSigFitMjj" :190,
+	"minHigMggFit" :115,
+	"maxHigMggFit" :135,
+	"minHigMjjFit":70,
+	"maxHigMjjFit":190,
+	"HH":false,
+	"base":true,
+	"low":false,
+	"obs":false,
+	"twotag":false,
+        "doBias":false,
+        "biasConfig": "BiasStudies/ForBias.json"
+
+    },
+    "data" : {
+        "name" :"DoubleEG_M-%MASS%"
+    }
+}

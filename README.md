@@ -202,5 +202,21 @@ for s in Radion BulkGraviton;
   done
 ```
 
+To produce the limit trees, modify the input paths in `conf_resonant_LM.json` and
+`conf_resonant_HM.json` files and then run locally (it's rather quick compared to the
+non-resonant limits):
 
+```
+pyLimits.py -f conf_resonant_LM.json --mass all-LM -j4 -o LIMS_RES_LM --overwrite
+pyLimits.py -f conf_resonant_HM.json --mass all-HM -j4 -o LIMS_RES_HM --overwrite 
+```
+
+(notice we run with separate config files for high mass points and low mass points,
+because the input paths for the limits trees must be different in those two cases).
+
+Once the limits are produced, make a plot with this script:
+```
+python scripts/MakeResPlot.py LIMS_RES_LM --hmFolder=LIMS_RES_TEST_HM --log --isAsymptotic -n MyPlotName_Radi
+python scripts/MakeResPlot.py LIMS_RES_LM --hmFolder=LIMS_RES_TEST_HM --log --isAsymptotic -n MyPlotName_Grav --isGrav
+```
 

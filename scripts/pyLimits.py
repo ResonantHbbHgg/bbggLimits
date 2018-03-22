@@ -54,7 +54,7 @@ parser.add_argument('--nodes', dest="nodes", default=None, type=str, nargs='+',
                     choices=['2','3','4','5','6','7','8','9','10','11','12','13','SM','box','all'],
                     help = "Choose the nodes to run")
 parser.add_argument('--mass', dest="mass", default=None, type=str, nargs='+',
-                    choices=['250','260','270','280','300','320','340','350','400','450','500','550','600','650','700', '750', '800', '900', 'all'],
+                    choices=['250','260','270','280','300','320','340','350','400','450','500','550','600','650','700', '750', '800', '900', 'all', 'all-LM', 'all-HM'],
                     help = "Choose the resonant mass to run")
 parser.add_argument('--points', dest="points", default=None, type=parseNumList, nargs='+',
                     help = "Choose the points in the grid to run")
@@ -141,8 +141,12 @@ if __name__ == "__main__":
   res_Masses = []
   if opt.mass!=None:
     mainLog.info('Running over masses:\n'+pformat(opt.mass))
-    if 'all' in opt.mass:
-      myNodes=['250','260','270','280','300','320','340','350','400','450','500','550','600','650','700', '750', '800', '900']
+    if 'all-LM' in opt.mass:
+      myNodes=['250','260','270','280','300','320','340','350','400','450','500','550','600']
+    elif 'all-HM' in opt.mass:
+      myNodes=['600','650','700', '750', '800', '900']
+    elif 'all' in opt.mass:
+      myNodes=['250','260','270','280','300','320','340','350','400','450','500','550','600', '600','650','700', '750', '800', '900']
     else:
       myNodes = opt.mass
     for n in myNodes:

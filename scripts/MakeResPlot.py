@@ -12,20 +12,19 @@ from HiggsAnalysis.bbggLimits.MyCMSStyle import *
 
 gROOT.SetBatch()
 
-parser =  argparse.ArgumentParser(description='Limit Tree maker')
-parser.add_argument('-f', '--inputFolder', dest="folder", default=None, type=str, required=True,
-                    help="input folders")
+parser =  argparse.ArgumentParser(description='Resonant limit plot maker')
+parser.add_argument("limdir")
+parser.add_argument('--hmFolder', dest='hmFolder', default=None)
 parser.add_argument('-n', '--inputName', dest="name", type=str, default="MyResonantAnalysis",
                     help="input folders cat names")
-parser.add_argument('-l', '--lumi', dest='lumi', default='36.5', type=str, help='Integrated luminosoty')
+parser.add_argument('-l', '--lumi', dest='lumi', default='35.9', type=str, help='Integrated luminosoty')
 parser.add_argument('--label', dest='label', default='', type=str, help='Label')
 parser.add_argument('--log', dest='log', action='store_true', default=False)
 parser.add_argument('--isAsymptotic', dest='asymp', action='store_true', default=False)
 parser.add_argument('--isGrav', dest='isGrav', action='store_true', default=False)
-parser.add_argument('--hmFolder', dest='hmfolder', default=None)
-parser.add_argument('--max', dest='max',  default=None, type=float)
-parser.add_argument('--min', dest='min',  default=0.001, type=float)
-parser.add_argument('--observed', dest='observed', action='store_true', default=False)
+parser.add_argument('--max', dest='max',  default=200, type=float)
+parser.add_argument('--min', dest='min',  default=0.05, type=float)
+parser.add_argument('-u',"--unblind", dest="unblind", action='store_true', default=False)
 
 opt = parser.parse_args()
 
@@ -47,19 +46,19 @@ leg = TLegend(0.49, 0.60, 0.87, 0.85)
 legL.SetFillColorAlpha(kWhite, 0.9)
 leg.SetFillColorAlpha(kWhite, 0.9)
 def main(argv):
-  print opt.folder, opt.name
-#  tdr.setTDRStyle()
+  print opt.limdir, opt.hmFolder, opt.name
+  #  tdr.setTDRStyle()
   #change the CMS_lumi variables (see CMS_lumi.py)
-#  CMS_lumi.lumi_13TeV = opt.lumi+" fb^{-1}"
-#  CMS_lumi.writeExtraText = 1
-#  CMS_lumi.extraText = "Preliminary"
-#  CMS_lumi.lumi_sqrtS = "13 TeV" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
+  #  CMS_lumi.lumi_13TeV = opt.lumi+" fb^{-1}"
+  #  CMS_lumi.writeExtraText = 1
+  #  CMS_lumi.extraText = "Preliminary"
+  #  CMS_lumi.lumi_sqrtS = "13 TeV" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
 
 
   quantiles = ['0.025', '0.160', '0.500', '0.840', '0.975']
-  if opt.observed: quantiles.append('-1')
+  if opt.unblind: quantiles.append('-1')
   qt_names = ['m2s', 'm1s', 'central', 'p1s', 'p2s']
-  if opt.observed: qt_names.append('obs')
+  if opt.unblind: qt_names.append('obs')
   gr_1s = TGraphAsymmErrors()
   gr_1s.SetFillColor(cNiceGreen2)
   gr_1s.SetLineColor(cNiceGreen2)
@@ -102,10 +101,18 @@ def main(argv):
   massesLM = [260, 270, 280, 300, 320, 350, 400, 450, 500, 550, 600]
   massesHM = [600, 650, 700, 750, 800, 900]
 
-  if opt.hmfolder: masses = massesLM
+  if opt.hmFolder:
+    masses = massesLM
   for iff,m in enumerate(masses):
-#lims_Res_NewBTagWPRadion_v66/Radion_Node_250_Rad/datacards/higgsCombineRadion_Node_250_Rad_qt_
-    ff = opt.folder.replace("MASS", str(m))
+    if opt.isGrav:
+      ff = opt.limdir+'/BulkGraviton_Node_'+str(m)+'/datacards/higgsCombineBulkGraviton_Node_'+str(m)
+      if 'EPS2017' in opt.limdir:
+        ff = opt.limdir+'/BulkGraviton_Node_'+str(m)+'LT_Res_500_HMHPC_960_HMMPC_700_LMHPC_960_LMMPC_700/datacards/higgsCombineBulkGraviton_Node_'+str(m)
+    else:
+      ff = opt.limdir+'/Radion_Node_'+str(m)+'/datacards/higgsCombineRadion_Node_'+str(m)
+      if 'EPS2017' in opt.limdir:
+        ff = opt.limdir+'/Radion_Node_'+str(m)+'LT_Res_500_HMHPC_960_HMMPC_700_LMHPC_960_LMMPC_700/datacards/higgsCombineRadion_Node_'+str(m)
+        
     qts = {}
     for iqt, qt in enumerate(quantiles):
       qts[qt] = 0
@@ -129,12 +136,21 @@ def main(argv):
     if qts['0.025'] == 0: e2s = 0
     gr_1s.SetPointError(iff, 0,0, e1s, max(qts['0.840'] - qts['0.500'], 0) )
     gr_2s.SetPointError(iff, 0,0, e2s, max(qts['0.975'] - qts['0.500'], 0) )
-    if opt.observed: gr_observed.SetPoint(iff, m, qts['-1'])
+    if opt.unblind: gr_observed.SetPoint(iff, m, qts['-1'])
     if qts['0.975'] > thisMax: thisMax = qts['0.975']
 
-  if opt.hmfolder:
+
+  if opt.hmFolder:
     for iff,m in enumerate(massesHM):
-      ff = opt.hmfolder.replace("MASS", str(m))
+      if opt.isGrav:
+        ff = opt.hmFolder+'/BulkGraviton_Node_'+str(m)+'/datacards/higgsCombineBulkGraviton_Node_'+str(m)
+        if 'EPS2017' in opt.hmFolder:
+          ff = opt.hmFolder+'/BulkGraviton_Node_'+str(m)+'LT_Res_500_HMHPC_500_HMMPC_000_LMHPC_500_LMMPC_000/datacards/higgsCombineBulkGraviton_Node_'+str(m)
+      else:
+        ff = opt.hmFolder+'/Radion_Node_'+str(m)+'/datacards/higgsCombineRadion_Node_'+str(m)
+        if 'EPS2017' in opt.hmFolder:
+          ff = opt.hmFolder+'/Radion_Node_'+str(m)+'LT_Res_500_HMHPC_500_HMMPC_000_LMHPC_500_LMMPC_000/datacards/higgsCombineRadion_Node_'+str(m)
+        
       qts = {}
       for iqt, qt in enumerate(quantiles):
         qts[qt] = 0
@@ -159,9 +175,10 @@ def main(argv):
       hmgr_1s.SetPointError(iff, 0,0, e1s, max(qts['0.840'] - qts['0.500'], 0) )
       hmgr_2s.SetPointError(iff, 0,0, e2s, max(qts['0.975'] - qts['0.500'], 0) )
       if qts['0.975'] > thisMax: thisMax = qts['0.975']
-      if opt.observed: hmgr_observed.SetPoint(iff, m, qts['-1'])
+      if opt.unblind: hmgr_observed.SetPoint(iff, m, qts['-1'])
 
 
+  
   SetGeneralStyle()
   c0 = TCanvas('a', 'a', 800, 600)
 #  c0.SetGrid()
@@ -190,8 +207,8 @@ def main(argv):
 #  c0.Update()
   gr_1s.Draw("3Z same")
   gr_ce.Draw("LZP same")
-  if opt.observed: gr_observed.Draw("PL same")
-  if opt.hmfolder:
+  if opt.unblind: gr_observed.Draw("PL same")
+  if opt.hmFolder:
     hmgr_2s.Draw("3Z same")
     hmgr_1s.Draw("3Z same")
     hmgr_ce.Draw("LZP same")
@@ -200,7 +217,7 @@ def main(argv):
     line.SetLineStyle(kDashed)
     line.SetLineWidth(2)
     line.Draw("same")
-    if opt.observed:
+    if opt.unblind:
       hmgr_observed.Draw("PL same")
       gr_observed.Draw("PL same")
 #  tdrStyle.SetTitleSize(0.003, "XYZ")
@@ -262,9 +279,9 @@ def main(argv):
   leg.Draw()
   legL.Draw()
 
-#  tdr.cmsPrel(float(opt.lumi)*1000,  "13",  0, True,  0, 1.25)
+  #  tdr.cmsPrel(float(opt.lumi)*1000,  "13",  0, True,  0, 1.25)
   DrawCMSLabels(c0, '35.9')
-  c0.SaveAs(opt.name+".pdf")
+  c0.SaveAs(opt.name+".png")
 
 if __name__ == "__main__":
   main(sys.argv[1:])
