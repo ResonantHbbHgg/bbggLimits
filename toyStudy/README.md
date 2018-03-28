@@ -7,6 +7,7 @@ the strings `%SIG%` and `%BKG%` will be replaced in a script.
 The corresponding script is [toyLimit_cut_n_count.py](toyLimit_cut_n_count.py). Just run it:
 
 ``` python toyLimit_cut_n_count.py ```
+
 You will get a plot like this:  
 ![Cut-n-count results](fig_cut_n_count.png)
 

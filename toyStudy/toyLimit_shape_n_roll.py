@@ -36,8 +36,8 @@ c.SaveAs('fig_gen_bkg.png')
 w.writeToFile('ws.root')
 
 Sigmas = np.array([0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 2.0])
-Ns = np.array([100,120])
-Ss = np.array([2, 4, 6])
+Nbkg = np.array([100,120])
+Nsig = np.array([2, 4, 6])
 toyCard2 = 'card_shape_n_roll.txt'
 
 
@@ -45,8 +45,8 @@ processes = []
 for sw in Sigmas:     
     with open(toyCard2, 'r') as templateCard:
         tmpCard = templateCard.read()
-        for si in Ss:
-            for N in Ns:
+        for si in Nsig:
+            for N in Nbkg:
                 with tempfile.NamedTemporaryFile(dir='/tmp/'+username, prefix='toyCard_N'+str(N), suffix='.txt', delete=False) as card:
                     newCard = tmpCard.replace('%BKG%',str(N)).replace('%SIG%',str(si)).replace('%SW%',str(sw))
                     
@@ -66,8 +66,8 @@ for p in processes:
 
 limsAll = {}
                 
-for si in Ss:
-    for N in Ns:
+for si in Nsig:
+    for N in Nbkg:
         lims = []
         for sw in Sigmas:
             fname = 'higgsCombine_Shape_NBKG_'+str(N)+'_NSIG_'+str(si)+'_sw_'+str(sw)+'.Asymptotic.mH125.root'
@@ -88,8 +88,8 @@ import itertools
 marker = itertools.cycle((',', '+', '.', 'o', '*', '^'))
 
 plt.clf()
-for si in Ss:
-    for N in Ns:
+for si in Nsig:
+    for N in Nbkg:
         plt.plot(np.sqrt(Sigmas), limsAll['NBKG_'+str(N)+'_NSIG_'+str(si)], marker = marker.next(), label='$N_{bkg} = '+str(N)+'; N_{sig} = '+str(si)+'$')
 plt.axis([0.5, 2.5, 0, 8])
 plt.title('Limits from toy shapes')

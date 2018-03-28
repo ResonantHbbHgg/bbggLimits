@@ -8,16 +8,16 @@ username = getpass.getuser()
 from ROOT import *
 gROOT.SetBatch()
 
-Ns = np.array([2,2.5,3,3.5,4,4.5,5,6,8,10,15,20,30])
-Ss = np.array([2, 4, 6])
+Nbkg = np.array([2,2.5,3,3.5,4,4.5,5,6,8,10,15,20,30])
+Nsig = np.array([2, 4, 6])
 
 toyCard1 = 'card_cut_n_count.txt'
 processes = []
 
 with open(toyCard1, 'r') as templateCard:
     tmpCard = templateCard.read()
-    for si in Ss:
-        for N in Ns:
+    for si in Nsig:
+        for N in Nbkg:
             with tempfile.NamedTemporaryFile(dir='/tmp/'+username, prefix='toyCard_N'+str(N), suffix='.txt', delete=False) as card:
                 newCard = tmpCard.replace('%BKG%',str(N)).replace('%SIG%',str(si))
                 print N
@@ -38,9 +38,9 @@ for p in processes:
     
 limsAll = {}
 
-for si in Ss:
+for si in Nsig:
     lims = []
-    for N in Ns:
+    for N in Nbkg:
         fname = 'higgsCombine_CutCount_NBKG_'+str(N)+'_NSIG_'+str(si)+'.Asymptotic.mH125.root'
         rfile = TFile(fname, 'READ')
         tree = rfile.Get("limit")
@@ -57,9 +57,9 @@ for si in Ss:
     print 'Expected limit at r=0.5: ', lims
 print limsAll
 
-plt.plot(np.sqrt(Ns), limsAll['2'], 'ro', label="Sig = 2 Ev")
-plt.plot(np.sqrt(Ns), limsAll['4'], 'bs', label="Sig = 4 Ev")
-plt.plot(np.sqrt(Ns), limsAll['6'], 'g^', label="Sig = 6 Ev")
+plt.plot(np.sqrt(Nbkg), limsAll['2'], 'ro', label="Sig = 2 Ev")
+plt.plot(np.sqrt(Nbkg), limsAll['4'], 'bs', label="Sig = 4 Ev")
+plt.plot(np.sqrt(Nbkg), limsAll['6'], 'g^', label="Sig = 6 Ev")
 plt.axis([0, 8, 0, 8])
 plt.title('Limits from toy counting experiments')
 plt.xlabel(r'$\sqrt{N_{bkg}}$')
