@@ -1,0 +1,24 @@
+imax 1
+jmax 1
+kmax *
+---------------
+#shapes * * ws.root w:$PROCESS
+shapes sig bin1 ws.root w:sig
+shapes bkg bin1 ws.root w:bkg
+shapes data_obs bin1 ws.root w:data_obs
+---------------
+bin bin1
+observation -1
+------------------------------
+bin          bin1       bin1
+process      sig        bkg
+process      0          1
+rate	    %SIG%	%BKG%
+--------------------------------
+
+lumi lnN	1.03	-
+sig_sys lnN   	1.10	-
+
+sigma   param   %SW%      0.01
+
+nuisance edit freeze sigma
