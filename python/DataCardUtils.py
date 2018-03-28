@@ -34,16 +34,12 @@ def DataCardMaker_wHiggs(Folder, nCats, signalExp, observed, higgsExp, HType):
     outputDatacard.write(outToWrite)
       
 def DataCardMaker(Folder, nCats, signalExp, observed, isRes = 0, HType=0):
-  if isRes == 0 and nCats == 1:
-    print 'Resonant needs two cats!'
+  if isRes==0:
+    print 'This fucntion is to be used for Resonant only. Use DataCardMaker_wHiggs() for Non-resonant'
     sys.exit(2)
 
   if nCats == 2:
     inputDatacardName = os.getenv("CMSSW_BASE")+'/src/HiggsAnalysis/bbggLimits/Models/LowMassResDatacardModel.txt'
-    if isRes == 0 and HType=="HighMass":
-      inputDatacardName = os.getenv("CMSSW_BASE")+'/src/HiggsAnalysis/bbggLimits/Models/NonResDatacardModel_HM.txt'
-    if isRes == 0 and HType=="LowMass":
-      inputDatacardName = os.getenv("CMSSW_BASE")+'/src/HiggsAnalysis/bbggLimits/Models/NonResDatacardModel_LM.txt'
 
     inputDatacard = open(inputDatacardName, 'r')
     outputDatacard = open(Folder+'/datacards/hhbbgg_13TeV_DataCard.txt', 'w')
