@@ -65,7 +65,7 @@ if 'nonres' in opt.x:
 
   SignalFiles = "/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph.root"
   if opt.signalDir is None:
-    Signals = "root://eoscms//eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/May2_Mjj70to190_NewCatMVA/EGML_Signal_GEN/Hadd/" + SignalFiles
+    Signals = "root://eoscms//eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/Mar82018_ForPubli_RafStyle/Signal/HaddHadd/" + SignalFiles
   else:
     if 'ForPubli' in opt.signalDir:
       SignalFiles = "/output_GluGluToHHTo2B2G_node_THENODE_13TeV-madgraph_0.root" #(different name: added _0)
@@ -75,14 +75,14 @@ if 'nonres' in opt.x:
   if opt.doSMHiggs:
     nodes = SMHiggsSamples.SMHiggsNodes
     if opt.signalDir is None:
-      Signals = "root://eoscms//eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/May2_Mjj70to190_NewCatMVA/EGML_Background_Mjj70_NewMVA/Hadd/THENODE"
+      Signals = "root://eoscms//eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/Mar82018_ForPubli_RafStyle/Background/Hadd/THENODE"
     else:
       Signals = opt.signalDir + '/THENODE'
 
 
   DataFiles = "/DoubleEG.root"
   if opt.dataDir is None:
-    Data = "root://eoscms//eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/May2_Mjj70to190_NewCatMVA/EGML_Data_Mjj70_NewMVA/Hadd/DoubleEG.root"
+    Data = "root://eoscms//eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/Mar82018_ForPubli_RafStyle/Data/Hadd/DoubleEG.root"
   else:
     Data = opt.dataDir + DataFiles
 
@@ -163,6 +163,8 @@ elif 'res' in opt.x:
 
   # APZ trees:
   SignalFiles = "/output_GluGluTo" + opt.resType + "ToHHTo2B2G_M-MASS_narrow_13TeV-madgraph.root"
+  if 'ForPubli' in opt.signalDir:
+    SignalFiles = "/output_GluGluTo" + opt.resType + "ToHHTo2B2G_M-MASS_narrow_13TeV-madgraph_0.root"
   if opt.signalDir is None:
     print "You need to specify the input directory"
     sys.exit(1)
@@ -171,7 +173,7 @@ elif 'res' in opt.x:
 
   DataFiles = "/DoubleEG.root"
   if opt.dataDir is None:
-    Data = "root://eoscms//eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/May2_Mjj70to190_NewCatMVA/EGML_Data_Mjj70_NewMVA/Hadd/DoubleEG.root"
+    Data = "root://eoscms//eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/Mar82018_ForPubli_RafStyle/Data/Hadd/DoubleEG.root"
   else:
     Data = opt.dataDir + DataFiles
 

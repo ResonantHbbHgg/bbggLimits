@@ -148,7 +148,9 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
       SignalFile = "/LT_output_GluGluToHHTo2B2G_node_"+str(point)+"_13TeV-madgraph_0.root"
   if isRes:
     SignalFile = "/LT_output_GluGluToTYPEToHHTo2B2G_M-"+str(point)+"_narrow_13TeV-madgraph.root"
-
+    if "RES_Mar21" in LTDir_type:
+      SignalFile = "/LT_output_GluGluToTYPEToHHTo2B2G_M-"+str(point)+"_narrow_13TeV-madgraph_0.root"
+    
   if NRgridPoint >= 0:
     SignalFile = "/LT_NR_Nodes_2to13_merged.root"
 
@@ -252,7 +254,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
         procLog.debug("Done SM Higgs bzz")
 
     ddata = str(LTDir + '/LT_'+dataName+'.root')
-    ddata = ddata.replace("MASS", str(point))
+    ddata = ddata.replace("%MASS%", str(point))
 
     theFitter.AddBkgData(ddata)
     procLog.info("\t BKG ADDED. Node=%r, GridPoint=%r, type=%r, data file=%s", point,NRgridPoint,t,ddata)
@@ -286,7 +288,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     procLog.info("\t BIAS FITS DONE. Node=%r, GridPoint=%r, type=%r", point,NRgridPoint,t)
     if opt.verb>0: p7 = printTime(p6,start,procLog)
 
-    print PID, "IM HERE"
+    # print PID, "IM HERE"
 
     sigExp = []
     bkgObs = []
@@ -307,7 +309,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
         sigExpStr += ","
         bkgObsStr += ","
 
-    print PID, "IM HERE2"
+    # print PID, "IM HERE2"
 
     # Make datacards:
     myLoc = os.getenv("CMSSW_BASE") + '/src/HiggsAnalysis/bbggLimits/'+newFolder
@@ -321,17 +323,17 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     procLog.info("\t DATACARD DONE. Node/Mass=%r, GridPoint=%r, type=%r", point,NRgridPoint,t)
     if opt.verb>0: p8 = printTime(p7,start,procLog)
 
-    print PID, "IM HERE3"
+    # print PID, "IM HERE3"
     # Limits by type:
     if doSingleLimit or isRes:
-      print PID, "IM HERE4"
+      # print PID, "IM HERE4"
       if doCombine:
-        print PID, "IM HERE5"
+        # print PID, "IM HERE5"
         if Combinelxbatch:
-          print PID, "IM HERE6"
+          # print PID, "IM HERE6"
           runCombineOnLXBatch(myLoc+"/datacards/", doBlinding, procLog, combineOpt, t+Label)
         else:
-          print PID, "IM HERE7"
+          # print PID, "IM HERE7"
           runCombine(newFolder+"/datacards/", doBlinding, procLog, combineOpt, Combinelxbatch, t+Label)
 
 
@@ -373,7 +375,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
         
     if doCombine:
       if Combinelxbatch:
-        print PID, "IM HERE6"
+        # print PID, "IM HERE6"
         myLoc = os.getenv("CMSSW_BASE") + '/src/HiggsAnalysis/bbggLimits/' + newDir
         runCombineOnLXBatch(myLoc+"/", doBlinding, procLog, combineOpt, "CombinedCard"+Label)
       else:
