@@ -61,7 +61,7 @@ Indeed, the scaling is as &Sqrt;&sigma;, nevertheless the ratio at 1.6 to 1.0 Ge
 | 120 | 2 | 3.33 | 3.98 | 0.197 | 0.265 |
 | 140 | 2 | 3.52 | 4.27 | 0.213 | 0.265 |
 | 100 | 4 | 1.55 | 1.85 | 0.194 | 0.265 |
-| *120* | *4* | *1.66* | *1.99* | *0.197* | *0.265* |
+| **120** | **4** | **1.66** | **1.99** | **0.197** | **0.265** |
 | 140 | 4 | 1.76 | 2.13 | 0.213 | 0.265 |
 | 100 | 6 | 1.04 | 1.24 | 0.196 | 0.265 |
 | 120 | 6 | 1.11 | 1.33 | 0.205 | 0.265 |
@@ -74,9 +74,11 @@ Crystal Ball functiio with exactly the same parameters as in the analysis worksp
 Here are the results:  
 
 <nobr>
+<img src="figs/fig_gen_CB_bug.png" width="400"/>
+<img src="https://github.com/ResonantHbbHgg/bbggLimits/tree/play-the-toy/toyStudy/figs/fig_gen_CB_bug.png" width="200"/>
+</nobr>
 ![Toy data and CB signal (bugged)](figs/fig_gen_CB_bug.png)
 ![Toy data and CB signal (fixed)](figs/fig_gen_CB_fix.png)
-</nobr>
 
 | N_bkg | N_sig | Limit with bug, &sigma;(eff) = 1 GeV | Limit after fix &sigma;(eff) = 1.6 GeV| (L(bug)-L(fix))/L(bug) | compare to &Sqrt;1.6/&Sqrt;1 - 1 |
 |-|-|-|-|-|-|
@@ -84,7 +86,7 @@ Here are the results:
 | 120 | 2 | 3.52 | 4.05 | 0.151 | 0.265 |
 | 140 | 2 | 3.73 | 4.33 | 0.159 | 0.265 |
 | 100 | 4 | 1.63 | 1.88 | 0.153 | 0.265 |
-| *120* | *4* | *1.76* | *2.02* | *0.151* | *0.265* |
+| **120** | **4** | **1.76** | **2.02** | **0.151** | **0.265** |
 | 140 | 4 | 1.87 | 2.16 | 0.159 | 0.265 |
 | 100 | 6 | 1.09 | 1.26 | 0.158 | 0.265 |
 | 120 | 6 | 1.17 | 1.36 | 0.161 | 0.265 |
