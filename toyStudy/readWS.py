@@ -7,16 +7,17 @@ import matplotlib.pyplot as plt
 from ROOT import *
 gROOT.SetBatch()
 
-# --
-# First, let's get the shape of the signal from the analysis workspace
+#
+# Read the workspaces:
+#
 
 # These are the workspaces with photon correction fixed:
-#rooWsSig = TFile('hhbbgg.mH125_13TeV.inputsig.root')
-#rooWsBkg = TFile('hhbbgg.inputbkg_13TeV.root')
+rooWsSig = TFile('hhbbgg.mH125_13TeV.inputsig.root')
+rooWsBkg = TFile('hhbbgg.inputbkg_13TeV.root')
 
 # These are bugged workspaces:
-rooWsSig = TFile('hhbbgg.mH125_13TeV.inputsig_bugged.root')
-rooWsBkg = TFile('hhbbgg.inputbkg_13TeV_bugged.root')
+# rooWsSig = TFile('hhbbgg.mH125_13TeV.inputsig_bugged.root')
+# rooWsBkg = TFile('hhbbgg.inputbkg_13TeV_bugged.root')
 
 
 sigWs = rooWsSig.Get('w_all')
@@ -27,10 +28,13 @@ bkgWs.Print()
 mgg = sigWs.var('mgg')
 mjj = sigWs.var('mjj')
 
+# 
+# Now, let's get the shape of the signal from the analysis workspace
+# These shapes are from High-Mass High-Purity category (the most sensitive one):
 
 anaSig_mgg  = sigWs.pdf("mggSig_cat0_CMS_sig_cat2")
 anaSig_mjj  = sigWs.pdf("mjjSig_cat0_CMS_sig_cat2")
-anaSig_prod = sigWs.pdf("CMS_sig_cat2")
+anaSig_prod = sigWs.pdf("CMS_sig_cat2") # This is a product of the two PDFs above
 sigDataSet = sigWs.data("Sig_cat2")
 
 # Printout the parameters of the PDFs:
@@ -66,34 +70,36 @@ mjjFrame.Draw()
 c.SaveAs('tmpfig_sig_mjj.png')
 
 
-# --
-# Now, let's get the shape of the background from the analysis workspace
-# --
-
+# 
+# Now, let's get the shape of the background from the workspace
+# 
 
 mgg = bkgWs.var('mgg')
 mjj = bkgWs.var('mjj')
-#mgg.Print()
 
 anaBkg_mgg = bkgWs.pdf("mggBkgTmpBer1_cat0_CMS_Bkg_cat2")
 anaBkg_mjj = bkgWs.pdf("mjjBkgTmpBer1_cat0_CMS_Bkg_cat2")
+anaBkg_mgg.Print()
+anaBkg_mjj.Print()
   
 realData = bkgWs.data("data_obs_cat2")
 
-anaBkg_mgg.Print()
-anaBkg_mjj.Print()
 
-print anaBkg_mgg.getVal(), anaBkg_mgg.getNorm()
-print anaBkg_mjj.getVal(), anaBkg_mjj.getNorm()
+print 'Some checks'
+print anaBkg_mgg.getVal(), anaBkg_mgg.getVal(RooArgSet(mgg)), anaBkg_mgg.getNorm()
+print anaBkg_mjj.getVal(), anaBkg_mjj.getVal(RooArgSet(mjj)), anaBkg_mjj.getNorm()
 
-# Evaluating the PDFs at 125 GeV
-N_data = realData.numEntries()
-print N_data
 mgg.setVal(125)
 mjj.setVal(125)
 
-dNmgg = N_data*anaBkg_mgg.getVal(RooArgSet(mgg))/anaBkg_mgg.getNorm()
-dNmjj = N_data*anaBkg_mjj.getVal(RooArgSet(mjj))/anaBkg_mjj.getNorm()
+print anaBkg_mgg.getVal(), anaBkg_mgg.getVal(RooArgSet(mgg)), anaBkg_mgg.getNorm()
+print anaBkg_mjj.getVal(), anaBkg_mjj.getVal(RooArgSet(mjj)), anaBkg_mjj.getNorm()
+
+# Evaluating the PDFs at 125 GeV
+N_data = realData.numEntries()
+# print N_data
+dNmgg = N_data*anaBkg_mgg.getVal(RooArgSet(mgg))
+dNmjj = N_data*anaBkg_mjj.getVal(RooArgSet(mjj))
 
 # Sigma_effectives times 2
 dMgg = 2*1.6
@@ -104,6 +110,19 @@ DeltaN = dNmgg*dNmjj*dMgg*dMjj
 print 'Bkg PDF at 125:'
 print '\t mgg=', dNmgg, 'mjj=', dNmjj, 'dN/{dm_gg*d_mjj} =', dNmgg*dNmjj
 print "DeltaN = ", DeltaN, ", sqrt(DeltaN) =", np.sqrt(DeltaN)
+
+# Would expect this guy to be equal to dNmgg*dNmjj, but it isnt:
+# print "another check:", N_dataanaSig_prod.getVal(RooArgSet(mgg, mjj))
+
+
+# From Pasqualle:
+# UL = poisson_inv_cdf(mu=mu_bkg, p=95%)
+
+# hmm, it crashes when trying to import scipy...
+#from scipy.stats import poisson 
+#UL = poisson.ppf(0.95, 10) # (this should be the function, rigth?)
+#print UL
+
 
 # Make a plot of backgrounds as well:
 fakeData = anaBkg_mgg.generate(RooArgSet(mgg), 120)

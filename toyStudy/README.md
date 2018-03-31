@@ -1,7 +1,15 @@
 ## Read the workspaces 
 
-A script called [readWS.py](readWS.py) allows to read the workspaces from the signal and
-background of the actual analysis (also commited here)
+A script called [readWS.py](readWS.py) allows you to read the workspaces from the signal and
+background of the actual analysis (which are also commited here).
+
+Here is a plot of the data distribution and backround fit in mgg in the most sensitive
+category (excluding single Higgs): 
+
+![Bkg fit in mgg](figs/fig_bkg_mgg.png)
+
+Total number of data events in this range is 118, signal prediction is 4.27 (normalized to 1 fb cross section).  
+
 
 ## How to play the toys
 
@@ -76,6 +84,7 @@ Crystal Ball functiio with exactly the same parameters as in the analysis worksp
 <img src="figs/fig_gen_CB_fix.png" width="400"/>
 
 Here are the results:  
+
 | N_bkg | N_sig | Limit with bug, &sigma;(eff) = 1 GeV | Limit after fix &sigma;(eff) = 1.6 GeV| L(bug)-L(fix))/L(bug) | compare to &Sqrt;1.6/&Sqrt;1 - 1 |
 |-|-|-|-|-|-|
 | 100 | 2 | 3.27 | 3.77 | 0.153 | 0.265 |
