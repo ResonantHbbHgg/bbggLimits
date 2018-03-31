@@ -16,7 +16,7 @@ python toyLimit_cut_n_count.py
 ```
 
 You will get a plot like this:  
-![Cut-n-count results](figs/fig_cut_n_count.png | width=500)
+![Cut-n-count results](figs/fig_cut_n_count.png)
 
 As we can see the relationship between the limit and &Sqrt(N_bkg) is indeed
 linear. However, we also notice that the line does not cross zero. That means that there
@@ -25,7 +25,7 @@ in the background.  From the backgound `mgg` shape `dN/dmgg = 2 events/GeV`. If 
 consider two cases of widths, 2 GeV and 3.2 GeV, we get 4 and 6.4 events
 correspondingly. So let's take those numbers and look at how the limits scale:
 
-| N_sig | Limit with N_bkg=4 events | Limit with N_Bkg=6.4 events| (L(4)-L(6.4))/L(4) | compare to &Sqrt;6.4/&Sqrt;4 - 1 |
+| N_sig | Limit with N_bkg=4 events | Limit with N_Bkg=6.4 events| (L(6.4)-L(4))/L(4) | compare to &Sqrt;6.4/&Sqrt;4 - 1 |
 | - | - | - | - | - |
 | 2 | 2.71 | 3.23 | 0.193 | 0.265 |
 | 4 | 1.36 | 1.62 | 0.193 | 0.265 |
@@ -55,7 +55,7 @@ After running the script, you will get a plot like this, which shows how the lim
 
 Indeed, the scaling is as &Sqrt;&sigma;, nevertheless the ratio at 1.6 to 1.0 GeV sigmas are as follows:
 
-| N_bkg | N_sig | Limit with &sigma;(sig) = 1 GeV | Limit with &sigma;(sig) = 1.6 GeV| (L(1.0)-L(1.6))/L(1.0) | compare to &Sqrt;1.6/&Sqrt;1 - 1 |
+| N_bkg | N_sig | Limit with &sigma;(sig) = 1 GeV | Limit with &sigma;(sig) = 1.6 GeV| L(1.6)-L(1.0))/L(1.0) | compare to &Sqrt;1.6/&Sqrt;1 - 1 |
 |-|-|-|-|-|-|
 | 100 | 2 | 3.10 | 3.70 | 0.194 | 0.265 |
 | 120 | 2 | 3.33 | 3.98 | 0.197 | 0.265 |
@@ -70,15 +70,13 @@ Indeed, the scaling is as &Sqrt;&sigma;, nevertheless the ratio at 1.6 to 1.0 Ge
 (in bold is the case closest to our analysis)
 
 Now, let's do a similar thing and instead of using Gasssian for the signal shape we use Double Sided
-Crystal Ball functiio with exactly the same parameters as in the analysis workspaces (before and after the bug fix).
-Here are the results:  
+Crystal Ball functiio with exactly the same parameters as in the analysis workspaces (before and after the bug fix):
 
-<nobr>
 <img src="figs/fig_gen_CB_bug.png" width="400"/>
 <img src="figs/fig_gen_CB_fix.png" width="400"/>
-</nobr>
 
-| N_bkg | N_sig | Limit with bug, &sigma;(eff) = 1 GeV | Limit after fix &sigma;(eff) = 1.6 GeV| (L(bug)-L(fix))/L(bug) | compare to &Sqrt;1.6/&Sqrt;1 - 1 |
+Here are the results:  
+| N_bkg | N_sig | Limit with bug, &sigma;(eff) = 1 GeV | Limit after fix &sigma;(eff) = 1.6 GeV| L(bug)-L(fix))/L(bug) | compare to &Sqrt;1.6/&Sqrt;1 - 1 |
 |-|-|-|-|-|-|
 | 100 | 2 | 3.27 | 3.77 | 0.153 | 0.265 |
 | 120 | 2 | 3.52 | 4.05 | 0.151 | 0.265 |
@@ -90,10 +88,10 @@ Here are the results:
 | 120 | 6 | 1.17 | 1.36 | 0.161 | 0.265 |
 | 140 | 6 | 1.24 | 1.44 | 0.164 | 0.265 |
 
-The 15% difference is what we observe in the analysis as well. 
+The 15% difference is what we also observe in the analysis. 
 
 Note: the width of 1.0 and 1.6 GeV are the _effective sigmas_ of the PDF. In the case of
-Crystal Ball PDFs with large tails, a simple scaling with the &sigma;_eff breaks.
+Crystal Ball functiuon with large tails, a simple scaling with the &sigma;_eff breaks.
 
  
  
