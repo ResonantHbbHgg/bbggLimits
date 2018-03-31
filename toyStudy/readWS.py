@@ -9,12 +9,20 @@ gROOT.SetBatch()
 
 # --
 # First, let's get the shape of the signal from the analysis workspace
-# --
 
-rooWsSig = TFile('hhbbgg.mH125_13TeV.inputsig.root')
-#rooWsSig = TFile('hhbbgg.mH125_13TeV.inputsig_bugged.root')
+# These are the workspaces with photon correction fixed:
+#rooWsSig = TFile('hhbbgg.mH125_13TeV.inputsig.root')
+#rooWsBkg = TFile('hhbbgg.inputbkg_13TeV.root')
+
+# These are bugged workspaces:
+rooWsSig = TFile('hhbbgg.mH125_13TeV.inputsig_bugged.root')
+rooWsBkg = TFile('hhbbgg.inputbkg_13TeV_bugged.root')
+
+
 sigWs = rooWsSig.Get('w_all')
 sigWs.Print()
+bkgWs = rooWsBkg.Get('w_all')
+bkgWs.Print()
 
 mgg = sigWs.var('mgg')
 mjj = sigWs.var('mjj')
@@ -62,9 +70,6 @@ c.SaveAs('tmpfig_sig_mjj.png')
 # Now, let's get the shape of the background from the analysis workspace
 # --
 
-rooWsBkg = TFile('hhbbgg.inputbkg_13TeV.root')
-bkgWs = rooWsBkg.Get('w_all')
-bkgWs.Print()
 
 mgg = bkgWs.var('mgg')
 mjj = bkgWs.var('mjj')
