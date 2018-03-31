@@ -26,7 +26,7 @@ python toyLimit_cut_n_count.py
 You will get a plot like this:  
 ![Cut-n-count results](figs/fig_cut_n_count.png)
 
-As we can see the relationship between the limit and &Sqrt(N_bkg) is indeed
+As we can see the relationship between the limit and &Sqrt;(N_bkg) is indeed
 linear. However, we also notice that the line does not cross zero. That means that there
 is an offset in the scaling of the limits. We are at the level of small number of events
 in the background.  From the backgound `mgg` shape `dN/dmgg = 2 events/GeV`. If we
@@ -78,7 +78,7 @@ Indeed, the scaling is as &Sqrt;&sigma;, nevertheless the ratio at 1.6 to 1.0 Ge
 (in bold is the case closest to our analysis)
 
 Now, let's do a similar thing and instead of using Gasssian for the signal shape we use Double Sided
-Crystal Ball functiio with exactly the same parameters as in the analysis workspaces (before and after the bug fix):
+Crystal Ball function with exactly the same parameters as in the analysis workspaces (before and after the bug fix):
 
 <img src="figs/fig_gen_CB_bug.png" width="400"/>
 <img src="figs/fig_gen_CB_fix.png" width="400"/>
@@ -100,7 +100,7 @@ Here are the results:
 The 15% difference is what we also observe in the analysis. 
 
 Note: the width of 1.0 and 1.6 GeV are the _effective sigmas_ of the PDF. In the case of
-Crystal Ball functiuon with large tails, a simple scaling with the &sigma;_eff breaks.
+Crystal Ball function with large tails, a simple scaling with the &sigma;_eff breaks.
 
  
  
