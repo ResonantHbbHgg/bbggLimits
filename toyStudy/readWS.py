@@ -86,14 +86,18 @@ realData = bkgWs.data("data_obs_cat2")
 
 
 print 'Some checks'
-print anaBkg_mgg.getVal(), anaBkg_mgg.getVal(RooArgSet(mgg)), anaBkg_mgg.getNorm()
-print anaBkg_mjj.getVal(), anaBkg_mjj.getVal(RooArgSet(mjj)), anaBkg_mjj.getNorm()
+#print anaBkg_mgg.getVal(), anaBkg_mgg.getVal(RooArgSet(mgg)), anaBkg_mgg.getNorm()
+#print anaBkg_mjj.getVal(), anaBkg_mjj.getVal(RooArgSet(mjj)), anaBkg_mjj.getNorm()
 
 mgg.setVal(125)
 mjj.setVal(125)
 
 print anaBkg_mgg.getVal(), anaBkg_mgg.getVal(RooArgSet(mgg)), anaBkg_mgg.getNorm()
 print anaBkg_mjj.getVal(), anaBkg_mjj.getVal(RooArgSet(mjj)), anaBkg_mjj.getNorm()
+# Results:
+# 9.1609403468 0.0162331093879 1.0
+# 6.4453044092 0.0072075547166 1.0
+
 
 # Evaluating the PDFs at 125 GeV
 N_data = realData.numEntries()
@@ -110,6 +114,11 @@ DeltaN = dNmgg*dNmjj*dMgg*dMjj
 print 'Bkg PDF at 125:'
 print '\t mgg=', dNmgg, 'mjj=', dNmjj, 'dN/{dm_gg*d_mjj} =', dNmgg*dNmjj
 print "DeltaN = ", DeltaN, ", sqrt(DeltaN) =", np.sqrt(DeltaN)
+
+# Results are:
+#         mgg= 1.91550690777 mjj= 0.850491456559 dN/{dm_gg*d_mjj} = 1.62912226004
+# DeltaN =  190.802799096 , sqrt(DeltaN) = 13.8131386403
+
 
 # Would expect this guy to be equal to dNmgg*dNmjj, but it isnt:
 # print "another check:", N_dataanaSig_prod.getVal(RooArgSet(mgg, mjj))
