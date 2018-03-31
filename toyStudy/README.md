@@ -16,7 +16,7 @@ python toyLimit_cut_n_count.py
 ```
 
 You will get a plot like this:  
-![Cut-n-count results](figs/fig_cut_n_count.png)
+![Cut-n-count results](figs/fig_cut_n_count.png | width=500)
 
 As we can see the relationship between the limit and &Sqrt(N_bkg) is indeed
 linear. However, we also notice that the line does not cross zero. That means that there
@@ -75,10 +75,8 @@ Here are the results:
 
 <nobr>
 <img src="figs/fig_gen_CB_bug.png" width="400"/>
-<img src="https://github.com/ResonantHbbHgg/bbggLimits/tree/play-the-toy/toyStudy/figs/fig_gen_CB_bug.png" width="200"/>
+<img src="figs/fig_gen_CB_fix.png" width="400"/>
 </nobr>
-![Toy data and CB signal (bugged)](figs/fig_gen_CB_bug.png)
-![Toy data and CB signal (fixed)](figs/fig_gen_CB_fix.png)
 
 | N_bkg | N_sig | Limit with bug, &sigma;(eff) = 1 GeV | Limit after fix &sigma;(eff) = 1.6 GeV| (L(bug)-L(fix))/L(bug) | compare to &Sqrt;1.6/&Sqrt;1 - 1 |
 |-|-|-|-|-|-|
