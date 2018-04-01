@@ -3,6 +3,7 @@
 #import os,sys
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.stats import poisson 
 
 from ROOT import *
 gROOT.SetBatch()
@@ -126,11 +127,9 @@ print "DeltaN = ", DeltaN, ", sqrt(DeltaN) =", np.sqrt(DeltaN)
 
 # From Pasqualle:
 # UL = poisson_inv_cdf(mu=mu_bkg, p=95%)
-
-# hmm, it crashes when trying to import scipy...
-#from scipy.stats import poisson 
-#UL = poisson.ppf(0.95, 10) # (this should be the function, rigth?)
-#print UL
+for mu in [dNmgg*dMgg, dNmjj*dMjj, dNmgg*dNmjj*dMgg*dMjj]:
+    UL = poisson.ppf(0.95, mu)
+    print "UL from Poisson ppf = ", UL, 'for mu =', mu 
 
 
 # Make a plot of backgrounds as well:
