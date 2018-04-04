@@ -358,7 +358,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     for t in signalTypes:
       strReplace = baseFolder+'/'+t+Label+'/datacards/'+os.getenv("CMSSW_BASE")+'/src/HiggsAnalysis/bbggLimits/'
       os.system("sed -i 's|"+strReplace+"||g' "+combCard)
-      print "String to replace:", strReplace
+      procLog.info("String to replace: "+ strReplace)
 
     if opt.analyticalRW:
       # Make another datacard, with entries for kt-reweihgting of single Higgs background

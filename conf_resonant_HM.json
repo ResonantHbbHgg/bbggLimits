@@ -1,6 +1,6 @@
 
 {
-    "LTDIR" : "/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LT_RES_Mar21_HighMass_TYPE",
+    "LTDIR" : "/store/group/phys_higgs/resonant_HH/RunII/LimitTrees/FixPhoCor_res/LT_RES_Mar21_HighMass_TYPE",
     "signal" : {
 	"types" : ["Radion", "BulkGraviton"],
 	"signalModelCard" : "/src/HiggsAnalysis/bbggLimits/Models/models_2D_higgs_mjj70.rs"

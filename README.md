@@ -169,10 +169,6 @@ Here, `-s` option can be used if only limits for `kt>0` are produced. In this ca
 plot is simply drawn symmetrically over (0,0) point in (kl,kt) coordinates.
 
 
-PS. In order to reproduce the _EPS17_ results, follow the instructions here:
-[SmartScripts/README.md](SmartScripts/README.md)
-
-
 
 ### Working examples for Resonant case
 
@@ -184,14 +180,14 @@ For low masses:
 ```shell
 for s in Radion BulkGraviton;
   do echo ${s};  
-  for m in 250 260 270 280 300 320 350 400 450 500 550 600;  
+  for m in 250 260 270 280 300 320 340 350 400 450 500 550 600;  
 	do echo ${s} ${m};  
 	python scripts/makeAllTrees.py -x res -d /eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/Mar82018_ForPubli_RafStyle/Data/Hadd/ -s /eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/Mar82018_ForPubli_RafStyle/Signal/Hadd/ -f LT_ResOutDirOne_ --doCatMVA --MVAHMC0 0.960 --MVAHMC1 0.700 --MVALMC0 0.960 --MVALMC1 0.700 --massNR 500 --LMLJBTC 0.0 --LMSJBTC 0.0 --resMass ${m} --resType ${s};  
 	done;  
   done
 ```
 
-For high masses (some nambers are different in the parameters wrt low masses):
+For high masses (some numbers are different in the parameters wrt low masses):
 ```shell
 for s in Radion BulkGraviton;  
   do echo ${s};  
@@ -202,7 +198,7 @@ for s in Radion BulkGraviton;
   done
 ```
 
-To produce the limit trees, modify the input paths in `conf_resonant_LM.json` and
+To produce the limits, modify the input paths in `conf_resonant_LM.json` and
 `conf_resonant_HM.json` files and then run locally (it's rather quick compared to the
 non-resonant limits):
 
