@@ -204,3 +204,5 @@ mjj_hig_n2_bbh_cat1[1, 0.01, 10];
 mjjHig_bbh_cat1 = RooDoubleCB(mjj, mjj_hig_m0_bbh_cat1, mjj_hig_sigma_bbh_cat1, mjj_hig_alpha1_bbh_cat1, mjj_hig_n1_bbh_cat1, mjj_hig_alpha2_bbh_cat1, mjj_hig_n2_bbh_cat1);
 
 mtot[200,1600];
+
+ttHTagger[-1,1];
