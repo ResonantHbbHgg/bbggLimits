@@ -166,6 +166,7 @@ RooArgSet* bbgg2DFitter::defineVariables(bool swithToSimpleWeight=false)
   RooRealVar* mgg  = new RooRealVar("mgg","M(#gamma#gamma)",_minMggMassFit,_maxMggMassFit,"GeV");
   RooRealVar* mtot = new RooRealVar("mtot","M(#gamma#gammajj)",200,1600,"GeV");
   RooRealVar* mjj  = new RooRealVar("mjj","M(jj)",_minMjjMassFit,_maxMjjMassFit,"GeV");
+  RooRealVar* ttHTagger  = new RooRealVar("ttHTagger","BDT",-1,1,"");
   RooCategory* cut_based_ct = new RooCategory("cut_based_ct","event category 4") ;
   RooRealVar* evWeight = 0;
   RooRealVar* new_evWeight = 0;
@@ -198,14 +199,11 @@ RooArgSet* bbgg2DFitter::defineVariables(bool swithToSimpleWeight=false)
   {
     ntplVars = new RooArgSet(*mgg, *mjj, *cut_based_ct, *evWeight);
     ntplVars->add(*mtot);
+    ntplVars->add(*ttHTagger);
   }
-  else
+  else {
     ntplVars = new RooArgSet(*mgg, *mjj, *cut_based_ct, *evWeight);
-
-  // AP: Why these are here? They are already in the set:
-  //ntplVars->add(*mgg);
-  //ntplVars->add(*mjj);
-  //ntplVars->add(*cut_based_ct);
+  }
 
   return ntplVars;
 }
@@ -253,6 +251,8 @@ int bbgg2DFitter::AddSigData(float mass, TString signalfile)
   TString cut0 = " && 1>0";
 
   RooArgList myArgList(*_w->var("mgg"));
+
+  myArgList.add(*_w->var("ttHTagger"));    
 
   if (_fitStrategy != 1)
     myArgList.add(*_w->var("mjj"));

@@ -25,6 +25,7 @@ void bbggLTMaker::Loop()
   o_phoevWeight = 1;
   o_normalization = normalization;
   o_HHTagger = -10;
+  o_ttHTagger = -10;
   o_ljet_bdis = -10;
   o_sjet_bdis = -10;
   o_isSignal = -10;
@@ -61,6 +62,8 @@ void bbggLTMaker::Loop()
   outTree->Branch("jt1diffweight", &o_jt1diffweight, "o_jt1diffweight/D");
   outTree->Branch("jt2diffweight", &o_jt2diffweight, "o_jt2diffweight/D");
   outTree->Branch("diffweight", &o_diffweight, "o_diffweight/D");
+
+  outTree->Branch("ttHTagger", &o_ttHTagger, "o_ttHTagger/D");
 
   outTree->Branch("evt", &o_evt, "o_evt/l");
   outTree->Branch("run", &o_run, "o_run/i");
@@ -183,6 +186,7 @@ void bbggLTMaker::Loop()
     o_sjet_bdis = 0;
     o_isSignal = -10;
     o_HHTagger = -10;
+    o_ttHTagger = -10;
     o_ljet_bdis = -10;
     o_sjet_bdis = -10;
     o_jt1diffweight = -99;
@@ -209,7 +213,9 @@ void bbggLTMaker::Loop()
     o_sjet_bdis = subleadingJet_bDis;
     o_isSignal = isSignal;
     o_HHTagger = HHTagger;
+    o_ttHTagger = ttHTagger;
 
+    //std::cout<<"ttH tagger = "<<ttHTagger<<std::endl;
     //Double_t mmm = diHiggsCandidate->M();
     //if( jentry%200 == 0 )
     //if (abs(mmm-o_bbggMass)/o_bbggMass > 0.001)
