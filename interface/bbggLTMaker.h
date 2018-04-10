@@ -473,7 +473,7 @@ void bbggLTMaker::Init(TTree *tree)
    fChain->SetBranchAddress("CosThetaStar_CS", &CosThetaStar_CS, &b_CosThetaStar_CS);
    fChain->SetBranchAddress("leadingPhotonR9full5x5", &leadingPhotonR9full5x5, &b_leadingPhotonR9full5x5);
    fChain->SetBranchAddress("subleadingPhotonR9full5x5", &subleadingPhotonR9full5x5, &b_subleadingPhotonR9full5x5);
-   fChain->SetBranchAddress("ttHTagger", &ttHTagger, &b_ttHTagger); // There is a typo in the name! tHH <-> ttH
+   fChain->SetBranchAddress("ttHTagger", &ttHTagger, &b_ttHTagger);
    TString WhichTagger = "HHTagger";
    if(isRes) WhichTagger = "ResHHTagger";
    fChain->SetBranchAddress(WhichTagger, &HHTagger, &b_HHTagger);

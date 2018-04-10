@@ -252,7 +252,7 @@ int bbgg2DFitter::AddSigData(float mass, TString signalfile)
 
   RooArgList myArgList(*_w->var("mgg"));
 
-  myArgList.add(*_w->var("ttHTagger"));    
+  //myArgList.add(*_w->var("ttHTagger"));    
 
   if (_fitStrategy != 1)
     myArgList.add(*_w->var("mjj"));

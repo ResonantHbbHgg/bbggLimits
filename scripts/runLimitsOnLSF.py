@@ -24,8 +24,8 @@ echo $workDir $outDir $Point
 cd $workDir
 ls
 eval `scramv1 runtime -sh`
-pyLimits.py -f $Json -o $outDir --points $Point -j1 -v2 --overwrite
-#pyLimits.py -f $Json -o $outDir --points $Point -j1 -v2 --overwrite --ttHTaggerCut -1
+#pyLimits.py -f $Json -o $outDir --points $Point -j1 -v2 --overwrite
+pyLimits.py -f $Json -o $outDir --points $Point -j1 -v2 --overwrite --ttHTaggerCut -0.1
 '''
 
 HERE = os.environ['PWD']
