@@ -195,16 +195,17 @@ RooArgSet* bbgg2DFitter::defineVariables(bool swithToSimpleWeight=false)
   RooArgSet* ntplVars = 0;
   if (_doARW)
     ntplVars = new RooArgSet(*mgg, *mjj, *cut_based_ct, *evWeight, *new_evWeight);
-  else if (_nonResWeightIndex>=-1)
-  {
+  else if (_nonResWeightIndex>=-1) {
     ntplVars = new RooArgSet(*mgg, *mjj, *cut_based_ct, *evWeight);
     ntplVars->add(*mtot);
-    ntplVars->add(*ttHTagger);
   }
   else {
     ntplVars = new RooArgSet(*mgg, *mjj, *cut_based_ct, *evWeight);
   }
-
+  
+  if (_cut.Contains("ttHTagger"))
+    ntplVars->add(*ttHTagger);
+  
   return ntplVars;
 }
 
@@ -252,21 +253,24 @@ int bbgg2DFitter::AddSigData(float mass, TString signalfile)
 
   RooArgList myArgList(*_w->var("mgg"));
 
-  //myArgList.add(*_w->var("ttHTagger"));    
-
   if (_fitStrategy != 1)
     myArgList.add(*_w->var("mjj"));
 
   if (_nonResWeightIndex>=-1)
     myArgList.add(*_w->var("mtot"));
+  
+  //myArgList.add(*_w->var("ttHTagger"));    
 
   myArgList.Print();
 
   for ( int i=0; i<_NCAT; ++i)
     {
 
-      std::cout << "-- Reducing cat " << i << std::endl;
-
+      if (_verbLvl>0) {
+	std::cout << "-- Reducing category " << i << std::endl;
+	std::cout << "Including the _cut: " << _cut << std::endl;
+      }
+      
       sigToFit[i] = (RooDataSet*) sigScaled.reduce(myArgList,_cut+TString::Format(" && cut_based_ct==%d ",i)+cut0);
 
       if (_fitStrategy == 1)

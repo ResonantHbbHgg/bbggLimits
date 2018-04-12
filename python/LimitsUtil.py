@@ -188,9 +188,9 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
 
     if opt.ttHTaggerCut!=None:
       theFitter.SetCut("ttHTagger > "+str(opt.ttHTaggerCut))
-    #    if opt.analyticalRW == True:
-    #      theFitter.DoARW()
-
+      if opt.verb>0:
+        procLog.info('Apply the cut on ttHTagger: ' + str(opt.ttHTaggerCut))
+        
     if 'HighMass' in t:
       theFitter.SetNCat0(2)
     else:
@@ -399,6 +399,6 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
 
   if opt.verb>0: p9 = printTime(p8,start,procLog)
   os.remove(pidfile)
-    # procLog.handlers = []
+  # procLog.handlers = []
   procLog.info('This process has ended. Label=%r', Label)
   return 42
