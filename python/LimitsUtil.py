@@ -91,8 +91,6 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     print 'WARning: using list of nodes from the json input file'
     return __BAD__
 
-  print "Label=",Label
-
   sigCat = 0
   isRes = 0
   if point==None:
@@ -109,6 +107,8 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     sigCat = int(point)
 
   Label +=  extraLabel
+
+  print "Label=",Label
 
 
   if opt.outDir:

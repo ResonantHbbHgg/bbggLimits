@@ -11,8 +11,10 @@ org_bashFile = '''
 #!/bin/bash
 cd HERE
 eval `scramv1 runtime -sh`
-pyLimits.py -f JSONFILE -o LOUTDIR EXTRA --overwrite -j1 -v5
+#pyLimits.py -f JSONFILE -o LOUTDIR EXTRA --overwrite -j1 -v5
+pyLimits.py -f JSONFILE -o LOUTDIR EXTRA --overwrite -j1 -v5 --ttHTaggerCut 0.0
 '''
+
 # This is a script for running the limits of grid reweighting
 grid_bashFile = '''
 #!/bin/bash
@@ -24,8 +26,7 @@ echo $workDir $outDir $Point
 cd $workDir
 ls
 eval `scramv1 runtime -sh`
-#pyLimits.py -f $Json -o $outDir --points $Point -j1 -v2 --overwrite
-pyLimits.py -f $Json -o $outDir --points $Point -j1 -v2 --overwrite --ttHTaggerCut -0.1
+pyLimits.py -f $Json -o $outDir --points $Point -j1 -v2 --overwrite
 '''
 
 HERE = os.environ['PWD']
@@ -108,15 +109,18 @@ if __name__ == "__main__":
   if 'manual' in opt.scanType:
     # Here we can run limits over specific points
     # Note: the limit trees for those points must exist
-      cg = 0.0
-      c2 = 0.0
-      c2g = 0.0
-      for kl in [1.0, 4.4]:
-        for kt in [float(i)/(4) for i in range(-10,11)]:
-          print counter
-          counter += 1
-          print kl, kt, cg, c2, c2g
-          submitPoint(kl, kt, cg, c2, c2g)
+    cg = 0.0
+    c2 = 0.0
+    c2g = 0.0
+    kt = 0.0
+    kl = 15.5
+    submitPoint(kl, kt, cg, c2, c2g)
+    #for kl in [1.0, 4.4]:
+    #  for kt in [float(i)/(4) for i in range(-10,11)]:
+    #    print counter
+    #    counter += 1
+    #    print kl, kt, cg, c2, c2g
+    #    submitPoint(kl, kt, cg, c2, c2g)
 
 
   if "grid" in opt.scanType:
