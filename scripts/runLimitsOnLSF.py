@@ -11,8 +11,9 @@ org_bashFile = '''
 #!/bin/bash
 cd HERE
 eval `scramv1 runtime -sh`
-pyLimits.py -f JSONFILE -o LOUTDIR EXTRA --overwrite -j1 -v5
+pyLimits.py -f JSONFILE -o LOUTDIR EXTRA --overwrite -j1 -v5 TTHTAGGER
 '''
+
 # This is a script for running the limits of grid reweighting
 grid_bashFile = '''
 #!/bin/bash
@@ -38,6 +39,7 @@ parser.add_argument('-f', '--configFile', dest="fname", type=str, default='conf_
                     help="Json config file")
 parser.add_argument('-o', '--outDir', dest="outDir", type=str, default='LIMS_NewHope',
                     help="Output directory for my limits")
+parser.add_argument('--ttHTaggerCut', dest='ttHTaggerCut', type=float, default=None)
 
 opt = parser.parse_args()
 
@@ -47,8 +49,11 @@ def submitPoint(kl=1, kt=1, cg=0, c2=0, c2g=0):
                     '--extraLabel '+pointStr])
 
   bashFile = org_bashFile.replace('HERE', HERE).replace('LOUTDIR', opt.outDir).replace('EXTRA', extra).replace('JSONFILE',opt.fname)
-
-
+  if opt.ttHTaggerCut!=None:
+    bashFile = bashFile.replace('TTHTAGGER', '--ttHTaggerCut '+str(opt.ttHTaggerCut))
+  else:
+    bashFile = bashFile.replace('TTHTAGGER', '')
+    
   with tempfile.NamedTemporaryFile(dir='/tmp/'+username, prefix='batch_LIM_'+pointStr, suffix='.sh', delete=False) as bFile:
     bFile.write(bashFile)
     bFile.flush()
@@ -107,15 +112,18 @@ if __name__ == "__main__":
   if 'manual' in opt.scanType:
     # Here we can run limits over specific points
     # Note: the limit trees for those points must exist
-      cg = 0.0
-      c2 = 0.0
-      c2g = 0.0
-      for kl in [1.0, 4.4]:
-        for kt in [float(i)/(4) for i in range(-10,11)]:
-          print counter
-          counter += 1
-          print kl, kt, cg, c2, c2g
-          submitPoint(kl, kt, cg, c2, c2g)
+    cg = 0.0
+    c2 = 0.0
+    c2g = 0.0
+    kt = 0.0
+    kl = 15.5
+    submitPoint(kl, kt, cg, c2, c2g)
+    #for kl in [1.0, 4.4]:
+    #  for kt in [float(i)/(4) for i in range(-10,11)]:
+    #    print counter
+    #    counter += 1
+    #    print kl, kt, cg, c2, c2g
+    #    submitPoint(kl, kt, cg, c2, c2g)
 
 
   if "grid" in opt.scanType:

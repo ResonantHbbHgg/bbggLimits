@@ -25,6 +25,7 @@ parser.add_argument('--isGrav', dest='isGrav', action='store_true', default=Fals
 parser.add_argument('--max', dest='max',  default=200, type=float)
 parser.add_argument('--min', dest='min',  default=0.05, type=float)
 parser.add_argument('-u',"--unblind", dest="unblind", action='store_true', default=False)
+parser.add_argument("--oldname", dest="oldname", action='store_true', default=False)
 
 opt = parser.parse_args()
 
@@ -106,11 +107,11 @@ def main(argv):
   for iff,m in enumerate(masses):
     if opt.isGrav:
       ff = opt.limdir+'/BulkGraviton_Node_'+str(m)+'/datacards/higgsCombineBulkGraviton_Node_'+str(m)
-      if 'EPS2017' in opt.limdir:
+      if opt.oldname:
         ff = opt.limdir+'/BulkGraviton_Node_'+str(m)+'LT_Res_500_HMHPC_960_HMMPC_700_LMHPC_960_LMMPC_700/datacards/higgsCombineBulkGraviton_Node_'+str(m)
     else:
       ff = opt.limdir+'/Radion_Node_'+str(m)+'/datacards/higgsCombineRadion_Node_'+str(m)
-      if 'EPS2017' in opt.limdir:
+      if opt.oldname:
         ff = opt.limdir+'/Radion_Node_'+str(m)+'LT_Res_500_HMHPC_960_HMMPC_700_LMHPC_960_LMMPC_700/datacards/higgsCombineRadion_Node_'+str(m)
         
     qts = {}
@@ -119,13 +120,13 @@ def main(argv):
       fs = glob.glob(ff+"*"+qt+".root")
       if opt.asymp:
         fs = glob.glob(ff+"*Asymptotic*.root")
-      print fs, ff
+      # print fs, ff
       if len(fs) > 0:
         tfile = TFile(fs[0], "READ")
         tree = tfile.Get("limit")
         tree.Draw("limit", "quantileExpected>"+str(float(qt)-0.001) + ' && quantileExpected < ' +str(float(qt)+0.001), "goff")
         qts[qt] = tree.GetV1()[0]
-        print qt, qts[qt]
+        print 'QT=', qt, ' Lim=', qts[qt], 'for ', fs
     gr_1s.SetPoint(iff, m, qts['0.500'])
     gr_2s.SetPoint(iff, m, qts['0.500'])
     gr_ce.SetPoint(iff, m, qts['0.500'])
@@ -144,11 +145,11 @@ def main(argv):
     for iff,m in enumerate(massesHM):
       if opt.isGrav:
         ff = opt.hmFolder+'/BulkGraviton_Node_'+str(m)+'/datacards/higgsCombineBulkGraviton_Node_'+str(m)
-        if 'EPS2017' in opt.hmFolder:
+        if opt.oldname:
           ff = opt.hmFolder+'/BulkGraviton_Node_'+str(m)+'LT_Res_500_HMHPC_500_HMMPC_000_LMHPC_500_LMMPC_000/datacards/higgsCombineBulkGraviton_Node_'+str(m)
       else:
         ff = opt.hmFolder+'/Radion_Node_'+str(m)+'/datacards/higgsCombineRadion_Node_'+str(m)
-        if 'EPS2017' in opt.hmFolder:
+        if opt.oldname:
           ff = opt.hmFolder+'/Radion_Node_'+str(m)+'LT_Res_500_HMHPC_500_HMMPC_000_LMHPC_500_LMMPC_000/datacards/higgsCombineRadion_Node_'+str(m)
         
       qts = {}
@@ -157,13 +158,13 @@ def main(argv):
         fs = glob.glob(ff+"*"+qt+".root")
         if opt.asymp:
           fs = glob.glob(ff+"*Asymptotic*.root")
-        print fs, ff
+        #print fs, ff
         if len(fs) > 0:
           tfile = TFile(fs[0], "READ")
           tree = tfile.Get("limit")
           tree.Draw("limit", "quantileExpected>"+str(float(qt)-0.001) + ' && quantileExpected < ' +str(float(qt)+0.001), "goff")
           qts[qt] = tree.GetV1()[0]
-          print qt, qts[qt]
+          print 'QT=', qt, ' Lim=', qts[qt], 'for ', fs
       hmgr_1s.SetPoint(iff, m, qts['0.500'])
       hmgr_2s.SetPoint(iff, m, qts['0.500'])
       hmgr_ce.SetPoint(iff, m, qts['0.500'])
@@ -282,6 +283,7 @@ def main(argv):
   #  tdr.cmsPrel(float(opt.lumi)*1000,  "13",  0, True,  0, 1.25)
   DrawCMSLabels(c0, '35.9')
   c0.SaveAs(opt.name+".png")
+  c0.SaveAs(opt.name+".pdf")
 
 if __name__ == "__main__":
   main(sys.argv[1:])

@@ -1,10 +1,3 @@
-//////////////////////////////////////////////////////////
-// This class has been automatically generated on
-// Tue Sep 15 10:49:49 2015 by ROOT version 6.02/05
-// from TTree bbggSelectionTree/Flat tree for HH->bbgg analyses (after pre selection)
-// found on file: bbgg2DFitter_DoubleEG_37.root
-//////////////////////////////////////////////////////////
-
 #ifndef bbgg2DFitter_h
 #define bbgg2DFitter_h
 // C++ headers

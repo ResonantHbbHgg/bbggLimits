@@ -6,8 +6,10 @@ import tempfile
 username = getpass.getuser()
 cwd = os.getcwd()
 
-D_HM = "/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LT_MadMaxMetCut_HighMass"
-D_LM = "/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LT_MadMaxMetCut_LowMass"
+#D_HM = "/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LT_MadMaxMetCut_HighMass"
+#D_LM = "/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LT_MadMaxMetCut_LowMass"
+D_HM = "/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LT_TEST_ttH_HighMass"
+D_LM = "/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LT_TEST_ttH_LowMass"
 
 FILE = "/LT_output_GluGluToHHTo2B2G_AllNodes.root"
 

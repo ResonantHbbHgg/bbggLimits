@@ -166,6 +166,7 @@ RooArgSet* bbgg2DFitter::defineVariables(bool swithToSimpleWeight=false)
   RooRealVar* mgg  = new RooRealVar("mgg","M(#gamma#gamma)",_minMggMassFit,_maxMggMassFit,"GeV");
   RooRealVar* mtot = new RooRealVar("mtot","M(#gamma#gammajj)",200,1600,"GeV");
   RooRealVar* mjj  = new RooRealVar("mjj","M(jj)",_minMjjMassFit,_maxMjjMassFit,"GeV");
+  RooRealVar* ttHTagger  = new RooRealVar("ttHTagger","BDT",-1,1,"");
   RooCategory* cut_based_ct = new RooCategory("cut_based_ct","event category 4") ;
   RooRealVar* evWeight = 0;
   RooRealVar* new_evWeight = 0;
@@ -194,19 +195,17 @@ RooArgSet* bbgg2DFitter::defineVariables(bool swithToSimpleWeight=false)
   RooArgSet* ntplVars = 0;
   if (_doARW)
     ntplVars = new RooArgSet(*mgg, *mjj, *cut_based_ct, *evWeight, *new_evWeight);
-  else if (_nonResWeightIndex>=-1)
-  {
+  else if (_nonResWeightIndex>=-1) {
     ntplVars = new RooArgSet(*mgg, *mjj, *cut_based_ct, *evWeight);
     ntplVars->add(*mtot);
   }
-  else
+  else {
     ntplVars = new RooArgSet(*mgg, *mjj, *cut_based_ct, *evWeight);
-
-  // AP: Why these are here? They are already in the set:
-  //ntplVars->add(*mgg);
-  //ntplVars->add(*mjj);
-  //ntplVars->add(*cut_based_ct);
-
+  }
+  
+  if (_cut.Contains("ttHTagger"))
+    ntplVars->add(*ttHTagger);
+  
   return ntplVars;
 }
 
@@ -259,14 +258,19 @@ int bbgg2DFitter::AddSigData(float mass, TString signalfile)
 
   if (_nonResWeightIndex>=-1)
     myArgList.add(*_w->var("mtot"));
+  
+  //myArgList.add(*_w->var("ttHTagger"));    
 
   myArgList.Print();
 
   for ( int i=0; i<_NCAT; ++i)
     {
 
-      std::cout << "-- Reducing cat " << i << std::endl;
-
+      if (_verbLvl>0) {
+	std::cout << "-- Reducing category " << i << std::endl;
+	std::cout << "Including the _cut: " << _cut << std::endl;
+      }
+      
       sigToFit[i] = (RooDataSet*) sigScaled.reduce(myArgList,_cut+TString::Format(" && cut_based_ct==%d ",i)+cut0);
 
       if (_fitStrategy == 1)

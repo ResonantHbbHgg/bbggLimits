@@ -91,8 +91,6 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     print 'WARning: using list of nodes from the json input file'
     return __BAD__
 
-  print "Label=",Label
-
   sigCat = 0
   isRes = 0
   if point==None:
@@ -109,6 +107,8 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     sigCat = int(point)
 
   Label +=  extraLabel
+
+  print "Label=",Label
 
 
   if opt.outDir:
@@ -144,7 +144,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
   # ParamsForFits = {'SM': massCuts, 'box': massCuts}
 
   SignalFile = "/LT_output_GluGluToHHTo2B2G_node_"+str(point)+"_13TeV-madgraph.root"
-  if "LT_StrikeBack" in LTDir_type or "MadMax" in LTDir_type:
+  if "LT_StrikeBack" in LTDir_type or "MadMax" in LTDir_type or "ttH" in LTDir_type:
       SignalFile = "/LT_output_GluGluToHHTo2B2G_node_"+str(point)+"_13TeV-madgraph_0.root"
   if isRes:
     SignalFile = "/LT_output_GluGluToTYPEToHHTo2B2G_M-"+str(point)+"_narrow_13TeV-madgraph.root"
@@ -186,9 +186,11 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
 
     theFitter.SetVerbosityLevel(opt.verb)
 
-    #    if opt.analyticalRW == True:
-    #      theFitter.DoARW()
-
+    if opt.ttHTaggerCut!=None:
+      theFitter.SetCut("ttHTagger > "+str(opt.ttHTaggerCut))
+      if opt.verb>0:
+        procLog.info('Apply the cut on ttHTagger: ' + str(opt.ttHTaggerCut))
+        
     if 'HighMass' in t:
       theFitter.SetNCat0(2)
     else:
@@ -397,6 +399,6 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
 
   if opt.verb>0: p9 = printTime(p8,start,procLog)
   os.remove(pidfile)
-    # procLog.handlers = []
+  # procLog.handlers = []
   procLog.info('This process has ended. Label=%r', Label)
   return 42

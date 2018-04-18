@@ -63,6 +63,7 @@ public :
    Double_t        o_ljet_bdis;
    Double_t        o_sjet_bdis;
    Double_t        o_HHTagger;
+   Double_t        o_ttHTagger;
    Double_t        o_jt1diffweight;
    Double_t        o_jt2diffweight;
    Double_t        o_diffweight;
@@ -133,6 +134,7 @@ public :
    LorentzVector    *MET;
    Float_t	    CosThetaStar;
    Float_t	    CosThetaStar_CS;
+   Float_t          ttHTagger;
    Float_t          HHTagger;
    Float_t          HHTagger_HM;
    Float_t          HHTagger_LM;
@@ -194,6 +196,7 @@ public :
    TBranch	  *b_CosThetaStar_CS;
    TBranch	  *b_leadingPhotonR9full5x5;
    TBranch	  *b_subleadingPhotonR9full5x5;
+   TBranch        *b_ttHTagger;
    TBranch        *b_HHTagger;
    TBranch        *b_HHTagger_LM;
    TBranch        *b_HHTagger_HM;
@@ -419,6 +422,7 @@ void bbggLTMaker::Init(TTree *tree)
    subleadingPhotonISO = 0;
    CosThetaStar = 0;
    CosThetaStar_CS = 0;
+   ttHTagger = 0;
    HHTagger = 0;
    HHTagger_LM = 0;
    HHTagger_HM = 0;
@@ -469,6 +473,7 @@ void bbggLTMaker::Init(TTree *tree)
    fChain->SetBranchAddress("CosThetaStar_CS", &CosThetaStar_CS, &b_CosThetaStar_CS);
    fChain->SetBranchAddress("leadingPhotonR9full5x5", &leadingPhotonR9full5x5, &b_leadingPhotonR9full5x5);
    fChain->SetBranchAddress("subleadingPhotonR9full5x5", &subleadingPhotonR9full5x5, &b_subleadingPhotonR9full5x5);
+   fChain->SetBranchAddress("ttHTagger", &ttHTagger, &b_ttHTagger);
    TString WhichTagger = "HHTagger";
    if(isRes) WhichTagger = "ResHHTagger";
    fChain->SetBranchAddress(WhichTagger, &HHTagger, &b_HHTagger);

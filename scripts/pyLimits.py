@@ -75,6 +75,8 @@ parser.add_argument('--cg', dest='ARW_cg', type=float, default=0.0)
 parser.add_argument('--c2', dest='ARW_c2', type=float, default=0.0)
 parser.add_argument('--c2g', dest='ARW_c2g', type=float, default=0.0)
 
+parser.add_argument('--ttHTaggerCut', dest='ttHTaggerCut', type=float, default=None)
+
 opt = parser.parse_args()
 print opt
 # opt.func()
