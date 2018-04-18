@@ -11,8 +11,7 @@ org_bashFile = '''
 #!/bin/bash
 cd HERE
 eval `scramv1 runtime -sh`
-#pyLimits.py -f JSONFILE -o LOUTDIR EXTRA --overwrite -j1 -v5
-pyLimits.py -f JSONFILE -o LOUTDIR EXTRA --overwrite -j1 -v5 --ttHTaggerCut 0.0
+pyLimits.py -f JSONFILE -o LOUTDIR EXTRA --overwrite -j1 -v5 TTHTAGGER
 '''
 
 # This is a script for running the limits of grid reweighting
@@ -40,6 +39,7 @@ parser.add_argument('-f', '--configFile', dest="fname", type=str, default='conf_
                     help="Json config file")
 parser.add_argument('-o', '--outDir', dest="outDir", type=str, default='LIMS_NewHope',
                     help="Output directory for my limits")
+parser.add_argument('--ttHTaggerCut', dest='ttHTaggerCut', type=float, default=None)
 
 opt = parser.parse_args()
 
@@ -49,8 +49,11 @@ def submitPoint(kl=1, kt=1, cg=0, c2=0, c2g=0):
                     '--extraLabel '+pointStr])
 
   bashFile = org_bashFile.replace('HERE', HERE).replace('LOUTDIR', opt.outDir).replace('EXTRA', extra).replace('JSONFILE',opt.fname)
-
-
+  if opt.ttHTaggerCut!=None:
+    bashFile = bashFile.replace('TTHTAGGER', '--ttHTaggerCut '+str(opt.ttHTaggerCut))
+  else:
+    bashFile = bashFile.replace('TTHTAGGER', '')
+    
   with tempfile.NamedTemporaryFile(dir='/tmp/'+username, prefix='batch_LIM_'+pointStr, suffix='.sh', delete=False) as bFile:
     bFile.write(bashFile)
     bFile.flush()
