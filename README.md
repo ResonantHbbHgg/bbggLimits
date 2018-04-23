@@ -22,7 +22,7 @@ scramv1 b
 ```       
 
 #### Step 2: Get HH support stuff    
-(Needed for analytical reweighting. When trying to reproduce EPS results, check with Konstantin and Alexandra about which tag to use for the following repositories.)    
+Needed for analytical reweighting.  
 
 ```
 cd ${CMSSW_BASE}/src/
@@ -118,8 +118,8 @@ the base code which interacts with the functions in `bbgg2DFitter.cc`.
 Using the `--nodes SM` option tells it to use the Limit Tree produced from a single SM MC
 sample.  
 Alternatively, one can do the limit on the re-weighted samples of the merged non-resonant
-samples. (For the SM point this allows to increase the statistics of the signal
-sample. Such re-weighting was used for EPS17 results of 2016 data.)  
+samples. For the SM point this allows to increase the statistics of the signal
+sample. Such re-weighting was used for the results of 2016 data.)  
 Run it like so:  
 ```
 pyLimits.py -f conf_default.json -o outDir --analyticalRW
