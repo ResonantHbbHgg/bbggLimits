@@ -1,9 +1,9 @@
 ## Read the workspaces 
 
 A script called [readWS.py](readWS.py) allows you to read the workspaces from the signal and
-background of the actual analysis (which are also commited here).
+background of the 2016 analysis. These workspaces are also committed here.
 
-Here is a plot of the data distribution and backround fit in mgg in the most sensitive
+Here is a plot of the data distribution and background fit in mgg in the most sensitive
 category (excluding single Higgs): 
 
 ![Bkg fit in mgg](figs/fig_bkg_mgg.png)
@@ -29,7 +29,7 @@ You will get a plot like this:
 As we can see the relationship between the limit and &Sqrt;(N_bkg) is indeed
 linear. However, we also notice that the line does not cross zero. That means that there
 is an offset in the scaling of the limits. We are at the level of small number of events
-in the background.  From the backgound `mgg` shape `dN/dmgg = 2 events/GeV`. If we
+in the background.  From the background `mgg` shape `dN/dmgg = 2 events/GeV`. If we
 consider two cases of widths, 2 GeV and 3.2 GeV, we get 4 and 6.4 events
 correspondingly. So let's take those numbers and look at how the limits scale:
 
@@ -58,7 +58,7 @@ The toys generated for that game as well as the background fit used are shown he
 python toyLimit_shape_n_roll.py 
 ```
 
-After running the script, you will get a plot like this, which shows how the limits scale with the width of the gaussian:  
+After running the script, you will get a plot like this, which shows how the limits scale with the width of the Gaussian:  
 ![Shape results](figs/fig_scale_with_sigma.png)
 
 Indeed, the scaling is as &Sqrt;&sigma;, nevertheless the ratio at 1.6 to 1.0 GeV sigmas are as follows:
@@ -77,7 +77,7 @@ Indeed, the scaling is as &Sqrt;&sigma;, nevertheless the ratio at 1.6 to 1.0 Ge
 
 (in bold is the case closest to our analysis)
 
-Now, let's do a similar thing and instead of using Gasssian for the signal shape we use Double Sided
+Now, let's do a similar thing and instead of using Gaussian for the signal shape we use Double Sided
 Crystal Ball function with exactly the same parameters as in the analysis workspaces (before and after the bug fix):
 
 <img src="figs/fig_gen_CB_bug.png" width="400"/>

@@ -252,14 +252,11 @@ int bbgg2DFitter::AddSigData(float mass, TString signalfile)
   TString cut0 = " && 1>0";
 
   RooArgList myArgList(*_w->var("mgg"));
-
-  if (_fitStrategy != 1)
-    myArgList.add(*_w->var("mjj"));
+  myArgList.add(*_w->var("mjj"));
 
   if (_nonResWeightIndex>=-1)
     myArgList.add(*_w->var("mtot"));
   
-  //myArgList.add(*_w->var("ttHTagger"));    
 
   myArgList.Print();
 
@@ -313,7 +310,7 @@ int bbgg2DFitter::AddSigData(float mass, TString signalfile)
     } // close ncat
     std::cout << "======================================================================" <<std::endl;
     sigScaled.Print("v");
-    std::cout << "----- DONE With Adding Signal!" << std::endl;
+    std::cout << "----- DONE With Adding Signal! \n\n"<< std::endl;
   }
   return 0;
 }
@@ -446,6 +443,8 @@ void bbgg2DFitter::SigModelFit(float mass)
   //******************************************//
   // Fit signal with model pdfs
   //******************************************//
+  if (_verbLvl>1) std::cout << "Doing signal model fit for M = " <<mass<<std::endl;
+  
   // four categories to fit
   RooDataSet* sigToFit[_NCAT];
   RooAbsPdf* mggSig[_NCAT];
@@ -474,9 +473,10 @@ void bbgg2DFitter::SigModelFit(float mass)
 
       //RooRealVar* peak = w->var(TString::Format("mgg_sig_m0_cat%d",c));
       //peak->setVal(MASS);
-      if (_verbLvl>1) std::cout << "OK up to now... Mass point: " <<mass<<std::endl;
+      if (_verbLvl>1) std::cout << "OK up to now... Mass point: " <<mass<<"  cat="<<c<<std::endl;
       if(_fitStrategy == 2) SigPdf[c]->fitTo(*sigToFit[c],Range("SigFitRange"),SumW2Error(kTRUE),PrintLevel(-1));
       if(_fitStrategy == 1) SigPdf1[c]->fitTo(*sigToFit[c],Range("SigFitRange"),SumW2Error(kTRUE),PrintLevel(-1));
+      if (_verbLvl>1) std::cout << "How is the Fit? Mass point: " <<mass<<"  cat="<<c<<std::endl;
 /*
       if (_verbLvl>1) std::cout << "old = " << ((RooRealVar*) _w->var(TString::Format("mgg_sig_m0_cat%d",c)))->getVal() <<std::endl;
       double mPeak = ((RooRealVar*) _w->var(TString::Format("mgg_sig_m0_cat%d",c)))->getVal()+(mass-125.0); // shift the peak //This should be an option
@@ -486,72 +486,32 @@ void bbgg2DFitter::SigModelFit(float mass)
       if (_verbLvl>1) std::cout << "new mPeak position = " << ((RooRealVar*) _w->var(TString::Format("mgg_sig_m0_cat%d",c)))->getVal() <<std::endl;
 */
       // IMPORTANT: fix all pdf parameters to constant, why?
-      RooArgSet* paramsMjj = (RooArgSet*) SigPdf[c]->getParameters(*mjj);
-      TIterator* iterMjj = (TIterator*) paramsMjj->createIterator();
-      TObject* tempObjMjj = nullptr;
-      RooArgSet sigParams;
-      while( (tempObjMjj = iterMjj->Next()) ) {
-        if ( (TString(tempObjMjj->GetName()).EqualTo("mjj")) || (TString(tempObjMjj->GetName()).EqualTo("mgg"))) continue;
-        std::cout << "Signal variables: " << tempObjMjj->GetName() << std::endl;
-        sigParams.add(*_w->var(tempObjMjj->GetName()));
+      RooArgSet *sigParams = 0;
+      if (_fitStrategy==2)
+	sigParams = (RooArgSet*) SigPdf[c]->getParameters(RooArgSet(*mgg, *mjj));
+      if (_fitStrategy==1)
+	sigParams = (RooArgSet*) SigPdf1[c]->getParameters(RooArgSet(*mgg));
+      
+      if (_verbLvl>1){
+	TIterator* paramIter = (TIterator*) sigParams->createIterator();
+	TObject* tempObj = nullptr;
+	while( (tempObj = paramIter->Next()) ) {
+	  if ( (TString(tempObj->GetName()).EqualTo("mjj")) || (TString(tempObj->GetName()).EqualTo("mgg"))) continue;
+	  std::cout << "Signal variables: " << tempObj->GetName() << std::endl;
+	}
+       	sigParams->Print("v");
       }
-      sigParams.Print("v");
-/*
-      RooArgSet* paramsMgg = (RooArgSet*) SigPdf[c]->getParameters(*mgg);
-      TIterator* iterMjj = paramsMjj->createIterator();
-      TObject* tempObjMjj=nullptr;
-
-      if (_verbLvl>1) {
-        while((tempObjMjj=iterMjj->Next()))
-          {
-            RooRealVar* var = (RooRealVar*)tempObjMjj;
-            std::cout << "Variables after fit = " << tempObjMjj->GetName() << " " << var->getVal() << "+/-" << var->getError() << std::endl;
-        }
-        std::cout << "old = " << ((RooRealVar*) _w->var(TString::Format("mgg_hig_m0_%s_cat%d",higName.Data(),c)))->getVal() <<std::endl;
-      }
-*/
-/*
-      RooArgSet sigParams( RooArgSet( *_w->var(TString::Format("mgg_sig_m0_cat%d",c)),
-                           *_w->var(TString::Format("mgg_sig_sigma_cat%d",c)) ) );
-      if(_fitStrategy==2) {
-        sigParams.add( RooArgSet( *_w->var(TString::Format("mjj_sig_m0_cat%d",c)),
-                                *_w->var(TString::Format("mjj_sig_sigma_cat%d",c)) ) );
-      }
-      if (!_useDSCB) {
-         sigParams.add(RooArgSet(
-			   *_w->var(TString::Format("mgg_sig_alpha_cat%d",c)),
-			   *_w->var(TString::Format("mgg_sig_n_cat%d",c)),
-			   *_w->var(TString::Format("mgg_sig_gsigma_cat%d",c)),
-			   *_w->var(TString::Format("mgg_sig_frac_cat%d",c))));
-         if(_fitStrategy == 2) {
-   	   sigParams.add(RooArgSet( *_w->var(TString::Format("mjj_sig_alpha_cat%d",c)),
-				*_w->var(TString::Format("mjj_sig_n_cat%d",c)),
-				*_w->var(TString::Format("mjj_sig_gsigma_cat%d",c)),
-				*_w->var(TString::Format("mjj_sig_frac_cat%d",c))));
-         }
-      }
-      if(_useDSCB) {
-         sigParams.add(RooArgSet(
-			   *_w->var(TString::Format("mgg_sig_alpha1_cat%d",c)),
-			   *_w->var(TString::Format("mgg_sig_n1_cat%d",c)),
-			   *_w->var(TString::Format("mgg_sig_alpha2_cat%d",c)),
-			   *_w->var(TString::Format("mgg_sig_n2_cat%d",c))));
-         if(_fitStrategy == 2) {
-   	   sigParams.add(RooArgSet(
-				*_w->var(TString::Format("mjj_sig_alpha1_cat%d",c)),
-				*_w->var(TString::Format("mjj_sig_n1_cat%d",c)),
-				*_w->var(TString::Format("mjj_sig_alpha2_cat%d",c)),
-				*_w->var(TString::Format("mjj_sig_n2_cat%d",c))));
-         }
-      }
-*/
-      _w->defineSet(TString::Format("SigPdfParam_cat%d",c), sigParams);
+      
+      _w->defineSet(TString::Format("SigPdfParam_cat%d",c), *sigParams);
       _w->set(TString::Format("SigPdfParam_cat%d",c))->Print("v");
       SetConstantParams(_w->set(TString::Format("SigPdfParam_cat%d",c)));
       if (_verbLvl>1) std::cout<<std::endl;
       if(_fitStrategy == 2) _w->import(*SigPdf[c]);
       if(_fitStrategy == 1) _w->import(*SigPdf1[c]);
     }
+
+  if (_verbLvl>1) std::cout << "Signal fit is done and imported to WS. M = " <<mass<<std::endl;
+
 }
 
 void bbgg2DFitter::HigModelFit(float mass, int higgschannel, TString higName)
@@ -1311,7 +1271,7 @@ void bbgg2DFitter::MakeSigWS(std::string fileBaseName)
   //**********************************************************************//
   std::vector<RooAbsPdf*> SigPdf(_NCAT,nullptr);
   RooWorkspace *wAll = new RooWorkspace("w_all","w_all");
-/*  _w->factory("CMS_hgg_sig_m0_absShift[1,1,1]");
+  /*  _w->factory("CMS_hgg_sig_m0_absShift[1,1,1]");
   _w->factory("CMS_hbb_sig_m0_absShift[1,1,1]");
   _w->factory("CMS_hgg_sig_sigmaScale[1,1,1]");
   _w->factory("CMS_hbb_sig_sigmaScale[1,1,1]");*/
@@ -1320,20 +1280,25 @@ void bbgg2DFitter::MakeSigWS(std::string fileBaseName)
       int newC = c + _ncat0;
 
       _w->factory(TString::Format("CMS_hgg_sig_m0_absShift[1,1,1]"));
-      _w->factory(TString::Format("CMS_hbb_sig_m0_absShift[1,1,1]"));
       _w->factory(TString::Format("CMS_hgg_sig_sigmaScale[1,1,1]"));
-      _w->factory(TString::Format("CMS_hbb_sig_sigmaScale[1,1,1]"));
 
+      if (_fitStrategy==2){
+	_w->factory(TString::Format("CMS_hbb_sig_sigmaScale[1,1,1]"));
+	_w->factory(TString::Format("CMS_hbb_sig_m0_absShift[1,1,1]"));
+      }
+      
       //IMPORTHERE
       //
       SigPdf[c] = (RooAbsPdf*) _w->pdf(TString::Format("SigPdf_cat%d",c));
-      RooArgSet* paramsMjj = (RooArgSet*) SigPdf[c]->getParameters(*_w->var("mjj"));
-      TIterator* iterMjj = (TIterator*) paramsMjj->createIterator();
-      TObject* tempObjMjj = nullptr;
+      
+      RooArgSet *sigParams = (RooArgSet*) SigPdf[c]->getParameters(RooArgSet(*_w->var("mgg"), *_w->var("mjj")));
+                 
+      TIterator* paramIter = (TIterator*) sigParams->createIterator();
+      TObject* tempObj = nullptr;
       std::vector<std::pair<TString,TString>> varsToChange;
-      while( (tempObjMjj = iterMjj->Next()) ) {
-        if ( (TString(tempObjMjj->GetName()).EqualTo("mjj")) || (TString(tempObjMjj->GetName()).EqualTo("mgg"))) continue;
-        TString thisVarName(tempObjMjj->GetName());
+      while( (tempObj = paramIter->Next()) ) {
+	if ( (TString(tempObj->GetName()).EqualTo("mjj")) || (TString(tempObj->GetName()).EqualTo("mgg"))) continue;
+        TString thisVarName(tempObj->GetName());
         TString newVarName = TString(thisVarName).ReplaceAll(TString::Format("cat%d", c), TString::Format("cat%d", newC));
         if ( !newVarName.Contains("m0") && !newVarName.Contains("sigma") ) {
           if ( newVarName.Contains("mgg") ) newVarName.ReplaceAll("mgg_", "CMS_hgg_");
@@ -1341,23 +1306,20 @@ void bbgg2DFitter::MakeSigWS(std::string fileBaseName)
           varsToChange.push_back(std::make_pair(thisVarName, newVarName));
         }
         std::cout << "Importing variable with new name: old - " << thisVarName << " new - " << newVarName << std::endl;
-        _w->import( *_w->var( tempObjMjj->GetName() ), RenameVariable( thisVarName, newVarName));
-        wAll->import( *_w->var( tempObjMjj->GetName() ), RenameVariable( thisVarName, newVarName));
+        _w->import( *_w->var( tempObj->GetName() ), RenameVariable( thisVarName, newVarName));
+        wAll->import( *_w->var( tempObj->GetName() ), RenameVariable( thisVarName, newVarName));
       }
       //Shifts and smearings
-/*      _w->factory(TString::Format("prod::CMS_hgg_sig_m0_cat%d(mgg_sig_m0_cat%d, CMS_hgg_sig_m0_absShift)", newC, newC));
-      _w->factory(TString::Format("prod::CMS_hbb_sig_m0_cat%d(mjj_sig_m0_cat%d, CMS_hbb_sig_m0_absShift)", newC, newC));
-      _w->factory(TString::Format("prod::CMS_hgg_sig_sigma_cat%d(mgg_sig_sigma_cat%d, CMS_hgg_sig_sigmaScale)", newC, newC));
-      _w->factory(TString::Format("prod::CMS_hbb_sig_sigma_cat%d(mjj_sig_sigma_cat%d, CMS_hbb_sig_sigmaScale)", newC, newC));*/
       _w->factory(TString::Format("prod::CMS_hgg_sig_m0_cat%d(mgg_sig_m0_cat%d, CMS_hgg_sig_m0_absShift)", newC, newC));
-      _w->factory(TString::Format("prod::CMS_hbb_sig_m0_cat%d(mjj_sig_m0_cat%d, CMS_hbb_sig_m0_absShift)", newC, newC));
       _w->factory(TString::Format("prod::CMS_hgg_sig_sigma_cat%d(mgg_sig_sigma_cat%d, CMS_hgg_sig_sigmaScale)", newC, newC));
-      _w->factory(TString::Format("prod::CMS_hbb_sig_sigma_cat%d(mjj_sig_sigma_cat%d, CMS_hbb_sig_sigmaScale)", newC, newC));
+      if (_fitStrategy==2){
+	_w->factory(TString::Format("prod::CMS_hbb_sig_m0_cat%d(mjj_sig_m0_cat%d, CMS_hbb_sig_m0_absShift)", newC, newC));
+	_w->factory(TString::Format("prod::CMS_hbb_sig_sigma_cat%d(mjj_sig_sigma_cat%d, CMS_hbb_sig_sigmaScale)", newC, newC));
+      }
       if(!_useDSCB) {
-/*        _w->factory(TString::Format("prod::CMS_hgg_gsigma_cat%d(mgg_sig_gsigma_cat%d, CMS_hgg_sig_sigmaScale)", newC, newC));
-        _w->factory(TString::Format("prod::CMS_hbb_gsigma_cat%d(mjj_sig_gsigma_cat%d, CMS_hbb_sig_sigmaScale)", newC, newC));*/
         _w->factory(TString::Format("prod::CMS_hgg_gsigma_cat%d(mgg_sig_gsigma_cat%d, CMS_hgg_sig_sigmaScale)", newC, newC));
-        _w->factory(TString::Format("prod::CMS_hbb_gsigma_cat%d(mjj_sig_gsigma_cat%d, CMS_hbb_sig_sigmaScale)", newC, newC));
+	if (_fitStrategy==2)
+	  _w->factory(TString::Format("prod::CMS_hbb_gsigma_cat%d(mjj_sig_gsigma_cat%d, CMS_hbb_sig_sigmaScale)", newC, newC));
       }
 
       TString EditPDF = TString::Format("EDIT::CMS_sig_cat%d(SigPdf_cat%d,", newC, c);
@@ -1365,13 +1327,22 @@ void bbgg2DFitter::MakeSigWS(std::string fileBaseName)
         EditPDF += TString::Format("%s=%s,", varsToChange[iv].first.Data(), varsToChange[iv].second.Data());
       //Shifted and smeared vars
       if(!_useDSCB) {
-        EditPDF += TString::Format("mgg_sig_gsigma_cat%d=CMS_hgg_sig_gsigma_cat%d,", c, newC);
-        EditPDF += TString::Format("mjj_sig_gsigma_cat%d=CMS_hbb_sig_gsigma_cat%d)", c, newC);
+        EditPDF += TString::Format("mgg_sig_gsigma_cat%d=CMS_hgg_sig_gsigma_cat%d", c, newC);
+	if (_fitStrategy==2)
+	  EditPDF += TString::Format(",mjj_sig_gsigma_cat%d=CMS_hbb_sig_gsigma_cat%d)", c, newC);
+	else
+	  EditPDF += (")");
+
       }
       EditPDF += TString::Format("mgg_sig_m0_cat%d=CMS_hgg_sig_m0_cat%d,", c, newC);
-      EditPDF += TString::Format("mjj_sig_m0_cat%d=CMS_hbb_sig_m0_cat%d,", c, newC);
-      EditPDF += TString::Format("mgg_sig_sigma_cat%d=CMS_hgg_sig_sigma_cat%d,", c, newC);
-      EditPDF += TString::Format("mjj_sig_sigma_cat%d=CMS_hbb_sig_sigma_cat%d)", c, newC);
+      EditPDF += TString::Format("mgg_sig_sigma_cat%d=CMS_hgg_sig_sigma_cat%d", c, newC);
+      if (_fitStrategy==2){
+	EditPDF += TString::Format(",mjj_sig_m0_cat%d=CMS_hbb_sig_m0_cat%d,", c, newC);
+	EditPDF += TString::Format("mjj_sig_sigma_cat%d=CMS_hbb_sig_sigma_cat%d)", c, newC);
+      }
+      else
+	EditPDF += (")");
+      
       std::cout << "STRINGTOCHANGE   ---  " << EditPDF << std::endl;
       _w->factory(EditPDF);
 
@@ -1385,6 +1356,7 @@ void bbgg2DFitter::MakeSigWS(std::string fileBaseName)
   return;
 } // close make signal WP
 
+
 void bbgg2DFitter::MakeHigWS(std::string fileHiggsName,int higgschannel, TString higName)
 {
   TString wsDir = TString::Format("%s/workspaces/",_folder_name.data());
@@ -1392,6 +1364,8 @@ void bbgg2DFitter::MakeHigWS(std::string fileHiggsName,int higgschannel, TString
   // Write pdfs and datasets into the workspace before to save to a file
   // for statistical tests.
   //**********************************************************************//
+  if (_verbLvl>1) std::cout << " \n ===== Creating WS for single Higgs background ====" << std::endl;
+
   std::vector<RooAbsPdf*> HigPdf(_NCAT,nullptr);
   RooWorkspace *wAll = new RooWorkspace("w_all","w_all");
 
@@ -1399,43 +1373,34 @@ void bbgg2DFitter::MakeHigWS(std::string fileHiggsName,int higgschannel, TString
     {
       int newC = c + _ncat0;
       HigPdf[c] = (RooAbsPdf*) _w->pdf(TString::Format("HigPdf_%s_cat%d",higName.Data(),c));
-      RooArgSet* paramsMjj = (RooArgSet*) HigPdf[c]->getParameters(*_w->var("mjj"));
-      TIterator* iterMjj = (TIterator*) paramsMjj->createIterator();
-      TObject* tempObjMjj = nullptr;
+
+
+      RooArgSet *singleHigParams = (RooArgSet*) HigPdf[c]->getParameters(RooArgSet(*_w->var("mgg"), *_w->var("mjj")));
+
+      TIterator* paramIter = (TIterator*) singleHigParams->createIterator();
+      TObject* tempObj = nullptr;
       std::vector<std::pair<TString,TString>> varsToChange;
-
-      while( (tempObjMjj = iterMjj->Next()) ) {
-
-        if ( (TString(tempObjMjj->GetName()).EqualTo("mjj")) || (TString(tempObjMjj->GetName()).EqualTo("mgg"))) continue;
-        TString thisVarName(tempObjMjj->GetName());
+      while( (tempObj = paramIter->Next()) ) {
+        if ( (TString(tempObj->GetName()).EqualTo("mjj")) || (TString(tempObj->GetName()).EqualTo("mgg"))) continue;
+        TString thisVarName(tempObj->GetName());
         TString newVarName = TString(thisVarName).ReplaceAll(TString::Format("cat%d", c), TString::Format("cat%d", newC));
-
         if ( !newVarName.Contains("m0") && !newVarName.Contains("sigma") ) {
           if ( newVarName.Contains("mgg") ) newVarName.ReplaceAll("mgg_", "CMS_hgg_");
           if ( newVarName.Contains("mjj") ) newVarName.ReplaceAll("mjj_", "CMS_hbb_");
           varsToChange.push_back(std::make_pair(thisVarName, newVarName));
         }
-
         std::cout << "Importing variable with new name: old - " << thisVarName << " new - " << newVarName << std::endl;
-        _w->import( *_w->var( tempObjMjj->GetName() ), RenameVariable( thisVarName, newVarName));
-        wAll->import( *_w->var( tempObjMjj->GetName() ), RenameVariable( thisVarName, newVarName));
-
+        _w->import( *_w->var( tempObj->GetName() ), RenameVariable( thisVarName, newVarName));
+        wAll->import( *_w->var( tempObj->GetName() ), RenameVariable( thisVarName, newVarName));
       }
 
       //Shifts and smearings
-      //CMS_hgg_sig_m0_absShift, CMS_hbb_sig_m0_absShift, CMS_hgg_sig_sigmaScale, and CMS_hbb_sig_sigmaScale have already been defined when doing SigWS
-/*      _w->factory(TString::Format("prod::CMS_hgg_hig_m0_%s_cat%d(mgg_hig_m0_%s_cat%d, CMS_hgg_sig_m0_absShift)", higName.Data(), newC, higName.Data(), newC));
-      _w->factory(TString::Format("prod::CMS_hgg_hig_sigma_%s_cat%d(mgg_hig_sigma_%s_cat%d, CMS_hgg_sig_sigmaScale)", higName.Data(), newC, higName.Data(), newC));*/
       _w->factory(TString::Format("prod::CMS_hgg_hig_m0_%s_cat%d(mgg_hig_m0_%s_cat%d, CMS_hgg_sig_m0_absShift)", higName.Data(), newC, higName.Data(), newC));
       _w->factory(TString::Format("prod::CMS_hgg_hig_sigma_%s_cat%d(mgg_hig_sigma_%s_cat%d, CMS_hgg_sig_sigmaScale)", higName.Data(), newC, higName.Data(), newC));
 
-//      if(!_useDSCB) _w->factory(TString::Format("prod::CMS_hgg_gsigma_%s_cat%d(mgg_hig_gsigma_%s_cat%d, CMS_hgg_sig_sigmaScale)", higName.Data(), newC, higName.Data(), newC));
       if(!_useDSCB) _w->factory(TString::Format("prod::CMS_hgg_gsigma_%s_cat%d(mgg_hig_gsigma_%s_cat%d, CMS_hgg_sig_sigmaScale)",
-                                                               higName.Data(), newC, higName.Data(), newC));
-      if (higName.Contains("ggh") == 0 && higName.Contains("vbf") == 0) {
-/*        _w->factory(TString::Format("prod::CMS_hbb_hig_m0_%s_cat%d(mjj_hig_m0_%s_cat%d, CMS_hbb_sig_m0_absShift)", higName.Data(), newC, higName.Data(), newC));
-        _w->factory(TString::Format("prod::CMS_hbb_hig_sigma_%s_cat%d(mjj_hig_sigma_%s_cat%d, CMS_hbb_sig_sigmaScale)", higName.Data(), newC, higName.Data(), newC));
-        if(!_useDSCB) _w->factory(TString::Format("prod::CMS_hbb_hig_gsigma_%s_cat%d(mjj_hig_gsigma_%s_cat%d, CMS_hbb_sig_sigmaScale)", higName.Data(), newC, higName.Data(), newC));*/
+						higName.Data(), newC, higName.Data(), newC));
+      if (higName.Contains("ggh") == 0 && higName.Contains("vbf") == 0 && _fitStrategy==2) {
         _w->factory(TString::Format("prod::CMS_hbb_hig_m0_%s_cat%d(mjj_hig_m0_%s_cat%d, CMS_hbb_sig_m0_absShift)", higName.Data(), newC, higName.Data(), newC));
         _w->factory(TString::Format("prod::CMS_hbb_hig_sigma_%s_cat%d(mjj_hig_sigma_%s_cat%d, CMS_hbb_sig_sigmaScale)", higName.Data(), newC, higName.Data(), newC));
         if(!_useDSCB) _w->factory(TString::Format("prod::CMS_hbb_hig_gsigma_%s_cat%d(mjj_hig_gsigma_%s_cat%d, CMS_hbb_sig_sigmaScale)", higName.Data(), newC, higName.Data(), newC));
@@ -1445,7 +1410,7 @@ void bbgg2DFitter::MakeHigWS(std::string fileHiggsName,int higgschannel, TString
       for (unsigned int iv = 0; iv < varsToChange.size(); iv++)
         EditPDF += TString::Format("%s=%s,", varsToChange[iv].first.Data(), varsToChange[iv].second.Data());
       //Shifted and smeared vars
-      if(higName.Contains("ggh") == 0 && higName.Contains("vbf") == 0) {
+      if(higName.Contains("ggh") == 0 && higName.Contains("vbf") == 0 && _fitStrategy==2) {
         if(!_useDSCB) EditPDF += TString::Format("mjj_hig_gsigma_%s_cat%d=CMS_hbb_hig_gsigma_%s_cat%d,", higName.Data(), c, higName.Data(), newC);
         EditPDF += TString::Format("mjj_hig_m0_%s_cat%d=CMS_hbb_hig_m0_%s_cat%d,", higName.Data(), c, higName.Data(), newC);
         EditPDF += TString::Format("mjj_hig_sigma_%s_cat%d=CMS_hbb_hig_sigma_%s_cat%d,", higName.Data(), c, higName.Data(), newC);
@@ -1510,14 +1475,6 @@ void bbgg2DFitter::MakeBkgWS(std::string fileBaseName)
       wAll->import(*_w->var(TString::Format("BkgPdf_cat%d_norm", c)), RenameVariable(TString::Format("BkgPdf_cat%d_norm", c) , TString::Format("CMS_Bkg_cat%d_norm",newC)));
       wAll->import(*_w->data(TString::Format("Data_cat%d", c)), Rename(TString::Format("data_obs_cat%d", newC) ));
 
-//      data[c] = (RooDataSet*) _w->data(TString::Format("Data_cat%d",c));
-      //RooDataHist* dataBinned = data[c]->binnedClone(); // Uncomment if you want to use wights in the limits
-//      BkgPdf[c] = (RooAbsPdf*) _w->pdf(TString::Format("BkgPdf_cat%d",c));
-//      wAll->import(*data[c], Rename(TString::Format("data_obs_cat%d",c)));// Comment if you want to use wights in the limits
-      //wAll->import(*dataBinned, Rename(TString::Format("data_obs_cat%d",c))); // Uncomment if you want to use wights in the limits
-//      wAll->import(*_w->pdf(TString::Format("BkgPdf_cat%d",c)));
-//      wAll->import(*_w->var(TString::Format("BkgPdf_cat%d_norm",c)));
-
     } // close ncat
 
   TString filename(wsDir+fileBaseName+".root");
@@ -1540,7 +1497,8 @@ void bbgg2DFitter::SetConstantParams(const RooArgSet* params)
   for (TObject *a = iter->Next(); a != 0; a = iter->Next())
     {
       RooRealVar *rrv = dynamic_cast<RooRealVar *>(a);
-      if (rrv) rrv->setConstant(true); if (_verbLvl>1) std::cout << " " << rrv->GetName();
+      if (rrv) rrv->setConstant(true);
+      if (_verbLvl>1) std::cout << " Setting this parameter to constant: " << rrv->GetName() << std::endl;
     }
 } // close set const parameters
 

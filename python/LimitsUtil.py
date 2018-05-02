@@ -64,6 +64,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
   doBias = Params['other']['doBias']
   biasConfig = Params['other']['biasConfig']
   doDoubleSidedCB = Params['other']['doDoubleSidedCB']
+  fitStrategy = Params['other']['fitStrategy']
 
   massCuts = [Params['other']["minMggMassFit"], Params['other']["maxMggMassFit"],
               Params['other']["minMjjMassFit"], Params['other']["maxMjjMassFit"],
@@ -196,6 +197,15 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     else:
       theFitter.SetNCat0(0)
 
+
+    # Fit strategies. 1: 1D - m(gg); 2: 2D - m(gg),m(jj)
+    if fitStrategy not in [1,2]:
+      print "Fit strategy is not supported:", fitStrategy
+      return __BAD__
+    else:
+      procLog.info('Setting fit strategy to: %r', fitStrategy)
+      theFitter.SetFitStrategy(fitStrategy)
+      
     if opt.verb>0:
       procLog.info('Using Double Sided Crystal Ball as Signal Model: %r', doDoubleSidedCB)
     if doDoubleSidedCB: theFitter.UseDoubleSidedCB()
@@ -220,7 +230,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     createDir(newFolder+'/workspaces',procLog)
     createDir(newFolder+'/datacards',procLog)
 
-    theFitter.SigModelFit( mass)
+    theFitter.SigModelFit(mass)
     procLog.info("\t SIGNAL FITTED. Node=%r, GridPoint=%r, type=%r", point,NRgridPoint,t)
     if opt.verb>0: p2 = printTime(p1,start, procLog)
 
