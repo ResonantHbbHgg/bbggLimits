@@ -187,6 +187,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
 
     theFitter.SetVerbosityLevel(opt.verb)
 
+
     if opt.ttHTaggerCut!=None:
       theFitter.SetCut("ttHTagger > "+str(opt.ttHTaggerCut))
       if opt.verb>0:
@@ -205,7 +206,9 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     else:
       procLog.info('Setting fit strategy to: %r', fitStrategy)
       theFitter.SetFitStrategy(fitStrategy)
-      
+    if fitStrategy==1:
+      theFitter.SetCut("mjj > 100 && mjj < 140")
+
     if opt.verb>0:
       procLog.info('Using Double Sided Crystal Ball as Signal Model: %r', doDoubleSidedCB)
     if doDoubleSidedCB: theFitter.UseDoubleSidedCB()

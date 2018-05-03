@@ -245,8 +245,8 @@ int bbgg2DFitter::AddSigData(float mass, TString signalfile)
   }
 
   RooDataSet sigScaled("sigScaled","dataset",sigTree,*ntplVars,_cut, _wName.c_str());
-//  if(_doARW) sigScaled = RooDataSet("sigScaled","dataset",sigTree,*ntplVars,_cut, "new_evWeight");
-//  else sigScaled = RooDataSet("sigScaled","dataset",sigTree,*ntplVars,_cut, _wName.c_str());
+  //  if(_doARW) sigScaled = RooDataSet("sigScaled","dataset",sigTree,*ntplVars,_cut, "new_evWeight");
+  //  else sigScaled = RooDataSet("sigScaled","dataset",sigTree,*ntplVars,_cut, _wName.c_str());
 
   RooDataSet* sigToFit[_NCAT];
   TString cut0 = " && 1>0";
@@ -270,9 +270,6 @@ int bbgg2DFitter::AddSigData(float mass, TString signalfile)
       
       sigToFit[i] = (RooDataSet*) sigScaled.reduce(myArgList,_cut+TString::Format(" && cut_based_ct==%d ",i)+cut0);
 
-      if (_fitStrategy == 1)
-	sigToFit[i] = (RooDataSet*) sigScaled.reduce(myArgList,_cut+TString::Format(" && cut_based_ct==%d && mjj < 140 ",i)+cut0);
-
       this->SetSigExpectedCats(i, sigToFit[i]->sumEntries());
 
       if (_verbLvl>0) {
@@ -292,9 +289,7 @@ int bbgg2DFitter::AddSigData(float mass, TString signalfile)
     }
   // Create full signal data set without categorization
   std::cout << "-- Reducing all signal, no cat" << std::endl;
-  RooDataSet* sigToFitAll = (RooDataSet*) sigScaled.reduce(myArgList,_cut);
-  if (_fitStrategy == 1)
-    sigToFitAll = (RooDataSet*) sigScaled.reduce(myArgList,_cut+TString(" && mjj < 140 "));
+  RooDataSet* sigToFitAll = (RooDataSet*) sigScaled.reduce(myArgList,_cut+cut0);
 
   _w->import(*sigToFitAll,Rename("Sig"));
 
@@ -341,12 +336,12 @@ std::vector<float> bbgg2DFitter::AddHigData(float mass, TString signalfile, int 
   for ( int i=0; i<_NCAT; ++i)
     {
       higToFit[i] = (RooDataSet*) higScaled.reduce(RooArgList(*_w->var("mgg"),*_w->var("mjj")),_cut+TString::Format(" && cut_based_ct==%d ",i)+cut0);
-      if(_fitStrategy == 1) higToFit[i] = (RooDataSet*) higScaled.reduce(RooArgList(*_w->var("mgg")),_cut+TString::Format(" && cut_based_ct==%d && mjj < 140 ",i)+cut0);
+      //if(_fitStrategy == 1) higToFit[i] = (RooDataSet*) higScaled.reduce(RooArgList(*_w->var("mgg")),_cut+TString::Format(" && cut_based_ct==%d ",i)+cut0);
       _w->import(*higToFit[i],Rename(TString::Format("Hig_%s_cat%d",higName.Data(),i)));
     }
   // Create full signal data set without categorization
   RooDataSet* higToFitAll = (RooDataSet*) higScaled.reduce(RooArgList(*_w->var("mgg"),*_w->var("mjj")),_cut);
-  if(_fitStrategy == 1) higToFitAll = (RooDataSet*) higScaled.reduce(RooArgList(*_w->var("mgg")),_cut + TString(" && mjj < 140 "));
+  //if(_fitStrategy == 1) higToFitAll = (RooDataSet*) higScaled.reduce(RooArgList(*_w->var("mgg")),_cut + TString(" && mjj < 140 "));
   _w->import(*higToFitAll,Rename("Hig"));
   // here we print the number of entries on the different categories
   if (_verbLvl>1) {
@@ -394,7 +389,7 @@ void bbgg2DFitter::AddBkgData(TString datafile)
   TString cut1 = "&& 1>0";
 
   
-  if (_verbLvl>1) std::cout<<"================= Add Bkg ==============================="<<std::endl;
+  if (_verbLvl>1) std::cout<<"\n ================= Add Bkg ==============================="<<std::endl;
   if (_verbLvl>1) {
     std::cout<<"\t Total events in root file: "<<Data.sumEntries()<<std::endl;
     std::cout<<"\t reduce to category 0: "<<Data.reduce("cut_based_ct==0")->sumEntries()
@@ -409,15 +404,12 @@ void bbgg2DFitter::AddBkgData(TString datafile)
 
       dataToFit[i] = (RooDataSet*) Data.reduce(RooArgList(*_w->var("mgg"),*_w->var("mjj")),_cut+TString::Format(" && cut_based_ct==%d",i));
 
-      this->SetObservedCats(i, dataToFit[i]->sumEntries());
-
-      if (_verbLvl>1) std::cout<<"\t categ="<<i<<"  events="<<dataToFit[i]->sumEntries()<<std::endl;
-
       if(_doblinding)
 	dataToPlot[i] = (RooDataSet*) Data.reduce(RooArgList(*_w->var("mgg"),*_w->var("mjj")),_cut+TString::Format(" && cut_based_ct==%d",i)+cut0);
       else
 	dataToPlot[i] = (RooDataSet*) Data.reduce(RooArgList(*_w->var("mgg"),*_w->var("mjj")),_cut+TString::Format(" && cut_based_ct==%d",i) );
 
+      /*
       if (_fitStrategy == 1) {
 	dataToFit[i] = (RooDataSet*) Data.reduce(RooArgList(*_w->var("mgg")),_cut+TString::Format(" && cut_based_ct==%d && mjj < 140",i));
 
@@ -425,15 +417,21 @@ void bbgg2DFitter::AddBkgData(TString datafile)
 	  dataToPlot[i] = (RooDataSet*) Data.reduce(RooArgList(*_w->var("mgg"),*_w->var("mjj")),_cut+TString::Format(" && cut_based_ct==%d && mjj < 140 ",i)+cut0);
 	else
 	  dataToPlot[i] = (RooDataSet*) Data.reduce(RooArgList(*_w->var("mgg"),*_w->var("mjj")),_cut+TString::Format(" && cut_based_ct==%d && mjj < 140 ",i) );
-
       }
+      */
+      
+      this->SetObservedCats(i, dataToFit[i]->sumEntries());
+      
+      if (_verbLvl>1) std::cout<<"\t categ="<<i<<"  events="<<dataToFit[i]->sumEntries()<<std::endl;
+
+
       _w->import(*dataToFit[i],Rename(TString::Format("Data_cat%d",i)));
       _w->import(*dataToPlot[i],Rename(TString::Format("Dataplot_cat%d",i)));
     }
   // Create full data set without categorization
   RooDataSet* data = (RooDataSet*) Data.reduce(RooArgList(*_w->var("mgg"),*_w->var("mjj")),_cut);
-  if (_fitStrategy == 1)
-    data = (RooDataSet*) Data.reduce(RooArgList(*_w->var("mgg")),_cut + TString(" && mjj < 140 "));
+  //if (_fitStrategy == 1)
+  //data = (RooDataSet*) Data.reduce(RooArgList(*_w->var("mgg")),_cut + TString(" && mjj < 140 "));
   _w->import(*data, Rename("Data"));
   if (_verbLvl>1) data->Print("v");
 }
@@ -477,22 +475,27 @@ void bbgg2DFitter::SigModelFit(float mass)
       if(_fitStrategy == 2) SigPdf[c]->fitTo(*sigToFit[c],Range("SigFitRange"),SumW2Error(kTRUE),PrintLevel(-1));
       if(_fitStrategy == 1) SigPdf1[c]->fitTo(*sigToFit[c],Range("SigFitRange"),SumW2Error(kTRUE),PrintLevel(-1));
       if (_verbLvl>1) std::cout << "How is the Fit? Mass point: " <<mass<<"  cat="<<c<<std::endl;
-/*
+      /*
       if (_verbLvl>1) std::cout << "old = " << ((RooRealVar*) _w->var(TString::Format("mgg_sig_m0_cat%d",c)))->getVal() <<std::endl;
       double mPeak = ((RooRealVar*) _w->var(TString::Format("mgg_sig_m0_cat%d",c)))->getVal()+(mass-125.0); // shift the peak //This should be an option
 
       ((RooRealVar*) _w->var(TString::Format("mgg_sig_m0_cat%d",c)))->setVal(mPeak); // shift the peak
       if (_verbLvl>1) std::cout << "mPeak = " << mPeak << std::endl;
       if (_verbLvl>1) std::cout << "new mPeak position = " << ((RooRealVar*) _w->var(TString::Format("mgg_sig_m0_cat%d",c)))->getVal() <<std::endl;
-*/
-      // IMPORTANT: fix all pdf parameters to constant, why?
+      */
+
       RooArgSet *sigParams = 0;
       if (_fitStrategy==2)
 	sigParams = (RooArgSet*) SigPdf[c]->getParameters(RooArgSet(*mgg, *mjj));
       if (_fitStrategy==1)
 	sigParams = (RooArgSet*) SigPdf1[c]->getParameters(RooArgSet(*mgg));
       
+      _w->defineSet(TString::Format("SigPdfParam_cat%d",c), *sigParams);
+      _w->set(TString::Format("SigPdfParam_cat%d",c))->Print("v");
+      SetConstantParams(_w->set(TString::Format("SigPdfParam_cat%d",c)));
+      
       if (_verbLvl>1){
+	std::cout << "Print out the parameters of the fit" << std::endl;
 	TIterator* paramIter = (TIterator*) sigParams->createIterator();
 	TObject* tempObj = nullptr;
 	while( (tempObj = paramIter->Next()) ) {
@@ -502,9 +505,6 @@ void bbgg2DFitter::SigModelFit(float mass)
        	sigParams->Print("v");
       }
       
-      _w->defineSet(TString::Format("SigPdfParam_cat%d",c), *sigParams);
-      _w->set(TString::Format("SigPdfParam_cat%d",c))->Print("v");
-      SetConstantParams(_w->set(TString::Format("SigPdfParam_cat%d",c)));
       if (_verbLvl>1) std::cout<<std::endl;
       if(_fitStrategy == 2) _w->import(*SigPdf[c]);
       if(_fitStrategy == 1) _w->import(*SigPdf1[c]);
@@ -521,6 +521,7 @@ void bbgg2DFitter::HigModelFit(float mass, int higgschannel, TString higName)
   RooAbsPdf* mggHig[_NCAT];
   RooAbsPdf* mjjHig[_NCAT];
   RooProdPdf* HigPdf[_NCAT];
+  RooAbsPdf* HigPdf1[_NCAT];
   // fit range
   //Float_t minHigMggFit(115),maxHigMggFit(135);//This should be an option
   //Float_t minHigMjjFit(60),maxHigMjjFit(180);//This should be an option
@@ -533,120 +534,68 @@ void bbgg2DFitter::HigModelFit(float mass, int higgschannel, TString higName)
       // import sig and data from workspace
       higToFit[c] = (RooDataSet*) _w->data(TString::Format("Hig_%s_cat%d",higName.Data(),c));
       mggHig[c] = (RooAbsPdf*) _w->pdf(TString::Format("mggHig_%s_cat%d",higName.Data(),c));
-//      mjjHig[c] = (RooAbsPdf*) _w->pdf(TString::Format("mjjHig_%d_cat%d",higgschannel,c));
-//      if(higgschannel == 1 || higgschannel == 3) mjjHig[c] = (RooAbsPdf*) _w->pdf(TString::Format("mjjHig_%d_cat%d",higgschannel,c));
-      if(higName.Contains("ggh") == 1 || higName.Contains("vbf") == 1) {
-        mjjHig[c] = new RooBernstein(TString::Format("mjjHig_%s_cat%d",higName.Data(),c),"",*mjj,
-			RooArgList( *_w->var( TString::Format("mjj_hig_slope1_%s_cat%d", higName.Data(),c) ),
-				    *_w->var( TString::Format("mjj_hig_slope2_%s_cat%d", higName.Data(),c) ),
-				    *_w->var( TString::Format("mjj_hig_slope3_%s_cat%d", higName.Data(),c) ) ));
-      } else {
-        mjjHig[c] = (RooAbsPdf*) _w->pdf(TString::Format("mjjHig_%s_cat%d",higName.Data(),c));
-      }
-      HigPdf[c] = new RooProdPdf(TString::Format("HigPdf_%s_cat%d",higName.Data(),c),"",RooArgSet(*mggHig[c], *mjjHig[c]));
-      std::cout << TString::Format("mggHig_%s_cat%d",higName.Data(),c) << std::endl;
-      mggHig[c]->Print();
-      std::cout << TString::Format("mjjHig_%s_cat%d",higName.Data(),c) << std::endl;
-      mjjHig[c]->Print();
-      std::cout << TString::Format("HigPdf_%s_cat%d",higName.Data(),c) << std::endl;
-      HigPdf[c]->Print();
-      std::cout << TString::Format("Hig_%s_cat%d",higName.Data(),c) << std::endl;
-      higToFit[c]->Print();
-      //((RooRealVar*) w->var(TString::Format("mgg_hig_m0_%d_cat%d",higgschannel,c)))->setVal(MASS);
-      if (_verbLvl>1) std::cout << "OK up to now... Mass point: " <<mass<<std::endl;
-      HigPdf[c]->fitTo(*higToFit[c],Range("HigFitRange"),SumW2Error(kTRUE),PrintLevel(-1));
-      RooArgSet* paramsMjj;
-      paramsMjj = (RooArgSet*) mjjHig[c]->getParameters(*mjj);
-      TIterator* iterMjj = paramsMjj->createIterator();
-      TObject* tempObjMjj=nullptr;
 
-      if (_verbLvl>1) {
-	while((tempObjMjj=iterMjj->Next()))
-	  {
-	    RooRealVar* var = (RooRealVar*)tempObjMjj;
-	    std::cout << "Variables after fit = " << tempObjMjj->GetName() << " " << var->getVal() << "+/-" << var->getError() << std::endl;
+
+      if (_fitStrategy==2){
+	
+	if(higName.Contains("ggh") == 1 || higName.Contains("vbf") == 1) {
+	  mjjHig[c] = new RooBernstein(TString::Format("mjjHig_%s_cat%d",higName.Data(),c),"",*mjj,
+				       RooArgList( *_w->var( TString::Format("mjj_hig_slope1_%s_cat%d", higName.Data(),c) ),
+						   *_w->var( TString::Format("mjj_hig_slope2_%s_cat%d", higName.Data(),c) ),
+						   *_w->var( TString::Format("mjj_hig_slope3_%s_cat%d", higName.Data(),c) ) ));
 	}
-	std::cout << "old = " << ((RooRealVar*) _w->var(TString::Format("mgg_hig_m0_%s_cat%d",higName.Data(),c)))->getVal() <<std::endl;
+	else 
+	  mjjHig[c] = (RooAbsPdf*) _w->pdf(TString::Format("mjjHig_%s_cat%d",higName.Data(),c));
+	
+	HigPdf[c] = new RooProdPdf(TString::Format("HigPdf_%s_cat%d",higName.Data(),c),"",RooArgSet(*mggHig[c], *mjjHig[c]));
       }
-      //There are very few events in some fits, so adjust the max by a good amount so the MASS-125.0 shift doesn't touch it.
-      /*
-      ((RooRealVar*) _w->var(TString::Format("mgg_hig_m0_%d_cat%d",higgschannel,c)))->setMax( ((RooRealVar*) _w->var(TString::Format("mgg_hig_m0_%d_cat%d",higgschannel,c)))->getMax()+(mass-125.0) );
-      double mPeak = ((RooRealVar*) _w->var(TString::Format("mgg_hig_m0_%d_cat%d",higgschannel,c)))->getVal()+(mass-125.0); // shift the peak
-      ((RooRealVar*) _w->var(TString::Format("mgg_hig_m0_%d_cat%d",higgschannel,c)))->setVal(mPeak); // shift the peak
-      if (_verbLvl>1) std::cout << "mPeak = " << mPeak <<std::endl;
-      if (_verbLvl>1) std::cout << "new mPeak position = " << ((RooRealVar*) _w->var(TString::Format("mgg_hig_m0_%d_cat%d",higgschannel,c)))->getVal() <<std::endl;
-      */
+      if(_fitStrategy == 1) HigPdf1[c] = (RooAbsPdf*) mggHig[c]->Clone(TString::Format("HigPdf_%s_cat%d",higName.Data(),c));
+      
+      if (_verbLvl>1) {
+	std::cout << TString::Format("mggHig_%s_cat%d",higName.Data(),c) << std::endl;
+	mggHig[c]->Print();
+	if (_fitStrategy==2){
+	  std::cout << TString::Format("mjjHig_%s_cat%d",higName.Data(),c) << std::endl;
+	  mjjHig[c]->Print();
+	  std::cout << TString::Format("HigPdf_%s_cat%d",higName.Data(),c) << std::endl;
+	  HigPdf[c]->Print();
+	}
+	std::cout << TString::Format("Dataset: Hig_%s_cat%d",higName.Data(),c) << std::endl;
+	higToFit[c]->Print();
+      }
+
+      if (_verbLvl>1) std::cout << "OK up to now... Mass point: " <<mass<<std::endl;
+
+      if(_fitStrategy == 2) HigPdf[c]->fitTo(*higToFit[c],Range("HigFitRange"),SumW2Error(kTRUE),PrintLevel(-1));
+      if(_fitStrategy == 1) HigPdf1[c]->fitTo(*higToFit[c],Range("HigFitRange"),SumW2Error(kTRUE),PrintLevel(-1));
+      if (_verbLvl>1) std::cout << "How is the Fit? Mass point: " <<mass<<"  cat="<<c<<std::endl;
+      
       // IMPORTANT: fix all pdf parameters to constant
 
-      RooArgSet* paramsMgg = (RooArgSet*) HigPdf[c]->getParameters(*mgg);
-      TIterator* iterMgg = (TIterator*) paramsMgg->createIterator();
-      TObject* tempObjMgg = nullptr;
-      RooArgSet sigParams;
-      while( (tempObjMgg = iterMgg->Next()) ) {
-        if ( (TString(tempObjMgg->GetName()).EqualTo("mjj")) || (TString(tempObjMgg->GetName()).EqualTo("mgg"))) continue;
-        std::cout << "Higgs variables: " << tempObjMgg->GetName() << std::endl;
-        sigParams.add(*_w->var(tempObjMgg->GetName()));
-      }
-      sigParams.Print("v");
-/*
-      RooArgSet sigParams;
-      sigParams.add(RooArgSet(*_w->var(TString::Format("mgg_hig_m0_%s_cat%d", higName.Data(),c))));
-      sigParams.add(RooArgSet(*_w->var(TString::Format("mgg_hig_sigma_%s_cat%d", higName.Data(),c))));
-      if(higName.Contains("ggh") == 1 || higName.Contains("vbf") == 1) {
-        sigParams.add(RooArgSet(*_w->var(TString::Format("mjj_hig_slope1_%s_cat%d", higName.Data(),c))));
-        sigParams.add(RooArgSet(*_w->var(TString::Format("mjj_hig_slope2_%s_cat%d", higName.Data(),c))));
-        sigParams.add(RooArgSet(*_w->var(TString::Format("mjj_hig_slope3_%s_cat%d", higName.Data(),c))));
-      } else {
-        sigParams.add(RooArgSet(*_w->var(TString::Format("mjj_hig_m0_%s_cat%d", higName.Data(),c))));
-        sigParams.add(RooArgSet(*_w->var(TString::Format("mjj_hig_sigma_%s_cat%d", higName.Data(),c))));
-      }
-      if(_useDSCB) {
-        sigParams.add(RooArgSet(*_w->var(TString::Format("mgg_hig_alpha1_%s_cat%d", higName.Data(),c))));
-        sigParams.add(RooArgSet(*_w->var(TString::Format("mgg_hig_n1_%s_cat%d", higName.Data(),c))));
-        sigParams.add(RooArgSet(*_w->var(TString::Format("mgg_hig_alpha2_%s_cat%d", higName.Data(),c))));
-        sigParams.add(RooArgSet(*_w->var(TString::Format("mgg_hig_n2_%s_cat%d", higName.Data(),c))));
-        if(higName.Contains("ggh") == 0 && higName.Contains("vbf") == 0) {
-          sigParams.add(RooArgSet(*_w->var(TString::Format("mjj_hig_alpha1_%s_cat%d", higName.Data(),c))));
-          sigParams.add(RooArgSet(*_w->var(TString::Format("mjj_hig_n1_%s_cat%d", higName.Data(),c))));
-          sigParams.add(RooArgSet(*_w->var(TString::Format("mjj_hig_alpha2_%s_cat%d", higName.Data(),c))));
-          sigParams.add(RooArgSet(*_w->var(TString::Format("mjj_hig_n2_%s_cat%d", higName.Data(),c))));
-        }
-      } else {
-        sigParams.add(RooArgSet(*_w->var(TString::Format("mgg_hig_alpha_%s_cat%d", higName.Data(),c))));
-        sigParams.add(RooArgSet(*_w->var(TString::Format("mgg_hig_n_%s_cat%d", higName.Data(),c))));
-        sigParams.add(RooArgSet(*_w->var(TString::Format("mgg_hig_gsigma_%s_cat%d", higName.Data(),c))));
-        sigParams.add(RooArgSet(*_w->var(TString::Format("mgg_hig_frac_%s_cat%d", higName.Data(),c))));
-        if(higName.Contains("ggh") == 0 && higName.Contains("vbf") == 0) {
-          sigParams.add(RooArgSet(*_w->var(TString::Format("mjj_hig_alpha_%s_cat%d", higName.Data(),c))));
-          sigParams.add(RooArgSet(*_w->var(TString::Format("mjj_hig_n_%s_cat%d", higName.Data(),c))));
-          sigParams.add(RooArgSet(*_w->var(TString::Format("mjj_hig_gsigma_%s_cat%d", higName.Data(),c))));
-          sigParams.add(RooArgSet(*_w->var(TString::Format("mjj_hig_frac_%s_cat%d", higName.Data(),c))));
-        }
-      }
-*/
-/*
-			   *_w->var(TString::Format("mgg_hig_sigma_%d_cat%d",higgschannel,c)));
-      if(!_useDSCB) {
-	sigParams.add( RooArgSet(
-			   *_w->var(TString::Format("mgg_hig_alpha_%d_cat%d",higgschannel,c)),
-			   *_w->var(TString::Format("mgg_hig_n_%d_cat%d",higgschannel,c)),
-			   *_w->var(TString::Format("mgg_hig_gsigma_%d_cat%d",higgschannel,c)),
-			   *_w->var(TString::Format("mgg_hig_frac_%d_cat%d",higgschannel,c))));
-      } else {}
-      if(higgschannel == 1 || higgschannel == 3){
-	sigParams.add(RooArgSet(
-				*_w->var(TString::Format("mjj_hig_m0_%d_cat%d",higgschannel,c)),
-				*_w->var(TString::Format("mjj_hig_sigma_%d_cat%d",higgschannel,c)),
-				*_w->var(TString::Format("mjj_hig_alpha_%d_cat%d",higgschannel,c)),
-				*_w->var(TString::Format("mjj_hig_n_%d_cat%d",higgschannel,c)),
-				*_w->var(TString::Format("mjj_hig_gsigma_%d_cat%d",higgschannel,c)),
-				*_w->var(TString::Format("mjj_hig_frac_%d_cat%d",higgschannel,c)) ) );
-      }
-*/
-      _w->defineSet(TString::Format("HigPdfParam_%s_cat%d",higName.Data(),c), sigParams);
+      RooArgSet *higParams = 0;
+      if (_fitStrategy==2)
+	higParams = (RooArgSet*) HigPdf[c]->getParameters(RooArgSet(*mgg, *mjj));
+      if (_fitStrategy==1)
+	higParams = (RooArgSet*) HigPdf1[c]->getParameters(RooArgSet(*mgg));
+      
+      _w->defineSet(TString::Format("HigPdfParam_%s_cat%d",higName.Data(),c), *higParams);
       SetConstantParams(_w->set(TString::Format("HigPdfParam_%s_cat%d",higName.Data(),c)));
+            
+      if (_verbLvl>1){
+	std::cout << "Print out the parameters of the fit" << std::endl;
+	TIterator* paramIter = (TIterator*) higParams->createIterator();
+	TObject* tempObj = nullptr;
+	while( (tempObj = paramIter->Next()) ) {
+	  if ( (TString(tempObj->GetName()).EqualTo("mjj")) || (TString(tempObj->GetName()).EqualTo("mgg"))) continue;
+	  std::cout << " variables: " << tempObj->GetName() << std::endl;
+	}
+       	higParams->Print("v");
+      }
+      
       if (_verbLvl>1) std::cout<<std::endl;
-      _w->import(*HigPdf[c]);
+
+       if(_fitStrategy == 2) _w->import(*HigPdf[c]);
+       if(_fitStrategy == 1) _w->import(*HigPdf1[c]);
     } // close for ncat
 } // close higgs model fit
 
@@ -1590,18 +1539,10 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs)
   std::vector<RooAbsPdf*> mggSig(ncat,nullptr);
   std::vector<RooAbsPdf*> mjjSig(ncat,nullptr);
   RooProdPdf* BkgPdf = nullptr;
-  //  RooAbsPdf* BkgPdf1 = nullptr;
-  //  RooAbsPdf* mjjBkgTmpPow1 = nullptr;
-  //  RooAbsPdf* mggBkgTmpPow1 = nullptr;
-  //  RooExponential* mjjBkgTmpExp1 = nullptr;
-  //  RooExponential* mggBkgTmpExp1 = nullptr;
+
   RooBernstein* mjjBkgTmpBer1 = nullptr;
   RooBernstein* mggBkgTmpBer1 = nullptr;
-  //Float_t minMggMassFit(100),maxMggMassFit(180);
-  //Float_t minMjjMassFit(60),maxMjjMassFit(180);
-  //  if(_sigMass == 260) _maxMggMassFit = 145;
-  //  if(_sigMass == 270) _maxMggMassFit = 155;
-  // Fit data with background pdf for data limit
+
   RooRealVar* mgg = _w->var("mgg");
   RooRealVar* mjj = _w->var("mjj");
   //RooRealVar* mtot = _w->var("mtot");
@@ -1626,8 +1567,8 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs)
 
     if (_verbLvl>1) {
       std::cout<<"\t categ="<<c<<std::endl;
-      if(_doblinding==0 && _fitStrategy==2) std::cout << "########NUMBER OF OBSERVED EVENTSSSS::: " << data_h2->Integral() << std::endl;
-      if(_doblinding==0 && _fitStrategy==1) std::cout << "########NUMBER OF OBSERVED EVENTSSSS::: " << data_h11->Integral() << std::endl;
+      if(_doblinding==0 && _fitStrategy==2) std::cout << "####### NUMBER OF OBSERVED EVENTSSSS::: " << data_h2->Integral() << std::endl;
+      if(_doblinding==0 && _fitStrategy==1) std::cout << "####### NUMBER OF OBSERVED EVENTSSSS::: " << data_h11->Integral() << std::endl;
       std::cout<<"\t sumEntries()="<<data[c]->sumEntries()<<std::endl;
     }
 
@@ -1691,25 +1632,22 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs)
 
     if (_verbLvl>1) std::cout << "[BkgModelFit] Cat loop 5 - cat" << c << std::endl;
 
-    if(_fitStrategy==2) BkgPdf = new RooProdPdf(TString::Format("BkgPdf_cat%d",c), "", RooArgList(*mggBkgTmpBer1, *mjjBkgTmpBer1));
-    //    if(_fitStrategy==1) BkgPdf1 = (RooAbsPdf*) mggBkgTmpBer1->Clone(TString::Format("BkgPdf_cat%d",c));
 
-    if (_verbLvl>1) std::cout << "[BkgModelFit] Cat loop " << c << std::endl;
-
-    RooExtendPdf* BkgPdfExt;
-
+    
     if(_fitStrategy == 2) {
+      BkgPdf = new RooProdPdf(TString::Format("BkgPdf_cat%d",c), "", RooArgList(*mggBkgTmpBer1, *mjjBkgTmpBer1));
+      RooExtendPdf* BkgPdfExt;
       BkgPdfExt = new RooExtendPdf(TString::Format("BkgPdfExt_cat%d",c),"", *BkgPdf,*_w->var(TString::Format("BkgPdf_cat%d_norm",c)));
       fitresults = BkgPdfExt->fitTo(*data[c], Strategy(1),Minos(kFALSE), Range("BkgFitRange"),SumW2Error(kTRUE), Save(kTRUE),PrintLevel(-1));
       _w->import(*BkgPdfExt);
-      //	delete BkgPdfExt;
     }
-
     if(_fitStrategy == 1) {
       fitresults = mggBkgTmpBer1->fitTo(*data[c], Strategy(1),Minos(kFALSE), Range("BkgFitRange"),SumW2Error(kTRUE), Save(kTRUE),PrintLevel(-1));
       RooAbsPdf* BkgPdf1 = (RooAbsPdf*) mggBkgTmpBer1->Clone(TString::Format("BkgPdf_cat%d",c));
       _w->import(*BkgPdf1);
     }
+
+    if (_verbLvl>1) std::cout << "[BkgModelFit] Cat loop " << c << std::endl;
 
     if (data_h2) data_h2->Delete();
     if (data_h11) data_h11->Delete();

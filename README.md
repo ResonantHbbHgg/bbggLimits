@@ -40,6 +40,9 @@ cd ${CMSSW_BASE}/src/HiggsAnalysis/bbggLimits/
 scramv1 b
 ```
 
+In order to see older versions of the code (could be useful to reporoduce old results),
+see [Releases](https://github.com/ResonantHbbHgg/bbggLimits/releases).
+
 
 ## Making Limit Trees
 
