@@ -622,10 +622,10 @@ void bbgg2DFitter::MakePlots(float mass)
   //RooDataSet* higgsAll = (RooDataSet*) w->data("Hig");
   // blinded dataset
   // RooDataSet* data[ncat];
-  std::vector<RooDataSet*>sigToFit(_NCAT,nullptr);
-  std::vector<RooAbsPdf*>mggGaussSig(_NCAT,nullptr);
-  std::vector<RooAbsPdf*>mggCBSig(_NCAT,nullptr);
-  std::vector<RooAbsPdf*>mggSig(_NCAT,nullptr);
+  std::vector<RooDataSet*> sigToFit(_NCAT,nullptr);
+  std::vector<RooAbsPdf*> mggGaussSig(_NCAT,nullptr);
+  std::vector<RooAbsPdf*> mggCBSig(_NCAT,nullptr);
+  std::vector<RooAbsPdf*> mggSig(_NCAT,nullptr);
   std::vector<RooAbsPdf*> mjjGaussSig(_NCAT,nullptr);
   std::vector<RooAbsPdf*> mjjCBSig(_NCAT,nullptr);
   std::vector<RooAbsPdf*> mjjSig(_NCAT,nullptr);
@@ -1236,8 +1236,7 @@ void bbgg2DFitter::MakeSigWS(std::string fileBaseName)
 	_w->factory(TString::Format("CMS_hbb_sig_m0_absShift[1,1,1]"));
       }
       
-      //IMPORTHERE
-      //
+
       SigPdf[c] = (RooAbsPdf*) _w->pdf(TString::Format("SigPdf_cat%d",c));
       
       RooArgSet *sigParams = (RooArgSet*) SigPdf[c]->getParameters(RooArgSet(*_w->var("mgg"), *_w->var("mjj")));
@@ -1295,7 +1294,7 @@ void bbgg2DFitter::MakeSigWS(std::string fileBaseName)
       std::cout << "STRINGTOCHANGE   ---  " << EditPDF << std::endl;
       _w->factory(EditPDF);
 
-      wAll->import(*_w->pdf(TString::Format("CMS_sig_cat%d",newC)));// Rename(TString::Format("SigPdf_cat%d", newC)));
+      wAll->import(*_w->pdf(TString::Format("CMS_sig_cat%d",newC)));
       wAll->import(*_w->data(TString::Format("Sig_cat%d",c)), Rename(TString::Format("Sig_cat%d", newC)));
     }
   wAll->Print("v");

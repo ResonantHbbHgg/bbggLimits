@@ -73,11 +73,11 @@ for cc in cats:
   catbin = 'ch1_cat'
   if cc == 0 or cc == 1: catbin = 'ch2_cat'
   data_cat.setRange("catcut",catbin+str(cc))
-#  var.Print()
+  #  var.Print()
 
   sig_pdf_name = obs+'Sig_cat'+str(intc)+'_CMS_sig_cat'+str(cc)
   sig_pdf = w_all.pdf(sig_pdf_name)
-#  print sig_pdf_name
+  print sig_pdf_name
   sig_pdf.Print()
 
   bkg_pdf_name = obs+'BkgTmpBer1_cat'+str(intc)+'_CMS_Bkg_cat'+str(cc)
