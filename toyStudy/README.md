@@ -85,7 +85,7 @@ Crystal Ball function with exactly the same parameters as in the analysis worksp
 
 Here are the results:  
 
-| N_bkg | N_sig | Limit with bug, &sigma;(eff) = 1 GeV | Limit after fix &sigma;(eff) = 1.6 GeV| L(bug)-L(fix))/L(bug) | compare to &Sqrt;1.6/&Sqrt;1 - 1 |
+| N_bkg | N_sig | Limit with bug, &sigma;(eff) = 1 GeV | Limit after fix, &sigma;(eff) = 1.6 GeV| (L(bug)-L(fix))/L(bug) | compare to &Sqrt;1.6/&Sqrt;1 - 1 |
 |-|-|-|-|-|-|
 | 100 | 2 | 3.27 | 3.77 | 0.153 | 0.265 |
 | 120 | 2 | 3.52 | 4.05 | 0.151 | 0.265 |
