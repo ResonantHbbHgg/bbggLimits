@@ -505,9 +505,14 @@ void bbgg2DFitter::SigModelFit(float mass)
        	sigParams->Print("v");
       }
       
+      if(_fitStrategy == 1) {
+	_w->import(*SigPdf1[c]);
+	//_w->import(*mggSig[c]);
+      }
+      if(_fitStrategy == 2)
+	_w->import(*SigPdf[c]);
+
       if (_verbLvl>1) std::cout<<std::endl;
-      if(_fitStrategy == 2) _w->import(*SigPdf[c]);
-      if(_fitStrategy == 1) _w->import(*SigPdf1[c]);
     }
 
   if (_verbLvl>1) std::cout << "Signal fit is done and imported to WS. M = " <<mass<<std::endl;
@@ -593,9 +598,15 @@ void bbgg2DFitter::HigModelFit(float mass, int higgschannel, TString higName)
       }
       
       if (_verbLvl>1) std::cout<<std::endl;
+      
+      if(_fitStrategy == 1) {
+	_w->import(*HigPdf1[c]);
+	//_w->import(*mggHig[c]);
+      }
+      if(_fitStrategy == 2)
+	_w->import(*HigPdf[c]);
 
-       if(_fitStrategy == 2) _w->import(*HigPdf[c]);
-       if(_fitStrategy == 1) _w->import(*HigPdf1[c]);
+      
     } // close for ncat
 } // close higgs model fit
 
@@ -1296,6 +1307,8 @@ void bbgg2DFitter::MakeSigWS(std::string fileBaseName)
 
       wAll->import(*_w->pdf(TString::Format("CMS_sig_cat%d",newC)));
       wAll->import(*_w->data(TString::Format("Sig_cat%d",c)), Rename(TString::Format("Sig_cat%d", newC)));
+      //if (_fitStrategy==1)
+      //wAll->import(*_w->pdf(TString::Format("mggSig_cat%d",c)), Rename(TString::Format("mggSig_cat%d", newC)));
     }
   wAll->Print("v");
   TString filename(wsDir+TString(fileBaseName)+".inputsig.root");
@@ -1371,12 +1384,14 @@ void bbgg2DFitter::MakeHigWS(std::string fileHiggsName,int higgschannel, TString
 
       wAll->import(*_w->pdf(TString::Format("CMS_hig_%s_cat%d",higName.Data(),newC)));
       wAll->import(*_w->data(TString::Format("Hig_%s_cat%d",higName.Data(), c)), Rename(TString::Format("Hig_%s_cat%d", higName.Data(), newC)));
-
+      //if (_fitStrategy==1)
+      //wAll->import(*_w->pdf(TString::Format("mggHig_%s_cat%d",higName.Data(),c)), Rename(TString::Format("Hig_%s_cat%d", higName.Data(), newC)));
+      
     }
   TString filename(wsDir+fileHiggsName+".inputhig.root");
   wAll->Print("v");
   wAll->writeToFile(filename);
-  if (_verbLvl>1) std::cout << "Write signal workspace in: " << filename << " file" << std::endl;
+  if (_verbLvl>1) std::cout << "Write single Higgs workspace in: " << filename << " file" << std::endl;
 
   return;
 } // close make higgs WP
@@ -1395,20 +1410,21 @@ void bbgg2DFitter::MakeBkgWS(std::string fileBaseName)
     {
       int newC = c + _ncat0;
       BkgPdf[c] = (RooAbsPdf*) _w->pdf(TString::Format("BkgPdf_cat%d",c));
-      RooArgSet* paramsMjj = (RooArgSet*) BkgPdf[c]->getParameters(*_w->var("mjj"));
-      TIterator* iterMjj = (TIterator*) paramsMjj->createIterator();
-      TObject* tempObjMjj = nullptr;
+
+      RooArgSet* bkgParams = (RooArgSet*) BkgPdf[c]->getParameters(RooArgSet(*_w->var("mgg"), *_w->var("mjj")));
+      TIterator* paramIter = (TIterator*) bkgParams->createIterator();
+      TObject* tempObj = nullptr;
       std::vector<std::pair<TString,TString>> varsToChange;
 
-      while( (tempObjMjj = iterMjj->Next()) ) {
+      while( (tempObj = paramIter->Next()) ) {
 
-        if ( (TString(tempObjMjj->GetName()).EqualTo("mjj")) || (TString(tempObjMjj->GetName()).EqualTo("mgg"))) continue;
-        TString thisVarName(tempObjMjj->GetName());
+        if ( (TString(tempObj->GetName()).EqualTo("mjj")) || (TString(tempObj->GetName()).EqualTo("mgg"))) continue;
+        TString thisVarName(tempObj->GetName());
         TString newVarName = TString(thisVarName).ReplaceAll(TString::Format("cat%d", c), TString::Format("cat%d", newC));
         varsToChange.push_back(std::make_pair(thisVarName, newVarName));
         std::cout << "Importing variable with new name: old - " << thisVarName << " new - " << newVarName << std::endl;
-        _w->import( *_w->var( tempObjMjj->GetName() ), RenameVariable( thisVarName, newVarName));
-        wAll->import( *_w->var( tempObjMjj->GetName() ), RenameVariable( thisVarName, newVarName));
+        _w->import( *_w->var( tempObj->GetName() ), RenameVariable( thisVarName, newVarName));
+        wAll->import( *_w->var( tempObj->GetName() ), RenameVariable( thisVarName, newVarName));
 
       }
 
@@ -1422,6 +1438,8 @@ void bbgg2DFitter::MakeBkgWS(std::string fileBaseName)
       wAll->import(*_w->pdf(TString::Format("CMS_Bkg_cat%d", newC)));
       wAll->import(*_w->var(TString::Format("BkgPdf_cat%d_norm", c)), RenameVariable(TString::Format("BkgPdf_cat%d_norm", c) , TString::Format("CMS_Bkg_cat%d_norm",newC)));
       wAll->import(*_w->data(TString::Format("Data_cat%d", c)), Rename(TString::Format("data_obs_cat%d", newC) ));
+      //if (_fitStrategy==1)
+      //wAll->import(*_w->pdf(TString::Format("mggBkgTmpBer1_cat%d",c)), Rename(TString::Format("mggBkgTmpBer1_cat%d",c)));
 
     } // close ncat
 
@@ -1644,6 +1662,7 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs)
       fitresults = mggBkgTmpBer1->fitTo(*data[c], Strategy(1),Minos(kFALSE), Range("BkgFitRange"),SumW2Error(kTRUE), Save(kTRUE),PrintLevel(-1));
       RooAbsPdf* BkgPdf1 = (RooAbsPdf*) mggBkgTmpBer1->Clone(TString::Format("BkgPdf_cat%d",c));
       _w->import(*BkgPdf1);
+      //_w->import(*mggBkgTmpBer1);
     }
 
     if (_verbLvl>1) std::cout << "[BkgModelFit] Cat loop " << c << std::endl;
@@ -1724,9 +1743,6 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs)
 
     }
 
-
-    //BkgPdf.fitTo(*data[c], Strategy(1),Minos(kFALSE), Range("BkgFitRange"),SumW2Error(kTRUE), Save(kTRUE));
-    //w->import(BkgPdf);
     //************************************************//
     // Plot mgg background fit results per categories
     //************************************************//
@@ -1828,24 +1844,7 @@ RooFitResult* bbgg2DFitter::BkgModelFit(Bool_t dobands, bool addhiggs)
 	plotmggBkg[c]->Draw("SAME");
       }
     else plotmggBkg[c]->Draw("SAME"); // close dobands
-    //plotmggBkg[c]->getObject(1)->Draw("SAME");
-    //plotmggBkg[c]->getObject(2)->Draw("P SAME");
-    ////////////////////////////////////////////////////////// plot higgs
-    /*
-    if(addhiggs) {
-      for(unsigned int d=0;d!=_singleHiggsNames.size();++d)
-    	{
-	  static std::vector<int>color{2,3,6,7,4};
-	  int realint=_singleHiggsMap[_singleHiggsNames[d]];
-	  sigToFitvec[realint][c] = (RooDataSet*) _w->data(TString::Format("Hig_%d_cat%d",realint,c));
-	  double norm = 1.0*sigToFitvec[realint][c]->sumEntries(); //
-	  mggSigvec[realint][c] = (RooAbsPdf*) _w->pdf(TString::Format("mggHig_%d_cat%d",realint,c));
-	  // we are not constructing signal pdf, this is constructed on sig to fit function...
-	  mggSigvec[realint][c]->plotOn(plotmggBkg[c],Normalization(norm,RooAbsPdf::NumEvent),DrawOption("F"),LineColor(color[realint]),FillStyle(1001),FillColor(19));
-	  mggSigvec[realint][c]->plotOn(plotmggBkg[c],Normalization(norm,RooAbsPdf::NumEvent),LineColor(color[realint]),LineStyle(1));
-	}
-    }
-    */
+
     //////////////////////////////////////////////////////////
     plotmggBkg[c]->Draw("SAME");
     if(c==0||c==2)plotmggBkg[c]->SetMinimum(0.005); // no error bar in bins with zero events
