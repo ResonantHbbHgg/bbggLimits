@@ -17,24 +17,27 @@ parser.add_argument('-t','--type', dest="toyType", default='Gauss', type=str,
                     choices=['Gauss', 'CB', '2D'], help = "Choose the type of toy limits to run")
 
 parser.add_argument('--mjjCut', dest="mjjCut", default=None, type=str,
-                    help = "A cut on mjj for the case of 1D fit. Must be a valid string like this: 'mjj>100 && mjj<190'")
+                    help = "A cut on mjj for the case of 1D fit. Must be a valid string like this: 'mjj>100 && mjj<190 \
+                    Also accepted strings: eff_sigma_1, eff_sigma_2")
 
 opt = parser.parse_args()
 
 # ------
-# Create a workspace to by used for toy limits.
-# It will contain 2 PDFs: bkg and sig, and a data_obs DataSet for fake data.
+# Create a workspace to be used for toy limits.
+# It will contain 2 PDFs: bkg and sig, and a data_obs DataSet of fake data.
 #-------
+
 w = RooWorkspace("w")
 
-
-
 w.factory('Exponential::bkg_mgg(mgg[100,180],tau_mgg[-0.04])')
-w.factory('Exponential::bkg_mjj(mjj[70,190],tau_mjj[-0.04])')
+w.factory('Exponential::bkg_mjj(mjj[70,190],tau_mjj[-0.03])')
+
+#w.factory('Chebychev::bkg_mgg(mgg[100,180], {-1.0, 0.2, 0.1})')
+#w.factory('Bernstein::bkg_mjj(mjj[70,190], {4.32, -0.83, -1.75})')
 
 if opt.toyType=="Gauss" or opt.toyType=="2D":
     w.factory('Gaussian::sig_mgg(mgg, 124.8, sigma_mgg[1])')
-    w.factory('Gaussian::sig_mjj(mjj, 123.0, sigma_mjj[18])')
+    w.factory('Gaussian::sig_mjj(mjj, 123.0, sigma_mjj[15])')
 
 elif opt.toyType=="CB":
     # The parameters of th Double Sided Crystal Ball are taken from the analysis workspace (see readWS.py script)
@@ -48,6 +51,8 @@ elif opt.toyType=="CB":
 w.factory('PROD::bkg_2D(bkg_mgg, bkg_mjj)')
 w.factory('PROD::sig_2D(sig_mgg, sig_mjj)')
 
+# ---------
+# Re-naming. The final PDFs should be named sig and bkg (used in the datacards)
 if opt.toyType=='2D':
     w.factory('EDIT::bkg(bkg_2D, tau_mgg=tau_mgg)')
     w.factory('EDIT::sig(sig_2D, sigma_mgg=sigma_mgg)')
@@ -60,8 +65,10 @@ y = w.var('mjj')
 sigPdf    = w.pdf("sig")
 bkgPdf    = w.pdf("bkg")
 
+# Generate fake dataset:
 fakeData  = bkgPdf.generate(RooArgSet(x,y), 150)
 
+# Save all to the warkspace root file
 getattr(w,'import')(fakeData,RooFit.Rename("data_obs"))
 w.Print()
 w.writeToFile('ws.root')
@@ -69,27 +76,29 @@ w.writeToFile('ws.root')
 # Workspace is saved
 
 
-# Now let's make a plot
+# Now let's make some plots
 c = TCanvas("c","c",0,0,900,600)
 c.cd()
 
-testFrame = x.frame()
-fakeData.plotOn(testFrame, RooFit.Binning(80), RooFit.Name('data2'))
-bkgPdf.plotOn(testFrame, RooFit.Name("Bkg 2"), RooFit.LineColor(kBlue), RooFit.LineWidth(2), RooFit.FillColor(kCyan-6))
-sigPdf.plotOn(testFrame, RooFit.Name("fake sig"), RooFit.LineColor(kRed+2), RooFit.LineWidth(2), RooFit.Normalization(0.10))
-testFrame.Draw()
+for v in [x,y]:
+    testFrame = v.frame()
+    fakeData.plotOn(testFrame, RooFit.Binning(80), RooFit.Name('Toy data'))
+    bkgPdf.plotOn(testFrame, RooFit.Name("Toy Bkg"), RooFit.LineColor(kBlue+1), RooFit.LineWidth(2))
+    sigPdf.plotOn(testFrame, RooFit.Name("Toy Sig"), RooFit.LineColor(kRed+2),  RooFit.LineWidth(2), RooFit.Normalization(0.10))
+    testFrame.Draw()
 
-c.SaveAs('tmpfig_gen_bkg.png')
+    c.SaveAs('tmpfig_gen_bkg_'+v.GetName()+'.png')
 
+    
 # ----------------
 # Here we define some scans: over sigma values, number of background and signal events:
-
+# ----------------
 Sigmas = np.array([0.6, 1.0, 1.6, 2.0])
 if opt.toyType not in ["Gauss","2D"]:
     Sigmas = np.array([1.0, 1.33, 2.0]) # This is for CB
 
-Nbkg = np.array([100, 120, 140])
-Nsig = np.array([2, 4, 6], dtype=float)
+Nbkg = np.array([100, 120, 250])
+Nsig = np.array([2, 4, 9], dtype=float)
 toyCard2 = 'card_shape_n_roll.txt'
 
 # ----- 
@@ -98,12 +107,16 @@ toyCard2 = 'card_shape_n_roll.txt'
 if opt.mjjCut!=None:
     print "The mjj cut is:", opt.mjjCut
     mjjCut = opt.mjjCut
-    if opt.mjjCut=='eff_sigma':
+    if 'eff_sigma' in opt.mjjCut:
         from eff_sigma import getEffSigma
         eff_sigma_mjj = getEffSigma(w.var('mjj'), w.pdf('sig_mjj'), 70, 170)
         print eff_sigma_mjj
-        # cut at +/- 2 effetive sigmas
-        mjjCut = "mjj > %.2f && mjj < %.2f" %(eff_sigma_mjj[1]-eff_sigma_mjj[0], eff_sigma_mjj[2]+eff_sigma_mjj[0])
+        if opt.mjjCut=='eff_sigma_1' or opt.mjjCut=='eff_sigma':
+            print 'cut at +/- 1 effective sigmas'
+            mjjCut = "mjj > %.2f && mjj < %.2f" %(eff_sigma_mjj[1], eff_sigma_mjj[2])
+        if opt.mjjCut=='eff_sigma_2':
+            print 'cut at +/- 2 effective sigmas'
+            mjjCut = "mjj > %.2f && mjj < %.2f" %(eff_sigma_mjj[1]-eff_sigma_mjj[0], eff_sigma_mjj[2]+eff_sigma_mjj[0])
     print mjjCut
     
     for i,si in enumerate(Nsig):
@@ -113,7 +126,7 @@ if opt.mjjCut!=None:
         Nsig[i] = reduced/1000
     
     for i,N in enumerate(Nbkg):
-        tmpBkg  = w.pdf('sig_2D').generate(RooArgSet(x,y), N)
+        tmpBkg  = w.pdf('bkg_2D').generate(RooArgSet(x,y), N)
         reduced = tmpBkg.reduce(RooArgSet(x,y), mjjCut).sumEntries()
         print N, tmpBkg.sumEntries(), reduced
         Nbkg[i] = reduced
@@ -121,7 +134,7 @@ if opt.mjjCut!=None:
 print Nsig
 print Nbkg
 
-#sys.exit()
+# sys.exit()
 
 # ------------
 # Now we can submit jobs to run combine many times:
@@ -195,7 +208,7 @@ for si in Nsig:
 
             exp_diff = np.sqrt(1.6)/np.sqrt(1) - 1
             diff = (lim_s1p6 - lim_s1p0)/lim_s1p0
-            print "| %i | %i | %.2f | %.2f | %.3f | %.3f |" % (N, si, lim_s1p0, lim_s1p6, diff, exp_diff)
+            print "| %.1f| %.1f | %.2f | %.2f | %.3f | %.3f |" % (N, si, lim_s1p0, lim_s1p6, diff, exp_diff)
 
         elif opt.toyType=="CB":
             lim_0 = limsAll['NBKG_'+str(N)+'_NSIG_'+str(si)][0]

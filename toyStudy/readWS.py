@@ -38,9 +38,9 @@ mjj = sigWs.var('mjj')
 pdfSig_mgg  = sigWs.pdf("mggSig_cat0_CMS_sig_cat2")
 pdfSig_mjj  = sigWs.pdf("mjjSig_cat0_CMS_sig_cat2")
 pdfSig_prod = sigWs.pdf("CMS_sig_cat2") # This is a product of the two PDFs above
-sigDataSet = sigWs.data("Sig_cat2")
+sigDataSet  = sigWs.data("Sig_cat2")
 
-# Printout the parameters of the PDFs:
+print "\n Printout the parameters of the sig PDF"
 l0 = RooArgSet(mgg,mjj)
 pars = pdfSig_prod.getParameters(l0)
 pars.Print()
@@ -52,7 +52,7 @@ while var!=None:
 
 
 # Make some plots:
-
+print 
 c = TCanvas("c","c",0,0,900,600)
 c.cd()
 
@@ -93,12 +93,22 @@ pdfBkg_prod = bkgWs.pdf("CMS_Bkg_cat2")
 pdfBkg_mgg.Print()
 pdfBkg_mjj.Print()
 
+print "\n Printout the parameters of the bkg PDF"
+l0 = RooArgSet(mgg,mjj)
+pars = pdfBkg_prod.getParameters(l0)
+pars.Print()
+parsiter = pars.createIterator()
+var=parsiter.Next()
+while var!=None:
+    print '%s: %.3f  +/ %.3f'%(var.GetName(), var.getVal(), var.getError())
+    var=parsiter.Next()
+
 
 realData = bkgWs.data("data_obs_cat2")
 
 
 print 'Some checks'
-#print psfBkg_mgg.getVal(), pdfBkg_mgg.getVal(RooArgSet(mgg)), pdfBkg_mgg.getNorm()
+#print pdfBkg_mgg.getVal(), pdfBkg_mgg.getVal(RooArgSet(mgg)), pdfBkg_mgg.getNorm()
 #print pdfBkg_mjj.getVal(), pdfBkg_mjj.getVal(RooArgSet(mjj)), pdfBkg_mjj.getNorm()
 
 mgg.setVal(125)
