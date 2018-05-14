@@ -114,8 +114,10 @@ python toyLimit_shape_n_roll.py --mjj "mjj>100 && mjj<140"
 python toyLimit_shape_n_roll.py --mjj eff_sigma_1
 ```
 
-Results with N_bkg = 120 events, N_sig = 4 events:
+Results with N_bkg = 120 events, N_sig = 4 events:  
+
 | Fit type         | N_bkg | N_sig | Limit | Diff. wrt 2D, %| 
+|-|-|-|-|-|
 | 2D(mgg,mjj)                    | 120 | 4.0 | 1.36 |  - | 
 | 1D(mgg), no mjj cut            | 120 | 4.0 | 1.99 | 46 | 
 | 1D(mgg), mjj in 1 &sigma;_eff  |  24 | 2.7 | 1.65 | 21 | 
@@ -124,12 +126,14 @@ Results with N_bkg = 120 events, N_sig = 4 events:
 
 
 
-Results with N_bkg = 250 events, N_sig = 9 events:
-| Fit type         | N_bkg | N_sig | Limit | Diff. wrt 2D, %| 
+Results with N_bkg = 250 events, N_sig = 9 events:  
+
+| Fit type         | N_bkg | N_sig | Limit | Diff. wrt 2D, % | 
+|-|-|-|-|-|
 | 2D(mgg,mjj)                    | 250 | 9.0 | 0.78 |  - | 
 | 1D(mgg), no mjj cut            | 250 | 9.0 | 1.21 | 55 | 
-| 1D(mgg), mjj in 1 &sigma;_eff  |  49 | 6.1 | 0.93 | 19 | 
-| 1D(mgg), mjj in 2 &sigma;_eff  | 108 | 6.8 | 0.89 | 14 | 
+| 1D(mgg), mjj within 1 &sigma;(eff)  |  49 | 6.1 | 0.93 | 19 | 
+| 1D(mgg), mjj within 2 &sigma;(eff)  | 108 | 6.8 | 0.89 | 14 | 
 | 1D(mgg), 100 < mjj < 140       |  81 | 7.3 | 0.94 | 21 | 
 
  
