@@ -36,7 +36,7 @@ w.factory('Exponential::bkg_mjj(mjj[70,190],tau_mjj[-0.03])')
 #w.factory('Bernstein::bkg_mjj(mjj[70,190], {4.32, -0.83, -1.75})')
 
 if opt.toyType=="Gauss" or opt.toyType=="2D":
-    w.factory('Gaussian::sig_mgg(mgg, 124.8, sigma_mgg[1])')
+    w.factory('Gaussian::sig_mgg(mgg, 124.8, sigma_mgg[1.6])')
     w.factory('Gaussian::sig_mjj(mjj, 123.0, sigma_mjj[15])')
 
 elif opt.toyType=="CB":
@@ -134,7 +134,7 @@ if opt.mjjCut!=None:
 print Nsig
 print Nbkg
 
-# sys.exit()
+sys.exit()
 
 # ------------
 # Now we can submit jobs to run combine many times:
