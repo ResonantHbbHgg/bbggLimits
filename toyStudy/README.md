@@ -52,7 +52,7 @@ a bug) or 1.6 GeV (corrected). Signal shape is Gaussian with mean at 125 GeV and
 
 
 The toys generated for this game, as well as the background fit used, are shown here:
-![Toy data](figs/fig_gen_bkg.png)
+![Toy data](figs/fig_gen_bkg_mgg.png)
 
 ``` 
 python toyLimit_shape_n_roll.py 
@@ -137,7 +137,11 @@ Results with N_bkg = 250 events, N_sig = 9 events:
 | 1D(mgg), 100 < mjj < 140       |  81 | 7.3 | 0.94 | 21 | 
 
  
- 
+For the results above, the background is modeled as 1-parameter exponential functions in both mgg and mjj.
+And the signal is Gaussian with the width close to the expected in the analysis. See figures below:  
+
+<img src="figs/fig_gen_bkg_mgg.png" width="400"/> <img src="figs/fig_gen_bkg_mjj.png" width="400"/>
+
  
  
  
