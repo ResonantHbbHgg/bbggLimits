@@ -1,9 +1,9 @@
 ## Read the workspaces 
 
 A script called [readWS.py](readWS.py) allows you to read the workspaces from the signal and
-background of the actual analysis (which are also commited here).
+background of the 2016 analysis. These workspaces are also committed here.
 
-Here is a plot of the data distribution and backround fit in mgg in the most sensitive
+Here is a plot of the data distribution and background fit in mgg in the most sensitive
 category (excluding single Higgs): 
 
 ![Bkg fit in mgg](figs/fig_bkg_mgg.png)
@@ -29,7 +29,7 @@ You will get a plot like this:
 As we can see the relationship between the limit and &Sqrt;(N_bkg) is indeed
 linear. However, we also notice that the line does not cross zero. That means that there
 is an offset in the scaling of the limits. We are at the level of small number of events
-in the background.  From the backgound `mgg` shape `dN/dmgg = 2 events/GeV`. If we
+in the background.  From the background `mgg` shape `dN/dmgg = 2 events/GeV`. If we
 consider two cases of widths, 2 GeV and 3.2 GeV, we get 4 and 6.4 events
 correspondingly. So let's take those numbers and look at how the limits scale:
 
@@ -46,22 +46,22 @@ That is, already with the counting experiment the limit change is smaller than 2
 Template card for this game is [card_shape_n_roll.txt](card_shape_n_roll.txt). Here we
 will be replacing `%SIG%`, `%BKG%` and `%SIGMA%` within
 [toyLimit_shape_n_roll.py](toyLimit_shape_n_roll.py) script. In the analysis, Nsig = 4
-events, N_bkg = 118 events (total number in 100 &lt; mgg &lt; 180 GeV), sigma = 1.0 (with
+events, N_bkg = 118 events (total number in 100 &lt; mgg &lt; 180 GeV), &sigma; = 1.0 (with
 a bug) or 1.6 GeV (corrected). Signal shape is Gaussian with mean at 125 GeV and variable
 &sigma;, while the background is a simple Exponential function.
 
 
-The toys generated for that game as well as the background fit used are shown here:
+The toys generated for this game, as well as the background fit used, are shown here:
 ![Toy data](figs/fig_gen_bkg.png)
 
 ``` 
 python toyLimit_shape_n_roll.py 
 ```
 
-After running the script, you will get a plot like this, which shows how the limits scale with the width of the gaussian:  
+After running the script, you will get a plot like this, which shows how the limits scale with the width of the Gaussian:  
 ![Shape results](figs/fig_scale_with_sigma.png)
 
-Indeed, the scaling is as &Sqrt;&sigma;, nevertheless the ratio at 1.6 to 1.0 GeV sigmas are as follows:
+Indeed, the scaling of limits goes as &Sqrt;&sigma;, nevertheless the ratios at &sigma; = 1.6 to 1.0 GeV are as follows:
 
 | N_bkg | N_sig | Limit with &sigma;(sig) = 1 GeV | Limit with &sigma;(sig) = 1.6 GeV| L(1.6)-L(1.0))/L(1.0) | compare to &Sqrt;1.6/&Sqrt;1 - 1 |
 |-|-|-|-|-|-|
@@ -75,17 +75,16 @@ Indeed, the scaling is as &Sqrt;&sigma;, nevertheless the ratio at 1.6 to 1.0 Ge
 | 120 | 6 | 1.11 | 1.33 | 0.205 | 0.265 |
 | 140 | 6 | 1.18 | 1.42 | 0.206 | 0.265 |
 
-(in bold is the case closest to our analysis)
+In bold is the case closest to our analysis.
 
-Now, let's do a similar thing and instead of using Gasssian for the signal shape we use Double Sided
+Now, let's do a similar thing and instead of using Gaussian for the signal shape we use Double Sided
 Crystal Ball function with exactly the same parameters as in the analysis workspaces (before and after the bug fix):
 
-<img src="figs/fig_gen_CB_bug.png" width="400"/>
-<img src="figs/fig_gen_CB_fix.png" width="400"/>
+<img src="figs/fig_gen_CB_bug.png" width="400"/> <img src="figs/fig_gen_CB_fix.png" width="400"/>
 
 Here are the results:  
 
-| N_bkg | N_sig | Limit with bug, &sigma;(eff) = 1 GeV | Limit after fix &sigma;(eff) = 1.6 GeV| L(bug)-L(fix))/L(bug) | compare to &Sqrt;1.6/&Sqrt;1 - 1 |
+| N_bkg | N_sig | Limit with bug, &sigma;(eff) = 1 GeV | Limit after fix, &sigma;(eff) = 1.6 GeV| (L(bug)-L(fix))/L(bug) | compare to &Sqrt;1.6/&Sqrt;1 - 1 |
 |-|-|-|-|-|-|
 | 100 | 2 | 3.27 | 3.77 | 0.153 | 0.265 |
 | 120 | 2 | 3.52 | 4.05 | 0.151 | 0.265 |
@@ -102,9 +101,37 @@ The 15% difference is what we also observe in the analysis.
 Note: the width of 1.0 and 1.6 GeV are the _effective sigmas_ of the PDF. In the case of
 Crystal Ball function with large tails, a simple scaling with the &sigma;_eff breaks.
 
- 
- 
- 
+
+### Toy with 2D
+
+Un updated version of the [toyLimit_shape_n_roll.py](toyLimit_shape_n_roll.py) script has
+an option to run the toys of 2D(mgg, mjj) fit, as well as 1D(mgg) fit after a cut on mjj variable:
+
+``` 
+python toyLimit_shape_n_roll.py # 1D fit without mjj cuts
+python toyLimit_shape_n_roll.py -t 2D
+python toyLimit_shape_n_roll.py --mjj "mjj>100 && mjj<140"
+python toyLimit_shape_n_roll.py --mjj eff_sigma_1
+```
+
+Results with N_bkg = 120 events, N_sig = 4 events:
+| Fit type         | N_bkg | N_sig | Limit | Diff. wrt 2D, %| 
+| 2D(mgg,mjj)                    | 120 | 4.0 | 1.36 |  - | 
+| 1D(mgg), no mjj cut            | 120 | 4.0 | 1.99 | 46 | 
+| 1D(mgg), mjj in 1 &sigma;_eff  |  24 | 2.7 | 1.65 | 21 | 
+| 1D(mgg), mjj in 2 &sigma;_eff  |  51 | 3.8 | 1.51 | 11 | 
+| 1D(mgg), 100 < mjj < 140       |  32 | 3.2 | 1.52 | 12 | 
+
+
+
+Results with N_bkg = 250 events, N_sig = 9 events:
+| Fit type         | N_bkg | N_sig | Limit | Diff. wrt 2D, %| 
+| 2D(mgg,mjj)                    | 250 | 9.0 | 0.78 |  - | 
+| 1D(mgg), no mjj cut            | 250 | 9.0 | 1.21 | 55 | 
+| 1D(mgg), mjj in 1 &sigma;_eff  |  49 | 6.1 | 0.93 | 19 | 
+| 1D(mgg), mjj in 2 &sigma;_eff  | 108 | 6.8 | 0.89 | 14 | 
+| 1D(mgg), 100 < mjj < 140       |  81 | 7.3 | 0.94 | 21 | 
+
  
  
  
