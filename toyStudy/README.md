@@ -102,7 +102,7 @@ Note: the width of 1.0 and 1.6 GeV are the _effective sigmas_ of the PDF. In the
 Crystal Ball function with large tails, a simple scaling with the &sigma;_eff breaks.
 
 
-### Toy with 2D
+### Toys with 2D fits
 
 Un updated version of the [toyLimit_shape_n_roll.py](toyLimit_shape_n_roll.py) script has
 an option to run the toys of 2D(mgg, mjj) fit, as well as 1D(mgg) fit after a cut on mjj variable:
@@ -110,7 +110,7 @@ an option to run the toys of 2D(mgg, mjj) fit, as well as 1D(mgg) fit after a cu
 ``` 
 python toyLimit_shape_n_roll.py # 1D fit without mjj cuts
 python toyLimit_shape_n_roll.py -t 2D
-python toyLimit_shape_n_roll.py --mjj "mjj>100 && mjj<140"
+python toyLimit_shape_n_roll.py --mjj "mjj>100 && mjj<150"
 python toyLimit_shape_n_roll.py --mjj eff_sigma_1
 ```
 
@@ -122,7 +122,7 @@ Results with N_bkg = 120 events, N_sig = 4 events:
 | 1D(mgg), no mjj cut            | 120 | 4.0 | 1.99 | 46 | 
 | 1D(mgg), mjj in 1 &sigma;_eff  |  24 | 2.7 | 1.65 | 21 | 
 | 1D(mgg), mjj in 2 &sigma;_eff  |  51 | 3.8 | 1.51 | 11 | 
-| 1D(mgg), 100 < mjj < 140       |  32 | 3.2 | 1.52 | 12 | 
+| 1D(mgg), 100 < mjj < 150       |  34 | 3.6 | 1.39 |  2 | 
 
 
 
@@ -134,7 +134,7 @@ Results with N_bkg = 250 events, N_sig = 9 events:
 | 1D(mgg), no mjj cut            | 250 | 9.0 | 1.21 | 55 | 
 | 1D(mgg), mjj within 1 &sigma;(eff)  |  49 | 6.1 | 0.93 | 19 | 
 | 1D(mgg), mjj within 2 &sigma;(eff)  | 108 | 6.8 | 0.89 | 14 | 
-| 1D(mgg), 100 < mjj < 140       |  81 | 7.3 | 0.94 | 21 | 
+| 1D(mgg), 100 < mjj < 150       |  88 | 8.1 | 0.87 | 12 | 
 
  
 For the results above, the background is modeled as 1-parameter exponential functions in both mgg and mjj.
@@ -142,8 +142,31 @@ And the signal is Gaussian with the width close to the expected in the analysis.
 
 <img src="figs/fig_gen_bkg_mgg.png" width="400"/> <img src="figs/fig_gen_bkg_mjj.png" width="400"/>
 
+Now, let's do the same as above, but changing the signal model from Gaussian to
+double-sided Crystall Ball, with same parameters obtained from our signal MC.
  
- 
+| Fit type         | N_bkg | N_sig | Limit | Diff. wrt 2D, % | 
+|-|-|-|-|-|
+| 2D(mgg,mjj)                         | 250 | 9.0 | 0.90 |  - | 
+| 1D(mgg), no mjj cut                 | 250 | 9.0 | 1.22 | 36 | 
+| 1D(mgg), mjj within 1 &sigma;(eff)  |  67 | 6.1 | 1.07 | 19 | 
+| 1D(mgg), mjj within 2 &sigma;(eff)  | 147 | 8.1 | 1.09 | 21 | 
+| 1D(mgg), 100 < mjj < 150            |  82 | 6.9 | 1.02 | 13 | 
+
+
+Here is another one, this time reducing the width of the mjj in signal by ~20% (let's hope
+for the greatest b-jet regression!):
+
+| Fit type         | N_bkg | N_sig | Limit | Diff. wrt 2D, % | 
+|-|-|-|-|-|
+| 2D(mgg,mjj)                         | 250 | 9.0 | 0.82 |  - | 
+| 1D(mgg), no mjj cut                 | 250 | 9.0 | 1.22 | 49 | 
+| 1D(mgg), mjj within 1 &sigma;(eff)  |  49 | 6.1 | 0.95 | 16 | 
+| 1D(mgg), mjj within 2 &sigma;(eff)  | 102 | 7.7 | 0.99 | 21 | 
+| 1D(mgg), 100 < mjj < 150            |  84 | 7.5 | 0.95 | 16 | 
+
+These are the PDFs of the last toy (two Crystall-Balls, with reduced width of mjj): 
+<img src="figs/fig_gen_bkg_mgg_CB.png" width="400"/> <img src="figs/fig_gen_bkg_mjj_CB.png" width="400"/>
  
 
 

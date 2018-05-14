@@ -14,7 +14,7 @@ parser =  argparse.ArgumentParser(description='Shape limits toy game')
 parser.add_argument('--dry', dest="dry", action="store_true", default=False,
                     help="Dry run, without running the limits. Assume the output files of combine exist, so just make the plots.")
 parser.add_argument('-t','--type', dest="toyType", default='Gauss', type=str,
-                    choices=['Gauss', 'CB', '2D'], help = "Choose the type of toy limits to run")
+                    choices=['Gauss', 'CB', '2D', '2D-CB'], help = "Choose the type of toy limits to run")
 
 parser.add_argument('--mjjCut', dest="mjjCut", default=None, type=str,
                     help = "A cut on mjj for the case of 1D fit. Must be a valid string like this: 'mjj>100 && mjj<190 \
@@ -39,21 +39,24 @@ if opt.toyType=="Gauss" or opt.toyType=="2D":
     w.factory('Gaussian::sig_mgg(mgg, 124.8, sigma_mgg[1.6])')
     w.factory('Gaussian::sig_mjj(mjj, 123.0, sigma_mjj[15])')
 
-elif opt.toyType=="CB":
+elif opt.toyType=="CB" or opt.toyType=="2D-CB":
     # The parameters of th Double Sided Crystal Ball are taken from the analysis workspace (see readWS.py script)
     # This one is after the bug fix:
     w.factory('DoubleCB::sig_mgg(mgg, 124.78, sigma_mgg[1.33], 1.18, 5.25, 1.65, 9.38)')
     # This one is before the bug fix
     # w.factory('DoubleCB::sig(x, 124.85, 0.79, 1.02, 3.75, 1.68, 4.63)')
 
-    w.factory('DoubleCB::sig_mjj(mjj, 123.53, sigma_mjj[12], 0.70, 2.06, 1.81, 0.95)')
+    # With parameters from our signal MC sample:
+    #w.factory('DoubleCB::sig_mjj(mjj, 123.53, sigma_mjj[12], 0.70, 2.06, 1.81, 0.95)')
+    # Reduced the width
+    w.factory('DoubleCB::sig_mjj(mjj, 123.53, sigma_mjj[9.6], 1.20, 0.96, 1.81, 0.95)')
 
 w.factory('PROD::bkg_2D(bkg_mgg, bkg_mjj)')
 w.factory('PROD::sig_2D(sig_mgg, sig_mjj)')
 
 # ---------
 # Re-naming. The final PDFs should be named sig and bkg (used in the datacards)
-if opt.toyType=='2D':
+if '2D' in opt.toyType:
     w.factory('EDIT::bkg(bkg_2D, tau_mgg=tau_mgg)')
     w.factory('EDIT::sig(sig_2D, sigma_mgg=sigma_mgg)')
 else:
@@ -94,8 +97,8 @@ for v in [x,y]:
 # Here we define some scans: over sigma values, number of background and signal events:
 # ----------------
 Sigmas = np.array([0.6, 1.0, 1.6, 2.0])
-if opt.toyType not in ["Gauss","2D"]:
-    Sigmas = np.array([1.0, 1.33, 2.0]) # This is for CB
+if opt.toyType in ["CB","2D-CB"]:
+    Sigmas = np.array([1.0, 1.33, 2.0]) # This is for CB shape of the mgg in signal
 
 Nbkg = np.array([100, 120, 250])
 Nsig = np.array([2, 4, 9], dtype=float)
@@ -134,7 +137,7 @@ if opt.mjjCut!=None:
 print Nsig
 print Nbkg
 
-sys.exit()
+# sys.exit()
 
 # ------------
 # Now we can submit jobs to run combine many times:
@@ -210,9 +213,9 @@ for si in Nsig:
             diff = (lim_s1p6 - lim_s1p0)/lim_s1p0
             print "| %.1f| %.1f | %.2f | %.2f | %.3f | %.3f |" % (N, si, lim_s1p0, lim_s1p6, diff, exp_diff)
 
-        elif opt.toyType=="CB":
-            lim_0 = limsAll['NBKG_'+str(N)+'_NSIG_'+str(si)][0]
-            print "| %i | %i | %.2f |" % (N, si, lim_0)
+        elif opt.toyType in ["CB","2D-CB"]:
+            lim_0 = limsAll['NBKG_'+str(N)+'_NSIG_'+str(si)][1]
+            print "| %.1f | %.1f | %.2f |" % (N, si, lim_0)
 
             tmp.append(lim_0)
 print tmp
