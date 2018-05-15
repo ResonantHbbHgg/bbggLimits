@@ -178,7 +178,7 @@ for cc in cats:
   leg.AddEntry(totbkgh, 'Full background model', 'l')
   leg.AddEntry(bkghist, 'Nonresonant background', 'l')
 
-  sigText = 'SM HH Signal (x'+str(int(opt.fsignal[intc]))+')'
+  sigText = 'SM HH signal (x'+str(int(opt.fsignal[intc]))+')'
   leg.AddEntry(sigh, sigText, 'l')
 
   SetGeneralStyle()

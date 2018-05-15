@@ -20,10 +20,10 @@ INFILE=${LIMFOLDER}/${CombDir}/MaxLikelihoodFitResult.root
 OUTFILE_HM=${LIMFOLDER}/FullBkgPlot_HM
 OUTFILE_LM=${LIMFOLDER}/FullBkgPlot_LM
 #all four below to be taken from the datacard (signal rate)*33.49*0.0026
-HMHP_NORM=0.37697
-HMMP_NORM=0.35948
-LMHP_NORM=0.02473
-LMMP_NORM=0.04940
+HMHP_NORM=0.37144
+HMMP_NORM=0.35764
+LMHP_NORM=0.02331
+LMMP_NORM=0.04631
 #these are multiplicative factors to make the signal show up
 HMHP_FACT=20
 HMMP_FACT=100
