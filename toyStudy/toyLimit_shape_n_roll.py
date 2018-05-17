@@ -47,9 +47,9 @@ elif opt.toyType=="CB" or opt.toyType=="2D-CB":
     # w.factory('DoubleCB::sig(x, 124.85, 0.79, 1.02, 3.75, 1.68, 4.63)')
 
     # With parameters from our signal MC sample:
-    #w.factory('DoubleCB::sig_mjj(mjj, 123.53, sigma_mjj[12], 0.70, 2.06, 1.81, 0.95)')
-    # Reduced the width
-    w.factory('DoubleCB::sig_mjj(mjj, 123.53, sigma_mjj[9.6], 1.20, 0.96, 1.81, 0.95)')
+    w.factory('DoubleCB::sig_mjj(mjj, 123.53, sigma_mjj[12], 0.70, 2.06, 1.81, 0.95)')
+    # Reduced the width:
+    # w.factory('DoubleCB::sig_mjj(mjj, 123.53, sigma_mjj[9.6], 1.20, 0.96, 1.81, 0.95)')
 
 w.factory('PROD::bkg_2D(bkg_mgg, bkg_mjj)')
 w.factory('PROD::sig_2D(sig_mgg, sig_mjj)')
