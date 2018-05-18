@@ -85,8 +85,11 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     Label = "_ARW_"
   elif point!=None:
     Label = "_Node_"+str(point)
+  elif opt.Mjj_VBFCut!=None and opt.dEta_VBFCut!=None:
+    Label = "VBFHH"
   elif NRgridPoint!=-1:
     Label = "_gridPoint_"+str(NRgridPoint)
+  
   else:
     print 'WARning: using list of nodes from the json input file'
     return __BAD__
@@ -158,6 +161,10 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
     pointStr = "_".join(['kl',str(opt.ARW_kl),'kt',str(opt.ARW_kt),'cg',str(opt.ARW_cg),'c2',str(opt.ARW_c2),'c2g',str(opt.ARW_c2g)]).replace('.', 'p').replace('-', 'm')
     SignalFile="/LT_NR_Nodes_All_merged_"+pointStr+".root"
 
+  if opt.Mjj_VBFCut!=None and opt.dEta_VBFCut!=None:
+    SignalFile="/LT_output_VBFHHTo2B2G_CV_1_C2V_1_C3_1_13TeV-madgraph_0.root"
+
+
   procLog.debug('%s, %s', SignalFile, pformat(signalTypes))
 
 
@@ -190,6 +197,16 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
       theFitter.SetCut("ttHTagger > "+str(opt.ttHTaggerCut))
       if opt.verb>0:
         procLog.info('Apply the cut on ttHTagger: ' + str(opt.ttHTaggerCut))
+    if opt.Mjj_VBFCut!=None and opt.dEta_VBFCut!=None:
+      if not opt.removeHHVBF:
+        print "mjj_vbf > "+str(opt.Mjj_VBFCut)+" && deta_vbf > "+str(opt.dEta_VBFCut)
+        theFitter.SetCut("mjj_vbf > "+str(opt.Mjj_VBFCut)+" && deta_vbf > "+str(opt.dEta_VBFCut))
+        procLog.info("mjj_vbf > "+str(opt.Mjj_VBFCut)+" && deta_vbf > "+str(opt.dEta_VBFCut))
+      else:
+        theFitter.SetCut("mjj_vbf < "+str(opt.Mjj_VBFCut)+" || deta_vbf < "+str(opt.dEta_VBFCut))
+        procLog.info("mjj_vbf < "+str(opt.Mjj_VBFCut)+" || deta_vbf < "+str(opt.dEta_VBFCut))
+
+
         
     if 'HighMass' in t:
       theFitter.SetNCat0(2)

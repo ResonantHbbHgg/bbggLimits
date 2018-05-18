@@ -76,6 +76,10 @@ parser.add_argument('--c2', dest='ARW_c2', type=float, default=0.0)
 parser.add_argument('--c2g', dest='ARW_c2g', type=float, default=0.0)
 
 parser.add_argument('--ttHTaggerCut', dest='ttHTaggerCut', type=float, default=None)
+parser.add_argument('--Mjj_VBFCut', dest='Mjj_VBFCut', type=float, default=None)
+parser.add_argument('--dEta_VBFCut', dest='dEta_VBFCut', type=float, default=None)
+parser.add_argument('--removeHHVBF', dest="removeHHVBF", action="store_true", default=False,
+                    help="If you provided VBF selection conditions you shall say if you want to remove HH VBF or keep HH VBF")
 
 opt = parser.parse_args()
 print opt
@@ -185,7 +189,11 @@ if __name__ == "__main__":
                   pformat([opt.ARW_kl, opt.ARW_kt, opt.ARW_c2, opt.ARW_cg, opt.ARW_c2g]))
     res_ARW.append(('ARW', pool.apply_async(runFullChain, args = (opt, Params, None, -1, opt.extraLabel))))
 
-      
+  res_VBF = []
+  if opt.Mjj_VBFCut!=None and opt.dEta_VBFCut!=None:
+    mainLog.debug('Running on VBF HH')
+    res_VBF.append(('VBFHH', pool.apply_async(runFullChain, args = (opt, Params, None, -1, opt.extraLabel))))
+
   pool.close()
 
 
@@ -202,13 +210,13 @@ if __name__ == "__main__":
   # We just wait for the jobs to finish.
 
 
-  print "Running over:", res_Masses, res_Nodes, res_Points, res_ARW
+  print "Running over:", res_Masses, res_Nodes, res_Points, res_ARW, res_VBF
 
   pCount=0
-  totJobs = len(res_Nodes)+len(res_Points)+len(res_Masses)+len(res_ARW)
+  totJobs = len(res_Nodes)+len(res_Points)+len(res_Masses)+len(res_ARW)+len(res_VBF)
 
   badJobs = []
-  for i, r in enumerate([res_Masses, res_Nodes, res_Points, res_ARW]):
+  for i, r in enumerate([res_Masses, res_Nodes, res_Points, res_ARW, res_VBF]):
     badJobs.append([])
 
     #mainLog.debug('Type of r: %r,  length of r: %r', i, len(r))

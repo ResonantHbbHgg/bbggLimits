@@ -8,8 +8,11 @@ cwd = os.getcwd()
 
 #D_HM = "/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LT_MadMaxMetCut_HighMass"
 #D_LM = "/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LT_MadMaxMetCut_LowMass"
-D_HM = "/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LT_TEST_ttH_HighMass"
-D_LM = "/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LT_TEST_ttH_LowMass"
+#D_HM = "/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LT_TEST_ttH_HighMass"
+#D_LM = "/afs/cern.ch/user/a/andrey/work/hh/LimitCode/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LT_TEST_ttH_LowMass"
+D_HM = "/afs/cern.ch/work/m/mgouzevi/private/LIMITS/CLEAN_EPS_GGBB_UPDATE/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LT_OutDir_HighMass"
+D_LM = "/afs/cern.ch/work/m/mgouzevi/private/LIMITS/CLEAN_EPS_GGBB_UPDATE/CMSSW_7_4_7/src/HiggsAnalysis/bbggLimits/LT_OutDir_LowMass"
+
 
 FILE = "/LT_output_GluGluToHHTo2B2G_AllNodes.root"
 
@@ -52,7 +55,7 @@ def makeMyTreeGood(inPath, kl=1, kt=1, cg=0, c2=0, c2g=0):
   with tempfile.NamedTemporaryFile(dir='/tmp/'+username, prefix='batch_LT_'+pointStr, suffix='.sh', delete=False) as bFile:
     bFile.write(batch)
     bFile.flush()
-    command = "bsub -q 8nm -J batch_LT_" + pointStr+ " < " + bFile.name
+    command = "bsub -q 8nh -J batch_LT_" + pointStr+ " < " + bFile.name
     print command
     os.system(command)
 

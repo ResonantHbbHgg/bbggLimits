@@ -167,6 +167,8 @@ RooArgSet* bbgg2DFitter::defineVariables(bool swithToSimpleWeight=false)
   RooRealVar* mtot = new RooRealVar("mtot","M(#gamma#gammajj)",200,1600,"GeV");
   RooRealVar* mjj  = new RooRealVar("mjj","M(jj)",_minMjjMassFit,_maxMjjMassFit,"GeV");
   RooRealVar* ttHTagger  = new RooRealVar("ttHTagger","BDT",-1,1,"");
+  RooRealVar* mjj_vbf  = new RooRealVar("mjj_vbf","M(jj) VBF jets",0,13000,"");
+  RooRealVar* deta_vbf  = new RooRealVar("deta_vbf","dEta VBF jets",0,10,"");
   RooCategory* cut_based_ct = new RooCategory("cut_based_ct","event category 4") ;
   RooRealVar* evWeight = 0;
   RooRealVar* new_evWeight = 0;
@@ -205,7 +207,11 @@ RooArgSet* bbgg2DFitter::defineVariables(bool swithToSimpleWeight=false)
   
   if (_cut.Contains("ttHTagger"))
     ntplVars->add(*ttHTagger);
-  
+  if (_cut.Contains("mjj_vbf"))
+    ntplVars->add(*mjj_vbf);
+  if (_cut.Contains("deta_vbf"))
+    ntplVars->add(*deta_vbf);
+
   return ntplVars;
 }
 

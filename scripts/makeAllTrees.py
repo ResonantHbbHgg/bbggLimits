@@ -32,6 +32,7 @@ parser.add_argument("--doPhotonCR", dest="isPhotonCR", action="store_true", defa
 parser.add_argument("--doPhotonCRSignalNorm", dest="isPhotonCRSignalNorm", action="store_true", default=False,
                                        help="Pick events from photon control region to match event yield of signal region")
 parser.add_argument("--doSMHiggs", dest='doSMHiggs', action="store_true", default=False, help="Make SM single H trees")
+parser.add_argument("--doVBFHH", dest='doVBFHH', action="store_true", default=False, help="Make VBF HH trees")
 parser.add_argument("--ctsCut", dest="ctsCut", default=-10)
 parser.add_argument("--resMass", dest="resMass", default=-100, help="Do one specific mass")
 parser.add_argument('--doCatMVA', dest="doCatMVA", action="store_true", default=False,
@@ -72,13 +73,19 @@ if 'nonres' in opt.x:
       
     Signals = opt.signalDir + SignalFiles
 
+  if opt.doVBFHH:
+    nodes = [["VBFHH", 50000]]
+    if opt.signalDir is None:
+      Signals = "root://eoscms//eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/Mar82018_ForPubli_RafStyle//Signal/Hadd/output_VBFHHTo2B2G_CV_1_C2V_1_C3_1_13TeV-madgraph_0.root"
+    else:
+      Signals = opt.signalDir + '/output_VBFHHTo2B2G_CV_1_C2V_1_C3_1_13TeV-madgraph_0.root'
+
   if opt.doSMHiggs:
     nodes = SMHiggsSamples.SMHiggsNodes
     if opt.signalDir is None:
       Signals = "root://eoscms//eos/cms/store/group/phys_higgs/resonant_HH/RunII/FlatTrees/2016/Mar82018_ForPubli_RafStyle/Background/Hadd/THENODE"
     else:
       Signals = opt.signalDir + '/THENODE'
-
 
   DataFiles = "/DoubleEG.root"
   if opt.dataDir is None:
