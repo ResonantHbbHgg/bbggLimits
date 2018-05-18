@@ -32,6 +32,8 @@ void bbggLTMaker::Loop()
   o_jt1diffweight = -99;
   o_jt2diffweight = -99;
   o_diffweight = -99;
+  o_deta_vbf = -99;
+  o_mjj_vbf = -99;
 
   std::cout << "Output file name: " << outFileName << std::endl;
   std::cout << "Options:\n\t Mtot min: " << mtotMin << "\n\t Mtot max: " <<  mtotMax << "\n\t isPhotonCR: " << photonCR
@@ -64,6 +66,10 @@ void bbggLTMaker::Loop()
   outTree->Branch("diffweight", &o_diffweight, "o_diffweight/D");
 
   outTree->Branch("ttHTagger", &o_ttHTagger, "o_ttHTagger/D");
+
+  outTree->Branch("deta_vbf", &o_deta_vbf, "o_deta_vbf/D");
+  outTree->Branch("mjj_vbf", &o_mjj_vbf, "o_mjj_vbf/D");
+
 
   outTree->Branch("evt", &o_evt, "o_evt/l");
   outTree->Branch("run", &o_run, "o_run/i");
@@ -192,6 +198,8 @@ void bbggLTMaker::Loop()
     o_jt1diffweight = -99;
     o_jt2diffweight = -99;
     o_diffweight = -99;
+    o_deta_vbf = -99;
+    o_mjj_vbf = -99;
 
       
     Long64_t ientry = LoadTree(jentry);
@@ -214,6 +222,9 @@ void bbggLTMaker::Loop()
     o_isSignal = isSignal;
     o_HHTagger = HHTagger;
     o_ttHTagger = ttHTagger;
+    o_deta_vbf = dEta_VBF;
+    o_mjj_vbf = Mjj_VBF;
+
 
     //std::cout<<"ttH tagger = "<<ttHTagger<<std::endl;
     //Double_t mmm = diHiggsCandidate->M();
