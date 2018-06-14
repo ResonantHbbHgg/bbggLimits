@@ -55,6 +55,7 @@ parser.add_argument('--LMSJBTC', dest='LMSJBTC', type=float, default=-10)
 parser.add_argument('--HMSJBTC', dest='HMSJBTC', type=float, default=-10)
 parser.add_argument('--massThreshold', dest='massThreshold', type=float, default=400, help='mass threshold')
 parser.add_argument('--isRes', dest='isres', action='store_true', default=False)
+parser.add_argument('--isETH', dest='isETH', action='store_true', default=False)
 
 #corrections
 parser.add_argument('--bVariation', dest="bVariation", type=int, default=-999,
@@ -153,6 +154,7 @@ def setAndLoop(fname, options, outFile):
   LTM.SetCosThetaStarHigh(options.cosThetaStarHigh)
   LTM.SetMassThreshold(options.massThreshold)
   if (opt.isres): LTM.IsRes()
+  if (opt.isETH): LTM.IsETH()
 
   LTM.SetLowMassLeadingJetBtagCut( options.LMLJBTC )
   LTM.SetHighMassLeadingJetBtagCut( options.HMLJBTC )

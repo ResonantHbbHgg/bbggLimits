@@ -106,6 +106,7 @@ public :
    double massThreshold;
    bool isCustMVA;
    bool isRes;
+   bool isETH;
    typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > LorentzVector;
 
    // Declaration of leaf types
@@ -315,6 +316,7 @@ public :
    void DoNRWeights(int doNRW) { doNonResWeights = doNRW; }
 
    void IsRes() {isRes=1;}
+   void IsETH() {isETH=1;}
 
    void isCustomCatMVA() {isCustMVA = 1;}
 };
@@ -475,10 +477,18 @@ void bbggLTMaker::Init(TTree *tree)
    fChain->SetBranchAddress("subleadingPhotonR9full5x5", &subleadingPhotonR9full5x5, &b_subleadingPhotonR9full5x5);
    fChain->SetBranchAddress("ttHTagger", &ttHTagger, &b_ttHTagger);
    TString WhichTagger = "HHTagger";
-   if(isRes) WhichTagger = "ResHHTagger";
-   fChain->SetBranchAddress(WhichTagger, &HHTagger, &b_HHTagger);
-   fChain->SetBranchAddress(TString(WhichTagger+"_LM"), &HHTagger_LM, &b_HHTagger_LM);
-   fChain->SetBranchAddress(TString(WhichTagger+"_HM"), &HHTagger_HM, &b_HHTagger_HM);
+   if(isETH) {
+     WhichTagger = "HHTagger2017_transform";
+     fChain->SetBranchAddress(TString(WhichTagger), &HHTagger, &b_HHTagger);
+     //fChain->SetBranchAddress(TString(WhichTagger), &HHTagger_LM, &b_HHTagger_LM);
+     //fChain->SetBranchAddress(TString(WhichTagger), &HHTagger_HM, &b_HHTagger_HM);
+   }
+   else {
+     if(isRes) WhichTagger = "ResHHTagger";
+     fChain->SetBranchAddress(WhichTagger, &HHTagger, &b_HHTagger);
+     fChain->SetBranchAddress(TString(WhichTagger+"_LM"), &HHTagger_LM, &b_HHTagger_LM);
+     fChain->SetBranchAddress(TString(WhichTagger+"_HM"), &HHTagger_HM, &b_HHTagger_HM);
+   }
    Notify();
 }
 

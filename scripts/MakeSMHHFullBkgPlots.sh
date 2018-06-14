@@ -6,7 +6,7 @@ LIMFOLDER=$1
 POINT="kl_1p0_kt_1p0_cg_0p0_c2_0p0_c2g_0p0" #this is SM
 CombDir="CombinedCard_ARW_${POINT}"
 
-#CombDir="CombinedCard_Node_SM"
+CombDir="CombinedCard_Node_SM"
 
 combine --datacard ${LIMFOLDER}/${CombDir}/hhbbgg_13TeV_DataCard.txt -M MaxLikelihoodFit --saveWorkspace --saveShapes --saveNormalization --X-rtd TMCSO_AdaptivePseudoAsimov=50 -n SMHHForBkgPlots
 
@@ -25,10 +25,10 @@ HMMP_NORM=0.35764
 LMHP_NORM=0.02331
 LMMP_NORM=0.04631
 #these are multiplicative factors to make the signal show up
-HMHP_FACT=20
-HMMP_FACT=100
-LMHP_FACT=100
-LMMP_FACT=1000
+HMHP_FACT=200
+HMMP_FACT=1000
+LMHP_FACT=1000
+LMMP_FACT=10000
 
 HMTEXT="#font[61]{pp#rightarrowHH#rightarrowb#bar{b}#gamma#gamma}|High-mass region"
 LMTEXT="#font[61]{pp#rightarrowHH#rightarrowb#bar{b}#gamma#gamma}|Low-mass region"

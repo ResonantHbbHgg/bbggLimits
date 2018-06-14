@@ -204,7 +204,8 @@ void bbggLTMaker::Loop()
 
     o_evt = event;
     o_run = run;
-
+    
+    //o_preweight = 1; //APZ TEMP. Make background MC look like data
     o_preweight = genTotalWeight*normalization;
     o_bbMass = dijetCandidate->M();
     o_ggMass = (*leadingPhoton + *subleadingPhoton).M();
@@ -229,7 +230,8 @@ void bbggLTMaker::Loop()
 
     // Removing ttbar contributions
     //if (o_met > 100 || njets>=6) continue;
-    
+
+
     if(doKinFit)
       o_bbggMass = diHiggsCandidate_KF->M();
     if(doMX)
@@ -237,7 +239,15 @@ void bbggLTMaker::Loop()
 
     //mtot cut
     if(o_bbggMass < mtotMin || o_bbggMass > mtotMax) continue;
+
+    // APZ DBG ETH BDT cuts
+    if (isETH){
+      HHTagger_LM = HHTagger;
+      HHTagger_HM = HHTagger;
+    }
+    //std::cout<<"mbbjj="<<o_bbggMass<<" HHtagger: "<<HHTagger<<"  LM="<<HHTagger_LM<<"  HM="<<HHTagger_HM<<std::endl;
     
+
     bool isInterestingRegion = 1;
     if(isSignal){
       if(photonCR==0 && photonCRNormToSig==0) isInterestingRegion = 1;

@@ -36,6 +36,8 @@ parser.add_argument("--ctsCut", dest="ctsCut", default=-10)
 parser.add_argument("--resMass", dest="resMass", default=-100, help="Do one specific mass")
 parser.add_argument('--doCatMVA', dest="doCatMVA", action="store_true", default=False,
                     help="Do MVA categorization")
+parser.add_argument('--doETH', dest="doETH", action="store_true", default=False,
+                    help="Do ETH MVA categorization")
 parser.add_argument('--MVAHMC0', dest='MVAHMC0', type=float, default=0.982, help="MVAHMC0")
 parser.add_argument('--MVAHMC1', dest='MVAHMC1', type=float, default=0.875, help="MVAHMC1")
 parser.add_argument('--MVALMC0', dest='MVALMC0', type=float, default=0.982, help="MVALMC0")
@@ -96,7 +98,7 @@ if 'nonres' in opt.x:
   postFix = massOpt + catscheme + " --cosThetaStarHigh " + str(opt.ctsCut) + " "
 
   if (opt.gendiphofilter): postFix += " --genDiPhotonFilter "
-
+  if (opt.doETH): postFix += " --isETH "
   SFs = " --bVariation 0 --phoVariation 0 --bDiffVariation " + opt.btagdiffvar + ' '
 
   directory = dirPrefix

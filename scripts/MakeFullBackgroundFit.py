@@ -59,7 +59,8 @@ dims = ['mjj','mgg']
 bins = [24, 80]
 xtitle = ['m_{jj} [GeV]', 'm_{#gamma#gamma} [GeV]']
 ytitle = ['Events/(5 GeV)', 'Events/(1 GeV)']
-yLimits = {'mgg': [14, 90, 14, 60], 'mjj': [18, 220, 30, 150]}
+#yLimits = {'mgg': [14, 90, 14, 60], 'mjj': [18, 220, 30, 150]}
+yLimits = {'mgg': [90, 1100, 240, 1200], 'mjj': [180, 3200, 600, 3500]}
 
 for cc in cats:
  for iobs,obs in enumerate(dims):

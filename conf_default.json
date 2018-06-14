@@ -14,6 +14,7 @@
         "doBlinding" : 0,
         "doBands" : 0,
         "ncat" : 2,
+        "fitStrategy" : 2,
         "doSingleLimit" : 0,
         "drawSignalFit" : 0,
         "drawBackgroundFit" : 0,
