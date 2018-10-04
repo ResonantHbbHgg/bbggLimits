@@ -1,0 +1,9 @@
+/Plotting
+/Resources
+/Support
+/CMakeLists.txt*
+/cmake
+/build
+*.pyc
+__init__.py
+.DS_Store
