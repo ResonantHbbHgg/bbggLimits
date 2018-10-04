@@ -64,8 +64,8 @@ maxval = [190, 145]
 
 xtitle = ['m_{jj} [GeV]', 'm_{#gamma#gamma} [GeV]']
 ytitle = ['Events/(5 GeV)', 'Events/(1 GeV)']
-yLimits = {'mgg': [60, 700, 60, 400], 'mjj': [110, 1000, 110, 700]}
-#yLimits = {'mgg': [0.03, 0.1, 0.03, 0.1], 'mjj': [0.03, 0.1, 0.03, 0.1]}
+#yLimits = {'mgg': [60, 700, 60, 400], 'mjj': [80, 700, 80, 700]}
+yLimits = {'mgg': [0.03, 0.1, 0.03, 0.1], 'mjj': [0.03, 0.1, 0.03, 0.1]}
 #yLimits = {'mgg': [6, 500, 6, 700], 'mjj': [200, 1200, 200, 2000]}
 
 for cc in cats:
@@ -93,8 +93,8 @@ for cc in cats:
   if cc == 0 or cc == 1: normName = 'n_exp_final_binch2_cat'
   bkg_norm = RooRealVar('bkg_norm', 'nonres bkg norm', w_all.obj(normName+str(cc)+'_proc_Bkg').getVal())
 
-  data2d = w_all.data("model_sData")
-#  data2d = w_all.data("data_obs")
+#  data2d = w_all.data("model_sData")
+  data2d = w_all.data("data_obs")
   data2d.Print()
   
 #  data = data2d.reduce(RooArgSet(RooFit.CutRange('catcut')))
@@ -149,7 +149,7 @@ for cc in cats:
   totBkg.plotOn(frame,RooFit.LineColor(cNiceBlueDark),RooFit.Precision(1E-5), RooFit.Normalization(totBkgNorm, RooAbsReal.NumEvent))
 
 
-  sig_pdf.plotOn(frame,RooFit.LineColor(cNiceRed), RooFit.Precision(1E-5), RooFit.Normalization(opt.snorm[intc]*opt.fsignal[intc],RooAbsReal.NumEvent))
+#  sig_pdf.plotOn(frame,RooFit.LineColor(cNiceRed), RooFit.Precision(1E-5), RooFit.Normalization(opt.snorm[intc]*opt.fsignal[intc],RooAbsReal.NumEvent))
 
   datahist = frame.getObject(0)
 
@@ -163,7 +163,7 @@ for cc in cats:
 
   bkghist = frame.getObject(dataind+1)
   totbkgh = frame.getObject(dataind+2)
-  sigh = frame.getObject(dataind+3)
+#  sigh = frame.getObject(dataind+3)
 
   leg = TLegend(0.5, 0.55, 0.89, 0.89)
   leg.SetBorderSize(0)
@@ -176,8 +176,8 @@ for cc in cats:
   leg.AddEntry(bkghist, 'Nonresonant background', 'l')
 #  sigText = 'SM HH Signal (x20)'
 #  if int(intc) == 1:
-  sigText = 'SM HH signal (x'+str(int(opt.fsignal[intc]))+')'
-  leg.AddEntry(sigh, sigText, 'l')
+#  sigText = 'SM HH signal (x'+str(int(opt.fsignal[intc]))+')'
+#  leg.AddEntry(sigh, sigText, 'l')
 
   SetGeneralStyle()
   c = TCanvas("c", "c", 800, 600)
@@ -227,49 +227,16 @@ for cc in cats:
 #               tlatex.SetTextFont(43)
     tlatex.DrawLatex(0.14, topy-stepy*2, Cat)
 
-  DrawCMSLabels(c, '3000')
+  DrawCMSLabels(c, 'MC Prefit 1')
   c.SaveAs(opt.outf+str(cc) + obs+".pdf")
   c.SaveAs(opt.outf+str(cc) + obs+".png")
 
   N = datahist.GetN()
-  alpha = 1 - 0.6827
-
   for i in range(0,N):
     datahist.GetPoint(i, x, y)
     rndvalue[0] = rnd.Poisson(y[0])
-
-    if rndvalue[0] == 0 :
-      L = 0
-    else : 
-      L = Math.gamma_quantile(alpha/2,rndvalue[0],1.)
-
-    U =  Math.gamma_quantile_c(alpha/2,rndvalue[0]+1,1) 
-   
-    datahist.SetPointEYlow(i, rndvalue[0]-L)
-    datahist.SetPointEYhigh(i, U-rndvalue[0])
-
-#    Eup = sqrt()
-#    Edo = 
     print "x = ",x," y = ",y, " rndvalue", rndvalue
     datahist.SetPoint(i,x,rndvalue)
-#    datahist.SetPointEYhigh(i,x,Eup)
-#    datahist.SetPointEYlow(i,x,Edo)
-
-  N = sigh.GetN()
-  totsig = 0
-  for i in range(1,N-1):
-    sigh.GetPoint(i,x,y)
-    xup = x[0] 
-    yup = y[0]
-    sigh.GetPoint(i-1,x,y)
-    totsig = totsig + yup*(xup-x[0])
-#    print "x = ", x[0], " val = ", yup, "width = ", xup-x[0]
-
-  integral = sigh.Integral()
-
-    
-  print "totsig = ", totsig, " integral = ", integral
-  print "----------------------------------------"
 
   c.SaveAs(opt.outf+str(cc) + obs+"_poiss.pdf")
   c.SaveAs(opt.outf+str(cc) + obs+"_poiss.png")
