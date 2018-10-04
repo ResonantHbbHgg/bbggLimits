@@ -67,6 +67,10 @@ public :
    Double_t        o_jt1diffweight;
    Double_t        o_jt2diffweight;
    Double_t        o_diffweight;
+   Double_t        o_deta_vbf;
+   Double_t        o_mjj_vbf;
+
+
    Double_t        jet1PT;
    Double_t	   jet2PT;
    Double_t	   jet1ETA;
@@ -140,6 +144,8 @@ public :
    Float_t          HHTagger_LM;
    Float_t	    leadingPhotonR9full5x5;
    Float_t	    subleadingPhotonR9full5x5;
+   Float_t        dEta_VBF;
+   Float_t        Mjj_VBF;
    Int_t	isSignal;
    Int_t	isPhotonCR;
    Int_t	leadingJet_flavour;
@@ -200,6 +206,8 @@ public :
    TBranch        *b_HHTagger;
    TBranch        *b_HHTagger_LM;
    TBranch        *b_HHTagger_HM;
+   TBranch        *b_dEta_VBF;
+   TBranch        *b_Mjj_VBF;
 
    //Photon ID SF stuff
    TFile* photonidFile;
@@ -474,6 +482,10 @@ void bbggLTMaker::Init(TTree *tree)
    fChain->SetBranchAddress("leadingPhotonR9full5x5", &leadingPhotonR9full5x5, &b_leadingPhotonR9full5x5);
    fChain->SetBranchAddress("subleadingPhotonR9full5x5", &subleadingPhotonR9full5x5, &b_subleadingPhotonR9full5x5);
    fChain->SetBranchAddress("ttHTagger", &ttHTagger, &b_ttHTagger);
+   fChain->SetBranchAddress("dEta_VBF", &dEta_VBF, &b_dEta_VBF);
+   fChain->SetBranchAddress("Mjj_VBF", &Mjj_VBF, &b_Mjj_VBF);
+
+
    TString WhichTagger = "HHTagger";
    if(isRes) WhichTagger = "ResHHTagger";
    fChain->SetBranchAddress(WhichTagger, &HHTagger, &b_HHTagger);
