@@ -15,8 +15,8 @@ def DataCardMaker_wHiggs(Folder, nCats, signalExp, observed, higgsExp, HType):
   outToWrite = outToWrite.replace("INPUTSIGLOC", str(Folder + '/workspaces/hhbbgg.mH125_13TeV.inputsig.root'))
   ##observed
   #print observed.split(',')
-  outToWrite = outToWrite.replace("OBSCAT0", str('%.0f'%float(observed.split(',')[0])))
-  outToWrite = outToWrite.replace("OBSCAT1", '%.0f'%float(observed.split(',')[1]))
+  outToWrite = outToWrite.replace("OBSCAT0", str('%.6f'%float(observed.split(',')[0])))
+  outToWrite = outToWrite.replace("OBSCAT1", '%.6f'%float(observed.split(',')[1]))
   #print outToWrite
   ##expected signal
   outToWrite = outToWrite.replace("SIGCAT0", str(signalExp.split(',')[0]))
@@ -47,8 +47,8 @@ def DataCardMaker(Folder, nCats, signalExp, observed, isRes = 0, HType=0):
     for line in inputDatacard:
       outTemp = line.replace("INPUTBKGLOC", Folder+'/workspaces/hhbbgg.inputbkg_13TeV.root')
       outTemp2 = outTemp.replace("INPUTSIGLOC", Folder+'/workspaces/hhbbgg.mH125_13TeV.inputsig.root')
-      outTemp3 = outTemp2.replace("OBSCAT0", '{:.0f}'.format(float(str(observed.split(',')[0]))))
-      outTemp4 = outTemp3.replace("OBSCAT1", '{:.0f}'.format(float(str(observed.split(',')[1]))))
+      outTemp3 = outTemp2.replace("OBSCAT0", '{:.6f}'.format(float(str(observed.split(',')[0]))))
+      outTemp4 = outTemp3.replace("OBSCAT1", '{:.6f}'.format(float(str(observed.split(',')[1]))))
       outTemp5 = outTemp4.replace("SIGCAT0", str(signalExp.split(',')[0]))
       outTemp6 = outTemp5.replace("SIGCAT1", str(signalExp.split(',')[1]))
       if float(observed.split(',')[0]) < 11:
