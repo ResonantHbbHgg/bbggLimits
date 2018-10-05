@@ -85,7 +85,7 @@ till the end. Then run
 cd ${CMSSW_BASE}/src/HiggsAnalysis/bbggLimits
 combine -M MaxLikelihoodFit -d outDir_MILANO_v3_split480/CombinedCard_Node_SM_Prefit/hhbbgg_13TeV_DataCard.txt --saveWorkspace --saveShapes --saveNormalization -S 0
 mv MaxLikelihoodFitResult.root outDir_MILANO_v3_split480/CombinedCard_Node_SM_Prefit/
-sh SmartScripts/ForApproval_MakeSMHHFullBkgPlots_UPGRADE_DATA.sh outDir_MILANO_v3_split480_Exp_Hist_5
+sh SmartScripts/ForApproval_MakeSMHHFullBkgPlots_UPGRADE_DATA.sh outDir_MILANO_v3_split480
 ```
 
 the plots are in CombinedCard_Node_SM_Prefit/Background
