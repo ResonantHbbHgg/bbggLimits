@@ -17,6 +17,7 @@ mv bbggLimits/CombinedLimit .
 mv bbggLimits/HHStatAnalysis ../
 scramv1 b clean
 scramv1 b
+cd bbggLimits
 ```       
 
 ### Step2: To create a datacard and analyse
