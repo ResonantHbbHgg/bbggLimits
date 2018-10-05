@@ -2,7 +2,7 @@
 
 ## 1) Make MaxLikelihood fit
 
-LIMFOLDER=outDir_MILANO_v3_split480_Exp_Hist_2/CombinedCard_Node_SM/
+LIMFOLDER=$1/CombinedCard_Node_SM
 
 #combine --datacard ${LIMFOLDER}/CombinedCard_Node_SM${POINT}/hhbbgg_13TeV_DataCard.txt -M MaxLikelihoodFit --saveWorkspace --saveShapes --saveNormalization --X-rtd TMCSO_AdaptivePseudoAsimov=50 -n SMHHForBkgPlots
 

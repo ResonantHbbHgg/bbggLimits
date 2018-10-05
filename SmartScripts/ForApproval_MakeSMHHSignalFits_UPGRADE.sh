@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DIR=outDir_MILANO_v3_split480_Exp_Hist_2
+DIR=$1
 
 DIR_LM=${DIR}/LowMass_Node_SM
 DIR_HM=${DIR}/HighMass_Node_SM
