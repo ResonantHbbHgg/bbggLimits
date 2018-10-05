@@ -52,6 +52,7 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
   Combinelxbatch = Params['other']['Combinelxbatch']
   doSingleLimit = Params['other']['doSingleLimit']
   drawSignalFit = Params['other']['drawSignalFit']
+  drawBackgroundFit = Params['other']['drawBackgroundFit']
   doCombine       = Params['other']["runCombine"]
   useSigTheoryUnc = Params['other']["useSigTheoryUnc"]
   HH   = Params['other']["HH"]
@@ -146,11 +147,11 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
   # For now the mass cuts are all the same, but can be changed in future.
   # ParamsForFits = {'SM': massCuts, 'box': massCuts}
 
-  SignalFile = "/LT_output_GluGluToHHTo2B2G_node_"+str(point)+"_13TeV-madgraph.root"
+  SignalFile = "/LT_output_GluGluToHHTo2B2G_node_"+str(point)+"_13TeV-madgraph_0.root"
   if "LT_StrikeBack" in LTDir_type or "MadMax" in LTDir_type or "ttH" in LTDir_type:
       SignalFile = "/LT_output_GluGluToHHTo2B2G_node_"+str(point)+"_13TeV-madgraph_0.root"
   if isRes:
-    SignalFile = "/LT_output_GluGluToTYPEToHHTo2B2G_M-"+str(point)+"_narrow_13TeV-madgraph.root"
+    SignalFile = "/LT_output_GluGluToTYPEToHHTo2B2G_M-"+str(point)+"_narrow_13TeV-madgraph_0.root"
     if "RES_Mar21" in LTDir_type:
       SignalFile = "/LT_output_GluGluToTYPEToHHTo2B2G_M-"+str(point)+"_narrow_13TeV-madgraph_0.root"
     
@@ -199,12 +200,15 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
         procLog.info('Apply the cut on ttHTagger: ' + str(opt.ttHTaggerCut))
     if opt.Mjj_VBFCut!=None and opt.dEta_VBFCut!=None:
       if not opt.removeHHVBF:
-        print "mjj_vbf > "+str(opt.Mjj_VBFCut)+" && deta_vbf > "+str(opt.dEta_VBFCut)
-        theFitter.SetCut("mjj_vbf > "+str(opt.Mjj_VBFCut)+" && deta_vbf > "+str(opt.dEta_VBFCut))
-        procLog.info("mjj_vbf > "+str(opt.Mjj_VBFCut)+" && deta_vbf > "+str(opt.dEta_VBFCut))
+        cond = "((mjj_vbf > "+str(opt.Mjj_VBFCut)+") && (deta_vbf > "+str(opt.dEta_VBFCut)+"))"
+        theFitter.SetCut(cond)
+        if opt.verb>0:
+          procLog.info("apply the cut" + cond)
       else:
-        theFitter.SetCut("mjj_vbf < "+str(opt.Mjj_VBFCut)+" || deta_vbf < "+str(opt.dEta_VBFCut))
-        procLog.info("mjj_vbf < "+str(opt.Mjj_VBFCut)+" || deta_vbf < "+str(opt.dEta_VBFCut))
+        cond = "(mjj_vbf < "+str(opt.Mjj_VBFCut)+" || deta_vbf < "+str(opt.dEta_VBFCut)+")"
+        theFitter.SetCut(cond)
+        if opt.verb>0:
+          procLog.info("Apply the cut " + cond)
 
 
         
@@ -250,6 +254,8 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
       theFitter.MakePlots( mass)
       procLog.info("\t SIGNAL'S PLOT DONE. Node=%r, GridPoint=%r, type=%r", point,NRgridPoint,t)
       if opt.verb>0: p4 = printTime(p3,start,procLog)
+
+
 
     if addHiggs:
       higTypes = Params['higgs']['type']

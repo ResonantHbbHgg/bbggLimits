@@ -17,7 +17,7 @@ def main(argv):
 	Label = ""
         DSCB = False
 	xmax = {'mgg':135, 'mjj': 190}
-        xmin = {'mgg':118, 'mjj': 70}
+        xmin = {'mgg':118, 'mjj': 80}
 	try:
 		opts, args = getopt.getopt(argv,"w:c:o:l:a:b:L:D",["workspace=", "cat=", "observable=","lumi=","analysis=","bins=", "Label=", "DSCB"])
 	except getopt.GetoptError:

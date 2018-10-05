@@ -12,7 +12,7 @@ cd CMSSW_7_4_7/src
 cmsenv
 mkdir ${CMSSW_BASE}/src/HiggsAnalysis/
 cd ${CMSSW_BASE}/src/HiggsAnalysis/
-git clone -b tth-bdt-tagger git@github.com:ResonantHbbHgg/bbggLimits.git
+git clone -b ProjectionECFA git@github.com:ResonantHbbHgg/bbggLimits.git
 mv bbggLimits/CombinedLimit .
 mv bbggLimits/HHStatAnalysis ../
 scramv1 b clean
