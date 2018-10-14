@@ -96,5 +96,8 @@ yLimits = {'mgg': [0.03, 0.1, 0.03, 0.1], 'mjj': [0.03, 0.1, 0.03, 0.1]}
 
 ======================
 
-Enjoy...
+If you have produced trees with HM category being above 350 GeV you can use the script SmartScripts/SkimTree.C to skim it into 2 parts above and below an MX cut.
+
+PS: Enjoy...
+
 
