@@ -70,7 +70,7 @@ theory group = theory_ggHN3LO pdf QCDscale_tth QCDscale_vbf QCDscale_vh theory_b
 CMS_hgg_sig_m0_absShift param 1 0.005 # displacement of the dipho mean error = sqrt(0.4^ 2 + 0.2^ 2) 
 CMS_hgg_sig_sigmaScale param 0.8 0.05 # optimistic estimate of resolution uncertainty 
 CMS_hbb_sig_m0_absShift param 1 0.01 # displacement of the dijet mean error 
-CMS_hbb_sig_sigmaScale param 1 0.05 # optimistic estimate of resolution uncertainty 
+CMS_hbb_sig_sigmaScale param 0.8 0.05 # optimistic estimate of resolution uncertainty 
 
 #Curve Normalization params
 CMS_Bkg_cat2_norm flatParam # Normalization uncertainty on background slope
