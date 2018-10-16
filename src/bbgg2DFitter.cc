@@ -1322,16 +1322,17 @@ void bbgg2DFitter::MakePlotsHiggs(float mass)
 void bbgg2DFitter::MakeSigWS(std::string fileBaseName)
 {
   TString wsDir = TString::Format("%s/workspaces/",_folder_name.data());
+  ofstream myfile;
+  TString logName = TString::Format("%s/workspaces/log.txt",_folder_name.data());
+  myfile.open (logName.Data());
+
+
   //**********************************************************************//
   // Write pdfs and datasets into the workspace before to save
   // for statistical tests.
   //**********************************************************************//
   std::vector<RooAbsPdf*> SigPdf(_NCAT,nullptr);
   RooWorkspace *wAll = new RooWorkspace("w_all","w_all");
-/*  _w->factory("CMS_hgg_sig_m0_absShift[1,1,1]");
-  _w->factory("CMS_hbb_sig_m0_absShift[1,1,1]");
-  _w->factory("CMS_hgg_sig_sigmaScale[1,1,1]");
-  _w->factory("CMS_hbb_sig_sigmaScale[1,1,1]");*/
   for (int c = 0; c < _NCAT; ++c)
     {
       int newC = c + _ncat0;
@@ -1357,7 +1358,8 @@ void bbgg2DFitter::MakeSigWS(std::string fileBaseName)
           if ( newVarName.Contains("mjj") ) newVarName.ReplaceAll("mjj_", "CMS_hbb_");
           varsToChange.push_back(std::make_pair(thisVarName, newVarName));
         }
-        std::cout << "Importing variable with new name: old - " << thisVarName << " new - " << newVarName << std::endl;
+
+        myfile << "Importing variable with new name: old - " << thisVarName << " new - " << newVarName << std::endl;
         _w->import( *_w->var( tempObjMjj->GetName() ), RenameVariable( thisVarName, newVarName));
         wAll->import( *_w->var( tempObjMjj->GetName() ), RenameVariable( thisVarName, newVarName));
       }
@@ -1370,12 +1372,15 @@ void bbgg2DFitter::MakeSigWS(std::string fileBaseName)
       _w->factory(TString::Format("prod::CMS_hbb_sig_m0_cat%d(mjj_sig_m0_cat%d, CMS_hbb_sig_m0_absShift)", newC, newC));
       _w->factory(TString::Format("prod::CMS_hgg_sig_sigma_cat%d(mgg_sig_sigma_cat%d, CMS_hgg_sig_sigmaScale)", newC, newC));
       _w->factory(TString::Format("prod::CMS_hbb_sig_sigma_cat%d(mjj_sig_sigma_cat%d, CMS_hbb_sig_sigmaScale)", newC, newC));
+      _w->factory(TString::Format("prod::CMS_hbb_sig_gsigma_cat%d(mjj_sig_gsigma_cat%d, CMS_hbb_sig_sigmaScale)", newC, newC));
       if(!_useDSCB) {
 /*        _w->factory(TString::Format("prod::CMS_hgg_gsigma_cat%d(mgg_sig_gsigma_cat%d, CMS_hgg_sig_sigmaScale)", newC, newC));
         _w->factory(TString::Format("prod::CMS_hbb_gsigma_cat%d(mjj_sig_gsigma_cat%d, CMS_hbb_sig_sigmaScale)", newC, newC));*/
         _w->factory(TString::Format("prod::CMS_hgg_gsigma_cat%d(mgg_sig_gsigma_cat%d, CMS_hgg_sig_sigmaScale)", newC, newC));
         _w->factory(TString::Format("prod::CMS_hbb_gsigma_cat%d(mjj_sig_gsigma_cat%d, CMS_hbb_sig_sigmaScale)", newC, newC));
       }
+
+      myfile << "defined variables" << std::endl;
 
       TString EditPDF = TString::Format("EDIT::CMS_sig_cat%d(SigPdf_cat%d,", newC, c);
       for (unsigned int iv = 0; iv < varsToChange.size(); iv++)
@@ -1388,13 +1393,22 @@ void bbgg2DFitter::MakeSigWS(std::string fileBaseName)
       EditPDF += TString::Format("mgg_sig_m0_cat%d=CMS_hgg_sig_m0_cat%d,", c, newC);
       EditPDF += TString::Format("mjj_sig_m0_cat%d=CMS_hbb_sig_m0_cat%d,", c, newC);
       EditPDF += TString::Format("mgg_sig_sigma_cat%d=CMS_hgg_sig_sigma_cat%d,", c, newC);
-      EditPDF += TString::Format("mjj_sig_sigma_cat%d=CMS_hbb_sig_sigma_cat%d)", c, newC);
-      std::cout << "STRINGTOCHANGE   ---  " << EditPDF << std::endl;
+      EditPDF += TString::Format("mjj_sig_sigma_cat%d=CMS_hbb_sig_sigma_cat%d,", c, newC);
+      EditPDF += TString::Format("mjj_sig_gsigma_cat%d=CMS_hbb_sig_gsigma_cat%d)", c, newC);
+      myfile << "STRINGTOCHANGE   ---  " << EditPDF << std::endl;
       _w->factory(EditPDF);
+
+      myfile << "ongoing 1" << std::endl;
 
       wAll->import(*_w->pdf(TString::Format("CMS_sig_cat%d",newC)));// Rename(TString::Format("SigPdf_cat%d", newC)));
       wAll->import(*_w->data(TString::Format("Sig_cat%d",c)), Rename(TString::Format("Sig_cat%d", newC)));
+
+      myfile << "ongoing 2" << std::endl;
+
     }
+
+  myfile << "finished" << std::endl;
+
   wAll->Print("v");
   TString filename(wsDir+TString(fileBaseName)+".inputsig.root");
   wAll->writeToFile(filename);
