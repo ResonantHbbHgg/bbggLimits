@@ -9,6 +9,8 @@ cd $DIR
 
 combine -M MaxLikelihoodFit -t -1 --expectSignal 1 -d hhbbgg_13TeV_DataCard.root -S 0 &>MaxLikelihood_stat.txt
 
+printf '\n=====\n\n'
+
 echo 'Finished Max Likelihood Fit Stat'
 
 tail MaxLikelihood_stat.txt
@@ -19,7 +21,7 @@ combine -M MaxLikelihoodFit -t -1 --expectSignal 1 -d hhbbgg_13TeV_DataCard.root
 
 echo 'Finished Max Likelihood Fit'
 
-tail MaxLikelihood.txt
+tail -36 MaxLikelihood.txt
 
 printf '\n=====\n\n'
 
