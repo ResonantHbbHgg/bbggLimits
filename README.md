@@ -23,14 +23,18 @@ cd bbggLimits
 ### Step2: To create a datacard and analyse
 
 ```
-pyLimits.py -f json/conf_MILANO.json -o outDir_MILANO_v3_split480 --nodes SM
+pyLimits.py -f json/conf_MILANO.json -o outDir_MILANO_v3_split480 --nodes SM -v 2 
 ```
 
-This job may take forever. Need to fix that. In practice you simply need to do ctrl+z once you see that this file exist
+this job includes now all the scripts below. The new datacards are including 20% improvement on Mgg and Mbb due to regressions. 
 
-outDir_MILANO_v3_split480/CombinedCard_Node_SM/hhbbgg_13TeV_DataCard.txt
+Just wait the job to finish. Shall take O(5 mn)
 
-Shall take 2-3 mn.
+The longuest time is taken by the limits including all systematics.
+
+================
+
+
 
 Then to produce Significance and errors:
 

@@ -415,6 +415,10 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
         procLog.info("sh SmartScripts/ForApproval_MakeSMHHSignalFits_UPGRADE.sh "+baseFolder)
         os.system("sh SmartScripts/ForApproval_MakeSMHHSignalFits_UPGRADE.sh "+baseFolder)
 
+        print  "sh SmartScripts/ForApproval_MakeSMHHFullBkgPlots_UPGRADE_DATA.sh "+baseFolder
+        procLog.info("sh SmartScripts/ForApproval_MakeSMHHFullBkgPlots_UPGRADE_DATA.sh "+baseFolder)
+        os.system("sh SmartScripts/ForApproval_MakeSMHHFullBkgPlots_UPGRADE_DATA.sh "+baseFolder)
+
         print  "Analysis of results done"
 
 
