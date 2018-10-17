@@ -1370,6 +1370,7 @@ void bbgg2DFitter::MakeSigWS(std::string fileBaseName)
       _w->factory(TString::Format("prod::CMS_hbb_sig_sigma_cat%d(mjj_sig_sigma_cat%d, CMS_hbb_sig_sigmaScale)", newC, newC));*/
       _w->factory(TString::Format("prod::CMS_hgg_sig_m0_cat%d(mgg_sig_m0_cat%d, CMS_hgg_sig_m0_absShift)", newC, newC));
       _w->factory(TString::Format("prod::CMS_hbb_sig_m0_cat%d(mjj_sig_m0_cat%d, CMS_hbb_sig_m0_absShift)", newC, newC));
+      _w->factory(TString::Format("prod::CMS_hbb_sig_gm0_cat%d(mjj_sig_gm0_cat%d, CMS_hbb_sig_m0_absShift)", newC, newC));
       _w->factory(TString::Format("prod::CMS_hgg_sig_sigma_cat%d(mgg_sig_sigma_cat%d, CMS_hgg_sig_sigmaScale)", newC, newC));
       _w->factory(TString::Format("prod::CMS_hbb_sig_sigma_cat%d(mjj_sig_sigma_cat%d, CMS_hbb_sig_sigmaScale)", newC, newC));
       _w->factory(TString::Format("prod::CMS_hbb_sig_gsigma_cat%d(mjj_sig_gsigma_cat%d, CMS_hbb_sig_sigmaScale)", newC, newC));
@@ -1392,6 +1393,7 @@ void bbgg2DFitter::MakeSigWS(std::string fileBaseName)
       }
       EditPDF += TString::Format("mgg_sig_m0_cat%d=CMS_hgg_sig_m0_cat%d,", c, newC);
       EditPDF += TString::Format("mjj_sig_m0_cat%d=CMS_hbb_sig_m0_cat%d,", c, newC);
+      EditPDF += TString::Format("mjj_sig_gm0_cat%d=CMS_hbb_sig_gm0_cat%d,", c, newC);
       EditPDF += TString::Format("mgg_sig_sigma_cat%d=CMS_hgg_sig_sigma_cat%d,", c, newC);
       EditPDF += TString::Format("mjj_sig_sigma_cat%d=CMS_hbb_sig_sigma_cat%d,", c, newC);
       EditPDF += TString::Format("mjj_sig_gsigma_cat%d=CMS_hbb_sig_gsigma_cat%d)", c, newC);
