@@ -101,7 +101,7 @@ mgg_hig_alpha2_bbh_cat1[1.5, 1.0, 10.0];
 mgg_hig_n2_bbh_cat1[2.0, 0.1, 10.0];
 mggHig_bbh_cat1 = RooDoubleCB(mgg, mgg_hig_m0_bbh_cat1, mgg_hig_sigma_bbh_cat1, mgg_hig_alpha1_bbh_cat1, mgg_hig_n1_bbh_cat1, mgg_hig_alpha2_bbh_cat1, mgg_hig_n2_bbh_cat1);
 
-mjj[80,190];
+mjj[90,190];
 
 mjj_sig_m0_cat0[122.0, 115, 130];
 mjj_sig_sigma_cat0[20.0, 10.0, 60.0];
@@ -109,10 +109,11 @@ mjj_sig_alpha1_cat0[0.3, 0.2, 2.0];
 mjj_sig_n1_cat0[1.0, 0.5, 10.0];
 mjj_sig_alpha2_cat0[3, 0.5, 2.0];
 mjj_sig_n2_cat0[5.0, 1.0, 100.0];
+mjj_sig_gm0_cat0[122.0, 110, 130];
 mjj_sig_gsigma_cat0[25.0, 10.0, 60.0];
-mjj_sig_frac_cat0[0.1, 0, 0.5];
+mjj_sig_frac_cat0[0.1, 0, 1];
 
-mjjGaussSig_cat0 = Gaussian(mjj, mjj_sig_m0_cat0, mjj_sig_gsigma_cat0);
+mjjGaussSig_cat0 = Gaussian(mjj, mjj_sig_gm0_cat0, mjj_sig_gsigma_cat0);
 mjjCBSig_cat0 = CBShape(mjj, mjj_sig_m0_cat0, mjj_sig_sigma_cat0, mjj_sig_alpha1_cat0, mjj_sig_n1_cat0);
 mjjSig_cat0 = AddPdf(mjjGaussSig_cat0, mjjCBSig_cat0, mjj_sig_frac_cat0);
 
@@ -122,10 +123,11 @@ mjj_sig_alpha1_cat1[0.3, 0.2, 2.0];
 mjj_sig_n1_cat1[1.0, 0.5, 10.0];
 mjj_sig_alpha2_cat1[3, 0.5, 2.0];
 mjj_sig_n2_cat1[5.0, 1.0, 100.0];
+mjj_sig_gm0_cat1[122.0, 110, 130];
 mjj_sig_gsigma_cat1[25.0, 10.0, 60.0];
-mjj_sig_frac_cat1[0.1, 0, 0.5];
+mjj_sig_frac_cat1[0.1, 0, 1];
 
-mjjGaussSig_cat1 = Gaussian(mjj, mjj_sig_m0_cat1, mjj_sig_gsigma_cat1);
+mjjGaussSig_cat1 = Gaussian(mjj, mjj_sig_gm0_cat1, mjj_sig_gsigma_cat1);
 mjjCBSig_cat1 = CBShape(mjj, mjj_sig_m0_cat1, mjj_sig_sigma_cat1, mjj_sig_alpha1_cat1, mjj_sig_n1_cat1);
 mjjSig_cat1 = AddPdf(mjjGaussSig_cat1, mjjCBSig_cat1, mjj_sig_frac_cat1);
 

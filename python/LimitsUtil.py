@@ -359,7 +359,8 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
           runCombineOnLXBatch(myLoc+"/datacards/", doBlinding, procLog, combineOpt, t+Label)
         else:
           # print PID, "IM HERE7"
-          runCombine(newFolder+"/datacards/", doBlinding, procLog, combineOpt, Combinelxbatch, t+Label)
+          procLog.info("\t Run sh SmartScripts/Analyzer.sh "+myLoc)
+          os.system("sh SmartScripts/Analyzer.sh "+myLoc)
 
 
 
@@ -400,24 +401,23 @@ def runFullChain(opt, Params, point=None, NRgridPoint=-1, extraLabel=''):
         
     if doCombine:
       if Combinelxbatch:
-        # print PID, "IM HERE6"
-        myLoc = os.getenv("CMSSW_BASE") + '/src/HiggsAnalysis/bbggLimits/' + newDir
-        runCombineOnLXBatch(myLoc+"/", doBlinding, procLog, combineOpt, "CombinedCard"+Label)
+        print  "To be reimplemented in this context"
       else:
-        for method in [1,2,3]:
-          # If options 1,2,3 are provided - run the corresponding limits:
-          # 1 - asymptotic, 2 - asymptotoc with adaptive azimov option; 3 - hybridnew
-          # If combineOpt==4: run all of them at once
-          if combineOpt!=4 and method!=combineOpt: continue
-          try:
-            combStatus = runCombine(newDir, doBlinding, procLog, method, Combinelxbatch, Label, scaleSingleHiggs)
-          except:
-            return __BAD__
-          procLog.info("\t COMBINE with Option=%r is DONE. Node=%r, GridPoint=%r, type=%r \n \t Status = %r",
-                       method, point,NRgridPoint,t, combStatus)
-          if combStatus!=0:
-            procLog.error('Combine failed...')
-            # return __BAD__
+        print  "Run sh SmartScripts/Analyzer.sh "+baseFolder
+        procLog.info("\t Run sh SmartScripts/Analyzer.sh "+baseFolder)
+        os.system("sh SmartScripts/Analyzer.sh "+baseFolder)
+
+        print  "sh SmartScripts/ForApproval_MakeSMHHFullBkgPlots_UPGRADE.sh "+baseFolder
+        procLog.info("sh SmartScripts/ForApproval_MakeSMHHFullBkgPlots_UPGRADE.sh "+baseFolder)
+        os.system("sh SmartScripts/ForApproval_MakeSMHHFullBkgPlots_UPGRADE.sh "+baseFolder)
+
+        print  "sh SmartScripts/ForApproval_MakeSMHHSignalFits_UPGRADE.sh "+baseFolder
+        procLog.info("sh SmartScripts/ForApproval_MakeSMHHSignalFits_UPGRADE.sh "+baseFolder)
+        os.system("sh SmartScripts/ForApproval_MakeSMHHSignalFits_UPGRADE.sh "+baseFolder)
+
+        print  "Analysis of results done"
+
+
 
 
   if opt.verb>0: p9 = printTime(p8,start,procLog)

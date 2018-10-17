@@ -41,14 +41,13 @@ process			0	1	2	3	4	5	6	0	1	2	3	4	5	6
 rate			SIGCAT0	1	GGHC0	TTHC0	VHC0	BBHC0	VBFC0	SIGCAT1	1	GGHC1	TTHC1	VHC1	BBHC1	VBFC1
 
 # General
-lumi_13TeV lnN          1.01   -       1.01   1.01   1.01   1.01   1.01   1.01   -       1.01   1.01   1.01   1.01   1.01
+lumi_14TeV_HLLHC lnN          1.01   -       1.01   1.01   1.01   1.01   1.01   1.01   -       1.01   1.01   1.01   1.01   1.01
 
 #Normalization
-CMS_eff_DiphoTrig lnN   1.020   -       1.020   1.020   1.020   1.020   1.020   1.020   -       1.020   1.020   1.020   1.020   1.020
-CMS_eff_PhoID lnN       1.010   -       1.010   1.010   1.010   1.010   1.010   1.010   -       1.010   1.010   1.010   1.010   1.010
-CMS_JES lnN       	1.010   -       1.010   1.010   1.010   1.010   1.010   1.010   -       1.010   1.010   1.010   1.010   1.010
+CMS_eff_g lnN       1.010   -       1.010   1.010   1.010   1.010   1.010   1.010   -       1.010   1.010   1.010   1.010   1.010
+CMS_scale_j_14TeV_HLLHC lnN       	1.010   -       1.010   1.010   1.010   1.010   1.010   1.010   -       1.010   1.010   1.010   1.010   1.010
 
-CMS_BTAG lnN       	1.020   -       1.020   1.020   1.020   1.020   1.020   1.020   -       1.010   1.010   1.010   1.010   1.010
+CMS_eff_b lnN       	1.020   -       1.020   1.020   1.020   1.020   1.020   1.020   -       1.010   1.010   1.010   1.010   1.010
 
 
 
@@ -56,11 +55,11 @@ CMS_BTAG lnN       	1.020   -       1.020   1.020   1.020   1.020   1.020   1.02
 theory_ggHN3LO lnN	-       -       1.039   -	-       -       -       -       -       1.039   -       -       -       -
 theory_bbH_scale lnN            -	- 	- 	-		-		0.76/1.20 	- 	- 	- 	- 	- 	- 	0.76/1.20 	-
 
-pdf lnN		 -	-	1.032	1.036	1.016	0.76/1.20	0.997/1.004	-       -       1.032   1.036   1.016   0.76/1.20	0.997/1.004
+pdf lnN		 -	-	1.032	1.036	1.016	0.76/1.20	1.021	-       -       1.032   1.036   1.016   0.76/1.20	1.021
 
 QCDscale_tth   lnN	-       -       -       0.918/1.058     -     		-		-   	-       -       -       0.918/1.058	-	-	-
 QCDscale_vh    lnN	-       -       -       -		0.969/1.038     -       	-	-	-	-	-		0.969/1.038	-	-
-QCDscale_vbf   lnN      -       -       -	-		-		-		1.021	-	-	-	-		-		-	1.021
+QCDscale_vbf   lnN      -       -       -	-		-		-		0.997/1.004	-	-	-	-		-		-	0.997/1.004
 
 theory group = theory_ggHN3LO pdf QCDscale_tth QCDscale_vbf QCDscale_vh theory_bbH_scale
 
@@ -68,9 +67,9 @@ theory group = theory_ggHN3LO pdf QCDscale_tth QCDscale_vbf QCDscale_vh theory_b
 
 #Signal Shape
 CMS_hgg_sig_m0_absShift param 1 0.005 # displacement of the dipho mean error = sqrt(0.4^ 2 + 0.2^ 2) 
-CMS_hgg_sig_sigmaScale param 0.8 0.05 # optimistic estimate of resolution uncertainty 
+CMS_hgg_sig_sigmaScale param 0.8 0.05 # optimistic estimate of resolution uncertainty. Assume 20% improvement due to regression effects.
 CMS_hbb_sig_m0_absShift param 1 0.01 # displacement of the dijet mean error 
-CMS_hbb_sig_sigmaScale param 0.8 0.05 # optimistic estimate of resolution uncertainty 
+CMS_hbb_sig_sigmaScale param 0.8 0.05 # optimistic estimate of resolution uncertainty. Assume 20% improvement due to regression effects.
 
 #Curve Normalization params
 CMS_Bkg_cat2_norm flatParam # Normalization uncertainty on background slope
