@@ -85,7 +85,7 @@ if Higgses == None: Higgses = ['ggh', 'vbf', 'tth', 'vh', 'bbh']
 
 dims = ['mjj', 'mgg']
 bins = [25, 25]
-minval = [80, 105]
+minval = [93.2, 105]
 maxval = [190, 145]
 
 xtitle = ['m_{jj} [GeV]', 'm_{#gamma#gamma} [GeV]']
