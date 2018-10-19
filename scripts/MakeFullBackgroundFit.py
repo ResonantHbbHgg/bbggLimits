@@ -27,6 +27,32 @@ def MakeFullBackgroundPdf(bkg_pdf, bkg_norm, hig_pdfs, hig_norms):
   totPdf = RooAddPdf('totBkg', 'Nonresonant + single H background', argPdfs, argNorms)
   return totPdf
 
+
+def MakeFullModelPdf(sig_pdf, sig_norm, bkg_pdf, bkg_norm, hig_pdfs, hig_norms):
+  if len(hig_pdfs) == 0:
+    print 'No HIG background found'
+    return bkg_pdf
+  argPdfs = RooArgList()
+  argNorms = RooArgList()
+  argPdfs.add(bkg_pdf)
+  argPdfs.add(sig_pdf)
+  argNorms.add(bkg_norm)
+  argNorms.add(sig_norm)
+  if len(hig_pdfs) != len(hig_norms):
+    print "list of higgs pdfs has different size wrt normalizations!"
+    return None
+  for hh in range(0, len(hig_pdfs)):
+#    hig_pdfs[hh].Print()                                                                                                                                              
+    argPdfs.add(hig_pdfs[hh])
+    argNorms.add(hig_norms[hh])
+#  argNorms.Print()                                                                                                                                                     
+#  argPdfs.Print()                                                                                                                                                            
+  if argNorms.getSize() != argPdfs.getSize():
+    print 'ArgNorms and ArgPdfs have different sizes!'
+    return None
+  totModPdf = RooAddPdf('totModPdf', 'Signal + Nonresonant background + single H background', argPdfs, argNorms)
+  return totModPdf
+
 gSystem.Load("libHiggsAnalysisCombinedLimit.so")
 gROOT.SetBatch(kTRUE)
 
@@ -80,18 +106,28 @@ for cc in cats:
   if cc == 0 or cc == 1: catbin = 'ch2_cat'
   data_cat.setRange("catcut",catbin+str(cc))
 #  var.Print()
+  var.Print()
 
   sig_pdf_name = obs+'Sig_cat'+str(intc)+'_CMS_sig_cat'+str(cc)
   sig_pdf = w_all.pdf(sig_pdf_name)
 #  print sig_pdf_name
+  print sig_pdf_name
   sig_pdf.Print()
+  normName = 'n_exp_binch1_cat'
+  if cc == 0 or cc == 1: normName = 'n_exp_binch2_cat'
+  ####sig_norm = w_all.obj(normName+str(cc)+'_proc_Sig').getVal()
+  sig_norm = RooRealVar('sig_norm','signal norm', w_all.obj(normName+str(cc)+'_proc_Sig').getVal())
+  #print "@@@ sig_norm: %.1f" % sig_norm
+  print "@@@ sig_norm: %.1f" % sig_norm.getVal()
 
   bkg_pdf_name = obs+'BkgTmpExp1_cat'+str(intc)+'_CMS_Bkg_cat'+str(cc)
   bkg_pdf = w_all.pdf(bkg_pdf_name)
 #  bkg_pdf.Print()
+  bkg_pdf.Print()
   normName = 'n_exp_final_binch1_cat'
   if cc == 0 or cc == 1: normName = 'n_exp_final_binch2_cat'
   bkg_norm = RooRealVar('bkg_norm', 'nonres bkg norm', w_all.obj(normName+str(cc)+'_proc_Bkg').getVal())
+
 
   data2d = w_all.data("model_sData")
 #  data2d = w_all.data("data_obs")
@@ -119,6 +155,9 @@ for cc in cats:
 
   totBkg = MakeFullBackgroundPdf(bkg_pdf, bkg_norm, hig_pdfs, hig_norms)
   totBkgNorm = totHiggs + bkg_norm.getVal()
+
+  model = MakeFullModelPdf(sig_pdf, sig_norm, bkg_pdf, bkg_norm, hig_pdfs, hig_norms)
+
 #  print totBkg
   print 'Total nonres:', bkg_norm.getVal(), 'total higgs:', totHiggs, totBkgNorm
 #  sys.exit()
@@ -144,12 +183,17 @@ for cc in cats:
   else:
 #    data.plotOn(frame,RooFit.DataError(RooAbsData.Poisson),RooFit.XErrorSize(0))
     data.plotOn(frame,RooFit.DataError(RooAbsData.SumW2),RooFit.XErrorSize(0))
-
+    
+  
   bkg_pdf.plotOn(frame,RooFit.LineColor(cNiceGreenDark), RooFit.LineStyle(kDashed), RooFit.Precision(1E-5), RooFit.Normalization(bkg_norm.getVal(), RooAbsReal.NumEvent))
   totBkg.plotOn(frame,RooFit.LineColor(cNiceBlueDark),RooFit.Precision(1E-5), RooFit.Normalization(totBkgNorm, RooAbsReal.NumEvent))
 
+###  sig_pdf.plotOn(frame,RooFit.LineColor(cNiceRed), RooFit.Precision(1E-5), RooFit.Normalization(opt.snorm[intc]*opt.fsignal[intc],RooAbsReal.NumEvent))
 
-  sig_pdf.plotOn(frame,RooFit.LineColor(cNiceRed), RooFit.Precision(1E-5), RooFit.Normalization(opt.snorm[intc]*opt.fsignal[intc],RooAbsReal.NumEvent))
+  ##model.plotOn(frame,RooFit.LineColor(cNiceRed), RooFit.Precision(1E-5), RooFit.Normalization(sig_norm.getVal()*opt.fsignal[intc],totBkgNorm,RooAbsReal.NumEvent))
+  model.plotOn(frame,RooFit.LineColor(cNiceRed), RooFit.Precision(1E-5))
+
+  ##sig_pdf.plotOn(frame,RooFit.LineColor(cNiceRed), RooFit.LineStyle(kDashed), RooFit.Precision(1E-5), RooFit.Normalization((sig_norm.getVal())*opt.fsignal[intc],RooAbsReal.NumEvent))
 
   datahist = frame.getObject(0)
 
@@ -161,9 +205,12 @@ for cc in cats:
   yE=n.zeros(1, dtype=float)
   rndvalue=n.zeros(1, dtype=float)
 
+
   bkghist = frame.getObject(dataind+1)
   totbkgh = frame.getObject(dataind+2)
-  sigh = frame.getObject(dataind+3)
+  modelhist = frame.getObject(dataind+3)
+  ##sigh = frame.getObject(dataind+4)
+
 
   leg = TLegend(0.5, 0.55, 0.89, 0.89)
   leg.SetBorderSize(0)
@@ -171,13 +218,15 @@ for cc in cats:
   leg.SetTextFont(43)
   leg.SetTextSize(20)
 #  leg.SetNColumns(3)
-  leg.AddEntry(datahist, 'Data', 'pe')
-  leg.AddEntry(totbkgh, 'Full background model', 'l')
+  leg.AddEntry(datahist, 'Pseudo-data', 'pe')
   leg.AddEntry(bkghist, 'Nonresonant background', 'l')
+  leg.AddEntry(totbkgh, 'Full background', 'l')
+  leg.AddEntry(modelhist, 'Signal + Full background', 'l')
+  ####leg.AddEntry(sigh, 'SM HH signal', 'l')
 #  sigText = 'SM HH Signal (x20)'
 #  if int(intc) == 1:
-  sigText = 'SM HH signal (x'+str(int(opt.fsignal[intc]))+')'
-  leg.AddEntry(sigh, sigText, 'l')
+  #####sigText = 'SM HH signal (x'+str(int(opt.fsignal[intc]))+')'
+  #####leg.AddEntry(sigh, sigText, 'l')
 
   SetGeneralStyle()
   c = TCanvas("c", "c", 800, 600)
@@ -255,21 +304,23 @@ for cc in cats:
 #    datahist.SetPointEYhigh(i,x,Eup)
 #    datahist.SetPointEYlow(i,x,Edo)
 
-  N = sigh.GetN()
-  totsig = 0
-  for i in range(1,N-1):
-    sigh.GetPoint(i,x,y)
-    xup = x[0] 
-    yup = y[0]
-    sigh.GetPoint(i-1,x,y)
-    totsig = totsig + yup*(xup-x[0])
+
+##  N = sigh.GetN()
+##  totsig = 0
+##  for i in range(1,N-1):
+##    sigh.GetPoint(i,x,y)
+##    xup = x[0] 
+##    yup = y[0]
+##    sigh.GetPoint(i-1,x,y)
+##    totsig = totsig + yup*(xup-x[0])
 #    print "x = ", x[0], " val = ", yup, "width = ", xup-x[0]
 
-  integral = sigh.Integral()
+##  integral = sigh.Integral()
 
     
-  print "totsig = ", totsig, " integral = ", integral
-  print "----------------------------------------"
+##  print "totsig = ", totsig, " integral = ", integral
+##  print "----------------------------------------"
+
 
   c.SaveAs(opt.outf+str(cc) + obs+"_poiss.pdf")
   c.SaveAs(opt.outf+str(cc) + obs+"_poiss.png")
