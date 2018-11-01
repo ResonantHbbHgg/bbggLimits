@@ -86,6 +86,9 @@ CMS_hhbbgg_13TeV_mjj_bkg_slope1_cat3 flatParam
 yield_norm rateParam * * 3000
 nuisance edit freeze yield_norm
 
-
+## Scale down ttH to take into account the improvements of ttH killer if we had more variables in DELPHES.
+## Result obtain by comparing with DNN ttH killer training from Caltech 
+h_norm_tth rateParam * tth 0.75
+nuisance edit freeze h_norm_tth
 
 
